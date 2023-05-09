@@ -30,13 +30,16 @@ def fit_RA_hist(RA_hist, Rossi_alpha_settings):
     exp_decay_fit_bounds = ([0,-np.inf],[np.inf,0])
     a0 = np.max(RA_hist[0])
     c0 = np.mean(RA_hist[0][-int(num_bins*0.05):])
-    b0 = ((np.log(c0)-np.log(RA_hist[0][0]))/
-          (time_diff_centers[-1]-time_diff_centers[0]))
+    b0 = ((np.log(c0) - np.log(RA_hist[0][0] + 1e-9)) /
+      (time_diff_centers[-1] - time_diff_centers[0]))
+    # b0 = ((np.log(c0)-np.log(RA_hist[0][0]))/
+          # (time_diff_centers[-1]-time_diff_centers[0]))
     yfit = RA_hist[0][fit_index] - c0
     # exp_decay_p0 = [a0, b0, c0]
-    exp_decay_p0 = [a0, b0]
+    exp_decay_p0 = a0, a0
+
     popt, pcov = curve_fit(exp_decay_2_param, xfit, yfit,
-                           bounds=exp_decay_fit_bounds, p0=exp_decay_p0, maxfev=1e6)
+                           bounds=exp_decay_fit_bounds, maxfev=1e6)
     
     yfit = exp_decay_3_param(xfit, *popt, c0)
     
