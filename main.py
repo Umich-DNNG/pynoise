@@ -18,6 +18,7 @@ sns.set(rc={"figure.dpi": 350, 'savefig.dpi': 350})
 sns.set_style("ticks")
 sns.set_context("talk", font_scale=0.8)
 
+#get the settings for the user to use
 def getSettings():
     current_path = os.path.realpath(__file__)
     file_path = os.path.join(os.path.dirname(current_path), "Rossi_alpha_settings.txt")
@@ -31,9 +32,16 @@ def getSettings():
 
 def main():
     settings = getSettings()
+    current_path = os.path.realpath(__file__)
+    file_path = os.path.join(os.path.dirname(current_path), "RF3-40_59min.txt")
+    list_data_n = np.loadtxt(file_path)
+    
     import timeDifs
-    time_Difs = timeDifs.calculate_time_differences(settings)
+    time_diffs = timeDifs.calculate_time_differences(list_data_n, settings)
 
-
+    import fitting
+    [RA_hist, popt, pcov, x_fit, y_fit] = fitting.make_RA_hist_and_fit(time_diffs, settings)
+    
 if __name__ == '__main__':
     main()
+
