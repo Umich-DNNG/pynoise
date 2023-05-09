@@ -14,9 +14,9 @@ Rossi_alpha_settings = dict([('reset time', 2e3), ('bin width', 2),
 
 def calculate_time_differences(list_data, Rossi_alpha_settings):
     
-    time_vector = list_data[:,1]
+    time_vector = list_data
     
-    reset_time = Rossi_alpha_settings['reset time']
+    reset_time = float(Rossi_alpha_settings['reset time'])
     
     if Rossi_alpha_settings['time difference method'] == 'any_and_all':
         time_diffs = any_and_all_time_differences(time_vector,reset_time)

@@ -27,7 +27,15 @@ def getSettings():
         for line in file:
             settingName = line.split(':')[0].strip()
             setting = line.split(':')[1].strip()
+            if(settingName == 'fit range'):
+                setting = [float(s) for s in setting[1:-1].split(",")]
             Rossi_alpha_settings[settingName] = setting
+            
+    Rossi_alpha_settings['reset time'] = float(Rossi_alpha_settings['reset time'])
+    Rossi_alpha_settings['bin width'] = int(Rossi_alpha_settings['bin width'])
+    Rossi_alpha_settings['minimum cutoff'] = int(Rossi_alpha_settings['minimum cutoff'])
+    Rossi_alpha_settings['digital delay'] = int(Rossi_alpha_settings['digital delay'])
+    Rossi_alpha_settings['meas time per folder'] = int(Rossi_alpha_settings['meas time per folder'])
     return Rossi_alpha_settings
 
 def main():
