@@ -1,0 +1,9 @@
+reset time : 2e3
+bin width : 2
+minimum cutoff : 25
+fit range : [0,2e3]
+plot scale : linear
+time difference method : any_and_all
+digital delay : 750
+number of folders : 61
+meas time per folder : 60
