@@ -18,7 +18,7 @@ def calculate_time_differences(list_data, Rossi_alpha_settings):
     
     reset_time = Rossi_alpha_settings['reset time']
     
-    if Rossi_alpha_settings['time difference method'] == 'any-and-all':
+    if Rossi_alpha_settings['time difference method'] == 'any_and_all':
         time_diffs = any_and_all_time_differences(time_vector,reset_time)
     elif (Rossi_alpha_settings['time difference method'] == 
           'any-and-all cross-correlations'):
