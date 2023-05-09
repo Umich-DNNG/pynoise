@@ -41,6 +41,21 @@ def main():
 
     import fitting
     [RA_hist, popt, pcov, x_fit, y_fit] = fitting.make_RA_hist_and_fit(time_diffs, settings)
+
+    RA_hist_array = RA_hist[0]
+    popt_array = popt
+
+    RA_std_dev = np.std(RA_hist_array, axis=0, ddof=1)            
+    RA_hist_total = np.sum(RA_hist_array, axis=0)
+    time_diff_centers = RA_hist[1][1:] - np.diff(RA_hist[1][:2])/2
+
+    [time_diff_centers, popt, pcov, perr, xfit1, yfit] = fitting.fit_RA_hist_weighting(RA_hist_total, settings)
+
+    popt_array = np.vstack((popt_array, popt))
+    perr_array = np.vstack((perr_array, perr))
+
+    fitting.plot_RA_and_fit_errorbar(RA_hist, x_fit, y_fit, settings, xlabel1='Time difference (ns)', ylabel1='Count rate (s$^{-1}$)',
+                             xlabel2='Time difference (ns)', ylabel2='Residual count rate (s$^{-1}$)')
     
 if __name__ == '__main__':
     main()
