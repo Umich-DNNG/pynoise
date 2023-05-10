@@ -62,7 +62,7 @@ def calculate_time_differences(list_data, Rossi_alpha_settings):
 
 
 def any_and_all_time_differences(time_vector, reset_time):
-    time_diffs = np.array([])
+    time_diffs = []
     n = len(time_vector)
     for i in range(n):
         for j in range(i + 1, n):
