@@ -39,20 +39,27 @@ def getSettings():
     return Rossi_alpha_settings
 
 def main():
+
+    # extracting settings and timestamps
     settings = getSettings()
     current_path = os.path.realpath(__file__)
     file_path = os.path.join(os.path.dirname(current_path), "RF3-40_59min.txt")
     list_data_n = np.loadtxt(file_path)
+
+    # sorting timestamps to be fed into calculate_time_differences()
     list_data_n = np.sort(list_data_n)
     
+    # applying time differences function
     import timeDifs
     time_diffs = timeDifs.calculate_time_differences(list_data_n, settings)
 
+    # plotting the histogram plot
     import plots
     reset_time = settings['reset time']
     bin_width = settings['bin width']
     counts, bin_centers = plots.plot(time_diffs, reset_time, bin_width, 'Time Differences', 'Count', 'Histogram')
 
+    # fitting curve to the histogramp plot
     import fitting
     fitting.fit(counts, bin_centers)
 

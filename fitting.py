@@ -187,22 +187,24 @@ def exp_func(t, A, alpha, B):
 
 def fit(counts, bin_centers):
 
+    # fitting line function to plot
     popt, pcov = curve_fit(exp_func, bin_centers, counts)
 
+    # displaying fitting parameters
     print('Fit parameters: A =', popt[0], ', alpha =', popt[1], ', B =', popt[2])
 
+    # deriving line x and line y
     line_x = np.linspace(bin_centers[0], bin_centers[-1], 100)
     line_y = exp_func(line_x, *popt)
 
+    # plotting the best fit curve to the plot
     fig, ax = plt.subplots(figsize=(8, 6))
     ax.bar(bin_centers, counts, width=0.8*(bin_centers[1]-bin_centers[0]), alpha=0.6, color='g')
     ax.plot(line_x, line_y, 'r--', label='Fit: A=%5.3f, alpha=%5.3f, B=%5.3f' % tuple(popt))
     ax.legend()
-
     ax.set_xlabel('Time Difference (s)')
     ax.set_ylabel('Probability Density')
     ax.set_title('Rossi-alpha Time Difference Distribution with Fit')
-
     fig.tight_layout()
     plt.show()
 
