@@ -20,14 +20,19 @@ The files that you will need in order to use the Rossi-Alpha program are fitting
 * reset time   
 * bin width   
 * minimum cutoff   
-* fit range   
+* fit range : format the range as follows [min,max] with min and max being ints  
 * plot scale   
-* time difference method   
+* time difference method : 'any_and_all'  
 * digital delay   
 * number of folders   
 * meas time per folder 
-* sort data?  
+* sort data? : select yes if the data file you provide is unsorted, no otherwise
+* color : 'b', 'g', 'r', 'c', 'm', 'y', 'k', 'w'
+* linestyle : '-', '--', '-.', ':', or ' '
+* linewidth : float value, sets the line width in points.
+* marker : see https://matplotlib.org/stable/api/markers_api.html#module-matplotlib.markers for complete list of options
+* alpha : must be within the 0-1 range, inclusive.
 Users can edit this .txt file to change the settings that they wish to use.
 INSERT DESCRIPTION OF DIFFERENT SETTINGS. 
-
+color, linestyle,linewidth, and alpha are all settings for the graph. 
 
