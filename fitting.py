@@ -181,7 +181,7 @@ def plot_RA_and_fit_errorbar(RA_hist, xfit, yfit, Rossi_alpha_settings, xlabel1=
 #--------------------------------------------------------------------------------
 
 def exp_func(t, A, alpha, B):
-    return A * np.exp(alpha * t) + B
+    return A * np.exp(-alpha * t) + B
 
 #--------------------------------------------------------------------------------
 

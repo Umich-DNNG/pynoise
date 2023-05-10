@@ -53,8 +53,8 @@ def main():
     bin_width = settings['bin width']
     counts, bin_centers = plots.plot(time_diffs, reset_time, bin_width, 'Time Differences', 'Count', 'Histogram')
 
-    # import fitting
-    # fitting.fit(counts, bin_centers)
+    import fitting
+    fitting.fit(counts, bin_centers)
 
 
 if __name__ == '__main__':
