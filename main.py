@@ -43,10 +43,22 @@ def getSettings():
     )
     return Rossi_alpha_settings
 
+def getOptions():
+    current_path = os.path.realpath(__file__)
+    file_path = os.path.join(os.path.dirname(current_path), "plotOptions.txt")
+    plotOpts = {}
+    with open(file_path, "r") as file:
+        for line in file:
+            settingName = line.split(":")[0].strip()
+            setting = line.split(":")[1].strip()
+            plotOpts[settingName] = setting
+    return plotOpts
+
 
 def main():
     # extracting settings and timestamps
     settings = getSettings()
+    options = getOptions()
     current_path = os.path.realpath(__file__)
     file_path = os.path.join(os.path.dirname(current_path), "RF3-40_59min.txt")
     list_data_n = np.loadtxt(file_path)
@@ -72,10 +84,10 @@ def main():
     alpha = float(settings['alpha'])
 
     counts, bin_centers = plots.plot(time_diffs, reset_time, bin_width, "Time Differences", 
-                                     "Count", "Histogram", color, line_style, line_width, marker, alpha)
+                                     "Count", "Histogram", options, color, line_style, line_width, marker, alpha)
 
     # fitting curve to the histogramp plot
-    import fitting
+    import fitting 
 
     fitting.fit(counts, bin_centers, "Time Differences", "Count", 
                 "Histogram w/ Fitted Line", color, line_style, line_width, marker, alpha)
