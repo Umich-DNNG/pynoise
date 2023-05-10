@@ -7,3 +7,4 @@ time difference method : any_and_all
 digital delay : 750
 number of folders : 61
 meas time per folder : 60
+sort data? : yes
