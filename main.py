@@ -65,14 +65,20 @@ def main():
 
     reset_time = settings["reset time"]
     bin_width = settings["bin width"]
-    counts, bin_centers = plots.plot(
-        time_diffs, reset_time, bin_width, "Time Differences", "Count", "Histogram"
-    )
+    color = settings['color']
+    line_style = settings['linestyle']
+    line_width = settings['linewidth']
+    marker = settings['marker']
+    alpha = float(settings['alpha'])
+
+    counts, bin_centers = plots.plot(time_diffs, reset_time, bin_width, "Time Differences", 
+                                     "Count", "Histogram", color, line_style, line_width, marker, alpha)
 
     # fitting curve to the histogramp plot
     import fitting
 
-    fitting.fit(counts, bin_centers)
+    fitting.fit(counts, bin_centers, "Time Differences", "Count", 
+                "Histogram w/ Fitted Line", color, line_style, line_width, marker, alpha)
 
 
 if __name__ == "__main__":

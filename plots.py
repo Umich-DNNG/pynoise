@@ -118,7 +118,8 @@ def plot_n_g_colors_PSD_discrim(list_data, ToT, x_label='Light yield (keVee)', y
 # OWN CODE BELOW
 #--------------------------------------------------------------------------------
 
-def plot(time_diffs, reset_time, bin_width, x_axis, y_axis, title):
+def plot(time_diffs, reset_time, bin_width, x_axis, y_axis, title, 
+         color='b', line_style='-', line_width='1.5', marker='None', alpha=0.5):
 
     # calculating number of bins for histogram plot
     num_bins = int(reset_time/bin_width)
@@ -130,7 +131,7 @@ def plot(time_diffs, reset_time, bin_width, x_axis, y_axis, title):
     bin_centers = 0.5 * (bin_edges[1:] + bin_edges[:-1])
 
     # plotting
-    plt.plot(bin_centers, counts, 'g', alpha=0.6)
+    plt.plot(bin_centers, counts, color=color, linestyle=line_style, linewidth=line_width, marker=marker, alpha=alpha)
     plt.xlabel(x_axis)
     plt.ylabel(y_axis)
     plt.title(title)
