@@ -1,2 +1,4 @@
-color: green
+color: black
+markeredgecolor: blue
+markerfacecolor: black
 linestyle: -

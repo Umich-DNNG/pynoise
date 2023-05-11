@@ -8,8 +8,3 @@ digital delay : 750
 number of folders : 61
 meas time per folder : 60
 sort data? : yes
-color: b
-linestyle: -
-linewidth: 2
-marker: None
-alpha: 0.5
