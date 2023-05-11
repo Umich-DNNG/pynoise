@@ -2,6 +2,15 @@
 import os  # For scanning directories
 
 #--------------------------------------------------------------------------------
+
+class Settings:
+    def __init__(self,io_file_info, general_program_settings,histogram_settings,line_fitting_settings,residual_plot_settings):
+        self.io_file_info = io_file_info
+        self.general_program_settings = general_program_settings
+        self.histogram_settings = histogram_settings
+        self.line_fitting_settings = line_fitting_settings
+        self.residual_plot_settings = residual_plot_settings
+
 def readInput():
     current_path = os.path.realpath(__file__)
     file_path = os.path.join(os.path.dirname(current_path), "settings.txt")
@@ -37,4 +46,6 @@ def readInput():
                 current_section[settingName.strip()] = setting
         general_program_settings["reset time"] = float(general_program_settings["reset time"])
         general_program_settings["bin width"] = int(general_program_settings["bin width"])
-    return io_file_info,general_program_settings,histogram_settings,line_fitting_settings,residual_plot_settings
+        theseSettings = Settings(io_file_info,general_program_settings,histogram_settings,line_fitting_settings,residual_plot_settings)
+    return theseSettings
+

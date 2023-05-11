@@ -65,32 +65,26 @@ def main():
     # options = getOptions()
     current_path = os.path.realpath(__file__)
     import readInput
-
-    (
-        io_file_info,
-        general_program_settings,
-        histogram_settings,
-        line_fitting_settings,
-        residual_plot_settings,
-    ) = readInput.readInput()
-    file_path = os.path.join(os.path.dirname(current_path), io_file_info["input file"])
+    from readInput import Settings
+    theseSettings = readInput.readInput()
+    file_path = os.path.join(os.path.dirname(current_path), theseSettings.io_file_info["input file"])
     list_data_n = np.loadtxt(file_path)
 
     # sorting timestamps to be fed into calculate_time_differences()
-    if general_program_settings["sort data?"] == "yes":
+    if theseSettings.general_program_settings["sort data?"] == "yes":
         list_data_n = np.sort(list_data_n)
 
     # applying time differences function
     from timeDifs import timeDifCalcs
     
-    thisTimeDifCalc = timeDifCalcs(list_data_n, general_program_settings)
+    thisTimeDifCalc = timeDifCalcs(list_data_n, theseSettings.general_program_settings)
     time_diffs = thisTimeDifCalc.calculate_time_differences()
 
 
     # plotting the histogram plot
     from plots import Plot
     
-    thisPlot = Plot(general_program_settings, histogram_settings)
+    thisPlot = Plot(theseSettings.general_program_settings, theseSettings.histogram_settings)
 
     # counts, bin_centers = plots.plot(time_diffs, reset_time, bin_width, "Time Differences", "Count", "Histogram", options)
     counts, bin_centers = thisPlot.plot(time_diffs)
@@ -101,18 +95,18 @@ def main():
     line_y = fitting.fit(
         counts,
         bin_centers,
-        general_program_settings['minimum cutoff'],
+        theseSettings.general_program_settings['minimum cutoff'],
         "Time Differences",
         "Count",
         "Histogram w/ Fitted Line",
-        line_fitting_settings,
+        theseSettings.line_fitting_settings,
     )
 
-    fitting.residual_plot(counts, bin_centers, general_program_settings['minimum cutoff'], 
-                          line_y, "Time Differences", "Residuals", "Fitted Line Residuals", residual_plot_settings)
+    fitting.residual_plot(counts, bin_centers, theseSettings.general_program_settings['minimum cutoff'], 
+                          line_y, "Time Differences", "Residuals", "Fitted Line Residuals", theseSettings.residual_plot_settings)
     
-    fitting.fit_and_residual(counts, bin_centers, general_program_settings['minimum cutoff'], "Time Differences", 
-                             "Residuals", "Fitted Line Residuals", line_fitting_settings, residual_plot_settings)
+    fitting.fit_and_residual(counts, bin_centers, theseSettings.general_program_settings['minimum cutoff'], "Time Differences", 
+                             "Residuals", "Fitted Line Residuals", theseSettings.line_fitting_settings, theseSettings.residual_plot_settings)
 
 
 if __name__ == "__main__":
