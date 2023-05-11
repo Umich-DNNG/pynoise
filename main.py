@@ -81,11 +81,11 @@ def main():
         list_data_n = np.sort(list_data_n)
 
     # applying time differences function
-    import timeDifs
+    from timeDifs import timeDifCalcs
+    
+    thisTimeDifCalc = timeDifCalcs(list_data_n, general_program_settings)
+    time_diffs = thisTimeDifCalc.calculate_time_differences()
 
-    time_diffs = timeDifs.calculate_time_differences(
-        list_data_n, general_program_settings
-    )
 
     # plotting the histogram plot
     from plots import Plot
