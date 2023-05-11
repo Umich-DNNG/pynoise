@@ -9,7 +9,7 @@ output file:
 GENERAL PROGRAM SETTINGS
 reset time : 2e3
 bin width : 2
-minimum cutoff : 25
+minimum cutoff : 30
 fit range : [0,2e3]
 plot scale : linear
 time difference method : any_and_all
@@ -24,7 +24,7 @@ color: black
 markeredgecolor: blue
 markerfacecolor: black
 linestyle: -
-linewidth: 5
+linewidth: 3
 #-------------------------------------------------------------
 #_
 LINE FITTING SETTINGS
@@ -32,8 +32,8 @@ color: black
 markeredgecolor: blue
 markerfacecolor: black
 linestyle: -
-linewidth: 5
+linewidth: 3
 #-------------------------------------------------------------
 #_
 RESIDUAL PLOT SETTINGS
-s: 10
+s: 8

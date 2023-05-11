@@ -101,13 +101,18 @@ def main():
     line_y = fitting.fit(
         counts,
         bin_centers,
+        general_program_settings['minimum cutoff'],
         "Time Differences",
         "Count",
         "Histogram w/ Fitted Line",
         line_fitting_settings,
     )
 
-    fitting.residual_plot(counts, bin_centers, line_y, "Time Differences", "Residuals", "Fitted Line Residuals", residual_plot_settings)
+    fitting.residual_plot(counts, bin_centers, general_program_settings['minimum cutoff'], 
+                          line_y, "Time Differences", "Residuals", "Fitted Line Residuals", residual_plot_settings)
+    
+    fitting.fit_and_residual(counts, bin_centers, general_program_settings['minimum cutoff'], "Time Differences", 
+                             "Residuals", "Fitted Line Residuals", line_fitting_settings, residual_plot_settings)
 
 
 if __name__ == "__main__":
