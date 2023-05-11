@@ -2,3 +2,4 @@ color: black
 markeredgecolor: blue
 markerfacecolor: black
 linestyle: -
+linewidth: 5

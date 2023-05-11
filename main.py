@@ -1,3 +1,4 @@
+
 import sys
 
 # # Define location of Git synchoronized Python functions
@@ -51,6 +52,8 @@ def getOptions():
         for line in file:
             settingName = line.split(":")[0].strip()
             setting = line.split(":")[1].strip()
+            if setting.isdigit():
+                setting = float(setting)
             plotOpts[settingName] = setting
     return plotOpts
 
@@ -88,3 +91,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
