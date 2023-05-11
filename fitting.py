@@ -212,17 +212,17 @@ def fit(counts, bin_centers, x_axis, y_axis, title, options):
 
 #--------------------------------------------------------------------------------
 
-def residual_plot(counts, bin_centers, line_y, x_axis, title):
+def residual_plot(counts, bin_centers, line_y, x_axis, y_axis, title, options):
     # compute residuals
     residuals = counts - line_y
 
     # create scatter plot of residuals
     fig, ax = plt.subplots(figsize=(8, 6))
-    ax.scatter(bin_centers, residuals, color='b', alpha=0.6)
+    ax.scatter(bin_centers, residuals, **options)
     ax.axhline(y=0, color='r', linestyle='--')
     ax.set_xlabel(x_axis)
-    ax.set_ylabel("Residuals")
-    ax.set_title(title + " Residual Plot")
+    ax.set_ylabel(y_axis)
+    ax.set_title(title)
     fig.tight_layout()
 
     plt.show()

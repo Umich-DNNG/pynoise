@@ -89,9 +89,7 @@ def main():
 
     # plotting the histogram plot
     from plots import Plot
-
-    reset_time = general_program_settings["reset time"]
-    bin_width = general_program_settings["bin width"]
+    
     thisPlot = Plot(general_program_settings, histogram_settings)
 
     # counts, bin_centers = plots.plot(time_diffs, reset_time, bin_width, "Time Differences", "Count", "Histogram", options)
@@ -109,7 +107,7 @@ def main():
         line_fitting_settings,
     )
 
-    fitting.residual_plot(counts, bin_centers, line_y, "Time Differences", "Residuals")
+    fitting.residual_plot(counts, bin_centers, line_y, "Time Differences", "Residuals", "Fitted Line Residuals", residual_plot_settings)
 
 
 if __name__ == "__main__":
