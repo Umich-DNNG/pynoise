@@ -194,7 +194,7 @@ def fit(counts, bin_centers, x_axis, y_axis, title, options):
     print('Fit parameters: A =', popt[0], ', alpha =', popt[1], ', B =', popt[2])
 
     # deriving line x and line y
-    line_x = np.linspace(bin_centers[0], bin_centers[-1], 100)
+    line_x = np.linspace(bin_centers[0], bin_centers[-1], len(bin_centers))
     line_y = exp_func(line_x, *popt)
 
     # plotting the best fit curve to the plot
@@ -205,7 +205,24 @@ def fit(counts, bin_centers, x_axis, y_axis, title, options):
     ax.set_xlabel(x_axis)
     ax.set_ylabel(y_axis)
     ax.set_title(title)
-    fig.tight_layout()
+
     plt.show()
 
+    return line_y
+
 #--------------------------------------------------------------------------------
+
+def residual_plot(counts, bin_centers, line_y, x_axis, title):
+    # compute residuals
+    residuals = counts - line_y
+
+    # create scatter plot of residuals
+    fig, ax = plt.subplots(figsize=(8, 6))
+    ax.scatter(bin_centers, residuals, color='b', alpha=0.6)
+    ax.axhline(y=0, color='r', linestyle='--')
+    ax.set_xlabel(x_axis)
+    ax.set_ylabel("Residuals")
+    ax.set_title(title + " Residual Plot")
+    fig.tight_layout()
+
+    plt.show()

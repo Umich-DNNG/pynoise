@@ -86,9 +86,9 @@ def main():
     # fitting curve to the histogramp plot
     import fitting 
 
-    fitting.fit(counts, bin_centers, "Time Differences", "Count", "Histogram w/ Fitted Line", options)
+    line_y = fitting.fit(counts, bin_centers, "Time Differences", "Count", "Histogram w/ Fitted Line", options)
 
+    fitting.residual_plot(counts, bin_centers, line_y, "Time Differences", "Residuals")
 
 if __name__ == "__main__":
     main()
-
