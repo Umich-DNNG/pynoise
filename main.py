@@ -1,4 +1,4 @@
-
+# %%
 import sys
 
 # # Define location of Git synchoronized Python functions
@@ -44,6 +44,7 @@ def getSettings():
     )
     return Rossi_alpha_settings
 
+
 def getOptions():
     current_path = os.path.realpath(__file__)
     file_path = os.path.join(os.path.dirname(current_path), "plotOptions.txt")
@@ -60,35 +61,57 @@ def getOptions():
 
 def main():
     # extracting settings and timestamps
-    settings = getSettings()
-    options = getOptions()
+    # settings = getSettings()
+    # options = getOptions()
     current_path = os.path.realpath(__file__)
-    file_path = os.path.join(os.path.dirname(current_path), "RF3-40_59min.txt")
+    import readInput
+
+    (
+        io_file_info,
+        general_program_settings,
+        histogram_settings,
+        line_fitting_settings,
+        residual_plot_settings,
+    ) = readInput.readInput()
+    file_path = os.path.join(os.path.dirname(current_path), io_file_info["input file"])
     list_data_n = np.loadtxt(file_path)
 
     # sorting timestamps to be fed into calculate_time_differences()
-    if settings["sort data?"] == "yes":
+    if general_program_settings["sort data?"] == "yes":
         list_data_n = np.sort(list_data_n)
 
     # applying time differences function
     import timeDifs
 
-    time_diffs = timeDifs.calculate_time_differences(list_data_n, settings)
+    time_diffs = timeDifs.calculate_time_differences(
+        list_data_n, general_program_settings
+    )
 
     # plotting the histogram plot
-    import plots
+    from plots import Plot
 
-    reset_time = settings["reset time"]
-    bin_width = settings["bin width"]
+    reset_time = general_program_settings["reset time"]
+    bin_width = general_program_settings["bin width"]
+    thisPlot = Plot(general_program_settings, histogram_settings)
 
-    counts, bin_centers = plots.plot(time_diffs, reset_time, bin_width, "Time Differences", "Count", "Histogram", options)
+    # counts, bin_centers = plots.plot(time_diffs, reset_time, bin_width, "Time Differences", "Count", "Histogram", options)
+    counts, bin_centers = thisPlot.plot(time_diffs)
 
     # fitting curve to the histogramp plot
-    import fitting 
+    import fitting
 
-    line_y = fitting.fit(counts, bin_centers, "Time Differences", "Count", "Histogram w/ Fitted Line", options)
+    line_y = fitting.fit(
+        counts,
+        bin_centers,
+        "Time Differences",
+        "Count",
+        "Histogram w/ Fitted Line",
+        line_fitting_settings,
+    )
 
     fitting.residual_plot(counts, bin_centers, line_y, "Time Differences", "Residuals")
 
+
 if __name__ == "__main__":
     main()
+# %%

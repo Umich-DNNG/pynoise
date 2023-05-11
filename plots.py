@@ -117,25 +117,32 @@ def plot_n_g_colors_PSD_discrim(list_data, ToT, x_label='Light yield (keVee)', y
 #--------------------------------------------------------------------------------
 # OWN CODE BELOW
 #--------------------------------------------------------------------------------
+class Plot:
+    def __init__(self,plotSettings,plotOptions):
+        self.reset_time = plotSettings['reset time']
+        self.bin_width = plotSettings['bin width']
+        self.options = plotOptions
+        self.x_axis = "Time Differences"
+        self.y_axis = "Count"
+        self.title = "Histogram"
+    def plot(self, time_diffs):
 
-def plot(time_diffs, reset_time, bin_width, x_axis, y_axis, title, options):
+        # calculating number of bins for histogram plot
+        num_bins = int(self.reset_time/self.bin_width)
 
-    # calculating number of bins for histogram plot
-    num_bins = int(reset_time/bin_width)
+        # generating histogram
+        counts, bin_edges = np.histogram(time_diffs, bins=num_bins, range=[0, self.reset_time])
 
-    # generating histogram
-    counts, bin_edges = np.histogram(time_diffs, bins=num_bins, range=[0, reset_time])
+        # adjusting the bin centers
+        bin_centers = 0.5 * (bin_edges[1:] + bin_edges[:-1])
 
-    # adjusting the bin centers
-    bin_centers = 0.5 * (bin_edges[1:] + bin_edges[:-1])
+        # plotting
+        plt.plot(bin_centers, counts, **self.options)
+        plt.xlabel(self.x_axis)
+        plt.ylabel(self.y_axis)
+        plt.title(self.title)
 
-    # plotting
-    plt.plot(bin_centers, counts, **options)
-    plt.xlabel(x_axis)
-    plt.ylabel(y_axis)
-    plt.title(title)
+        # display
+        plt.show()
 
-    # display
-    plt.show()
-
-    return counts, bin_centers
+        return counts, bin_centers
