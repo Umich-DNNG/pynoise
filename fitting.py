@@ -201,12 +201,12 @@ def fit(counts, bin_centers, min_cutoff, x_axis, y_axis, title, options):
     fig, ax = plt.subplots(figsize=(8, 6))
     ax.bar(bin_centers, counts, width=0.8*(bin_centers[1]-bin_centers[0]), alpha=0.6, color='g')
     ax.plot(line_x, line_y, 'r--', label='Fit: A=%5.3f, alpha=%5.3f, B=%5.3f' % tuple(popt), **options)
-    ax.legend(fontsize=6)
+    ax.legend()
     ax.set_xlabel(x_axis)
     ax.set_ylabel(y_axis)
     ax.set_title(title)
 
-    plt.show()
+    # fig.savefig('test1', dpi=300, bbox_inches='tight')
 
     return line_y
 
@@ -230,7 +230,7 @@ def residual_plot(counts, bin_centers, min_cutoff, line_y, x_axis, y_axis, title
     ax.set_title(title)
     fig.tight_layout()
 
-    plt.show()
+    # fig.savefig('test2', dpi=300, bbox_inches='tight')
 
 #--------------------------------------------------------------------------------
 
@@ -248,24 +248,26 @@ def fit_and_residual(counts, bin_centers, min_cutoff, x_axis, y_axis, title, fit
     # create figure and axes
     fig, (ax1, ax2) = plt.subplots(nrows=2, sharex=True, figsize=(8, 6), gridspec_kw={'height_ratios': [2, 1]})
 
-    # plot histogram and fitting curve in top subplot
+    # plotting histogram and fitting curve in top subplot
     ax1.bar(bin_centers, counts, width=0.8*(bin_centers[1]-bin_centers[0]), alpha=0.6, color='g')
     ax1.plot(line_x, line_y, 'r--', label='Fit: A=%5.3f, alpha=%5.3f, B=%5.3f' % tuple(popt), **fitting_options)
-    ax1.legend(fontsize=6)
+    ax1.legend()
     ax1.set_ylabel(y_axis)
 
-    # compute residuals and plot in bottom subplot
+    # computing residuals and plot in bottom subplot
     residuals = counts - line_y
     residuals_norm = residuals / np.max(np.abs(residuals))
     ax2.scatter(bin_centers, residuals_norm, **residual_options)
     ax2.axhline(y=0, color='r', linestyle='--')
     ax2.set_ylim([-1, 1])
     ax2.set_xlabel(x_axis)
-    ax2.set_ylabel('Normalized Residuals')
+    ax2.set_ylabel('Relative residuals')
 
-    # set title for entire figure
+    # setting title for entire figure
     fig.suptitle(title, fontsize=14)
 
-    # adjust layout and display plot
+    # adjusting layout and display plot
     fig.tight_layout()
-    plt.show()
+
+    # saving plot to file
+    # fig.savefig('test3', dpi=300, bbox_inches='tight')

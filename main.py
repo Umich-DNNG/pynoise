@@ -92,6 +92,7 @@ def main():
     # fitting curve to the histogramp plot
     import fitting
 
+    '''
     line_y = fitting.fit(
         counts,
         bin_centers,
@@ -104,9 +105,10 @@ def main():
 
     fitting.residual_plot(counts, bin_centers, theseSettings.general_program_settings['minimum cutoff'], 
                           line_y, "Time Differences", "Residuals", "Fitted Line Residuals", theseSettings.residual_plot_settings)
+    '''
     
-    fitting.fit_and_residual(counts, bin_centers, theseSettings.general_program_settings['minimum cutoff'], "Time Differences", 
-                             "Residuals", "Fitted Line Residuals", theseSettings.line_fitting_settings, theseSettings.residual_plot_settings)
+    fitting.fit_and_residual(counts, bin_centers, theseSettings.general_program_settings['minimum cutoff'], "Time Differences (ns)", 
+                             "Coincidence rate (s^-1)", "Any-and-all", theseSettings.line_fitting_settings, theseSettings.residual_plot_settings)
 
 
 if __name__ == "__main__":

@@ -137,12 +137,13 @@ class Plot:
         bin_centers = 0.5 * (bin_edges[1:] + bin_edges[:-1])
 
         # plotting
-        plt.plot(bin_centers, counts, **self.options)
+        # plt.plot(bin_centers, counts, drawstyle='steps-post', **self.options)
+        plt.bar(bin_centers, counts, width=0.8*(bin_centers[1]-bin_centers[0]), alpha=0.6, color='b', align='center', edgecolor='k', linewidth=0.5, fill=True)
         plt.xlabel(self.x_axis)
         plt.ylabel(self.y_axis)
         plt.title(self.title)
 
-        # display
-        plt.show()
+        # saving plot
+        # plt.savefig('test2', dpi=300, bbox_inches='tight')
 
         return counts, bin_centers

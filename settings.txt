@@ -28,7 +28,7 @@ linewidth: 3
 #-------------------------------------------------------------
 #_
 LINE FITTING SETTINGS
-color: black
+color: red
 markeredgecolor: blue
 markerfacecolor: black
 linestyle: -
