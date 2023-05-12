@@ -67,9 +67,10 @@ def main():
     import readInput
     from readInput import Settings
     theseSettings = readInput.readInput()
-    file_path = os.path.join(os.path.dirname(current_path), theseSettings.io_file_info["input file"])
-    list_data_n = np.loadtxt(file_path)
-
+    if(theseSettings.io_file_info['file type'] == 1):
+        file_path = os.path.join(os.path.dirname(current_path), theseSettings.io_file_info["input file"])
+        list_data_n = np.loadtxt(file_path)
+ 
     # sorting timestamps to be fed into calculate_time_differences()
     if theseSettings.general_program_settings["sort data?"] == "yes":
         list_data_n = np.sort(list_data_n)
