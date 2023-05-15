@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt  # For plotting data summaries
 # --------------------------------------------------------------------------------
 
 
-def compile_sample_stdev_RA_dist(settings):
+def compil_sampele_stdev_RA_dist(settings):
     data_folder = settings.io_file_info["input folder"]
     num_folders = 10
     i = 0
@@ -19,6 +19,8 @@ def compile_sample_stdev_RA_dist(settings):
                 list_data_n = np.loadtxt(path_to_data, delimiter=' ')
                 #list_data_n = np.genfromtxt(path_to_data, delimiter=' ')
                 list_data = list_data_n[:, 1]
+                if settings.general_program_settings["sort data?"] == "yes":
+                    list_data = np.sort(list_data)
                 from timeDifs import timeDifCalcs
 
                 thisData = timeDifCalcs(list_data, settings.general_program_settings)
