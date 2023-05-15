@@ -35,7 +35,7 @@ def fit(counts, bin_centers, min_cutoff, x_axis, y_axis, title, options):
 
     # fig.savefig('test1', dpi=300, bbox_inches='tight')
 
-    return line_y
+    return popt, line_y
 
 #--------------------------------------------------------------------------------
 
