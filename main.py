@@ -47,7 +47,7 @@ def main():
         # plotting the histogram plot
         from plots import Plot
         
-        thisPlot = Plot(theseSettings.general_program_settings, theseSettings.histogram_settings)
+        thisPlot = Plot(theseSettings.general_program_settings, theseSettings.histogram_settings, show_plot=True)
 
         # counts, bin_centers = plots.plot(time_diffs, reset_time, bin_width, "Time Differences", "Count", "Histogram", options)
         counts, bin_centers = thisPlot.plot(time_diffs)
@@ -55,15 +55,14 @@ def main():
         # fitting curve to the histogramp plot
         import fitting
         
-        fitting.fit_and_residual(counts, bin_centers, theseSettings.general_program_settings['minimum cutoff'], "Time Differences (ns)", 
-                                "Coincidence rate (s^-1)", "Any-and-all", theseSettings.line_fitting_settings, theseSettings.residual_plot_settings)
+        fitting.fit_and_residual(counts, bin_centers, theseSettings.general_program_settings['minimum cutoff'], [0,2000], 
+                                 "Time Differences (ns)", "Coincidence rate (s^-1)", "Any-and-all", theseSettings.line_fitting_settings, 
+                                 theseSettings.residual_plot_settings, show_plot=False)
 
     else:
         analyzingFolders.compile_sample_stdev_RA_dist(theseSettings)
     # sorting timestamps to be fed into calculate_time_differences()
-    
 
-   
 
 if __name__ == "__main__":
     main()
