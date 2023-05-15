@@ -78,9 +78,6 @@ def compile_sample_stdev_RA_dist(settings):
     RA_std_dev = np.std(RA_hist_array, axis=0, ddof=1)
     RA_hist_total = np.sum(RA_hist_array, axis=0)
     time_diff_centers = bin_edges[1:] - np.diff(bin_edges[:2]) / 2
-    RA_hist_total = np.vstack(
-        (RA_hist_total, time_diff_centers, RA_std_dev * num_folders)
-    )
-    plt.plot(RA_hist_array)
-    plt.show()
+    RA_hist_total = np.vstack((RA_hist_total, time_diff_centers, RA_std_dev * num_folders))
+    
     return RA_hist_total
