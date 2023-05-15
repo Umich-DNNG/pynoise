@@ -154,3 +154,54 @@ def fit_and_residual(counts, bin_centers, min_cutoff, fit_range, x_axis,
         fig.savefig('fitted_and_residual', dpi=300, bbox_inches='tight')
 
     return popt
+
+#--------------------------------------------------------------------------------
+
+def fit_RA_hist_weighting(RA_hist,Rossi_alpha_settings):
+    
+    num_bins = np.size(RA_hist[0])
+    time_diff_centers = RA_hist[1]
+    
+    # Calculate weighting with relative variance
+    uncertainties = RA_hist[2]
+    
+    # Choose region to fit
+    fit_index = (
+        (time_diff_centers > Rossi_alpha_settings['minimum cutoff']) & 
+        (time_diff_centers >= Rossi_alpha_settings['fit range'][0]) & 
+        (time_diff_centers <= Rossi_alpha_settings['fit range'][1])
+                 )
+    xfit = time_diff_centers[fit_index]
+    
+    # Fit distribution
+    # Fit the data using curve_fit
+    # exp_decay_fit_bounds = ([0,-np.inf,0],[np.inf,0,np.inf])
+    exp_decay_fit_bounds = ([0,-np.inf],[np.inf,0])
+    a0 = np.max(RA_hist[0])
+    c0 = np.mean(RA_hist[0][-int(num_bins*0.05):])
+    b0 = ((np.log(c0)-np.log(RA_hist[0][0]))/
+          (time_diff_centers[-1]-time_diff_centers[0]))
+    yfit = RA_hist[0][fit_index] - c0
+    # exp_decay_p0 = [a0, b0, c0]
+    exp_decay_p0 = [a0, b0]
+    popt, pcov = curve_fit(
+        exp_decay_2_param, 
+        xfit, 
+        yfit,
+        bounds=exp_decay_fit_bounds,
+        p0=exp_decay_p0,
+        maxfev=1e6,
+        sigma=uncertainties[fit_index], 
+        absolute_sigma=True)
+    
+    yfit = exp_decay_3_param(xfit, *popt, c0)
+    
+    popt = np.hstack((popt, c0))
+    
+    cerr = np.std(RA_hist[0][-int(num_bins*0.05):], axis=0, ddof=1)
+    
+    perr = np.sqrt(np.diag(pcov)) 
+    
+    perr = np.hstack((perr, cerr))
+    
+    return time_diff_centers, popt, pcov, perr, xfit, yfit
