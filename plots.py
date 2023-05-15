@@ -48,4 +48,4 @@ class Plot:
         # saving plot
         # plt.savefig('test2', dpi=300, bbox_inches='tight')
 
-        return counts, bin_centers
+        return counts, bin_centers, bin_edges
