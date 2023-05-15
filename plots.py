@@ -29,7 +29,7 @@ class Plot:
         bin_centers = 0.5 * (bin_edges[1:] + bin_edges[:-1])
 
         # plotting
-        # plt.plot(bin_centers, counts, drawstyle='steps-post', **self.options)
+        plt.plot(bin_centers, counts, drawstyle='steps-post', **self.options)
         plt.bar(
             bin_centers,
             counts,

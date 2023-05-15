@@ -3,6 +3,7 @@ import os  # For scanning directories
 
 #--------------------------------------------------------------------------------
 
+#settings class stores the separate dictionaries of settings created from the input file
 class Settings:
     def __init__(self,io_file_info, general_program_settings,histogram_settings,line_fitting_settings,residual_plot_settings):
         self.io_file_info = io_file_info
@@ -11,6 +12,7 @@ class Settings:
         self.line_fitting_settings = line_fitting_settings
         self.residual_plot_settings = residual_plot_settings
 
+#reads in the input from settings.txt and stores it in dictionaries
 def readInput():
     current_path = os.path.realpath(__file__)
     file_path = os.path.join(os.path.dirname(current_path), "settings.txt")

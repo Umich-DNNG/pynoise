@@ -5,7 +5,7 @@ I/O FILE INFO
 input file: RF3-40_59min.txt
 output file: 
 input folder: /Users/kate/Dropbox\ \(University\ of\ Michigan\)/20210322_06_RF3-42_CF_OS_run1_60min_0947
-file type: 2
+file type: 1
 #for the file types, 1 corresponds to the first file we analyzed and 2 corresponds to the folders.
 #-------------------------------------------------------------
 #_
@@ -13,6 +13,7 @@ GENERAL PROGRAM SETTINGS
 reset time : 2e3
 bin width : 2
 minimum cutoff : 30
+#
 fit range : [0,2e3]
 plot scale : linear
 time difference method : any_and_all

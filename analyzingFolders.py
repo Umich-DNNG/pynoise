@@ -27,27 +27,29 @@ def compile_sample_stdev_RA_dist(settings):
                 
                 if i == 0:
                     time_diffs = thisData.calculate_time_differences()
-                    [RA_hist, popt, pcov, x_fit, y_fit] = make_RA_hist_and_fit(time_diffs, general_settings)
-                    RA_hist_array = RA_hist[0]
+                    #[RA_hist, popt, pcov, x_fit, y_fit] = make_RA_hist_and_fit(time_diffs, general_settings)
+                    #RA_hist_array = RA_hist[0]
+                    #popt_array = popt
+
+                    thisPlot = Plot(settings.general_program_settings, settings.histogram_settings)
+                    counts, bin_centers = thisPlot.plot(time_diffs)
+                    RA_hist_array = counts
+                    popt = fitting.fit_and_residual(counts, bin_centers, settings.general_program_settings['minimum cutoff'], "Time Differences (ns)", "Coincidence rate (s^-1)", "Any-and-all", settings.line_fitting_settings, settings.residual_plot_settings)
                     popt_array = popt
-
-                    # thisPlot = Plot(theseSettings.general_program_settings, theseSettings.histogram_settings) TODO
-                    # counts, bin_centers = thisPlot.plot(time_diffs)
-
-                    # fitting.fit_and_residual(counts, bin_centers, theseSettings.general_program_settings['minimum cutoff'], "Time Differences (ns)", 
-                             # "Coincidence rate (s^-1)", "Any-and-all", theseSettings.line_fitting_settings, theseSettings.residual_plot_settings)
 
                 else:
                     time_diffs = thisData.calculate_time_differences()
-                    [RA_hist, popt, pcov, x_fit, y_fit] = make_RA_hist_and_fit(time_diffs, Rossi_alpha_settings)
-                    RA_hist_array = np.vstack((RA_hist_array, RA_hist[0]))
+                    #[RA_hist, popt, pcov, x_fit, y_fit] = make_RA_hist_and_fit(time_diffs, Rossi_alpha_settings)
+                    #RA_hist_array = np.vstack((RA_hist_array, RA_hist[0]))
+                    #popt_array = np.vstack((popt_array, popt))
+
+                    thisPlot = Plot(settings.general_program_settings, settings.histogram_settings) 
+                    counts, bin_centers = thisPlot.plot(time_diffs)
+
+                    popt = fitting.fit_and_residual(counts, bin_centers, settings.general_program_settings['minimum cutoff'], "Time Differences (ns)", "Coincidence rate (s^-1)", "Any-and-all", settings.line_fitting_settings, settings.residual_plot_settings)
+                    RA_hist_array = np.vstack((RA_hist_array, counts))
                     popt_array = np.vstack((popt_array, popt))
-
-                    # thisPlot = Plot(theseSettings.general_program_settings, theseSettings.histogram_settings) TODO
-                    # counts, bin_centers = thisPlot.plot(time_diffs)
-
-                    # fitting.fit_and_residual(counts, bin_centers, theseSettings.general_program_settings['minimum cutoff'], "Time Differences (ns)", 
-                             # "Coincidence rate (s^-1)", "Any-and-all", theseSettings.line_fitting_settings, theseSettings.residual_plot_settings)
+                    
                     
                 i = i + 1
                 
