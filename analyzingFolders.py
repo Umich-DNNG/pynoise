@@ -6,8 +6,8 @@ from plots import Plot
 import fitting
 #--------------------------------------------------------------------------------
 
-def compile_sample_stdev_RA_dist(data_folder, general_settings):
-    
+def compile_sample_stdev_RA_dist(settings):
+    data_folder = settings.io_file_info['input folder']
     num_folders = 10
     i = 0;   
     for fol_num in range(1, num_folders + 1):
@@ -20,10 +20,10 @@ def compile_sample_stdev_RA_dist(data_folder, general_settings):
                 list_data_n = np.loadtxt(path_to_data)
                 list_data_n = list_data_n[:,1]
                 from timeDifs import timeDifCalcs
-                thisData = timeDifCalcs(list_data_n, general_settings)
-                # hist_settings = ________  TODO
-                # line_settings = ________ TODO
-                # residual settings = _________ TODO
+                thisData = timeDifCalcs(list_data_n, settings.general_settings)
+                hist_settings = settings.histogram_settings
+                line_settings = settings.line_fitting_settings
+                residual_settings = settings.residual_plot_settings
                 
                 if i == 0:
                     time_diffs = thisData.calculate_time_differences()
