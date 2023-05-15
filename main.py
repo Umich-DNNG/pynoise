@@ -50,7 +50,7 @@ def main():
         thisPlot = Plot(theseSettings.general_program_settings, theseSettings.histogram_settings, show_plot=True)
 
         # counts, bin_centers = plots.plot(time_diffs, reset_time, bin_width, "Time Differences", "Count", "Histogram", options)
-        counts, bin_centers = thisPlot.plot(time_diffs)
+        counts, bin_centers, bin_edges = thisPlot.plot(time_diffs)
 
         # fitting curve to the histogramp plot
         import fitting
