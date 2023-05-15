@@ -98,3 +98,5 @@ def fit_and_residual(counts, bin_centers, min_cutoff, x_axis, y_axis, title, fit
 
     # saving plot to file
     # fig.savefig('test3', dpi=300, bbox_inches='tight')
+
+    return popt
