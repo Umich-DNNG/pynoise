@@ -22,42 +22,6 @@ sns.set_style("ticks")
 sns.set_context("talk", font_scale=0.8)
 
 
-# get the settings for the user to use
-def getSettings():
-    current_path = os.path.realpath(__file__)
-    file_path = os.path.join(os.path.dirname(current_path), "Rossi_alpha_settings.txt")
-    Rossi_alpha_settings = {}
-    with open(file_path, "r") as file:
-        for line in file:
-            settingName = line.split(":")[0].strip()
-            setting = line.split(":")[1].strip()
-            if settingName == "fit range":
-                setting = [float(s) for s in setting[1:-1].split(",")]
-            Rossi_alpha_settings[settingName] = setting
-
-    Rossi_alpha_settings["reset time"] = float(Rossi_alpha_settings["reset time"])
-    Rossi_alpha_settings["bin width"] = int(Rossi_alpha_settings["bin width"])
-    Rossi_alpha_settings["minimum cutoff"] = int(Rossi_alpha_settings["minimum cutoff"])
-    Rossi_alpha_settings["digital delay"] = int(Rossi_alpha_settings["digital delay"])
-    Rossi_alpha_settings["meas time per folder"] = int(
-        Rossi_alpha_settings["meas time per folder"]
-    )
-    return Rossi_alpha_settings
-
-
-def getOptions():
-    current_path = os.path.realpath(__file__)
-    file_path = os.path.join(os.path.dirname(current_path), "plotOptions.txt")
-    plotOpts = {}
-    with open(file_path, "r") as file:
-        for line in file:
-            settingName = line.split(":")[0].strip()
-            setting = line.split(":")[1].strip()
-            if setting.isdigit():
-                setting = float(setting)
-            plotOpts[settingName] = setting
-    return plotOpts
-
 
 def main():
     # extracting settings and timestamps
@@ -71,48 +35,35 @@ def main():
     if(theseSettings.io_file_info['file type'] == 1):
         file_path = os.path.join(os.path.dirname(current_path), theseSettings.io_file_info["input file"])
         list_data_n = np.loadtxt(file_path)
+        if theseSettings.general_program_settings["sort data?"] == "yes":
+            list_data_n = np.sort(list_data_n)
+         # applying time differences function
+        from timeDifs import timeDifCalcs
+        
+        thisTimeDifCalc = timeDifCalcs(list_data_n, theseSettings.general_program_settings)
+        time_diffs = thisTimeDifCalc.calculate_time_differences()
+
+
+        # plotting the histogram plot
+        from plots import Plot
+        
+        thisPlot = Plot(theseSettings.general_program_settings, theseSettings.histogram_settings)
+
+        # counts, bin_centers = plots.plot(time_diffs, reset_time, bin_width, "Time Differences", "Count", "Histogram", options)
+        counts, bin_centers = thisPlot.plot(time_diffs)
+
+        # fitting curve to the histogramp plot
+        import fitting
+        
+        fitting.fit_and_residual(counts, bin_centers, theseSettings.general_program_settings['minimum cutoff'], "Time Differences (ns)", 
+                                "Coincidence rate (s^-1)", "Any-and-all", theseSettings.line_fitting_settings, theseSettings.residual_plot_settings)
+
     else:
-        analyzingFolders.compile_sample_stdev_RA_dist()
+        analyzingFolders.compile_sample_stdev_RA_dist(theseSettings)
     # sorting timestamps to be fed into calculate_time_differences()
-    if theseSettings.general_program_settings["sort data?"] == "yes":
-        list_data_n = np.sort(list_data_n)
-
-    # applying time differences function
-    from timeDifs import timeDifCalcs
     
-    thisTimeDifCalc = timeDifCalcs(list_data_n, theseSettings.general_program_settings)
-    time_diffs = thisTimeDifCalc.calculate_time_differences()
 
-
-    # plotting the histogram plot
-    from plots import Plot
-    
-    thisPlot = Plot(theseSettings.general_program_settings, theseSettings.histogram_settings)
-
-    # counts, bin_centers = plots.plot(time_diffs, reset_time, bin_width, "Time Differences", "Count", "Histogram", options)
-    counts, bin_centers = thisPlot.plot(time_diffs)
-
-    # fitting curve to the histogramp plot
-    import fitting
-
-    '''
-    line_y = fitting.fit(
-        counts,
-        bin_centers,
-        theseSettings.general_program_settings['minimum cutoff'],
-        "Time Differences",
-        "Count",
-        "Histogram w/ Fitted Line",
-        theseSettings.line_fitting_settings,
-    )
-
-    fitting.residual_plot(counts, bin_centers, theseSettings.general_program_settings['minimum cutoff'], 
-                          line_y, "Time Differences", "Residuals", "Fitted Line Residuals", theseSettings.residual_plot_settings)
-    '''
-    
-    fitting.fit_and_residual(counts, bin_centers, theseSettings.general_program_settings['minimum cutoff'], "Time Differences (ns)", 
-                             "Coincidence rate (s^-1)", "Any-and-all", theseSettings.line_fitting_settings, theseSettings.residual_plot_settings)
-
+   
 
 if __name__ == "__main__":
     main()
