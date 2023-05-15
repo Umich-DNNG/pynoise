@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt  # For plotting data summaries
 # --------------------------------------------------------------------------------
 
 
-def compil_sampele_stdev_RA_dist(settings):
+def compile_sample_stdev_RA_dist(settings):
     data_folder = settings.io_file_info["input folder"]
     num_folders = 10
     i = 0
@@ -16,8 +16,8 @@ def compil_sampele_stdev_RA_dist(settings):
         for filename in os.listdir(data_folder + "/" + str(fol_num)):
             if filename.endswith("n_allch.txt"):
                 path_to_data = data_folder + "/" + str(fol_num) + "/" + filename
-                list_data_n = np.loadtxt(path_to_data, delimiter=' ')
-                #list_data_n = np.genfromtxt(path_to_data, delimiter=' ')
+                list_data_n = np.loadtxt(path_to_data, delimiter=" ")
+                # list_data_n = np.genfromtxt(path_to_data, delimiter=' ')
                 list_data = list_data_n[:, 1]
                 if settings.general_program_settings["sort data?"] == "yes":
                     list_data = np.sort(list_data)
@@ -35,7 +35,9 @@ def compil_sampele_stdev_RA_dist(settings):
                     # popt_array = popt
 
                     thisPlot = Plot(
-                        settings.general_program_settings, settings.histogram_settings
+                        settings.general_program_settings,
+                        settings.histogram_settings,
+                        False,
                     )
                     counts, bin_centers, bin_edges = thisPlot.plot(time_diffs)
                     RA_hist_array = counts
@@ -43,11 +45,13 @@ def compil_sampele_stdev_RA_dist(settings):
                         counts,
                         bin_centers,
                         settings.general_program_settings["minimum cutoff"],
+                        settings.general_program_settings["fit range"],
                         "Time Differences (ns)",
                         "Coincidence rate (s^-1)",
                         "Any-and-all",
                         settings.line_fitting_settings,
                         settings.residual_plot_settings,
+                        False,
                     )
                     popt_array = popt
 
@@ -58,7 +62,9 @@ def compil_sampele_stdev_RA_dist(settings):
                     # popt_array = np.vstack((popt_array, popt))
 
                     thisPlot = Plot(
-                        settings.general_program_settings, settings.histogram_settings
+                        settings.general_program_settings,
+                        settings.histogram_settings,
+                        False,
                     )
                     counts, bin_centers, bin_edges = thisPlot.plot(time_diffs)
 
@@ -66,11 +72,13 @@ def compil_sampele_stdev_RA_dist(settings):
                         counts,
                         bin_centers,
                         settings.general_program_settings["minimum cutoff"],
+                        settings.general_program_settings["fit range"],
                         "Time Differences (ns)",
                         "Coincidence rate (s^-1)",
                         "Any-and-all",
                         settings.line_fitting_settings,
                         settings.residual_plot_settings,
+                        False,
                     )
                     RA_hist_array = np.vstack((RA_hist_array, counts))
                     popt_array = np.vstack((popt_array, popt))
@@ -80,6 +88,8 @@ def compil_sampele_stdev_RA_dist(settings):
     RA_std_dev = np.std(RA_hist_array, axis=0, ddof=1)
     RA_hist_total = np.sum(RA_hist_array, axis=0)
     time_diff_centers = bin_edges[1:] - np.diff(bin_edges[:2]) / 2
-    RA_hist_total = np.vstack((RA_hist_total, time_diff_centers, RA_std_dev * num_folders))
-    
+    RA_hist_total = np.vstack(
+        (RA_hist_total, time_diff_centers, RA_std_dev * num_folders)
+    )
+
     return RA_hist_total

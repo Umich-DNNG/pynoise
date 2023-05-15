@@ -61,6 +61,7 @@ def main():
 
     else:
         analyzingFolders.compile_sample_stdev_RA_dist(theseSettings)
+
     # sorting timestamps to be fed into calculate_time_differences()
 
 
