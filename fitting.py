@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
+import sys
 
 
 #--------------------------------------------------------------------------------
@@ -15,7 +16,7 @@ def exp_decay_3_param(x, a, b, c):
 def exp_decay_2_param(x, a, b):
     return a * np.exp(b * x)
 
-#--------------------------------------------------------------------------------
+#--------------------------------------------------------------------------------    
 
 def fit(counts, bin_centers, min_cutoff, fit_range, x_axis, y_axis, title, fitting_options, show_plot):
 
@@ -166,11 +167,9 @@ def fit_RA_hist_weighting(RA_hist,Rossi_alpha_settings):
     uncertainties = RA_hist[2]
     
     # Choose region to fit
-    fit_index = (
-        (time_diff_centers > Rossi_alpha_settings['minimum cutoff']) & 
+    fit_index = np.where(((time_diff_centers > Rossi_alpha_settings['minimum cutoff']) & 
         (time_diff_centers >= Rossi_alpha_settings['fit range'][0]) & 
-        (time_diff_centers <= Rossi_alpha_settings['fit range'][1])
-                 )
+        (time_diff_centers <= Rossi_alpha_settings['fit range'][1])))
     xfit = time_diff_centers[fit_index]
     
     # Fit distribution
@@ -182,18 +181,14 @@ def fit_RA_hist_weighting(RA_hist,Rossi_alpha_settings):
     b0 = ((np.log(c0)-np.log(RA_hist[0][0]))/
           (time_diff_centers[-1]-time_diff_centers[0]))
     yfit = RA_hist[0][fit_index] - c0
-    # exp_decay_p0 = [a0, b0, c0]
+    #exp_decay_p0 = [a0, b0, c0]
     exp_decay_p0 = [a0, b0]
-    popt, pcov = curve_fit(
-        exp_decay_2_param, 
-        xfit, 
-        yfit,
-        bounds=exp_decay_fit_bounds,
-        p0=exp_decay_p0,
-        maxfev=1e6,
-        sigma=uncertainties[fit_index], 
-        absolute_sigma=True)
+    popt, pcov = curve_fit(exp_decay_2_param, xfit, yfit,bounds=exp_decay_fit_bounds, p0=exp_decay_p0,maxfev=1e6,sigma=uncertainties[fit_index], absolute_sigma=True)
     
+
+    #popt, pcov = curve_fit(exp_decay_2_param, xfit, yfit, bounds=exp_decay_fit_bounds, p0=exp_decay_p0, maxfev=1e6)
+
+
     yfit = exp_decay_3_param(xfit, *popt, c0)
     
     popt = np.hstack((popt, c0))
@@ -205,3 +200,26 @@ def fit_RA_hist_weighting(RA_hist,Rossi_alpha_settings):
     perr = np.hstack((perr, cerr))
     
     return time_diff_centers, popt, pcov, perr, xfit, yfit
+
+
+def plot_RA_and_fit(RA_hist, xfit, yfit, Rossi_alpha_settings):
+    
+    time_diff_centers = RA_hist[1][1:] - np.diff(RA_hist[1][:2])/2
+    
+    fig2, ax2 = plt.subplots()
+    
+    # Create a scatter plot with the data
+    ax2.scatter(time_diff_centers, RA_hist[0])
+    
+    # Add the fit to the data
+    ax2.plot(xfit, yfit, 'r-', label='Fit')
+    
+    # Set the axis labels
+    ax2.set_xlabel('Time difference (ns)')
+    ax2.set_ylabel('Counts')
+    ax2.set_yscale(Rossi_alpha_settings['plot scale'])
+    
+    # Display the plot
+    plt.show()
+    
+    return
