@@ -23,7 +23,7 @@ There are different categories of settings as follows:
 * input folder: the path to the folder being analyzed (if file type is 2)   
 * file type: the type of file being analyzed
     * file type 1 corresponds to a file that is a list of detection times with nothing else
-    * file type 2 corresponds to a folder that has folders within it and files within that folder   
+    * file type 2 corresponds to a folder that has folders within it and files within that folder  
 **GENERAL PROGRAM SETTINGS** : this contains general program settings     
 * fit range : format the range as follows [min,max] with min and max being ints  
 * plot scale :  
