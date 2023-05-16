@@ -1,34 +1,35 @@
 #Input File for Rossi Alpha
-#-------------------------------------------------------------
-#-------------------------------------------------------------
+#---------------------------------------------------------------------------------------------------
+#---------------------------------------------------------------------------------------------------
 I/O FILE INFO
 input file: RF3-40_59min.txt
 output file: 
-input folder: /Users/kate/Dropbox\ \(University\ of\ Michigan\)/20210322_06_RF3-42_CF_OS_run1_60min_0947
-file type: 1
+input folder: /Users/kate/Dropbox (University of Michigan)/20210322_06_RF3-42_CF_OS_run1_60min_0947
+file type: 2
 #for the file types, 1 corresponds to the first file we analyzed and 2 corresponds to the folders.
-#-------------------------------------------------------------
-#_
+#---------------------------------------------------------------------------------------------------
+#---------------------------------------------------------------------------------------------------
 GENERAL PROGRAM SETTINGS
-reset time : 2e3
-bin width : 2
-minimum cutoff : 30
-#
-fit range : [0,2e3]
+fit range : [0,400]
 plot scale : linear
 time difference method : any_and_all
 digital delay : 750
 number of folders : 61
 meas time per folder : 60
 sort data? : yes
-#-------------------------------------------------------------
-#_
-HISTOGRAM SETTINGS
+#---------------------------------------------------------------------------------------------------
+#HISTOGRAM SETTINGS BELOW
+#---------------------------------------------------------------------------------------------------
+HISTOGRAM VISUAL SETTINGS
 color: black
 markeredgecolor: blue
 markerfacecolor: black
 linestyle: -
 linewidth: 3
+GENERATING HISTOGRAM SETTINGS
+reset time : 2e3
+bin width : 2
+minimum cutoff : 30
 #-------------------------------------------------------------
 #_
 LINE FITTING SETTINGS

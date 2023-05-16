@@ -12,10 +12,10 @@ Rossi_alpha_settings = dict([('reset time', 2e3), ('bin width', 2),
 
 class timeDifCalcs:
     
-    def __init__(self, list_data, general_settings):
+    def __init__(self, list_data, general_settings, generating_hist_settings):
         self.time_vector = list_data
         self.list_data = list_data
-        self.reset_time = float(general_settings["reset time"])
+        self.reset_time = float(generating_hist_settings["reset time"])
         self.timeDifs = None
         self.method = general_settings["time difference method"]
         self.digital_delay = general_settings["digital delay"]
