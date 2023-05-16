@@ -222,12 +222,12 @@ class Fit_With_Weighting:
        
     def plot_RA_and_fit(self):
         
-        #time_diff_centers = RA_hist[1][1:] - np.diff(RA_hist[1][:2])/2
+        time_diff_centers = self.time_diff_centers[1:] - np.diff(self.time_diff_centers[:2])/2
         
         fig2, ax2 = plt.subplots()
         
         # Create a scatter plot with the data
-        ax2.scatter(self.time_diff_centers, self.hist[:-1])
+        ax2.scatter(time_diff_centers, self.hist[:-1])
         
         # Add the fit to the data
         ax2.plot(self.xfit, self.yfit, 'r-', label='Fit')

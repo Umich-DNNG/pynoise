@@ -63,8 +63,8 @@ def main():
         RA_hist_total = analyzingFolders.compile_sample_stdev_RA_dist(theseSettings)
         from fitting import Fit_With_Weighting
         thisWeightedFit = Fit_With_Weighting(RA_hist_total,theseSettings.generating_histogram_settings, theseSettings.general_program_settings)
-        thisWeightedFit.fit_RA_hist_weighting
-        thisWeightedFit.plot_RA_and_fit
+        thisWeightedFit.fit_RA_hist_weighting()
+        thisWeightedFit.plot_RA_and_fit()
         #time_diff_centers, popt, pcov, perr, xfit, yfit = fitting.fit_RA_hist_weighting(RA_hist_total,theseSettings.general_program_settings)
         #fitting.plot_RA_and_fit(RA_hist_total, xfit, yfit, theseSettings.general_program_settings)
     

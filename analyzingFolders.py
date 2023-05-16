@@ -64,6 +64,8 @@ def compile_sample_stdev_RA_dist(settings):
                     popt_array = np.vstack((popt_array, popt))
 
                 i = i + 1
+                break
+
 
     RA_std_dev = np.std(RA_hist_array, axis=0, ddof=1)
     RA_hist_total = np.sum(RA_hist_array, axis=0)
