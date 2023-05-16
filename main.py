@@ -16,7 +16,7 @@ from matplotlib.colors import LogNorm  # For adjusting colorbar scale
 from scipy.optimize import curve_fit
 import copy
 import seaborn as sns
-
+import fitting
 sns.set(rc={"figure.dpi": 350, "savefig.dpi": 350})
 sns.set_style("ticks")
 sns.set_context("talk", font_scale=0.8)
@@ -53,15 +53,16 @@ def main():
         counts, bin_centers, bin_edges = thisPlot.plot(time_diffs)
 
         # fitting curve to the histogramp plot
-        import fitting
+       
         
         fitting.fit_and_residual(counts, bin_centers, theseSettings.general_program_settings['minimum cutoff'], [0,2000], 
                                  "Time Differences (ns)", "Coincidence rate (s^-1)", "Any-and-all", theseSettings.line_fitting_settings, 
                                  theseSettings.residual_plot_settings, show_plot=False)
 
     else:
-        analyzingFolders.compile_sample_stdev_RA_dist(theseSettings)
-
+        RA_hist_total = analyzingFolders.compile_sample_stdev_RA_dist(theseSettings)
+        time_diff_centers, popt, pcov, perr, xfit, yfit = fitting.fit_RA_hist_weighting(RA_hist_total,theseSettings.general_program_settings)
+        #fitting.plot_RA_and_fit(RA_hist_total, xfit, yfit, theseSettings.general_program_settings)
     # sorting timestamps to be fed into calculate_time_differences()
 
 
