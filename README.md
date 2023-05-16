@@ -24,6 +24,7 @@ There are different categories of settings as follows:
 * file type: the type of file being analyzed
     * file type 1 corresponds to a file that is a list of detection times with nothing else
     * file type 2 corresponds to a folder that has folders within it and files within that folder  
+ 
 **GENERAL PROGRAM SETTINGS** : this contains general program settings     
 * fit range : format the range as follows [min,max] with min and max being ints  
 * plot scale :  
@@ -36,16 +37,19 @@ There are different categories of settings as follows:
 * number of folders : when using file type 2, this is the number of folders you want analyzed  
 * meas time per folder :  
 * sort data? : select yes if the data file you provide is unsorted, no otherwise  
+
 **HISTOGRAM VISUAL SETTINGS:** these settings correspond to the histogram settings see https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.plot.html for full documentation of options TODO: change code to get boolean values
 * color : 'b', 'g', 'r', 'c', 'm', 'y', 'k', 'w'
 * linestyle : '-', '--', '-.', ':', or ' '
 * linewidth : float value, sets the line width in points.
 * marker : see https://matplotlib.org/stable/api/markers_api.html#module-matplotlib.markers for complete list of options
 * alpha : must be within the 0-1 range, inclusive.  
+
 **GENERATING HISTOGRAM SETTINGS**  
 * reset time :   
 * bin width : the width of the histogram bins  
 * minimum cutoff :  
+
 **LINE FITTING SETTINGS** : visual settings for the fit line see https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.plot.html for full documentation of options   
 * color : 'b', 'g', 'r', 'c', 'm', 'y', 'k', 'w'   
 * linestyle : '-', '--', '-.', ':', or ' '   
