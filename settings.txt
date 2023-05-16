@@ -21,6 +21,7 @@ sort data? : yes
 #HISTOGRAM SETTINGS BELOW
 #---------------------------------------------------------------------------------------------------
 HISTOGRAM VISUAL SETTINGS
+#------------------------
 color: black
 markeredgecolor: blue
 markerfacecolor: black
@@ -33,6 +34,7 @@ minimum cutoff : 30
 #-------------------------------------------------------------
 #_
 LINE FITTING SETTINGS
+#------------------------
 color: red
 markeredgecolor: blue
 markerfacecolor: black
