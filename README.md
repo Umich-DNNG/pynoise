@@ -36,3 +36,19 @@ Users can edit this .txt file to change the settings that they wish to use.
 INSERT DESCRIPTION OF DIFFERENT SETTINGS. 
 color, linestyle,linewidth, and alpha are all settings for the graph. 
 
+
+
+### Plotting
+In the plots.py file, there is a class called "Plot" which is umbrella class that encompasses all the important plotting functions. Currently, there is one function under "Plot" called "plot(self, time_diffs)", in which the input parameter time_diffs is an array of time differences generated from the "timeDifCalcs" class.
+
+Firstly, a Plot() object must be created first with the parameters below: 
+
+* reset_time (numeric)
+* bin_width (numeric)
+* show_plot (boolean)
+* options (dict)
+* x_axis (string)
+* y_axis (string)
+* title (string)
+
+From there, the Plot.plot() function will construct the corresponding histogram. The option show_plot can be set to whether you want to show the plot and save the plot or not. Finally, it will also return: counts, bin_centers, and big edges. These outputs will be used in various fitting functions in the next section.
