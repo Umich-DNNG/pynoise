@@ -53,10 +53,11 @@ class Plot:
             plt.xlabel(self.x_axis)
             plt.ylabel(self.y_axis)
             plt.title(self.title)
+            plt.show()
 
-            # saving plot
-            if self.show_plot == True:
-                plt.savefig('histogram', dpi=300, bbox_inches='tight')
+        # saving plot
+        if self.show_plot == True:
+            plt.savefig('histogram', dpi=300, bbox_inches='tight')
 
             
         return counts, bin_centers, bin_edges
