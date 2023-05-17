@@ -5,7 +5,7 @@ I/O FILE INFO
 #----------------------------------------------------------------------------------------
 input file: RF3-40_59min.txt
 output file: 
-input folder: /Users/vincentweng/DropBox/20210322_06_RF3-42_CF_OS_run1_60min_0947
+input folder: /Users/kate/Dropbox (University of Michigan)/20210322_06_RF3-42_CF_OS_run1_60min_0947
 file type: 2
 #for the file types, 1 corresponds to the first file we analyzed and 2 corresponds to the folders.
 #----------------------------------------------------------------------------------------
@@ -16,11 +16,11 @@ fit range : [0,2e3]
 plot scale : linear
 time difference method : any_and_all
 digital delay : 750
-number of folders : 30
+number of folders : 10
 meas time per folder : 60
 sort data? : yes
 save fig? : yes
-show plot? : no
+show plot? : yes
 #----------------------------------------------------------------------------------------
 #HISTOGRAM SETTINGS BELOW
 #----------------------------------------------------------------------------------------
