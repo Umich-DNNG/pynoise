@@ -21,9 +21,9 @@ def compile_sample_stdev_RA_dist(settings):
     num_folders = int(settings.general_program_settings['number of folders'])
     i = 0
     for fol_num in range(1, num_folders + 1):
-        #for filename in os.listdir(data_folder + "/" + str(fol_num)):
-            #if filename.endswith("n_allch.txt"):
-                path_to_data = data_folder + "/" + str(fol_num) + "/" + "board0_n_allch.txt"
+        for filename in os.listdir(data_folder + "/" + str(fol_num)):
+            if filename.endswith("n_allch.txt"):
+                path_to_data = data_folder + "/" + str(fol_num) + "/" + filename
                 list_data_n = np.loadtxt(path_to_data, delimiter=" ")
                 # list_data_n = np.genfromtxt(path_to_data, delimiter=' ')
                 list_data = list_data_n[:, 1]
@@ -68,7 +68,7 @@ def compile_sample_stdev_RA_dist(settings):
                     popt_array = np.vstack((popt_array, popt))
 
                 i = i + 1
-                #break
+                break
 
 
     RA_std_dev = np.std(RA_hist_array, axis=0, ddof=1)
