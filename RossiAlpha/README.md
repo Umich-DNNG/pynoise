@@ -29,11 +29,11 @@ There are different categories of settings as follows:
 * fit range : format the range as follows [min,max] with min and max being ints  
 * plot scale :  
 * time difference method : this refers to the way you want the type differences analyzed. the options are:  
-    * any_and_all :  
-    * any_and_all cross_correlations :  
-    * any_and_all cross_correlations no_repeat :  
-    * any_and_all cross_correlations no_repeat digital_delay :  
-* digital delay   
+    * any_and_all :  considers all time differences within the reset time
+    * any_and_all cross_correlations :  considers all time differences except those from the same detector
+    * any_and_all cross_correlations no_repeat :  considers all time differences except those from the same channel and doesn't consider more than one detection from each detector within the same reset period
+    * any_and_all cross_correlations no_repeat digital_delay :  considers all time differences except those from the same channel and doesn't consider more than one detection from each detector within the same reset period and adds a digital delay when considering detections from the same detector within the same reset period
+* digital delay : specify if using the digital delay time difference method
 * number of folders : when using file type 2, this is the number of folders you want analyzed  
 * meas time per folder :  
 * sort data? : select yes if the data file you provide is unsorted, no otherwise  
