@@ -32,7 +32,8 @@ def main():
     from readInput import Settings
     theseSettings = readInput.readInput()
     import analyzingFolders
-    if(theseSettings.io_file_info['file type'] == 1):
+
+    if (theseSettings.io_file_info['file type'] == 1):
         file_path = os.path.join(os.path.dirname(current_path), theseSettings.io_file_info["input file"])
         list_data_n = np.loadtxt(file_path)
         
@@ -62,7 +63,8 @@ def main():
     else:
         RA_hist_total = analyzingFolders.compile_sample_stdev_RA_dist(theseSettings)
         from fitting import Fit_With_Weighting
-        thisWeightedFit = Fit_With_Weighting(RA_hist_total,theseSettings.generating_histogram_settings, theseSettings.general_program_settings)
+        thisWeightedFit = Fit_With_Weighting(RA_hist_total,theseSettings.generating_histogram_settings, 
+                                             theseSettings.general_program_settings, theseSettings.line_fitting_settings)
         thisWeightedFit.fit_RA_hist_weighting()
         thisWeightedFit.plot_RA_and_fit()
 

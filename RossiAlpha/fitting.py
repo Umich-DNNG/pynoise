@@ -27,6 +27,7 @@ class Fit:
         self.fitting_options = fitting_opts
         self.residual_options = residual_opts
         self.show_plot = showPlot
+        self.save_fig = general_settings['save fig?']
         self.timeDifMethod = general_settings['time difference method']
 
 
@@ -170,7 +171,7 @@ class Fit:
 #--------------------------------------------------------------------------------
 
 class Fit_With_Weighting:
-    def __init__(self,RA_hist_totals, generating_hist_settings, general_settings):
+    def __init__(self,RA_hist_totals, generating_hist_settings, general_settings, fitting_opts):
         self.hist = RA_hist_totals[0]
         self.num_bins = np.size(RA_hist_totals[0])
         self.time_diff_centers = RA_hist_totals[1]
@@ -178,8 +179,11 @@ class Fit_With_Weighting:
         self.fit_range = general_settings['fit range']
         self.min_cutoff = generating_hist_settings['minimum cutoff']
         self.plot_scale = general_settings['plot scale']
+        self.save_fig = general_settings['save fig?']
+        self.fitting_options = fitting_opts
         self.xfit = None
         self.yfit = None
+
     def fit_RA_hist_weighting(self):
 
         
@@ -224,20 +228,24 @@ class Fit_With_Weighting:
         
         time_diff_centers = self.time_diff_centers[1:] - np.diff(self.time_diff_centers[:2])/2
         
-        fig2, ax2 = plt.subplots()
+        fig, ax = plt.subplots()
         
         # Create a scatter plot with the data
-        ax2.scatter(time_diff_centers, self.hist[:-1])
+        print("test")
+        ax.scatter(time_diff_centers, self.hist[:-1], s=10)
         
         # Add the fit to the data
-        ax2.plot(self.xfit, self.yfit, 'r-', label='Fit')
+        ax.plot(self.xfit, self.yfit, 'r-', label='Fit', **self.fitting_options)
         
         # Set the axis labels
-        ax2.set_xlabel('Time difference (ns)')
-        ax2.set_ylabel('Counts')
-        ax2.set_yscale(self.plot_scale)
+        ax.set_xlabel('Time difference (ns)')
+        ax.set_ylabel('Counts')
+        ax.set_yscale(self.plot_scale)
+
+        # adjusting layout and saving figure (optional)
+        if self.save_fig == 'yes':
+            fig.tight_layout()
+            fig.savefig('histogram_weighting', dpi=300, bbox_inches='tight')
         
         # Display the plot
-        plt.show()
-        
-        return
+        # plt.show()
