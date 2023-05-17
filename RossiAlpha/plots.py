@@ -9,13 +9,18 @@ import copy
 # --------------------------------------------------------------------------------
 class Plot:
     def __init__(self, plotSettings, plotOptions, show_plot):
-        self.reset_time = plotSettings["reset time"]
-        self.bin_width = plotSettings["bin width"]
+
+        # plotting options
         self.show_plot = show_plot
         self.options = plotOptions
+
+        # required parameters
+        self.reset_time = plotSettings["reset time"]
+        self.bin_width = plotSettings["bin width"]
         self.x_axis = "Time Differences"
         self.y_axis = "Count"
         self.title = "Histogram"
+        
 
     def plot(self, time_diffs):
         # calculating number of bins for histogram plot
