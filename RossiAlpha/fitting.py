@@ -129,43 +129,42 @@ class Fit:
         popt = np.hstack((popt, c0))
         print('Fit parameters: A =', popt[0], ', alpha =', popt[1], ', B =', popt[2])
 
-        if self.show_plot == True:
-            # create figure and axes
-            fig, (ax1, ax2) = plt.subplots(nrows=2, sharex=True, figsize=(8, 6), gridspec_kw={'height_ratios': [2, 1]})
+        # create figure and axes
+        fig, (ax1, ax2) = plt.subplots(nrows=2, sharex=True, figsize=(8, 6), gridspec_kw={'height_ratios': [2, 1]})
 
-            # plotting histogram and fitting curve in top subplot
-            ax1.bar(self.bin_centers, self.counts, width=0.8*(self.bin_centers[1]-self.bin_centers[0]), 
-                alpha=0.6, color="b", align="center", edgecolor="k", linewidth=0.5, fill=True)
-            ax1.plot(line_x, line_y, 'r--', label='Fit: A=%5.3f, alpha=%5.3f, B=%5.3f' % tuple(popt), **self.fitting_options)
-            ax1.legend()
-            ax1.set_ylabel("Coincidence rate (s^-1)")
+        # plotting histogram and fitting curve in top subplot
+        ax1.bar(self.bin_centers, self.counts, width=0.8*(self.bin_centers[1]-self.bin_centers[0]), 
+            alpha=0.6, color="b", align="center", edgecolor="k", linewidth=0.5, fill=True)
+        ax1.plot(line_x, line_y, 'r--', label='Fit: A=%5.3f, alpha=%5.3f, B=%5.3f' % tuple(popt), **self.fitting_options)
+        ax1.legend()
+        ax1.set_ylabel("Coincidence rate (s^-1)")
 
-            # computing residuals and plot in bottom subplot
-            residuals = self.counts[fit_index] - line_y
-            residuals_norm = residuals / np.max(np.abs(residuals))
+        # computing residuals and plot in bottom subplot
+        residuals = self.counts[fit_index] - line_y
+        residuals_norm = residuals / np.max(np.abs(residuals))
 
-            index = (time_diff_centers >= xfit[0]) & (time_diff_centers <= xfit[-1])
+        index = (time_diff_centers >= xfit[0]) & (time_diff_centers <= xfit[-1])
 
-            ax2.scatter(time_diff_centers[index], residuals_norm, **self.residual_options)
-            ax2.axhline(y=0, color='r', linestyle='--')
-            ax2.set_ylim([-1, 1])
-            ax2.set_xlabel("Time Differences(ns)")
-            ax2.set_ylabel('Relative residuals')
+        ax2.scatter(time_diff_centers[index], residuals_norm, **self.residual_options)
+        ax2.axhline(y=0, color='r', linestyle='--')
+        ax2.set_ylim([-1, 1])
+        ax2.set_xlabel("Time Differences(ns)")
+        ax2.set_ylabel('Relative residuals')
 
-            # setting title for entire figure
-            fig.suptitle(self.timeDifMethod, fontsize=14)
+        # setting title for entire figure
+        fig.suptitle(self.timeDifMethod, fontsize=14)
 
-            # adjusting layout and display plot
+        # adjusting layout and display plot
+        fig.tight_layout()
+
+        # adjusting layout and saving figure (optional)
+        if self.save_fig == "yes":
             fig.tight_layout()
+            fig.savefig('fitted_and_residual', dpi=300, bbox_inches='tight')
 
-            # adjusting layout and saving figure (optional)
-            if self.save_fig == "yes":
-                fig.tight_layout()
-                fig.savefig('fitted_and_residual', dpi=300, bbox_inches='tight')
-
-            # showing plot (optional)
-            if self.show_plot == "yes":
-                plt.show()
+        # showing plot (optional)
+        if self.show_plot == "yes":
+            plt.show()
 
         return popt
 
