@@ -47,7 +47,8 @@ def compile_sample_stdev_RA_dist(settings):
                     RA_hist_array = counts
 
                     from fitting import Fit
-                    thisFit = Fit(counts,bin_centers,settings.generating_histogram_settings,settings.line_fitting_settings, settings.general_program_settings,settings.residual_plot_settings,False)
+                    thisFit = Fit(counts,bin_centers,settings.generating_histogram_settings,settings.line_fitting_settings, 
+                                  settings.general_program_settings,settings.residual_plot_settings,False)
                     popt = thisFit.fit_and_residual
                     popt_array = popt
 
@@ -62,7 +63,8 @@ def compile_sample_stdev_RA_dist(settings):
                     )
                     counts, bin_centers, bin_edges = thisPlot.plot(time_diffs)
 
-                    thisFit = Fit(counts,bin_centers,settings.generating_histogram_settings,settings.line_fitting_settings, settings.general_program_settings,settings.residual_plot_settings,False)
+                    thisFit = Fit(counts,bin_centers,settings.generating_histogram_settings,settings.line_fitting_settings, 
+                                  settings.general_program_settings,settings.residual_plot_settings,False)
                     popt = thisFit.fit_and_residual
                     RA_hist_array = np.vstack((RA_hist_array, counts))
                     popt_array = np.vstack((popt_array, popt))
