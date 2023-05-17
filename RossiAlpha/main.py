@@ -56,19 +56,20 @@ def main():
 
         # fitting curve to the histogramp plot
         from fitting import Fit
-        thisFit = Fit(counts,bin_centers,theseSettings.generating_histogram_settings,theseSettings.line_fitting_settings, theseSettings.general_program_settings, theseSettings.residual_plot_settings)
+        thisFit = Fit(counts, bin_centers, theseSettings.generating_histogram_settings, 
+                      theseSettings.line_fitting_settings, theseSettings.general_program_settings,
+                      theseSettings.residual_plot_settings, theseSettings.histogram_visual_settings)
+        
         thisFit.fit_and_residual()
         
-
     else:
         RA_hist_total = analyzingFolders.compile_sample_stdev_RA_dist(theseSettings)
         from fitting import Fit_With_Weighting
         thisWeightedFit = Fit_With_Weighting(RA_hist_total,theseSettings.generating_histogram_settings, 
-                                             theseSettings.general_program_settings, theseSettings.line_fitting_settings)
+                                             theseSettings.general_program_settings, theseSettings.line_fitting_settings, 
+                                             theseSettings.residual_plot_settings)
         thisWeightedFit.fit_RA_hist_weighting()
         thisWeightedFit.plot_RA_and_fit()
-
-    
 
 
 if __name__ == "__main__":
