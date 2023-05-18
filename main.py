@@ -21,8 +21,6 @@ sns.set(rc={"figure.dpi": 350, "savefig.dpi": 350})
 sns.set_style("ticks")
 sns.set_context("talk", font_scale=0.8)
 
-
-
 def main():
     # extracting settings and timestamps
     # settings = getSettings()

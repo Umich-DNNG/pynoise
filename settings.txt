@@ -5,12 +5,12 @@ I/O FILE INFO
 input file: RF3-40_59min.txt
 output file: 
 input folder: /Users/kate/Dropbox (University of Michigan)/20210322_06_RF3-42_CF_OS_run1_60min_0947
-file type: 2
+file type: 1
 #for the file types, 1 corresponds to the first file we analyzed and 2 corresponds to the folders.
 #---------------------------------------------------------------------------------------------------
 #---------------------------------------------------------------------------------------------------
 GENERAL PROGRAM SETTINGS
-fit range : [0,400]
+fit range : [0,2000]
 plot scale : linear
 time difference method : any_and_all
 digital delay : 750

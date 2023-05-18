@@ -1,0 +1,7 @@
+# Processed data that does not make sense to keep on GitLab
+*.png
+*.npy
+*.bin
+
+# Python software default outputs
+__pycache__/
