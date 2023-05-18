@@ -37,7 +37,7 @@ class RossiHistogram:
         self.bin_edges = None
         self.bin_centers = None
 
-    def plot(self, time_diffs):
+    def plot(self, time_diffs, save_every_fig):
 
         '''
         Creating histogram from an array of time differences and plotting it.
@@ -82,7 +82,7 @@ class RossiHistogram:
             plt.show()
 
         # Saving plot (optional)
-        if self.show_plot == True:
+        if save_every_fig == True:
             plt.savefig('histogram', dpi=300, bbox_inches='tight')
 
         #Set the counts, bin_centers, and bin_edges of the object

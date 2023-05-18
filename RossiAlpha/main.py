@@ -48,9 +48,9 @@ def main():
         # plotting the histogram plot
         from plots import RossiHistogram
         
-        thisPlot = RossiHistogram(theseSettings.generating_histogram_settings, theseSettings.histogram_visual_settings, show_plot=True)
+        thisPlot = RossiHistogram(theseSettings.generating_histogram_settings, theseSettings.histogram_visual_settings, show_plot=False)
 
-        counts, bin_centers, bin_edges = thisPlot.plot(time_diffs)
+        counts, bin_centers, bin_edges = thisPlot.plot(time_diffs, save_every_fig=True)
 
         # fitting curve to the histogramp plot
         from fitting import Fit
@@ -58,7 +58,7 @@ def main():
                       theseSettings.line_fitting_settings, theseSettings.general_program_settings,
                       theseSettings.residual_plot_settings, theseSettings.histogram_visual_settings)
         
-        thisFit.fit_and_residual()
+        thisFit.fit_and_residual(save_every_fig=True)
         
     else:
         RA_hist_total = analyzingFolders.compile_sample_stdev_RA_dist(theseSettings)

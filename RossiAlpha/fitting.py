@@ -143,7 +143,7 @@ class Fit:
 
 #--------------------------------------------------------------------------------
 
-    def fit_and_residual(self):
+    def fit_and_residual(self, save_every_fig):
 
         '''
         Fitting an exponential curve onto the histogram and creating a residual plot to measure the accuracy.
@@ -214,7 +214,7 @@ class Fit:
         fig.suptitle(self.timeDifMethod, fontsize=14)
 
         # Adjusting layout and saving figure (optional)
-        if self.save_fig == "yes":
+        if save_every_fig == True:
             fig.tight_layout()
             fig.savefig('fitted_and_residual', dpi=300, bbox_inches='tight')
 
