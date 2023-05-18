@@ -48,9 +48,9 @@ def main():
 
 
         # plotting the histogram plot
-        from plots import Plot
+        from plots import RossiHistogram
         
-        thisPlot = Plot(theseSettings.generating_histogram_settings, theseSettings.histogram_visual_settings, show_plot=True)
+        thisPlot = RossiHistogram(theseSettings.generating_histogram_settings, theseSettings.histogram_visual_settings, show_plot=True)
 
         counts, bin_centers, bin_edges = thisPlot.plot(time_diffs)
 
