@@ -6,7 +6,7 @@ import copy
 # --------------------------------------------------------------------------------
 # OWN CODE BELOW
 # --------------------------------------------------------------------------------
-class Plot:
+class RossiHistogram:
     def __init__(self, plotSettings, plotOptions, show_plot):
 
         '''
@@ -32,6 +32,10 @@ class Plot:
         self.y_axis = "Count"
         self.title = "Histogram"
         
+        #Parameters set once plot(time_diffs) is called
+        self.counts = None
+        self.bin_edges = None
+        self.bin_centers = None
 
     def plot(self, time_diffs):
 
@@ -80,5 +84,10 @@ class Plot:
         # Saving plot (optional)
         if self.show_plot == True:
             plt.savefig('histogram', dpi=300, bbox_inches='tight')
+
+        #Set the counts, bin_centers, and bin_edges of the object
+        self.counts = counts
+        self.bin_centers = bin_centers
+        self.bin_edges = bin_edges
 
         return counts, bin_centers, bin_edges
