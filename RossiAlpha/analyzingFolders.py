@@ -17,6 +17,17 @@ def replace_zeroes(lst):
     return lst
 
 def compile_sample_stdev_RA_dist(settings):
+    '''goes through folders in the specified folder path and finds the appropriate file to analyze
+    calculates the time difference and constructs a histogram and fitting for each file
+    compiles all of these folders finds the standard deviation and uncertainties
+    
+    arguements: Settings object
+    
+    outputs: RA_Hist_Total which contains three things:
+    RA_Hist_Total[0] is the summed histogram from all of the folders 
+    RA_Hist_Total[1] is the bin centers for the histogram
+    RA_Hist_Total[2] is the uncertainties'''
+
     data_folder = settings.io_file_info["input folder"]
     num_folders = int(settings.general_program_settings['number of folders'])
     i = 0
@@ -32,7 +43,7 @@ def compile_sample_stdev_RA_dist(settings):
                     list_data = np.sort(list_data)
                 from timeDifs import timeDifCalcs
 
-                thisData = timeDifCalcs(list_data, settings.general_program_settings,settings.generating_histogram_settings, channels)
+                thisData = timeDifCalcs(list_data, settings.generating_histogram_settings["reset time"], settings.general_program_settings["time difference method"], settings.general_program_settings["digital delay"], channels)
                 
                 if i == 0:
                     time_diffs = thisData.calculate_time_differences()

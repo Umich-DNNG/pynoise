@@ -24,7 +24,14 @@ class Settings:
 
 
 # reads in the input from settings.txt and stores it in dictionaries
-def readInput():
+def readInput(filePath = None):
+
+    ''' Reads the settings file and stores the appropriate data
+    
+    Arguments: (optional) filePath a path to the settings txt file that the user wants to read from, if none specified, program will look for "settings.txt" in the current directory
+    
+    Returns: a Settings object that contains io_file_info, general_program settings, histogram_visual settings, line_fittings settings, residual_plot_settings, generating_histogram_settings dictionaries'''
+
     current_path = os.path.realpath(__file__)
     file_path = os.path.join(os.path.dirname(current_path), "settings.txt")
     io_file_info = {}

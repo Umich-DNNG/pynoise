@@ -1,25 +1,20 @@
 import numpy as np  # For processing data
 
-"""
-Rossi_alpha_settings = dict([('reset time', 2e3), ('bin width', 2),
-                             ('minimum cutoff', 25), ('fit range', [0, 2e3]),
-                             ('plot scale', 'linear'), 
-                             ('time difference method', 
-                              'any-and-all'), ('digital delay', 750),
-                             ('number of folders', 61),
-                             ('meas time per folder', 60)])
-"""
+
 
 class timeDifCalcs:
     
-    def __init__(self, list_data, general_settings, generating_hist_settings, channels = None):
-        self.time_vector = list_data
-        self.reset_time = float(generating_hist_settings["reset time"])
-        self.timeDifs = None
-        self.method = general_settings["time difference method"]
-        self.digital_delay = general_settings["digital delay"]
+    def __init__(self, time_data, reset_time, method, digital_delay = None, channels = None):
+        self.time_vector = time_data 
+        self.reset_time = float(reset_time)
+        self.method = method
+        self.digital_delay = digital_delay
         self.channels = channels
+        self.timeDifs = None
+    
     def calculate_time_differences(self):
+        '''can be called on a timeDifCalcs object and returns the array of time differences used for constructing a histogram based on the appropriate method'''
+
         #time_vector = self.list_data
 
         #reset_time = float(Rossi_alpha_settings["reset time"])

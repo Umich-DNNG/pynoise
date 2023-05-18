@@ -43,7 +43,7 @@ def main():
         # applying time differences function
         
         from timeDifs import timeDifCalcs
-        thisTimeDifCalc = timeDifCalcs(list_data_n, theseSettings.general_program_settings, theseSettings.generating_histogram_settings)
+        thisTimeDifCalc = timeDifCalcs(list_data_n, theseSettings.generating_histogram_settings["reset time"], theseSettings.general_program_settings["time difference method"])
         time_diffs = thisTimeDifCalc.calculate_time_differences()
 
 
