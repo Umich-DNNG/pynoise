@@ -2,12 +2,13 @@ import numpy as np  # For processing data
 import matplotlib.pyplot as plt  # For plotting data summaries
 from matplotlib.colors import LogNorm  # For adjusting colorbar scale
 import copy
+import os
 
 # --------------------------------------------------------------------------------
 # OWN CODE BELOW
 # --------------------------------------------------------------------------------
 class RossiHistogram:
-    def __init__(self, plotSettings, plotOptions, show_plot):
+    def __init__(self, generalSettings, plotSettings, plotOptions, show_plot):
 
         '''
         Creating the a Plot() object and its variables.
@@ -24,6 +25,7 @@ class RossiHistogram:
         # Plotting options
         self.show_plot = show_plot
         self.options = plotOptions
+        self.save_dir = generalSettings['save dir']
 
         # Required parameters
         self.reset_time = plotSettings["reset time"]
@@ -83,7 +85,9 @@ class RossiHistogram:
 
         # Saving plot (optional)
         if save_every_fig == True:
-            plt.savefig('histogram', dpi=300, bbox_inches='tight')
+            plt.tight_layout()
+            save_filename = os.path.join(self.save_dir, 'histogram.png')
+            plt.savefig(save_filename, dpi=300, bbox_inches='tight')
 
         #Set the counts, bin_centers, and bin_edges of the object
         self.counts = counts

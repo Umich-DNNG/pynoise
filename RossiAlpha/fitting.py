@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
+import os
 import sys
 
 #--------------------------------------------------------------------------------
@@ -72,6 +73,7 @@ class Fit:
         self.save_fig = general_settings['save fig?']
         self.show_plot = general_settings['show plot?']
         self.timeDifMethod = general_settings['time difference method']
+        self.save_dir = general_settings['save dir']
 
 
     def fit(self):
@@ -216,7 +218,8 @@ class Fit:
         # Adjusting layout and saving figure (optional)
         if save_every_fig == True:
             fig.tight_layout()
-            fig.savefig('fitted_and_residual', dpi=300, bbox_inches='tight')
+            save_filename = os.path.join(self.save_dir, 'fitted_and_residual') 
+            fig.savefig(save_filename, dpi=300, bbox_inches='tight')
 
         # Showing plot (optional)
         if self.show_plot == "yes":
@@ -257,6 +260,7 @@ class Fit_With_Weighting:
         self.plot_scale = general_settings['plot scale']
         self.save_fig = general_settings['save fig?']
         self.show_plot = general_settings['show plot?']
+        self.save_dir = general_settings['save dir']
 
         # Line fitting variables
         self.xfit, self.yfit = None, None
@@ -339,7 +343,8 @@ class Fit_With_Weighting:
         # Adjusting layout and saving figure (optional)
         if self.save_fig == 'yes':
             fig.tight_layout()
-            fig.savefig('histogram_weighting', dpi=300, bbox_inches='tight')
+            save_filename = os.path.join(self.save_dir, 'histogram_weighting.png') 
+            fig.savefig(save_filename, dpi=300, bbox_inches='tight')
         
         # Displaying the plot (optional)
         if self.show_plot == 'yes':
