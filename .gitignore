@@ -4,4 +4,7 @@
 *.bin
 
 # Python software default outputs
-__pycache__/
+*__pycache__/
+
+# vscode configuration files
+*.vscode
