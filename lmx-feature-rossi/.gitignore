@@ -1,0 +1,14 @@
+__pycache__
+*.pyc
+analysis
+FAUSTmodified
+helper_scripts
+input
+old
+PlotWrapper_*.py
+PlotWrapper_*.txt
+untitled*.py
+priority list.txt
+*.bat
+*.bak
+script_modify_*.py
