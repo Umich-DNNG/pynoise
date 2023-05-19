@@ -1,7 +1,7 @@
 import os  # For scanning directories
 import numpy as np
 from timeDifs import timeDifCalcs
-from plots import Plot
+from plots import RossiHistogram
 import fitting
 import matplotlib.pyplot as plt  # For plotting data summaries
 
@@ -48,30 +48,32 @@ def compile_sample_stdev_RA_dist(settings):
                 if i == 0:
                     time_diffs = thisData.calculate_time_differences()
 
-                    thisPlot = Plot(settings.generating_histogram_settings,
-                                    settings.histogram_visual_settings, False)
+                    thisPlot = RossiHistogram(settings.general_program_settings,
+                                              settings.generating_histogram_settings,
+                                              settings.histogram_visual_settings, False)
                     
-                    counts, bin_centers, bin_edges = thisPlot.plot(time_diffs)
+                    counts, bin_centers, bin_edges = thisPlot.plot(time_diffs, save_every_fig=False)
                     RA_hist_array = counts
 
                     from fitting import Fit
                     thisFit = Fit(counts,bin_centers,settings.generating_histogram_settings,settings.line_fitting_settings, 
                                   settings.general_program_settings, settings.residual_plot_settings, settings.histogram_visual_settings)
-                    popt = thisFit.fit_and_residual
+                    popt = thisFit.fit_and_residual(save_every_fig=False)
                     popt_array = popt
 
                 else:
                     time_diffs = thisData.calculate_time_differences()
 
-                    thisPlot = Plot(settings.generating_histogram_settings,
-                                    settings.histogram_visual_settings, False)
+                    thisPlot = RossiHistogram(settings.general_program_settings,
+                                              settings.generating_histogram_settings,
+                                              settings.histogram_visual_settings, False)
                     
-                    counts, bin_centers, bin_edges = thisPlot.plot(time_diffs)
+                    counts, bin_centers, bin_edges = thisPlot.plot(time_diffs, save_every_fig=False)
 
                     thisFit = Fit(counts,bin_centers,settings.generating_histogram_settings,settings.line_fitting_settings, 
                                   settings.general_program_settings, settings.residual_plot_settings, settings.histogram_visual_settings)
 
-                    popt = thisFit.fit_and_residual()
+                    popt = thisFit.fit_and_residual(save_every_fig=False)
                     RA_hist_array = np.vstack((RA_hist_array, counts))
                     # popt_array = np.vstack((popt_array, popt))
 

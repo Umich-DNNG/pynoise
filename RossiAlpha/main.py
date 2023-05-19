@@ -12,16 +12,12 @@ import os  # For scanning directories
 import matplotlib.pyplot as plt  # For plotting data summaries
 from matplotlib.colors import LogNorm  # For adjusting colorbar scale
 
-# from scipy.signal import find_peaks
 from scipy.optimize import curve_fit
 import copy
 import seaborn as sns
-#import fitting
 sns.set(rc={"figure.dpi": 350, "savefig.dpi": 350})
 sns.set_style("ticks")
 sns.set_context("talk", font_scale=0.8)
-
-
 
 def main():
     # extracting settings and timestamps
@@ -48,11 +44,14 @@ def main():
 
 
         # plotting the histogram plot
-        from plots import Plot
+        from plots import RossiHistogram
         
-        thisPlot = Plot(theseSettings.generating_histogram_settings, theseSettings.histogram_visual_settings, show_plot=True)
+        thisPlot = RossiHistogram(theseSettings.general_program_settings,
+                                  theseSettings.generating_histogram_settings, 
+                                  theseSettings.histogram_visual_settings, 
+                                  show_plot=False)
 
-        counts, bin_centers, bin_edges = thisPlot.plot(time_diffs)
+        counts, bin_centers, bin_edges = thisPlot.plot(time_diffs, save_every_fig=True)
 
         # fitting curve to the histogramp plot
         from fitting import Fit
@@ -60,7 +59,7 @@ def main():
                       theseSettings.line_fitting_settings, theseSettings.general_program_settings,
                       theseSettings.residual_plot_settings, theseSettings.histogram_visual_settings)
         
-        thisFit.fit_and_residual()
+        thisFit.fit_and_residual(save_every_fig=True)
         
     else:
         RA_hist_total = analyzingFolders.compile_sample_stdev_RA_dist(theseSettings)

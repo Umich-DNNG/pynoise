@@ -2,12 +2,13 @@ import numpy as np  # For processing data
 import matplotlib.pyplot as plt  # For plotting data summaries
 from matplotlib.colors import LogNorm  # For adjusting colorbar scale
 import copy
+import os
 
 # --------------------------------------------------------------------------------
 # OWN CODE BELOW
 # --------------------------------------------------------------------------------
-class Plot:
-    def __init__(self, plotSettings, plotOptions, show_plot):
+class RossiHistogram:
+    def __init__(self, generalSettings, plotSettings, plotOptions, show_plot):
 
         '''
         Creating the a Plot() object and its variables.
@@ -24,6 +25,7 @@ class Plot:
         # Plotting options
         self.show_plot = show_plot
         self.options = plotOptions
+        self.save_dir = generalSettings['save dir']
 
         # Required parameters
         self.reset_time = plotSettings["reset time"]
@@ -32,8 +34,12 @@ class Plot:
         self.y_axis = "Count"
         self.title = "Histogram"
         
+        #Parameters set once plot(time_diffs) is called
+        self.counts = None
+        self.bin_edges = None
+        self.bin_centers = None
 
-    def plot(self, time_diffs):
+    def plot(self, time_diffs, save_every_fig):
 
         '''
         Creating histogram from an array of time differences and plotting it.
@@ -78,7 +84,14 @@ class Plot:
             plt.show()
 
         # Saving plot (optional)
-        if self.show_plot == True:
-            plt.savefig('histogram', dpi=300, bbox_inches='tight')
+        if save_every_fig == True:
+            plt.tight_layout()
+            save_filename = os.path.join(self.save_dir, 'histogram.png')
+            plt.savefig(save_filename, dpi=300, bbox_inches='tight')
+
+        #Set the counts, bin_centers, and bin_edges of the object
+        self.counts = counts
+        self.bin_centers = bin_centers
+        self.bin_edges = bin_edges
 
         return counts, bin_centers, bin_edges

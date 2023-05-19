@@ -1,6 +1,10 @@
-# Processed data that doesn't make sense to have on GitLab
+# Processed data that does not make sense to keep on GitLab
 *.png
 *.npy
+*.bin
 
 # Python software default outputs
-__pycache__
+*__pycache__/
+
+# vscode configuration files
+*.vscode
