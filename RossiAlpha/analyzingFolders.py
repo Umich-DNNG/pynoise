@@ -48,8 +48,9 @@ def compile_sample_stdev_RA_dist(settings):
                 if i == 0:
                     time_diffs = thisData.calculate_time_differences()
 
-                    thisPlot = RossiHistogram(settings.generating_histogram_settings,
-                                    settings.histogram_visual_settings, False)
+                    thisPlot = RossiHistogram(settings.general_program_settings,
+                                              settings.generating_histogram_settings,
+                                              settings.histogram_visual_settings, False)
                     
                     counts, bin_centers, bin_edges = thisPlot.plot(time_diffs, save_every_fig=False)
                     RA_hist_array = counts
@@ -63,8 +64,9 @@ def compile_sample_stdev_RA_dist(settings):
                 else:
                     time_diffs = thisData.calculate_time_differences()
 
-                    thisPlot = RossiHistogram(settings.generating_histogram_settings,
-                                    settings.histogram_visual_settings, False)
+                    thisPlot = RossiHistogram(settings.general_program_settings,
+                                              settings.generating_histogram_settings,
+                                              settings.histogram_visual_settings, False)
                     
                     counts, bin_centers, bin_edges = thisPlot.plot(time_diffs, save_every_fig=False)
 
