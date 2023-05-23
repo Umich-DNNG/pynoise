@@ -37,10 +37,13 @@ def compile_sample_stdev_RA_dist(settings):
                 path_to_data = data_folder + "/" + str(fol_num) + "/" + filename
                 list_data_n = np.loadtxt(path_to_data, delimiter=" ")
                 # list_data_n = np.genfromtxt(path_to_data, delimiter=' ')
+                if settings.general_program_settings["sort data?"] == "yes":
+                    list_data = list_data_n[:, 1]
+                    sorted_indices = np.argsort(list_data)
+                    list_data_n = list_data_n[sorted_indices]
                 list_data = list_data_n[:, 1]
                 channels = list_data_n[:,0]
-                if settings.general_program_settings["sort data?"] == "yes":
-                    list_data = np.sort(list_data)
+                
                 from timeDifs import timeDifCalcs
 
                 thisData = timeDifCalcs(list_data, settings.generating_histogram_settings["reset time"], settings.general_program_settings["time difference method"], settings.general_program_settings["digital delay"], channels)
