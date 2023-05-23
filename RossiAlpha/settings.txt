@@ -23,7 +23,7 @@ meas time per folder : 60
 sort data? : yes
 save fig? : yes
 show plot? : no
-save dir : /Users/vincentweng/Documents/PyNoise/RossiAlpha/output
+save dir : ./pynoise
 #----------------------------------------------------------------------------------------
 #HISTOGRAM SETTINGS BELOW
 #----------------------------------------------------------------------------------------
