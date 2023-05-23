@@ -8,3 +8,4 @@
 
 # vscode configuration files
 *.vscode
+.DS_Store
