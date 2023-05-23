@@ -2,11 +2,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 import os
-import sys
-
-#--------------------------------------------------------------------------------
-# OWN CODE BELOW
-#--------------------------------------------------------------------------------
 
 def exp_decay_3_param(x, a, b, c):
 
@@ -155,8 +150,9 @@ class Fit:
     def fit_and_residual(self, save_every_fig, show_plot):
 
         '''
-        Fitting an exponential curve onto the histogram and creating a residual plot to measure the accuracy.
-        Saving and showing the plot can be turned on or off.
+        Description:
+            - Fitting an exponential curve onto the histogram and creating a residual plot to measure the accuracy.
+            - Saving and showing the plot can be turned on or off.
 
         Inputs:
             - self (encompasses all private variables)
@@ -240,7 +236,8 @@ class Fit_With_Weighting:
     def __init__(self,RA_hist_totals, generating_hist_settings, general_settings, fitting_opts, residual_opts):
 
         '''
-        Creating the a Fit_with_Weighting() object and its variables.
+        Description:
+            - Creating the a Fit_with_Weighting() object and its variables.
 
         Inputs:
             - RA_hist_totals (array of counts and uncertainties)
@@ -274,8 +271,9 @@ class Fit_With_Weighting:
     def fit_RA_hist_weighting(self):
 
         '''
-        Fitting an exponential curve onto the histogram with weighting.
-        Saving and showing the plot can be turned on or off.
+        Description:
+            - Fitting an exponential curve onto the histogram with weighting.
+            - Saving and showing the plot can be turned on or off.
 
         Inputs:
             - self (encompasses all private variables)
@@ -320,8 +318,9 @@ class Fit_With_Weighting:
     def plot_RA_and_fit(self, save_fig, show_plot):
 
         '''
-        Plotting the sum of histograms generated.
-        Saving and showing the plot can be turned on or off.
+        Description:
+            - Plotting the sum of histograms generated.
+            - Saving and showing the plot can be turned on or off.
 
         Inputs:
             - self (encompasses all private variables)
@@ -329,7 +328,7 @@ class Fit_With_Weighting:
         Outputs: 
             - None
         '''
-        
+
         time_diff_centers = self.time_diff_centers[1:] - np.diff(self.time_diff_centers[:2])/2
         
         fig, ax = plt.subplots()
