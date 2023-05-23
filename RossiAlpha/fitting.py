@@ -233,7 +233,7 @@ class Fit:
 #--------------------------------------------------------------------------------
 
 class Fit_With_Weighting:
-    def __init__(self,RA_hist_totals, generating_hist_settings, general_settings, fitting_opts, residual_opts):
+    def __init__(self,RA_hist_totals, min_cutoff, general_settings, fitting_opts, residual_opts):
 
         '''
         Description:
@@ -260,7 +260,7 @@ class Fit_With_Weighting:
         self.time_diff_centers = RA_hist_totals[1]
         self.uncertainties = RA_hist_totals[2]
         self.fit_range = general_settings['fit range']
-        self.min_cutoff = generating_hist_settings['minimum cutoff']
+        self.min_cutoff = min_cutoff
         self.plot_scale = general_settings['plot scale']
         self.save_dir = general_settings['save dir']
 

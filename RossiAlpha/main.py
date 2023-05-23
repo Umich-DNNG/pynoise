@@ -64,7 +64,7 @@ def main():
     else:
         RA_hist_total = analyzingFolders.compile_sample_stdev_RA_dist(theseSettings)
         from fitting import Fit_With_Weighting
-        thisWeightedFit = Fit_With_Weighting(RA_hist_total,theseSettings.generating_histogram_settings, 
+        thisWeightedFit = Fit_With_Weighting(RA_hist_total,theseSettings.generating_histogram_settings['minimum cutoff'], 
                                              theseSettings.general_program_settings, theseSettings.line_fitting_settings, 
                                              theseSettings.residual_plot_settings)
         thisWeightedFit.fit_RA_hist_weighting()
