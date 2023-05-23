@@ -107,4 +107,3 @@ class Settings:
         self.print_fit()
         print()
         self.print_res()
-        print()
