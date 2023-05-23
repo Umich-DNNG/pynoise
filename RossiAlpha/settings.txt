@@ -7,8 +7,6 @@ input file: RF3-40_59min.txt
 output file: 
 input folder:
 file type: 1
-input folder:
-file type: 1
 #for the file types, 1 corresponds to the first file we analyzed and 2 corresponds to the folders.
 #----------------------------------------------------------------------------------------
 #----------------------------------------------------------------------------------------
