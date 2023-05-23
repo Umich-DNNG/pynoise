@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
+from settings import *
 import os
 import sys
 
@@ -48,8 +49,14 @@ def exp_decay_2_param(x, a, b):
 #--------------------------------------------------------------------------------    
 
 class Fit:
-    def __init__(self, counts, bin_centers, generating_hist_settings, 
-                 fitting_opts, general_settings, residual_opts, hist_visual_opts):
+    def __init__(self,
+                 counts,
+                 bin_centers, 
+                 fitting_opts,
+                 general_settings,
+                 residual_opts,
+                 hist_visual_opts,
+                 generating_hist_settings):
         
         '''
         Description:

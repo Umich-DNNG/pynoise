@@ -21,7 +21,7 @@ meas time per folder : 60
 sort data? : yes
 save fig? : yes
 show plot? : no
-save dir : ./pynoise
+save dir : ./
 #----------------------------------------------------------------------------------------
 #HISTOGRAM SETTINGS BELOW
 #----------------------------------------------------------------------------------------

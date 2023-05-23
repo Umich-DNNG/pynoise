@@ -1,44 +1,46 @@
-class IOSettings:
-    def __init__(self, typeIn, inputIn, outputIn):
-        self.type = typeIn
-        self.input = inputIn
-        self.output = outputIn
+class Settings:
 
-class GenSettings:
-    def __init__(self, fitIn, scaleIn, methodIn, delayIn, numIn, measIn, sortIn, saveIn, showIn, dirIn):
-        self.fit = fitIn
-        self.scale = scaleIn
-        self.method = methodIn
-        self.delay = delayIn
-        self.num = numIn
-        self.meas = measIn
-        self.sort = sortIn
-        self.save = saveIn
-        self.show = showIn
-        self.dir = dirIn
+    def __init__(self,
+                 
+                 ioSettings={},
 
-class VisSettings:
-    def __init__(self, colorIn, edgeIn, faceIn, styleIn, widthIn):
-        self.color = colorIn
-        self.edge = edgeIn
-        self.face = faceIn
-        self.style = styleIn
-        self.width = widthIn
+                 genSettings=   {'fit':[0,2e3],
+                                'scale':'linear',
+                                'method':'any_and_all',
+                                'delay':750,
+                                'num':10,
+                                'meas':60,
+                                'sort':'yes',
+                                'save':'yes',
+                                'show':'no',
+                                'dir':'./'},
 
-class HistSettings:
-    def __init__(self, timeIn=2e3, widthIn=2, cutoffIn=30):
-        self.time = timeIn
-        self.width = widthIn
-        self.cutoff = cutoffIn
+                visSettings={   'color':'black',
+                                'edge':'blue',
+                                'face':'black',
+                                'style':'-',
+                                'width':3},
 
-class FitSettings:
-    def __init__(self, colorIn='red', edgeIn='blue', faceIn='black', styleIn='-', widthIn=1):
-        self.color = colorIn
-        self.edge = edgeIn
-        self.face = faceIn
-        self.style = styleIn
-        self.width = widthIn
+                histSettings={  'time':2e3,
+                                'width':2,
+                                'cutoff':30},
 
-class ResSettings:
-    def __init__(self, sIn=8):
-        self.s = sIn
+                fitSettings={   'color':'red',
+                                'edge':'blue',
+                                'face':'black',
+                                'style':'-',
+                                'width':1},
+
+                resSettings={'s':8}
+                ):
+        
+        self.settings = {'io_file_info': ioSettings,
+                         'general_program_settings': genSettings,
+                         'histogram_visual_settings': visSettings,
+                         'generating_histogram_settings': histSettings,
+                         'line_fitting_settings': fitSettings,
+                         'residual_plot_settings': resSettings
+        }
+
+    def changeSetting(self, type, setting, value):
+        self.settings[type][setting] = value
