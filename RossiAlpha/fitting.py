@@ -11,13 +11,17 @@ import sys
 def exp_decay_3_param(x, a, b, c):
 
     '''
-    Exponential decay function with 3 parameters including offset
+    Description:
+        - Exponential decay function with 3 parameters including offset
 
     Inputs:
         - x (time differences: x-axis)
         - a (coefficient constant)
         - b (alpha value)
         - c (offset constant)
+
+    Outputs:
+        - Exponential decay function
     '''
 
     # exponential decay function with 3 parameters
@@ -26,13 +30,16 @@ def exp_decay_3_param(x, a, b, c):
 def exp_decay_2_param(x, a, b):
 
     '''
-    Exponential decay function with 3 parameters including offset
+    Description:
+        - Exponential decay function with 2 parameters including offset
 
     Inputs:
         - x (time differences: x-axis)
         - a (coefficient constant)
         - b (alpha value)
-        - c (offset constant)
+    
+    Outputs:
+        - Exponential decay function
     '''
     
     # exponential decay function with 2 parameters
@@ -45,7 +52,8 @@ class Fit:
                  fitting_opts, general_settings, residual_opts, hist_visual_opts):
         
         '''
-        Creating the a Fit() object and its variables.
+        Description:
+            - Creating the a Fit() object and its variables.
 
         Inputs:
             - counts (The set of values of the histogram as a list)
@@ -70,17 +78,16 @@ class Fit:
         self.bin_centers = bin_centers
         self.fit_range = general_settings['fit range']
         self.min_cutoff = generating_hist_settings['minimum cutoff']
-        self.save_fig = general_settings['save fig?']
-        self.show_plot = general_settings['show plot?']
         self.timeDifMethod = general_settings['time difference method']
         self.save_dir = general_settings['save dir']
 
 
-    def fit(self):
+    def fit(self, save_fig, show_plot):
 
         '''
-        Fitting an exponential curve onto the histogram.
-        Saving and showing the plot can be turned on or off.
+        Description:
+            - Fitting an exponential curve onto the histogram.
+            - Saving and showing the plot can be turned on or off.
 
         Inputs:
             - self (encompasses all private variables)
@@ -133,19 +140,19 @@ class Fit:
         ax1.set_ylabel(self.y_axis)
 
         # Saving figure (optional)
-        if self.save_fig == "yes":
+        if save_fig == "yes":
             fig.tight_layout()
             fig.savefig('fitted_only', dpi=300, bbox_inches='tight')
 
         # Showing plot (optional)
-        if self.show_plot == "yes":
+        if show_plot == "yes":
             plt.show()
 
         return popt
 
 #--------------------------------------------------------------------------------
 
-    def fit_and_residual(self, save_every_fig):
+    def fit_and_residual(self, save_every_fig, show_plot):
 
         '''
         Fitting an exponential curve onto the histogram and creating a residual plot to measure the accuracy.
@@ -222,7 +229,7 @@ class Fit:
             fig.savefig(save_filename, dpi=300, bbox_inches='tight')
 
         # Showing plot (optional)
-        if self.show_plot == "yes":
+        if show_plot == "yes":
             plt.show()
 
         return popt
@@ -258,8 +265,6 @@ class Fit_With_Weighting:
         self.fit_range = general_settings['fit range']
         self.min_cutoff = generating_hist_settings['minimum cutoff']
         self.plot_scale = general_settings['plot scale']
-        self.save_fig = general_settings['save fig?']
-        self.show_plot = general_settings['show plot?']
         self.save_dir = general_settings['save dir']
 
         # Line fitting variables
@@ -312,7 +317,7 @@ class Fit_With_Weighting:
         self.xfit, self.yfit = xfit, yfit
 
        
-    def plot_RA_and_fit(self):
+    def plot_RA_and_fit(self, save_fig, show_plot):
 
         '''
         Plotting the sum of histograms generated.
@@ -341,11 +346,11 @@ class Fit_With_Weighting:
         ax.set_yscale(self.plot_scale)
 
         # Adjusting layout and saving figure (optional)
-        if self.save_fig == 'yes':
+        if save_fig == 'yes':
             fig.tight_layout()
             save_filename = os.path.join(self.save_dir, 'histogram_weighting.png') 
             fig.savefig(save_filename, dpi=300, bbox_inches='tight')
         
         # Displaying the plot (optional)
-        if self.show_plot == 'yes':
+        if show_plot == 'yes':
             plt.show()

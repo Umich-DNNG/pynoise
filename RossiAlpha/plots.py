@@ -1,17 +1,13 @@
-import numpy as np  # For processing data
-import matplotlib.pyplot as plt  # For plotting data summaries
-from matplotlib.colors import LogNorm  # For adjusting colorbar scale
-import copy
+import numpy as np
+import matplotlib.pyplot as plt
 import os
 
-# --------------------------------------------------------------------------------
-# OWN CODE BELOW
-# --------------------------------------------------------------------------------
 class RossiHistogram:
-    def __init__(self, generalSettings, plotSettings, plotOptions, show_plot):
+    def __init__(self, generalSettings, plotSettings, plotOptions):
 
         '''
-        Creating the a Plot() object and its variables.
+        Description:
+            - Creating a Plot() object and its variables.
 
         Inputs:
             - plotSettings (setting for the plotting)
@@ -23,7 +19,6 @@ class RossiHistogram:
         '''
 
         # Plotting options
-        self.show_plot = show_plot
         self.options = plotOptions
         self.save_dir = generalSettings['save dir']
 
@@ -34,12 +29,12 @@ class RossiHistogram:
         self.y_axis = "Count"
         self.title = "Histogram"
         
-        #Parameters set once plot(time_diffs) is called
+        # Parameters set once plot(time_diffs) is called
         self.counts = None
         self.bin_edges = None
         self.bin_centers = None
 
-    def plot(self, time_diffs, save_every_fig):
+    def plot(self, time_diffs, save_every_fig, show_plot):
 
         '''
         Creating histogram from an array of time differences and plotting it.
@@ -80,7 +75,7 @@ class RossiHistogram:
         plt.title(self.title)
 
         # Showing plot (optional)
-        if self.show_plot == True:
+        if show_plot == "yes":
             plt.show()
 
         # Saving plot (optional)
