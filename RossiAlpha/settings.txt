@@ -7,6 +7,8 @@ input file: RF3-40_59min.txt
 output file: 
 input folder:
 file type: 1
+input folder:
+file type: 1
 #for the file types, 1 corresponds to the first file we analyzed and 2 corresponds to the folders.
 #----------------------------------------------------------------------------------------
 #----------------------------------------------------------------------------------------
@@ -21,7 +23,7 @@ meas time per folder : 60
 sort data? : yes
 save fig? : yes
 show plot? : no
-save dir : ./pynoise
+save dir : /Users/vincentweng/Documents/PyNoise/RossiAlpha/output
 #----------------------------------------------------------------------------------------
 #HISTOGRAM SETTINGS BELOW
 #----------------------------------------------------------------------------------------
