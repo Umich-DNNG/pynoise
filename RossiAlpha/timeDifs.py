@@ -13,7 +13,14 @@ class timeDifCalcs:
         self.timeDifs = None
     
     def calculate_time_differences(self):
-        '''can be called on a timeDifCalcs object and returns the array of time differences used for constructing a histogram based on the appropriate method'''
+        '''can be called on a timeDifCalcs object and returns the array of time differences used for constructing a histogram based on the appropriate method
+        
+        inputs:
+        -None
+
+        outputs:
+        -time differences array
+        '''
 
         #time_vector = self.list_data
 

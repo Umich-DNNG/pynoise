@@ -4,15 +4,6 @@ A repository for a Python suite of neutron noise analysis algorithms. This draws
 
 ## Rossi-Alpha Method
 
-### Setup
-You will need to install python and then install numpy.   
-To begin, you must create a local repo. To do this, initialize the local repo by typing the following command into your terminal:   
-```$ git init```   
-This will create a .git subdirectory which will contain files for the repo.   
-To check the status of the repo at any point, type:    
-```$ git status```   
-To clone the project onto your machine locally, type   
-```$ git clone https://gitlab.eecs.umich.edu/umich-dnng/pynoise.git```
 
 ### How to Use
 The files that you will need in order to use the Rossi-Alpha program are fitting.py, plots.py, timeDifs.py, main.py, analyzingFolders.py, readInput,py, settings.txt, and either a file that you want to analyze or a path to folder to analyze(specify in settings). The format of the file you want to analyze should be a txt file with a list of time stamps of neutron detection times, separated by new lines. The format of the settings.txt should be a list of settings:  
@@ -58,7 +49,15 @@ There are different categories of settings as follows:
 
 Users can edit this .txt file to change the settings that they wish to use.
 
+### Time Difference Calculator
+```timeDifs.py``` contains a class, ```TimeDifsCalcs``` that can be initialized with the time data (a list of sorted detection times), the reset time, the method that we will be using, the digital delay, and the corresponding channels to the time data (if not using any_and_all method).
 
+**Using Time Difference Calculator**
+```python
+from RossiAlpha.timeDifs import * #imports all classes from file
+thisTimeDifCalc = timeDifCalcs(list_data, 2e3, any_and_all) #constructs an object called thisTimeDifCalc with a reset time of 2000 and method = any_and_all
+time_diffs = thisTimeDifCalc.calculate_time_differences() #saves the array of time diffs as time_diffs
+```
 
 ### Plotting
 In the plots.py file, there is a class called "Plot" which is umbrella class that encompasses all the important plotting functions. Currently, there is one function under "Plot" called "plot(self, time_diffs)", in which the input parameter time_diffs is an array of time differences generated from the "timeDifCalcs" class.
