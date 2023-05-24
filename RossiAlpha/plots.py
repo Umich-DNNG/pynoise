@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import os
 
 class RossiHistogram:
-    def __init__(self, reset_time, bin_width, plotOptions, save_dir= None):
+    def __init__(self, reset_time, bin_width, plot_opts, save_dir= None):
 
         '''
         Description:
@@ -19,7 +19,7 @@ class RossiHistogram:
         '''
 
         # Plotting options
-        self.options = plotOptions
+        self.options = plot_opts
         self.save_dir = save_dir
 
         # Required parameters
@@ -57,17 +57,8 @@ class RossiHistogram:
         bin_centers = 0.5 * (bin_edges[1:] + bin_edges[:-1])
 
         # Plotting
-        plt.plot(bin_centers, counts, drawstyle='steps-post', **self.options)
-        plt.bar(bin_centers, 
-                counts,
-                width=0.8 * (bin_centers[1] - bin_centers[0]),
-                alpha=0.6,
-                color="b",
-                align="center",
-                edgecolor="k",
-                linewidth=0.5,
-                fill=True)
-        
+        plt.bar(bin_centers, counts, width=0.8 * (bin_centers[1] - bin_centers[0]), alpha=0.6, fill=True, **self.options)
+
         plt.xlabel(self.x_axis)
         plt.ylabel(self.y_axis)
         plt.title(self.title)

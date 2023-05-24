@@ -61,7 +61,7 @@ def compile_sample_stdev_RA_dist(settings):
                     from fitting import RossiHistogramFit
                     thisFit = RossiHistogramFit(counts,bin_centers,settings.generating_histogram_settings,settings.line_fitting_settings, 
                                   settings.general_program_settings, settings.residual_plot_settings, settings.histogram_visual_settings)
-                    popt = thisFit.fit_and_residual(save_every_fig=True, show_plot="No", folder_index=i)
+                    popt = thisFit.fit_and_residual(save_every_fig=settings.general_program_settings['save fig?'], show_plot="No", folder_index=i)
                     popt_array = popt
 
                 else:
