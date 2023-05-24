@@ -58,10 +58,10 @@ def compile_sample_stdev_RA_dist(settings):
                     counts, bin_centers, bin_edges = thisPlot.plot(time_diffs, save_every_fig=False, show_plot=settings.general_program_settings['show plot?'])
                     RA_hist_array = counts
 
-                    from fitting import Fit
-                    thisFit = Fit(counts,bin_centers,settings.generating_histogram_settings,settings.line_fitting_settings, 
+                    from fitting import RossiHistogramFit
+                    thisFit = RossiHistogramFit(counts,bin_centers,settings.generating_histogram_settings,settings.line_fitting_settings, 
                                   settings.general_program_settings, settings.residual_plot_settings, settings.histogram_visual_settings)
-                    popt = thisFit.fit_and_residual(save_every_fig=False, show_plot=settings.general_program_settings['show plot?'])
+                    popt = thisFit.fit_and_residual(save_every_fig=False, show_plot="No")
                     popt_array = popt
 
                 else:
@@ -71,12 +71,12 @@ def compile_sample_stdev_RA_dist(settings):
                                               settings.generating_histogram_settings,
                                               settings.histogram_visual_settings)
                     
-                    counts, bin_centers, bin_edges = thisPlot.plot(time_diffs, save_every_fig=False, show_plot=False)
+                    counts, bin_centers, bin_edges = thisPlot.plot(time_diffs, save_every_fig=False, show_plot="No")
 
-                    thisFit = Fit(counts,bin_centers,settings.generating_histogram_settings,settings.line_fitting_settings, 
+                    thisFit = RossiHistogramFit(counts,bin_centers,settings.generating_histogram_settings,settings.line_fitting_settings, 
                                   settings.general_program_settings, settings.residual_plot_settings, settings.histogram_visual_settings)
 
-                    popt = thisFit.fit_and_residual(save_every_fig=False, show_plot=settings.general_program_settings['show plot?'])
+                    popt = thisFit.fit_and_residual(save_every_fig=False, show_plot="No")
                     RA_hist_array = np.vstack((RA_hist_array, counts))
                     # popt_array = np.vstack((popt_array, popt))
 

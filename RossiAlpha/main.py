@@ -13,7 +13,7 @@ from readInput import Settings
 import analyzingFolders
 from timeDifs import timeDifCalcs
 from plots import RossiHistogram
-from fitting import Fit
+from fitting import RossiHistogramFit
 sns.set(rc={"figure.dpi": 350, "savefig.dpi": 350})
 sns.set_style("ticks")
 sns.set_context("talk", font_scale=0.8)
@@ -44,7 +44,7 @@ def main():
                                                        show_plot=theseSettings.general_program_settings['show plot?'])
 
         # creating Fit() object with specified settings
-        thisFit = Fit(counts, bin_centers, theseSettings.generating_histogram_settings, 
+        thisFit = RossiHistogramFit(counts, bin_centers, theseSettings.generating_histogram_settings, 
                       theseSettings.line_fitting_settings, theseSettings.general_program_settings,
                       theseSettings.residual_plot_settings, theseSettings.histogram_visual_settings)
         
@@ -59,7 +59,7 @@ def main():
                                              theseSettings.residual_plot_settings)
         thisWeightedFit.fit_RA_hist_weighting()
         thisWeightedFit.plot_RA_and_fit(save_fig=theseSettings.general_program_settings['save fig?'], 
-                                        show_plot=theseSettings.general_program_settings['show plot?'])
+                                        show_plot="No")
 
 
 if __name__ == "__main__":
