@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import os
 
 class RossiHistogram:
-    def __init__(self, generalSettings, plotSettings, plotOptions):
+    def __init__(self, reset_time, bin_width, plotOptions, save_dir= None):
 
         '''
         Description:
@@ -20,11 +20,11 @@ class RossiHistogram:
 
         # Plotting options
         self.options = plotOptions
-        self.save_dir = generalSettings['save dir']
+        self.save_dir = save_dir
 
         # Required parameters
-        self.reset_time = plotSettings["reset time"]
-        self.bin_width = plotSettings["bin width"]
+        self.reset_time = reset_time
+        self.bin_width = bin_width
         self.x_axis = "Time Differences"
         self.y_axis = "Count"
         self.title = "Histogram"
@@ -32,7 +32,7 @@ class RossiHistogram:
         # Parameters set once plot(time_diffs) is called
         self.counts, self.bin_edges, self.bin_centers = None, None, None
 
-    def plot(self, time_diffs, save_every_fig, show_plot):
+    def plot(self, time_diffs, save_fig, show_plot):
         '''
         Creating histogram from an array of time differences and plotting it.
         Saving and showing the plot can be turned on or off.
@@ -77,7 +77,7 @@ class RossiHistogram:
             plt.show()
 
         # Saving plot (optional)
-        if save_every_fig == True:
+        if save_fig == "yes":
             plt.tight_layout()
             save_filename = os.path.join(self.save_dir, 'histogram.png')
             plt.savefig(save_filename, dpi=300, bbox_inches='tight')

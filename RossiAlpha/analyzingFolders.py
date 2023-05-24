@@ -51,11 +51,11 @@ def compile_sample_stdev_RA_dist(settings):
                 if i == 0:
                     time_diffs = thisData.calculate_time_differences()
 
-                    thisPlot = RossiHistogram(settings.general_program_settings,
-                                              settings.generating_histogram_settings,
-                                              settings.histogram_visual_settings)
+                    thisPlot = RossiHistogram(settings.generating_histogram_settings['reset time'],
+                                  settings.generating_histogram_settings['bin width'],
+                                  settings.histogram_visual_settings, settings.general_program_settings['save dir'])
                     
-                    counts, bin_centers, bin_edges = thisPlot.plot(time_diffs, save_every_fig=False, show_plot=settings.general_program_settings['show plot?'])
+                    counts, bin_centers, bin_edges = thisPlot.plot(time_diffs, save_fig = settings.general_program_settings['save fig?'], show_plot=settings.general_program_settings['show plot?'])
                     RA_hist_array = counts
 
                     from fitting import RossiHistogramFit
@@ -67,16 +67,16 @@ def compile_sample_stdev_RA_dist(settings):
                 else:
                     time_diffs = thisData.calculate_time_differences()
 
-                    thisPlot = RossiHistogram(settings.general_program_settings,
-                                              settings.generating_histogram_settings,
-                                              settings.histogram_visual_settings)
+                    thisPlot = RossiHistogram(settings.generating_histogram_settings['reset time'],
+                                  settings.generating_histogram_settings['bin width'],
+                                  settings.histogram_visual_settings, settings.general_program_settings['save dir'])
                     
-                    counts, bin_centers, bin_edges = thisPlot.plot(time_diffs, save_every_fig=False, show_plot="No")
+                    counts, bin_centers, bin_edges = thisPlot.plot(time_diffs, save_fig=settings.general_program_settings['save fig?'], show_plot="No")
 
                     thisFit = RossiHistogramFit(counts,bin_centers,settings.generating_histogram_settings,settings.line_fitting_settings, 
                                   settings.general_program_settings, settings.residual_plot_settings, settings.histogram_visual_settings)
 
-                    popt = thisFit.fit_and_residual(save_every_fig=True, show_plot="No", folder_index=i)
+                    popt = thisFit.fit_and_residual(save_every_fig=settings.general_program_settings['save fig?'], show_plot="No", folder_index=i)
                     RA_hist_array = np.vstack((RA_hist_array, counts))
                     # popt_array = np.vstack((popt_array, popt))
 

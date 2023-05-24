@@ -147,7 +147,7 @@ class RossiHistogramFit:
 
 #--------------------------------------------------------------------------------
 
-    def fit_and_residual(self, save_every_fig, show_plot, folder_index):
+    def fit_and_residual(self, save_every_fig, show_plot, folder_index = None):
 
         '''
         Description:
@@ -219,10 +219,14 @@ class RossiHistogramFit:
         fig.suptitle(self.timeDifMethod, fontsize=14)
 
         # Adjusting layout and saving figure (optional)
-        if save_every_fig == True:
+        if save_every_fig == "yes":
             fig.tight_layout()
-            save_filename = os.path.join(self.save_dir, 'fitted_and_residual_folder' + str(folder_index)) 
-            fig.savefig(save_filename, dpi=300, bbox_inches='tight')
+            if folder_index is not None:
+                save_filename = os.path.join(self.save_dir, 'fitted_and_residual_folder' + str(folder_index)) 
+                fig.savefig(save_filename, dpi=300, bbox_inches='tight')
+            else:
+                save_filename = os.path.join(self.save_dir, 'fitted_and_residual')
+                fig.savefig(save_filename, dpi=300, bbox_inches='tight')
 
         # Showing plot (optional)
         if show_plot == "yes":
