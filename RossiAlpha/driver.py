@@ -3,13 +3,31 @@ import sys
 
 setting = Settings()
 
+def showGroups():
+    print('What setting group would you like to edit?')
+    print('i - input/output settings')
+    print('g - general settings')
+    print('v - histogram visual settings')
+    print('h - histogram generation settings')
+    print('l - line fitting settings')
+    print('r - residual plot settings')
+    print('e - exit to main menu')
+
+def isFloat(input):
+    if input.replace(".", "").isnumeric() and input.count('.') <= 1:
+        return True
+    else:
+        return False
+
 def ioSet():
+    choice = ''
     print('What setting would you like to edit?')
     print('')
     print('')
     print('')
 
 def genSet():
+    choice = ''
     print('What setting would you like to edit?')
     print('')
     print('')
@@ -23,63 +41,75 @@ def genSet():
     print('')
 
 def visSet():
+    choice = ''
     print('What setting would you like to edit?')
-    print('')
-    print('')
-    print('')
-    print('')
-    print('')
+    print('m - main color')
+    print('e - edge color')
+    print('f - face color')
+    print('s - line style')
+    print('w - line width')
+    print('e - exit to main menu')
 
 def histSet():
+    choice = ''
     print('What setting would you like to edit?')
     print('')
     print('')
     print('')
 
 def fitSet():
+    choice = ''
     print('What setting would you like to edit?')
-    print('')
-    print('')
-    print('')
-    print('')
-    print('')
+    print('m - main color')
+    print('e - edge color')
+    print('f - face color')
+    print('s - line style')
+    print('w - line width')
+    print('e - exit to main menu')
 
 def resSet():
+    choice = ''
     print('There is only one residual plot setting - s.')
     print('The current value of s is',setting.get('residual_plot_settings','s'),
           'and must be a float.')
-    choice = input('Enter a new value: ')
-    if choice.replace(".", "").isnumeric():
-        setting.set('','',float(choice))
-        print('Set the value of s to ' + choice + '.')
-    else:
-        print('Your input must be a numeric value')
+    while not isFloat(choice):
+        choice = input('Enter a new value: ')
+        if isFloat(choice):
+            setting.set('residual_plot_settings','s',float(choice))
+            print('Set the value of s to ' + choice + '.')
+        else:
+            print('Your input must be a float.')
+    print('Returning to the editor main menu...\n')
 
 def settingsEditor():
     selection = ''
-    print('What setting group would you like to edit?')
-    print('i - input/output settings')
-    print('g - general settings')
-    print('v - histogram visual settings')
-    print('h - histogram generation settings')
-    print('l - line fitting settings')
-    print('r - residual plot settings')
-    print('e - exit to main menu')
+    showGroups()
     while selection != 'e':
-        selection = input('Enter print command: ')
+        selection = input('Enter edit command: ')
         match selection:
             case 'i':
+                print()
                 ioSet()
+                showGroups()
             case 'g':
+                print()
                 genSet()
+                showGroups()
             case 'v':
+                print()
                 visSet()
             case 'h':
+                print()
                 histSet()
+                showGroups()
             case 'l':
+                print()
                 fitSet()
+                showGroups()
             case 'r':
+                print()
                 resSet()
+                showGroups()
             case 'e':
                 print('Returning to menu...\n')
                 break
