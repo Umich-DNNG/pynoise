@@ -36,11 +36,11 @@ def main():
         time_diffs = thisTimeDifCalc.calculate_time_differences()
 
         # creating RossiHistogram() object with specified settings
-        thisPlot = RossiHistogram(theseSettings.general_program_settings,
-                                  theseSettings.generating_histogram_settings, 
-                                  theseSettings.histogram_visual_settings)
+        thisPlot = RossiHistogram(theseSettings.generating_histogram_settings['reset time'],
+                                  theseSettings.generating_histogram_settings['bin width'],
+                                  theseSettings.histogram_visual_settings, theseSettings.general_program_settings['save dir'])
 
-        counts, bin_centers, bin_edges = thisPlot.plot(time_diffs, save_every_fig=True, 
+        counts, bin_centers, bin_edges = thisPlot.plot(time_diffs, save_fig=theseSettings.general_program_settings['save fig?'], 
                                                        show_plot=theseSettings.general_program_settings['show plot?'])
 
         # creating Fit() object with specified settings
@@ -49,7 +49,8 @@ def main():
                       theseSettings.residual_plot_settings, theseSettings.histogram_visual_settings)
         
         # Fitting curve to the histogram and plotting the residuals
-        thisFit.fit_and_residual(save_every_fig=True, show_plot=theseSettings.general_program_settings['show plot?'])
+        thisFit.fit_and_residual(save_every_fig=theseSettings.general_program_settings['save fig?'], 
+                                 show_plot=theseSettings.general_program_settings['show plot?'])
         
     else:
         RA_hist_total = analyzingFolders.compile_sample_stdev_RA_dist(theseSettings)

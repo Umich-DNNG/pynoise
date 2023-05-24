@@ -30,24 +30,18 @@ There are different categories of settings as follows:
 * sort data? : select yes if the data file you provide is unsorted, no otherwise  
 
 **HISTOGRAM VISUAL SETTINGS:** these settings correspond to the histogram settings see https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.plot.html for full documentation of options TODO: change code to get boolean values
-* color : 'b', 'g', 'r', 'c', 'm', 'y', 'k', 'w'
-* linestyle : '-', '--', '-.', ':', or ' '
-* linewidth : float value, sets the line width in points.
-* marker : see https://matplotlib.org/stable/api/markers_api.html#module-matplotlib.markers for complete list of options
-* alpha : must be within the 0-1 range, inclusive.  
 
 **GENERATING HISTOGRAM SETTINGS**  
 * reset time :   
 * bin width : the width of the histogram bins  
 * minimum cutoff :  
 
-**LINE FITTING SETTINGS** : visual settings for the fit line see https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.plot.html for full documentation of options   
-* color : 'b', 'g', 'r', 'c', 'm', 'y', 'k', 'w'   
-* linestyle : '-', '--', '-.', ':', or ' '   
-* linewidth : float value, sets the line width in points.   
-* marker : see https://matplotlib.org/stable/api/markers_api.html#module-matplotlib.markers for complete list of options   
+**LINE FITTING SETTINGS** : visual settings for the fit line see https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.plot.html for full documentation of options    
 
 Users can edit this .txt file to change the settings that they wish to use.
+
+### Main
+```main.py``` contains a driver program, which when ran, will take the settings.txt file and run the sepcified analysis and produce the plots as specified in the settings. Users can run this file without knowing how any of the code works as long as they can correctly edit settings.txt.   
 
 ### Time Difference Calculator
 ```timeDifs.py``` contains a class, ```TimeDifsCalcs``` that can be initialized with the time data (a list of sorted detection times), the reset time, the method that we will be using, the digital delay, and the corresponding channels to the time data (if not using any_and_all method).
@@ -59,27 +53,16 @@ thisTimeDifCalc = timeDifCalcs(list_data, 2e3, any_and_all) #constructs an objec
 time_diffs = thisTimeDifCalc.calculate_time_differences() #saves the array of time diffs as time_diffs
 ```
 
-### Plotting
-In the plots.py file, there is a class called "Plot" which is umbrella class that encompasses all the important plotting functions. Currently, there is one function under "Plot" called "plot(self, time_diffs)", in which the input parameter time_diffs is an array of time differences generated from the "timeDifCalcs" class.
+### RossiHistogram
+In the plots.py file, there is a class called ```RossiHistogram``` which is a class that bins the data. Currently, there is one function under ```RossiHistogram``` called ```plot(self, time_diffs, save_every_fig, show_plot)```, in which the input parameter time_diffs is an array of time differences generated from the ```timeDifCalcs``` class.
 
-A Plot() object can be created first with the parameters below: 
-
-* plotSettings (dict)
-* plotOptions (dict)
-* show_plot (boolean)
-
-From plotSettings, the following variables are created:
-* reset_time (numeric)
-* bin_width (numeric)
-
-From plotOptions, the following variables are created:
-* options (dict)
-* x_axis (string)
-* y_axis (string)
-* title (string)
-
-The Plot.plot() function will construct the corresponding histogram. The option show_plot can be set to whether you want to show the plot and save the plot or not. Finally, this will return counts, bin_centers, and big edges. These outputs will be used in various fitting functions in the next section.
-
+**Using RossiHistogram**
+```python
+from RossiAlpha.plots import * #imports all classes from file
+thisPlot = RossiHistogram(reset_time = 2e3, bin_width = 2, histogram_visual_settings, save_dir = '/path/to/save/plot.png') #construct a RossiHistogram object specifying the reset time, bin width, visual settings, and (optional) path to where you want plot to save
+counts, bin_centers, bin_edges = thisPlot.plot(time_diffs, save_fig="yes", show_plot="no") #constructs the histogram with the time differences and saves it to the save_dir
+#Returns the counts,bin_centers, and bin_edges for later use
+```
 
 
 ### Fitting
