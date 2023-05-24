@@ -148,7 +148,7 @@ class RossiHistogramFit:
 
 #--------------------------------------------------------------------------------
 
-    def fit_and_residual(self, save_every_fig, show_plot):
+    def fit_and_residual(self, save_every_fig, show_plot, folder_index):
 
         '''
         Description:
@@ -222,7 +222,7 @@ class RossiHistogramFit:
         # Adjusting layout and saving figure (optional)
         if save_every_fig == True:
             fig.tight_layout()
-            save_filename = os.path.join(self.save_dir, 'fitted_and_residual') 
+            save_filename = os.path.join(self.save_dir, 'fitted_and_residual_folder' + str(folder_index)) 
             fig.savefig(save_filename, dpi=300, bbox_inches='tight')
 
         # Showing plot (optional)
@@ -348,7 +348,7 @@ class Fit_With_Weighting:
         # Adjusting layout and saving figure (optional)
         if save_fig == 'yes':
             fig.tight_layout()
-            save_filename = os.path.join(self.save_dir, 'histogram_weighting.png') 
+            save_filename = os.path.join(self.save_dir, 'histogram_weighting_total.png') 
             fig.savefig(save_filename, dpi=300, bbox_inches='tight')
         
         # Displaying the plot (optional)

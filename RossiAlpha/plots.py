@@ -33,7 +33,6 @@ class RossiHistogram:
         self.counts, self.bin_edges, self.bin_centers = None, None, None
 
     def plot(self, time_diffs, save_every_fig, show_plot):
-
         '''
         Creating histogram from an array of time differences and plotting it.
         Saving and showing the plot can be turned on or off.
