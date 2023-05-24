@@ -49,7 +49,8 @@ def main():
                       theseSettings.residual_plot_settings, theseSettings.histogram_visual_settings)
         
         # Fitting curve to the histogram and plotting the residuals
-        thisFit.fit_and_residual(save_every_fig=True, show_plot=theseSettings.general_program_settings['show plot?'])
+        thisFit.fit_and_residual(save_every_fig=theseSettings.general_program_settings['save fig?'], 
+                                 show_plot=theseSettings.general_program_settings['show plot?'])
         
     else:
         RA_hist_total = analyzingFolders.compile_sample_stdev_RA_dist(theseSettings)
