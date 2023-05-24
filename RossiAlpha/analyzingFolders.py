@@ -61,7 +61,7 @@ def compile_sample_stdev_RA_dist(settings):
                     from fitting import RossiHistogramFit
                     thisFit = RossiHistogramFit(counts,bin_centers,settings.generating_histogram_settings,settings.line_fitting_settings, 
                                   settings.general_program_settings, settings.residual_plot_settings, settings.histogram_visual_settings)
-                    popt = thisFit.fit_and_residual(save_every_fig=False, show_plot="No")
+                    popt = thisFit.fit_and_residual(save_every_fig=True, show_plot="No", folder_index=i)
                     popt_array = popt
 
                 else:
@@ -76,7 +76,7 @@ def compile_sample_stdev_RA_dist(settings):
                     thisFit = RossiHistogramFit(counts,bin_centers,settings.generating_histogram_settings,settings.line_fitting_settings, 
                                   settings.general_program_settings, settings.residual_plot_settings, settings.histogram_visual_settings)
 
-                    popt = thisFit.fit_and_residual(save_every_fig=False, show_plot="No")
+                    popt = thisFit.fit_and_residual(save_every_fig=True, show_plot="No", folder_index=i)
                     RA_hist_array = np.vstack((RA_hist_array, counts))
                     # popt_array = np.vstack((popt_array, popt))
 
