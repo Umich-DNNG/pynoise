@@ -47,7 +47,6 @@ class Settings:
 
     def set(self, type, setting, value):
         self.settings[type][setting] = value
-        self.changed = True
     
     def get(self, type, setting):
         return self.settings[type].get(setting)
