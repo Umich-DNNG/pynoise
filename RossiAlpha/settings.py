@@ -33,7 +33,7 @@ class Settings:
                                 'style':'-',
                                 'width':1},
 
-                resSettings={'s':8}
+                resSettings={'s':8.0}
                 ):
         
         self.settings = {'io_file_info': ioSettings,
@@ -44,14 +44,17 @@ class Settings:
                          'residual_plot_settings': resSettings
         }
 
-    def changeSetting(self, type, setting, value):
+    def set(self, type, setting, value):
         self.settings[type][setting] = value
     
+    def get(self, type, setting):
+        return self.settings[type][setting]
+
     def print_io(self):
         print('INPUT/OUTPUT SETTINGS')
-        print('Input type:',self.settings['io_file_info']['type'])
-        print('Input file/folder:',self.settings['io_file_info']['input'])
-        print('Output file:',self.settings['io_file_info']['output'])
+        print('Input type:',self.get('io_file_info','type'))
+        print('Input file/folder:',self.get('io_file_info','input'))
+        print('Output file:',self.get('io_file_info','output'))
 
     def print_gen(self):
         print('GENERAL SETTINGS')
