@@ -1,7 +1,46 @@
 from settings import *
 import sys
 
+# The settings object to be referenced.
 setting = Settings()
+
+def plotSettings():
+    print()
+
+# The function that selects color settings.
+def showColors():
+    color = ''
+    print('You can choose from the following colors:')
+    print('b - blue')
+    print('g - green')
+    print('r - red')
+    print('c - cyan')
+    print('m - magenta')
+    print('y - yellow')
+    print('k - black')
+    print('w - white')
+    while True:
+        color = input('Choose color: ')
+        match color:
+            case 'b':
+                return 'blue'
+            case 'g':
+                return 'green'
+            case 'r':
+                return 'red'
+            case 'c':
+                return 'cyan'
+            case 'm':
+                return 'magenta'
+            case 'y':
+                return 'yellow'
+            case 'k':
+                return 'black'
+            case 'w':
+                return 'white'
+            case _:
+                print('You must select a valid color.')
+
 
 def showGroups():
     print('What setting group would you like to edit?')
@@ -66,6 +105,30 @@ def fitSet():
     print('s - line style')
     print('w - line width')
     print('e - exit to main menu')
+    while choice != 'e':
+        choice = input('Enter setting selection: ')
+        match choice:
+            case 'm':
+                print('The current value of main color is',
+                      setting.get('line_fitting_settings','color'),
+                      'and must be a color.')
+                color = showColors()
+                setting.set('line_fitting_settings','color',color)
+                print('Set the value of main color to ' + color + '.')
+            case 'e':
+                print('The current value of edge color is',
+                      setting.get('line_fitting_settings','edge'),
+                      'and must be a color.')
+                color = showColors()
+                setting.set('line_fitting_settings','edge',color)
+                print('Set the value of edge color to ' + color + '.')
+            case 'f':
+                print('The current value of face color is',
+                      setting.get('line_fitting_settings','color'),
+                      'and must be a color.')
+                color = showColors()
+                setting.set('line_fitting_settings','color',color)
+                print('Set the value of main color to ' + color + '.')
 
 def resSet():
     choice = ''
