@@ -30,9 +30,7 @@ class RossiHistogram:
         self.title = "Histogram"
         
         # Parameters set once plot(time_diffs) is called
-        self.counts = None
-        self.bin_edges = None
-        self.bin_centers = None
+        self.counts, self.bin_edges, self.bin_centers = None, None, None
 
     def plot(self, time_diffs, save_every_fig, show_plot):
 
@@ -61,7 +59,8 @@ class RossiHistogram:
 
         # Plotting
         plt.plot(bin_centers, counts, drawstyle='steps-post', **self.options)
-        plt.bar(bin_centers, counts,
+        plt.bar(bin_centers, 
+                counts,
                 width=0.8 * (bin_centers[1] - bin_centers[0]),
                 alpha=0.6,
                 color="b",

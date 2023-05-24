@@ -1,10 +1,7 @@
 import os  # For scanning directories
 import numpy as np
 
-# --------------------------------------------------------------------------------
-
-
-# settings class stores the separate dictionaries of settings created from the input file
+# Settings class stores the separate dictionaries of settings created from the input file
 class Settings:
     def __init__(
         self,
@@ -23,7 +20,7 @@ class Settings:
         self.residual_plot_settings = residual_plot_settings
 
 
-# reads in the input from settings.txt and stores it in dictionaries
+# Reads in the input from settings.txt and stores it in dictionaries
 def readInput(filePath = None):
 
     ''' Reads the settings file and stores the appropriate data
@@ -84,4 +81,5 @@ def readInput(filePath = None):
             residual_plot_settings,
             generating_histogram_settings,
         )
+
     return theseSettings
