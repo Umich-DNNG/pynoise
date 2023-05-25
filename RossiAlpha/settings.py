@@ -44,15 +44,18 @@ class Settings:
         self.changed = False
 
     def isFloat(self, input):
-        if input.replace(".", "").isnumeric() and input.count('.') <= 1:
+        try:
+            float(input)
             return True
-        else:
+        except ValueError:
             return False
 
     def updated(self):
+        '''Returns whether or not the settings have been updated in the current runtime.'''
         return self.changed
 
     def update(self):
+        '''Indicate that the settings have been updated/altered.'''
         self.changed = True
 
     def read(self, path):
