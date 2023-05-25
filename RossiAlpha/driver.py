@@ -1,5 +1,6 @@
 from settings import *
 import sys
+import os
 
 # The settings object to be referenced.
 parameters = Settings()
@@ -253,7 +254,7 @@ def settingsEditor():
                 showGroups()
             case 'd':
                 print()
-                importSettings()
+                importSettings(False)
             case '':
                 print('Returning to menu...\n')
                 break
@@ -332,11 +333,27 @@ def settingsDriver():
             case _:
                 print('Unknown input. Use one of the aforementioned commands to edit, view, or approve the settings.')
 
-def importSettings():
-    print('Enter the name of the settings file (not including '
-        + 'the .set file extension) you want imported.')
-    file = input('Name: ')
-    print('TODO - Import settings from .set file')
+def importSettings(init):
+    path = 'blank'
+    file = 'blank'
+    while not os.path.isfile(path) and (init or file != ''):
+        print('Enter the name of the settings file (not including '
+            + 'the .set file extension) you want imported.')
+        if init:
+            file = input('Name of file: ')
+        else:
+            file = input('Name of file (or blank to cancel): ')
+        if file == '' and not init:
+            print('Returning to menu...\n')
+        else:
+            file = file + '.set'
+            path = os.path.realpath(__file__)
+            path = os.path.join(os.path.dirname(path),file)
+            if os.path.isfile(path):
+                print('Importing settings from ' + file + '...')
+                parameters.read(path)
+            else:
+                print('It appears the file you selected does not exist. Please try again.\n')
     
 
 def main():
@@ -355,10 +372,13 @@ def main():
             case 'd':
                 print()
                 print('Initializing program with default settings...')
-                parameters.download('default.set')
+                path = os.path.realpath(__file__)
+                path = os.path.join(os.path.dirname(path),'default.set')
+                parameters.read(path)
             case 'i':
                 print()
-                importSettings()
+                importSettings(True)
+                print()
             case _:
                 print('Unknown input. Use one of the aforementioned commands to edit, view, or approve the settings.')
                 print()
@@ -392,13 +412,34 @@ def main():
                     print('This will overwrite the current default settings. Are you sure you want to do this?')
                     choice = input('Enter y to continue and anything else to abort: ')
                     if choice == 'y':
-                        print('TODO - overwrite the deafult settings file')
+                        path = os.path.realpath(__file__)
+                        path = os.path.join(os.path.dirname(path),'default.set')
+                        print('Overwriting default settings...')
+                        parameters.write(path)
+                        print('Default settings overwritten.\n')
                     else:
                         selection = ''
                 case 'n':
-                    print('Enter a name for the new settings (not including the .set file extension).')
-                    choice  = input('Name: ')
-                    print('TODO - create a new settings file')
+                    path = 'blank'
+                    file = 'blank'
+                    while file != '':
+                        print('Enter a name for the new settings (not including the .set file extension).')
+                        file  = input('Name of file (or blank to cancel): ')
+                        file = file + '.set'
+                        path = os.path.realpath(__file__)
+                        path = os.path.join(os.path.dirname(path),file)
+                        if os.path.isfile(path):
+                            print('WARNING: settings file ' + file + ' already exists.'
+                                  + ' Do you want to overwrite the previous stored settings?')
+                            choice = input('Enter y to continue and anything else to abort: ')
+                            if choice == 'y':
+                                print('Overwriting ' + file + '...')
+                                parameters.write(path)
+                                print(file + ' overwritten.\n')
+                        else:
+                            print('Saving current settings to new file ' + file + '...')
+                            parameters.write(path)
+                            print('Settings saved.')
                 case 'a':
                     print('All your current changes will be lost. Are you sure you want to do this?')
                     choice = input('Enter y to continue and anything else to abort: ')

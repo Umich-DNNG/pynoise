@@ -1,5 +1,3 @@
-import os
-
 class Settings:
 
     def __init__(self,
@@ -57,9 +55,7 @@ class Settings:
     def update(self):
         self.changed = True
 
-    def download(self, file):
-        path = os.path.realpath(__file__)
-        path = os.path.join(os.path.dirname(path),file)
+    def read(self, path):
         f = open(path, "r")
         line = ''
         while line != 'Input/Output Settings':
@@ -153,6 +149,9 @@ class Settings:
                 self.set('Residual Plot Settings',type,setting)
             line = f.readline().replace('\n','')
         self.changed = False
+
+    def write(path):
+        print('TODO')
 
     def set(self, type, setting, value):
         self.settings[type][setting] = value
