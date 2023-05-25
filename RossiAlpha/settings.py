@@ -45,6 +45,9 @@ class Settings:
         }
         self.changed = False
 
+    def download(file):
+        print('TODO - Implement the download function. This should be able to take a standardized .set file and load it into the settings object.')
+
     def set(self, type, setting, value):
         self.settings[type][setting] = value
     
@@ -57,7 +60,7 @@ class Settings:
     def print_section(self, type):
         print(type)
         if len(self.settings[type]) == 0:
-            print ('No settings')
+            print ('No specified settings.')
         else:
             for setting in self.settings[type]:
                 print(setting,'-',self.get(type,setting))
