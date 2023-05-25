@@ -45,7 +45,13 @@ class Settings:
         }
         self.changed = False
 
-    def download(file):
+    def updated(self):
+        return self.changed
+
+    def update(self):
+        self.changed = True
+
+    def download(self, file):
         print('TODO - Implement the download function. This should be able to take a standardized .set file and load it into the settings object.')
 
     def set(self, type, setting, value):
