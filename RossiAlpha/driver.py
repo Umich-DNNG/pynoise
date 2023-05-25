@@ -255,6 +255,7 @@ def settingsEditor():
             case 'd':
                 print()
                 importSettings(False)
+                print()
             case '':
                 print('Returning to menu...\n')
                 break
@@ -378,7 +379,6 @@ def main():
             case 'i':
                 print()
                 importSettings(True)
-                print()
             case _:
                 print('Unknown input. Use one of the aforementioned commands to edit, view, or approve the settings.')
                 print()
@@ -422,7 +422,7 @@ def main():
                 case 'n':
                     path = 'blank'
                     file = 'blank'
-                    while file != '':
+                    while file != '' and not os.path.isfile(path):
                         print('Enter a name for the new settings (not including the .set file extension).')
                         file  = input('Name of file (or blank to cancel): ')
                         file = file + '.set'
@@ -435,7 +435,9 @@ def main():
                             if choice == 'y':
                                 print('Overwriting ' + file + '...')
                                 parameters.write(path)
-                                print(file + ' overwritten.\n')
+                                print('Settings in ' + file + ' overwritten.\n')
+                            else:
+                                path = 'blank'
                         else:
                             print('Saving current settings to new file ' + file + '...')
                             parameters.write(path)

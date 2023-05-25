@@ -91,9 +91,9 @@ class Settings:
         line = f.readline().replace('\n','')
         self.set('General Settings','Sort data?',line[12:])
         line = f.readline().replace('\n','')
-        self.set('General Settings','Save fig?',line[11:])
+        self.set('General Settings','Save figures?',line[15:])
         line = f.readline().replace('\n','')
-        self.set('General Settings','Show plot?',line[12:])
+        self.set('General Settings','Show plots?',line[13:])
         line = f.readline().replace('\n','')
         self.set('General Settings','Save directory',line[16:])
         f.readline()
@@ -150,8 +150,18 @@ class Settings:
             line = f.readline().replace('\n','')
         self.changed = False
 
-    def write(path):
-        print('TODO')
+    def write(self, path):
+        f = open(path,'w')
+        f.write('# Custom user generated settings.\n')
+        f.write('#----------------------------------------------------------------------------------------\n')
+        for type in self.settings:
+            f.write(type + '\n')
+            f.write('#----------------------------------------------------------------------------------------\n')
+            for setting in self.settings[type]:
+                f.write(setting + ': ')
+                f.write(str(self.get(type, setting)))
+                f.write('\n')
+            f.write('#----------------------------------------------------------------------------------------\n')
 
     def set(self, type, setting, value):
         self.settings[type][setting] = value

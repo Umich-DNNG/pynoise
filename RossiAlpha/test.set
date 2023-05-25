@@ -1,4 +1,4 @@
-# The default settings for running the PyNoise project.
+# Custom user generated settings.
 #----------------------------------------------------------------------------------------
 Input/Output Settings
 #----------------------------------------------------------------------------------------
@@ -8,9 +8,9 @@ Output file:
 #----------------------------------------------------------------------------------------
 General Settings
 #----------------------------------------------------------------------------------------
-Fit range: [0,2e3]
+Fit range: [0, 2000.0]
 Plot scale: linear
-Time difference method: any_and_all
+Time difference method: any_and_all cross_correlations no_repeat digital_delay
 Digital delay: 750
 Number of folders: 10
 Meas time per folder: 60
@@ -29,7 +29,7 @@ linewidth: 3
 #----------------------------------------------------------------------------------------
 Histogram Generation Settings
 #----------------------------------------------------------------------------------------
-Reset time: 2e3
+Reset time: 2000.0
 Bin width: 2
 Minimum cutoff: 30
 #----------------------------------------------------------------------------------------
