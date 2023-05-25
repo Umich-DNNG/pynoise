@@ -355,8 +355,7 @@ def main():
             case 'd':
                 print()
                 print('Initializing program with default settings...')
-                print('WARNING: with  defualt settings, the input file'
-                      + '/folder is not specified. You must add it manually.')
+                parameters.download('default.set')
             case 'i':
                 print()
                 importSettings()

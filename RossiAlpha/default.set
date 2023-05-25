@@ -1,26 +1,25 @@
 # The default settings for running the PyNoise project.
 #----------------------------------------------------------------------------------------
-I/O FILE INFO
+Input/Output Settings
 #----------------------------------------------------------------------------------------
-input file: RF3-40_59min.txt
-output file: 
-input folder:
-file type: 1
+Input type: 1
+Input file/folder: RF3-40_59min.txt
+Output file: 
 #----------------------------------------------------------------------------------------
-GENERAL PROGRAM SETTINGS
+General Settings
 #----------------------------------------------------------------------------------------
-fit range : [0,2e3]
-plot scale : linear
-time difference method : any_and_all
-digital delay : 750
-number of folders : 10
-meas time per folder : 60
-sort data? : yes
-save fig? : yes
-show plot? : no
-save dir : ./
+Fit range: [0,2e3]
+Plot scale: linear
+Time difference method: any_and_all
+Digital delay: 750
+Number of folders: 10
+Meas time per folder: 60
+Sort data?: yes
+Save fig?: yes
+Show plot?: no
+Save directory: ./
 #--------------------------------------------------------------------------------
-HISTOGRAM VISUAL SETTINGS
+Histogram Visual Settings
 #--------------------------------------------------------------------------------
 color: black
 markeredgecolor: blue
@@ -28,13 +27,13 @@ markerfacecolor: black
 linestyle: -
 linewidth: 3
 #--------------------------------------------------------------------------------
-GENERATING HISTOGRAM SETTINGS
+Histogram Generation Settings
 #--------------------------------------------------------------------------------
-reset time : 2e3
-bin width : 2
-minimum cutoff : 30
+Reset time: 2e3
+Bin width: 2
+Minimum cutoff: 30
 #--------------------------------------------------------------------------------
-LINE FITTING SETTINGS
+Line Fitting Settings
 #--------------------------------------------------------------------------------
 color: red
 markeredgecolor: blue
@@ -42,6 +41,7 @@ markerfacecolor: black
 linestyle: -
 linewidth: 1
 #--------------------------------------------------------------------------------
-RESIDUAL PLOT SETTINGS
+Residual Plot Settings
 #--------------------------------------------------------------------------------
 s: 1
+#--------------------------------------------------------------------------------
