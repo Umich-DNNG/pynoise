@@ -124,20 +124,20 @@ def ioSet():
 
 def genSet():
     choice = 'blank'
-    print('What setting would you like to edit?')
-    print('')
-    print('')
-    print('')
-    print('')
-    print('')
-    print('')
-    print('')
-    print('')
-    print('')
-    print('')
-    print('v - view current General Settings')
-    print('Leave the command blank if you wish to return to the previous menu.')
     while choice != '':
+        print('What setting would you like to edit?')
+        print('r - fit range')
+        print('p - plot scale')
+        print('t - time difference method')
+        print('d - digital delay')
+        print('n - number of folders')
+        print('m - meas time per folder')
+        print('o - sort data?')
+        print('f - save fig?')
+        print('w - show plot?')
+        print('a - save directory')
+        print('v - view current General Settings')
+        print('Leave the command blank if you wish to return to the previous menu.')
         choice = input('Enter setting: ')
         match choice:
             case 'v':
