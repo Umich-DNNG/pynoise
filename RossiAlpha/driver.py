@@ -16,6 +16,17 @@ def isFloat(input):
     except ValueError:
         return False
 
+def fileType(input):
+
+    '''Converts input type digit to text for user interactions (print statements).
+    
+    Assumes input is only either 1 or 2.'''
+
+    if input == 1:
+        return 'single file'
+    else:
+        return 'folder'
+
 def inputBool(group, setting):
 
     '''Update a setting to be a boolean (stored as yes or no).
@@ -81,17 +92,6 @@ def inputNum(group, setting, type):
         # Catchall for invalid inputs.
         else:
             print('Please enter a' + type + '.')
-
-def fileType(input):
-
-    '''Converts input type digit to text for user interactions.
-    
-    Assumes input is only either 1 or 2.'''
-
-    if input == 1:
-        return 'single file'
-    else:
-        return 'folder'
 
 def changeInput():
 

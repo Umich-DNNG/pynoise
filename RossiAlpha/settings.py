@@ -59,7 +59,7 @@ class Settings:
         # settings have been changed during runtime.
         self.changed = False
 
-    def isFloat(input):
+    def isFloat(self, input):
 
         '''Checks whether or not the input string can be converted to a float.'''
 
@@ -118,9 +118,8 @@ class Settings:
         
         Assumes the group and file object are correct (no error checking).'''
 
-        # Pop each setting currently in the plot group.
-        for setting in self.settings[group]:
-            self.remove(group, setting)
+        # Clear all settings currently in the group.
+        self.settings[group] = {}
         # Get the first setting for the plot.
         line = f.readline().replace('\n','')
         # Continue looping while the input isn't a dashed line.
@@ -163,9 +162,9 @@ class Settings:
         # If input type not specified, assume file is not given, and issue a warning to 
         # the user. Then read over the input file/foler line since no input is assumed.
         if line[12] == '0':
-            print('WARNING: with the current defualt settings, the input file'
+            print('WARNING: with the current imported settings, the input file'
                       + '/folder is not specified. You must add it manually.')
-            f.readLine()
+            f.readline()
         else:
             line = f.readline().replace('\n','')
             self.set('Input/Output Settings','Input file/folder',line[19:])
