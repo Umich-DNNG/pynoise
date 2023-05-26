@@ -5,6 +5,7 @@ import main as mn
 import fitting as fit
 import plots as plt
 import timeDifs as dif
+import analyzingFolders as fol
 import os
 
 # The settings object to be referenced.
@@ -661,19 +662,26 @@ def main():
         print('Enter a blank command to end the program.\n')
         selection = input('Enter a command: ')
         match selection:
+            # Run the whole analysis process.
             case 'm':
                 print('TODO: Run main.py accordingly')
+            # Utilize the timeDifs.py program.
             case 't':
                 print('TODO: Run timeDifs.py accordingly')
+            # Utilize the plots.py program.
             case 'p':
                 print('TODO: Run plots.py accordingly')
+            # Utilize the fitting.py program.
             case 'f':
                 print('TODO: Run fitting.py accordingly')
+            # View and/or edit program settings.
             case 's':
                 print()
                 settingsDriver()
+            # End the program.
             case '':
-                break
+                print('Ending program...\n')
+            # Catchall for invalid commands.
             case _:
                 print('Unknown input. Use one of the aforementioned commands to edit, view, or approve the settings.')
                 print()
