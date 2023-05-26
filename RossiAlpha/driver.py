@@ -1,10 +1,14 @@
 '''The main file that should be run each time the user wants to use this Python Suite.'''
 
-from settings import *
+import settings as set
+import main as mn
+import fitting as fit
+import plots as plt
+import timeDifs as dif
 import os
 
 # The settings object to be referenced.
-parameters = Settings()
+parameters = set.Settings()
 
 def isFloat(input):
 
@@ -649,10 +653,22 @@ def main():
     # Continue running the program until the user is done.
     while selection != '':
         print('You can utitilze any of the following functions:')
+        print('m - run the entire program through the main driver')
+        print('t - calculate time differences')
+        print('p - create plots of the time difference data')
+        print('f - fit the data to an exponential curve')
         print('s - view or edit the program settings')
         print('Enter a blank command to end the program.\n')
         selection = input('Enter a command: ')
         match selection:
+            case 'm':
+                print('TODO: Run main.py accordingly')
+            case 't':
+                print('TODO: Run timeDifs.py accordingly')
+            case 'p':
+                print('TODO: Run plots.py accordingly')
+            case 'f':
+                print('TODO: Run fitting.py accordingly')
             case 's':
                 print()
                 settingsDriver()
