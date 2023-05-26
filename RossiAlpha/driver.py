@@ -1,3 +1,5 @@
+'''The main file that should be run each time the user wants to use this Python Suite.'''
+
 from settings import *
 import os
 
@@ -14,7 +16,7 @@ def isFloat(input):
     except ValueError:
         return False
 
-def inputBool(type, setting):
+def inputBool(group, setting):
 
     '''Update a setting to be a boolean (stored as yes or no).
     
@@ -29,12 +31,12 @@ def inputBool(type, setting):
         match selection:
             # Update settings to yes.
             case 'y':
-                parameters.set(type,setting,'yes')
+                parameters.set(group,setting,'yes')
                 parameters.update()
                 print('Updated the ' + setting + ' to yes.\n')
             # Update settings to no.
             case 'n':
-                parameters.set(type,setting,'no')
+                parameters.set(group,setting,'no')
                 parameters.update()
                 print('Updated the ' + setting + ' to no.\n')
             # Cancel changes.
@@ -48,7 +50,8 @@ def inputNum(group, setting, type):
 
     '''Update a setting to be an integer or float.
     
-    Send the function the setting group and the specific setting to be edited, and one of the two type options:
+    Send the function the setting group and the specific 
+    setting to be edited, and one of the two type options:
 
     "n integer" - integer
 
@@ -363,13 +366,15 @@ def histSet():
 
 def plotSettings(plot):
 
-    '''The general settings editor for plot settings (histogram visual, line fitting, and residual plot).
+    '''The general settings editor for plot settings 
+    (histogram visual, line fitting, and residual plot).
     
     Send the function the setting group to be edited.
     
     Assumes the inputs are correct (no input error detection).
     
-    Since there are countless plot variables, no user error detection is supplied to insure plot paramters/values are correct.'''
+    Since there are countless plot variables, no user error detection 
+    is supplied to insure plot paramters/values are correct.'''
 
     choice = 'blank'
     print('You are editing settings for a plot. There are many settings '
@@ -387,17 +392,25 @@ def plotSettings(plot):
         match choice:
             # Change exisitng setting.
             case 'c':
-                add = input('Input the parameter name that you want added/modified: ')
+                setting = input('Input the parameter name that you want added/modified: ')
                 # If setting did not previously exist, tell user.
-                if parameters.get(plot, add) == None:
-                    print('Created parameter ' + add + ' in ' + plot + '.')
+                if parameters.get(plot, setting) == None:
+                    print('Created parameter ' + setting + ' in ' + plot + '.')
                 value = input('Input the value of the parameter (make sure '
                               + 'that it in agreement with the correct variable '
                               'type for the parameter): ')
-                # Update plot paramter value.
-                parameters.set(plot,add,value)
+                # If value is numeric, store as integer.
+                if value.isnumeric():
+                    parameters.set(plot,setting,int(value))
+                # If value is a float, store as float.
+                elif isFloat(value):
+                    parameters.set(plot,setting,float(value))
+                # Otherwise, store as a string.
+                else:
+                    parameters.set(plot,setting,value)
+                # Mark the settings as updated.
                 parameters.update()
-                print('Set paramter ' + add + ' in ' + plot + ' to ' + value +  '.')
+                print('Set paramter ' + setting + ' in ' + plot + ' to ' + value +  '.')
             # Delete existing setting.
             case 'd':
                 remove = input('Input the parameter name that you want removed: ')
