@@ -8,6 +8,4 @@
 
 # vscode configuration files
 *.vscode
-
-# .DS_Store file does not need to be saved
 .DS_Store
