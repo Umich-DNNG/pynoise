@@ -63,17 +63,17 @@ class RossiHistogramFit:
         '''
 
         # Plotting options
-        self.fitting_options = settings.fitSettings
-        self.residual_options = settings.resSettings
-        self.hist_visual_options = settings.visSettings
+        self.fitting_options = settings['Line Fitting Settings']
+        self.residual_options = settings['Residual Plot Settings']
+        self.hist_visual_options = settings['Histogram Visual Settings']
 
         # Required parameters
         self.counts = counts
         self.bin_centers = bin_centers
-        self.fit_range = settings.genSettings['Fit range']
-        self.min_cutoff = settings.histSettings['Minimum cutoff']
-        self.timeDifMethod = settings.genSettings['Time difference method']
-        self.save_dir = settings.ioSettings['Save directory']
+        self.fit_range = settings['General Settings']['Fit range']
+        self.min_cutoff = settings['Histogram Generation Settings']['Minimum cutoff']
+        self.timeDifMethod = settings['General Settings']['Time difference method']
+        self.save_dir = settings['Input/Output Settings']['Save directory']
 
 
     def fit(self, save_fig, show_plot):
@@ -134,12 +134,12 @@ class RossiHistogramFit:
         ax1.set_ylabel(self.y_axis)
 
         # Saving figure (optional)
-        if save_fig == "yes":
+        if save_fig:
             fig.tight_layout()
             fig.savefig('fitted_only', dpi=300, bbox_inches='tight')
 
         # Showing plot (optional)
-        if show_plot == "yes":
+        if show_plot:
             plt.show()
 
         return popt
@@ -218,7 +218,7 @@ class RossiHistogramFit:
         fig.suptitle(self.timeDifMethod, fontsize=14)
 
         # Adjusting layout and saving figure (optional)
-        if save_every_fig == "yes":
+        if save_every_fig:
             fig.tight_layout()
             if folder_index is not None:
                 save_filename = os.path.join(self.save_dir, 'fitted_and_residual_folder' + str(folder_index)) 
@@ -228,7 +228,7 @@ class RossiHistogramFit:
                 fig.savefig(save_filename, dpi=300, bbox_inches='tight')
 
         # Showing plot (optional)
-        if show_plot == "yes":
+        if show_plot:
             plt.show()
 
         return popt
@@ -348,11 +348,11 @@ class Fit_With_Weighting:
         ax.set_yscale(self.plot_scale)
 
         # Adjusting layout and saving figure (optional)
-        if save_fig == 'yes':
+        if save_fig:
             fig.tight_layout()
             save_filename = os.path.join(self.save_dir, 'histogram_weighting_total.png') 
             fig.savefig(save_filename, dpi=300, bbox_inches='tight')
         
         # Displaying the plot (optional)
-        if show_plot == 'yes':
+        if show_plot:
             plt.show()

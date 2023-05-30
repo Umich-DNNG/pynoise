@@ -686,7 +686,10 @@ def main():
         match selection:
             # Run the whole analysis process.
             case 'm':
-                print('TODO: Run main.py accordingly')
+                if parameters.get('Input/Output Settings','Input type') == 1:
+                    mn.analyzeAllType1(parameters.settings)
+                else:
+                    mn.analyzeAllType2(parameters.settings)
             # Utilize the timeDifs.py program.
             case 't':
                 print('TODO: Run timeDifs.py accordingly')

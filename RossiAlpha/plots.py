@@ -64,13 +64,13 @@ class RossiHistogram:
         plt.title(self.title)
 
         # Saving plot (optional)
-        if save_fig == "yes":
+        if save_fig:
             plt.tight_layout()
             save_filename = os.path.join(self.save_dir, 'histogram.png')
             plt.savefig(save_filename, dpi=300, bbox_inches='tight')
 
         # Showing plot (optional)
-        if show_plot == "yes":
+        if show_plot:
             plt.show()
 
         #Set the counts, bin_centers, and bin_edges of the object
