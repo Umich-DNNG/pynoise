@@ -263,17 +263,23 @@ class Settings:
         # will have been overwritten, so mark settings as unchanged.
         self.changed = False
 
-    def write(self, path):
+    def write(self, path, default):
 
         '''The function that writes the current settings to a given 
         .set file. The file must be given as an absolute path.
+
+        The function takes a boolean, default, which marks whether 
+        or not the settings being written are the default.
         
         The function assumes that the file path is valid (no error checking).'''
 
         # Create a file object by opening the given file (write enabled).
         f = open(path,'w')
         # Create a generic comment header and dashed line.
-        f.write('# Custom user generated settings.\n')
+        if default:
+            f.write('# The default settings for running the PyNoise project.\n')
+        else:
+            f.write('# Custom user generated settings.\n')
         f.write('#----------------------------------------------'
                 + '------------------------------------------\n')
         # For each settings group, do the following:
