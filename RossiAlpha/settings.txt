@@ -3,7 +3,7 @@
 #----------------------------------------------------------------------------------------
 I/O FILE INFO
 #----------------------------------------------------------------------------------------
-input file: RF3-40_59min.txt
+input file path: RF3-40_59min.txt
 output file: 
 input folder: /Users/vincentweng/DropBox/20210322_06_RF3-42_CF_OS_run1_60min_0947
 file type: 1
