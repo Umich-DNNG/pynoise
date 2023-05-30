@@ -46,6 +46,7 @@ Default or custom settings can be imported into the program and can be changed d
 2. Each settings group must have a header of the correct name and must have its contents surrounded by a comment line on either side (dashed lines are commonly used but the comment line can contain anything)
 3. Input/Output, General, and Histogram Generation Settings must always have the same settings in the same order.
 4. Other settings groups can have a variable number of parameters in any order.
+
 See the default.set format for examples.
 
 ### Main
