@@ -43,8 +43,7 @@ def exp_decay_2_param(x, a, b):
 #--------------------------------------------------------------------------------    
 
 class RossiHistogramFit:
-    def __init__(self, counts, bin_centers, generating_hist_settings, 
-                 fitting_opts, general_settings, residual_opts, hist_visual_opts):
+    def __init__(self, counts, bin_centers, settings):
         
         '''
         Description:
@@ -64,17 +63,17 @@ class RossiHistogramFit:
         '''
 
         # Plotting options
-        self.fitting_options = fitting_opts
-        self.residual_options = residual_opts
-        self.hist_visual_options = hist_visual_opts
+        self.fitting_options = settings.fitSettings
+        self.residual_options = settings.resSettings
+        self.hist_visual_options = settings.visSettings
 
         # Required parameters
         self.counts = counts
         self.bin_centers = bin_centers
-        self.fit_range = general_settings['fit range']
-        self.min_cutoff = generating_hist_settings['minimum cutoff']
-        self.timeDifMethod = general_settings['time difference method']
-        self.save_dir = general_settings['save dir']
+        self.fit_range = settings.genSettings['Fit range']
+        self.min_cutoff = settings.histSettings['Minimum cutoff']
+        self.timeDifMethod = settings.genSettings['Time difference method']
+        self.save_dir = settings.ioSettings['Save directory']
 
 
     def fit(self, save_fig, show_plot):
