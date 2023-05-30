@@ -75,26 +75,21 @@ counts, bin_centers, bin_edges = thisPlot.plot(time_diffs, save_fig="yes", show_
 
 
 ### Fitting
-In the fitting.py file, there are two classes. One is called ```RossiHistogramFit``` and the other one is called ```Fit_With_Weighting```. Currently, the difference between the two classes is that "Fit_With_Weighting" deals with parsing through folders of files, as well as creating uncertainty plots. The the class ```RossiHistogramFit```, there are two functions called "fit()" and "fit_and_residual()", the former is used to fit an exponential decay curve onto the histogram and the latter produces a residual plot on top of the curve fitting.
+In the fitting.py file, there are two classes. One is called "Fit" and the other one is called "Fit_With_Weighting". Currently, the difference between the two classes is that "Fit_With_Weighting" deals with parsing through folders of files, as well as creating uncertainty plots. The the class "Fit", there are two functions called "fit()" and "fit_and_residual()", the former is used to fit an exponential decay curve onto the histogram and the latter produces a residual plot on top of the curve fitting.
 
-**Using RossiHistogramFit**
+A Fit() object can be created first with the parameters below: 
 
-```python
-# creating Fit() object with specified settings
-    thisFit = RossiHistogramFit(counts, bin_centers, theseSettings.generating_histogram_settings, 
-                      line_fitting_settings, general_program_settings,
-                      residual_plot_settings, histogram_visual_settings)
-        
-# Fitting curve to the histogram and plotting the residuals
-    thisFit.fit_and_residual(save_every_fig=theseSettings.general_program_settings['save fig?'], 
-                                 show_plot=theseSettings.general_program_settings['show plot?'])
-        
-```
+* counts (array)
+* bin_centers (array)
+* generating_hist_settings (dict)
+* fitting_opts (dict)
+* general_settings (dict)
+* residual_opts (dict)
+* showPlot (boolean)
 
 From there, the Fit.fit() function will fit an exponential decay curve onto the histogram (given in the form of counts and bin_centers). As discussed above, the Fit.fit_and_residual() function will do the same thing as Fit.fit(), execept that it will plot the relative residuals onto a plot right below the curve fitting plot. Thus, the images produced will have two plots that correspond to a line fitted for a histogram and a residua plot describing how well the line is fitting at each Time Difference (ns) unit. 
 
 
-**Using Fit_With_Weighting**
 
 A Fit_With_Weighting() object can be created with the parameters below:
 
