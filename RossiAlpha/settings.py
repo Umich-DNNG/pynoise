@@ -13,7 +13,7 @@ class Settings:
                 ioSettings={
                                 'Input type':0,
                                 'Input file/folder':'',
-                                'Output file':''
+                                'Save directory':''
                             },
 
                 # Initial General Settings.
@@ -27,7 +27,6 @@ class Settings:
                                 'Sort data?':False,
                                 'Save figures?':False,
                                 'Show plots?':False,
-                                'Save directory':''
                             },
 
                 # Inital Histogram Visual Settings.
@@ -181,9 +180,10 @@ class Settings:
             file = line[19:]
             # Store the input file/folder.
             self.set('Input/Output Settings','Input file/folder',os.path.abspath(file))
-        # Read output file and store it.
+        # Read the save directory and store it.
         line = f.readline().replace('\n','')
-        self.set('Input/Output Settings','Output file',line[13:])
+        file = line[16:]
+        self.set('Input/Output Settings','Save directory',os.path.abspath(file))
         # Read past header and dashed lines.
         f.readline()
         f.readline()
@@ -230,9 +230,6 @@ class Settings:
             self.set('General Settings','Show plots?',True)
         else:
             self.set('General Settings','Show plots?',False)
-        # Read the save directory and store it.
-        line = f.readline().replace('\n','')
-        self.set('General Settings','Save directory',line[16:])
         # Read past header and dashed lines.
         f.readline()
         f.readline()
