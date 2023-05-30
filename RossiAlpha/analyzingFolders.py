@@ -29,7 +29,7 @@ def compile_sample_stdev_RA_dist(settings):
     RA_Hist_Total[2] is the uncertainties
     '''
 
-    data_folder = settings.ioSettings['Input file/folder']
+    data_folder = settings['Input/Output Settings']['Input file/folder']
     num_folders = int(settings['General Settings']['Number of folders'])
     i = 0
     for fol_num in range(1, num_folders + 1):
@@ -57,7 +57,7 @@ def compile_sample_stdev_RA_dist(settings):
                 thisPlot = RossiHistogram(settings['Histogram Generation Settings']['Reset time'],
                                           settings['Histogram Generation Settings']['Bin width'],
                                           settings['Histogram Visual Settings'], 
-                                          settings['General Settings']['Save directory'])
+                                          settings['Input/Output Settings']['Save directory'])
 
                 counts, bin_centers, bin_edges = thisPlot.plot(time_diffs, 
                                                                save_fig="no", 
@@ -69,14 +69,10 @@ def compile_sample_stdev_RA_dist(settings):
                     RA_hist_array = np.vstack((RA_hist_array, counts))
 
                 thisFit = RossiHistogramFit(counts,
-                                            bin_centers,settings['Histogram Generation Settings'],
-                                            settings['Line Fitting Settings'], 
-                                            settings['General Settings'], 
-                                            settings['Residual Plot Settings'], 
-                                            settings['Histogram Visual Settings'])
+                                            bin_centers,settings)
 
-                thisFit.fit_and_residual(save_every_fig=settings['General Settings']['save fig?'], 
-                                         show_plot=settings['General Settings']['show plot?'], 
+                thisFit.fit_and_residual(save_every_fig=settings['General Settings']['Save figures?'], 
+                                         show_plot=settings['General Settings']['Show plots?'], 
                                          folder_index=i)
 
                 i = i + 1

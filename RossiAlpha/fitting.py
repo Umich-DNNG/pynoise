@@ -236,7 +236,7 @@ class RossiHistogramFit:
 #--------------------------------------------------------------------------------
 
 class Fit_With_Weighting:
-    def __init__(self,RA_hist_totals, min_cutoff, general_settings, fitting_opts, residual_opts):
+    def __init__(self,RA_hist_totals, min_cutoff, general_settings,saveDir, fitting_opts, residual_opts):
 
         '''
         Description:
@@ -262,10 +262,10 @@ class Fit_With_Weighting:
         self.num_bins = np.size(RA_hist_totals[0])
         self.time_diff_centers = RA_hist_totals[1]
         self.uncertainties = RA_hist_totals[2]
-        self.fit_range = general_settings['fit range']
+        self.fit_range = general_settings['Fit range']
         self.min_cutoff = min_cutoff
-        self.plot_scale = general_settings['plot scale']
-        self.save_dir = general_settings['save dir']
+        self.plot_scale = general_settings['Plot scale']
+        self.save_dir = saveDir
 
         # Line fitting variables
         self.xfit, self.yfit = None, None
