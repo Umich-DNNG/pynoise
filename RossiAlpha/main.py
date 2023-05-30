@@ -23,7 +23,8 @@ def main():
     theseSettings = readInput.readInput()
 
     if (theseSettings.io_file_info['file type'] == 1):
-        file_path = os.path.join(os.path.dirname(current_path), theseSettings.io_file_info["input file"])
+        #file_path = os.path.join(os.path.dirname(current_path), theseSettings.io_file_info["input file"])
+        file_path = theseSettings.io_file_info['input file path']
         list_data_n = np.loadtxt(file_path)
         
         # sorting timestamps to be fed into calculate_time_differences()
