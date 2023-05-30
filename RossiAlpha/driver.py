@@ -36,6 +36,18 @@ def fileType(input):
     else:
         return 'folder'
 
+def plotLink(plot):
+
+    '''Returns the right link based on the plot type.
+    
+    Requires the settings group for the plot (Histogram 
+    Visual, Line Fitting, or Residual Plot)'''
+
+    if plot == 'Histogram Visual Settings':
+        return 'https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.bar.html'
+    else:
+        return 'https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.plot.html'
+
 def inputBool(group, setting):
 
     '''Update a setting to be a boolean (stored as yes or no).
@@ -398,10 +410,10 @@ def plotSettings(plot):
     is supplied to insure plot paramters/values are correct.'''
 
     choice = 'blank'
-    print('You are editing settings for a plot. There are many settings '
-          + 'for plots - the full list can be found at '
-          + 'https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.plot.html. '
-          + 'As such, you can add and remove settings as you wish.')
+    print('You are editing settings for a plot. There are many '
+          + 'settings for plots - the full list for', plot, 
+          'can be found at:\n', plotLink(plot),'\nAs such, '
+          + 'you can add and remove settings as you wish.\n')
     print('Choose a following action:')
     print('c - change new or exisitng ' + plot)
     print('d - delete exisiting ' + plot)
