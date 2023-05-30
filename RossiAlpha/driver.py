@@ -11,9 +11,8 @@ import os
 # The settings object to be referenced.
 parameters = set.Settings()
 
-# The aboslute path for the driver, for 
-# generating absolute paths for other files.
-ABSOLUTE_PATH = os.path.dirname(os.path.realpath(__file__))
+# Set the current working directory for assigning absolute paths.
+os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
 def isFloat(input):
 
@@ -134,7 +133,7 @@ def changeInput():
                 parameters.set('Input/Output Settings','Input type',2)
             # Update input.
             if file[0] == '.':
-                file = os.path.join(ABSOLUTE_PATH,file[2:])
+                file = os.path.abspath(file[2:])
             parameters.set('Input/Output Settings','Input file/folder',file)
             parameters.update()
             # Notify user of automatically assigned input type.
@@ -634,7 +633,7 @@ def importSettings(init):
         else:
             # Create an absolute path to the file name.
             file = file + '.set'
-            path = os.path.join(ABSOLUTE_PATH,file)
+            path = os.path.abspath(file)
             # If file exists, import the settings.
             if os.path.isfile(path):
                 print('Importing settings from ' + file + '...')
@@ -667,7 +666,7 @@ def main():
                 print()
                 print('Initializing program with default settings...')
                 # Create absolute path for the default settings file and read it in.
-                path = os.path.join(ABSOLUTE_PATH,'default.set')
+                path = os.path.abspath('default.set')
                 parameters.read(path)
             # Import custom settings.
             case 'i':
@@ -733,7 +732,7 @@ def main():
                     if choice == 'y':
                         # Create an absolute path for the default settings
                         # file and write the current settings into it.
-                        path = os.path.join(ABSOLUTE_PATH,'default.set')
+                        path = os.path.abspath('default.set')
                         print('Overwriting default settings...')
                         parameters.write(path)
                         print('Default settings overwritten.\n')
@@ -751,7 +750,7 @@ def main():
                         file  = input('Name of file (or blank to cancel): ')
                         # Create absolute path for user given file.
                         file = file + '.set'
-                        path = os.path.join(ABSOLUTE_PATH,file)
+                        path = os.path.abspath(file)
                         # If settings file already exists, check that user 
                         # wants to overwrite settings currently in the file.
                         if os.path.isfile(path):

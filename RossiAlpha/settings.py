@@ -2,9 +2,8 @@
 
 import os
 
-# The aboslute path for the driver, for 
-# generating absolute paths for other files.
-ABSOLUTE_PATH = os.path.dirname(os.path.realpath(__file__))
+# Set the current working directory for assigning absolute paths.
+os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
 class Settings:
 
@@ -175,11 +174,8 @@ class Settings:
         else:
             line = f.readline().replace('\n','')
             file = line[19:]
-            # If input path is relative, convert it to an absolute path.
-            if line[19] == '.':
-                file = os.path.join(ABSOLUTE_PATH,line[21:])
             # Store the input file/folder.
-            self.set('Input/Output Settings','Input file/folder',file)
+            self.set('Input/Output Settings','Input file/folder',os.path.abspath(file))
         # Read output file and store it.
         line = f.readline().replace('\n','')
         self.set('Input/Output Settings','Output file',line[13:])
