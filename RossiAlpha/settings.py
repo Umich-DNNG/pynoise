@@ -1,5 +1,11 @@
 '''The file that contains the Settings class for storing and modifying the program settings.'''
 
+import os
+
+# The aboslute path for the driver, for 
+# generating absolute paths for other files.
+ABSOLUTE_PATH = os.path.dirname(os.path.realpath(__file__))
+
 class Settings:
 
     def __init__(self,
@@ -167,7 +173,10 @@ class Settings:
             f.readline()
         else:
             line = f.readline().replace('\n','')
-            self.set('Input/Output Settings','Input file/folder',line[19:])
+            file = line[19:]
+            if line[19] == '.':
+                file = os.path.join(ABSOLUTE_PATH,line[21:])
+            self.set('Input/Output Settings','Input file/folder',file)
         # Read output file and store it.
         line = f.readline().replace('\n','')
         self.set('Input/Output Settings','Output file',line[13:])
