@@ -44,7 +44,7 @@ Users can edit this .txt file to change the settings that they wish to use.
 Default or custom settings can be imported into the program and can be changed during runtime. For the program to read in the settings correctly, the file extension must be .set and must have the following formatting:
 1. The file can begin with any number of comments (lines that start with #)
 2. Each settings group must have a header of the correct name and must have its contents surrounded by a comment line on either side (dashed lines are commonly used but the comment line can contain anything)
-3. The setting groups must come in the same order every time (Input/Output, General, Histogram Visual, Histogram Generation, Line Fitting, Residual Plot)
+3. The setting groups must come in the same order every time (Input/Output -> General -> Histogram Visual -> Histogram Generation -> Line Fitting -> Residual Plot)
 4. Input/Output, General, and Histogram Generation Settings must always have the same settings in the same order.
 5. Other settings groups can have a variable number of parameters in any order.
 
