@@ -14,9 +14,9 @@ Time difference method: any_and_all
 Digital delay: 750
 Number of folders: 10
 Meas time per folder: 60
-Sort data?: yes
-Save figures?: yes
-Show plots?: no
+Sort data?: True
+Save figures?: True
+Show plots?: False
 Save directory: ./
 #----------------------------------------------------------------------------------------
 Histogram Visual Settings

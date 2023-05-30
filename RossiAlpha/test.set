@@ -3,7 +3,7 @@
 Input/Output Settings
 #----------------------------------------------------------------------------------------
 Input type: 1
-Input file/folder: ../RF3-40_59min.txt
+Input file/folder: /Users/maxtennant/Downloads/internship/pynoise/RossiAlpha/RF3-40_59min.txt
 Output file: 
 #----------------------------------------------------------------------------------------
 General Settings
@@ -22,10 +22,10 @@ Save directory: ./
 Histogram Visual Settings
 #----------------------------------------------------------------------------------------
 color: black
+markeredgecolor: blue
 markerfacecolor: black
 linestyle: -
 linewidth: 3
-testparameter: 6000.0
 #----------------------------------------------------------------------------------------
 Histogram Generation Settings
 #----------------------------------------------------------------------------------------

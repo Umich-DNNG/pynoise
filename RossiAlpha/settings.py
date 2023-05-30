@@ -24,9 +24,9 @@ class Settings:
                                 'Digital delay':0,
                                 'Number of folders':0,
                                 'Meas time per folder':0,
-                                'Sort data?':'',
-                                'Save figures?':'',
-                                'Show plots?':'',
+                                'Sort data?':False,
+                                'Save figures?':False,
+                                'Show plots?':False,
                                 'Save directory':''
                             },
 
@@ -46,7 +46,7 @@ class Settings:
                 # Inital Residual Plot Settings.
                 resSettings={}
                 ):
-        
+
         '''The initializer for a Settings object. The object is initialized 
         with blank/empty values, but can be overwritten if desired. However, 
         it is recommended to instead us the read() or set() functions.'''
@@ -133,8 +133,13 @@ class Settings:
             split = line.find(':')
             setting = line[:split]
             value = line[split+2:]
+            # If value is boolean, store as bool.
+            if value == 'True':
+                self.set(group,setting,True)
+            elif value == 'False':
+                self.set(group,setting,False)
             # If value is numeric, store as integer.
-            if value.isnumeric():
+            elif value.isnumeric():
                 self.set(group,setting,int(value))
             # If value is a float, store as float.
             elif self.isFloat(value):
@@ -209,13 +214,22 @@ class Settings:
         self.set('General Settings','Meas time per folder',int(line[22:]))
         # Read the sort data choice and store it.
         line = f.readline().replace('\n','')
-        self.set('General Settings','Sort data?',line[12:])
+        if line[12] == 'T':
+            self.set('General Settings','Sort data?',True)
+        else:
+            self.set('General Settings','Sort data?',False)
         # Read the save figures choice and store it.
         line = f.readline().replace('\n','')
-        self.set('General Settings','Save figures?',line[15:])
+        if line[15] == 'T':
+            self.set('General Settings','Save figures?',True)
+        else:
+            self.set('General Settings','Save figures?',False)
         # Read the show plots choice and store it.
         line = f.readline().replace('\n','')
-        self.set('General Settings','Show plots?',line[13:])
+        if line[13] == 'T':
+            self.set('General Settings','Show plots?',True)
+        else:
+            self.set('General Settings','Show plots?',False)
         # Read the save directory and store it.
         line = f.readline().replace('\n','')
         self.set('General Settings','Save directory',line[16:])

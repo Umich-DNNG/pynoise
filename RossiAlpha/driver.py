@@ -49,7 +49,7 @@ def plotLink(plot):
 
 def inputBool(group, setting):
 
-    '''Update a setting to be a boolean (stored as yes or no).
+    '''Update a setting to be a boolean (stored as True/False).
     
     Send the function the setting group and the specific setting to be edited.
     
@@ -57,25 +57,25 @@ def inputBool(group, setting):
 
     selection = 'blank'
     # Keep looping until the user selects yes or no, or cancels.
-    while selection != '' and selection != 'y' and selection != 'n':
-        selection = input('Enter y/n (or leave blank to cancel): ')
+    while selection != '' and selection != 't' and selection != 'f':
+        selection = input('Enter t/f (or leave blank to cancel): ')
         match selection:
-            # Update settings to yes.
-            case 'y':
-                parameters.set(group,setting,'yes')
+            # Update settings to True.
+            case 't':
+                parameters.set(group,setting,True)
                 parameters.update()
-                print('Updated the ' + setting + ' to yes.\n')
-            # Update settings to no.
-            case 'n':
-                parameters.set(group,setting,'no')
+                print('Updated the ' + setting + ' to True.\n')
+            # Update settings to False.
+            case 'f':
+                parameters.set(group,setting,False)
                 parameters.update()
-                print('Updated the ' + setting + ' to no.\n')
+                print('Updated the ' + setting + ' to False.\n')
             # Cancel changes.
             case '':
                 print('Canceling changes...\n')
             # Catchall for invalid inputs.
             case _:
-                print('This is a yes or no question (y/n).\n')
+                print('This is a true/false question (t/f).\n')
 
 def inputNum(group, setting, type):
 
@@ -430,8 +430,13 @@ def plotSettings(plot):
                 value = input('Input the value of the parameter (make sure '
                               + 'that it in agreement with the correct variable '
                               'type for the parameter): ')
+                # If value is boolean, store as bool.
+                if value == 'True':
+                    set(plot,setting,True)
+                elif value == 'False':
+                    set(plot,setting,False)
                 # If value is numeric, store as integer.
-                if value.isnumeric():
+                elif value.isnumeric():
                     parameters.set(plot,setting,int(value))
                 # If value is a float, store as float.
                 elif isFloat(value):
