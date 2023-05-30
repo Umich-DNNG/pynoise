@@ -598,7 +598,9 @@ def settingsDriver():
 def importSettings(init):
 
     '''The function that imports settings from .set files.
-    Requires an init input, which is a boolean that indicates whether or not this import is to initialize the settings.'''
+
+    Requires an init input, which is a boolean that indicates 
+    whether or not this import is to initialize the settings.'''
 
     path = 'blank'
     file = 'blank'

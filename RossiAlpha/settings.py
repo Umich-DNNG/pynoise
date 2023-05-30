@@ -171,11 +171,14 @@ class Settings:
             print('WARNING: with the current imported settings, the input file'
                       + '/folder is not specified. You must add it manually.')
             f.readline()
+        # Otherwise, read input as given.
         else:
             line = f.readline().replace('\n','')
             file = line[19:]
+            # If input path is relative, convert it to an absolute path.
             if line[19] == '.':
                 file = os.path.join(ABSOLUTE_PATH,line[21:])
+            # Store the input file/folder.
             self.set('Input/Output Settings','Input file/folder',file)
         # Read output file and store it.
         line = f.readline().replace('\n','')
