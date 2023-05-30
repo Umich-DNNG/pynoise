@@ -75,7 +75,7 @@ def inputBool(group, setting):
                 print('Canceling changes...\n')
             # Catchall for invalid inputs.
             case _:
-                print('This is a yes or no question (y/n).\n')            
+                print('This is a yes or no question (y/n).\n')
 
 def inputNum(group, setting, type):
 
@@ -132,8 +132,7 @@ def changeInput():
             else:
                 parameters.set('Input/Output Settings','Input type',2)
             # Update input.
-            if file[0] == '.':
-                file = os.path.abspath(file[2:])
+            file = os.path.abspath(file[2:])
             parameters.set('Input/Output Settings','Input file/folder',file)
             parameters.update()
             # Notify user of automatically assigned input type.
