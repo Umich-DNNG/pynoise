@@ -1,7 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
-from settings import *
 import os
 
 def exp_decay_3_param(x, a, b, c):
