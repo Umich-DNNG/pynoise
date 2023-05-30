@@ -40,6 +40,14 @@ There are different categories of settings as follows:
 
 Users can edit this .txt file to change the settings that they wish to use.
 
+### Settings Input Format
+Default or custom settings can be imported into the program and can be changed during runtime. For the program to read in the settings correctly, the file extension must be .set and must have the following formatting:
+1. The file can begin with any number of comments (lines that start with #)
+2. Each settings group must have a header of the correct name and must have its contents surrounded by a comment line on either side (dashed lines are commonly used but the comment line can contain anything)
+3. Input/Output, General, and Histogram Generation Settings must always have the same settings in the same order.
+4. Other settings groups can have a variable number of parameters in any order.
+See the default.set format for examples.
+
 ### Main
 ```main.py``` contains a driver program, which when ran, will take the settings.txt file and run the sepcified analysis and produce the plots as specified in the settings. Users can run this file without knowing how any of the code works as long as they can correctly edit settings.txt.   
 
