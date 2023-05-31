@@ -1,43 +1,37 @@
-#Input File for Rossi Alpha
+# Custom user generated settings.
 #----------------------------------------------------------------------------------------
+Input/Output Settings
 #----------------------------------------------------------------------------------------
-I/O FILE INFO
+Input type: 1
+Input file/folder: ./RF3-40_59min.txt
+Save directory: ./
 #----------------------------------------------------------------------------------------
-input file path: RF3-40_59min.txt
-output file: 
-input folder: /Users/vincentweng/DropBox/20210322_06_RF3-42_CF_OS_run1_60min_0947
-file type: 1
-#for the file types, 1 corresponds to the first file we analyzed and 2 corresponds to the folders.
+General Settings
 #----------------------------------------------------------------------------------------
+Fit range: [0.0, 2000.0]
+Plot scale: linear
+Time difference method: any_and_all
+Digital delay: 750
+Number of folders: 10
+Meas time per folder: 60
+Sort data?: True
+Save figures?: True
+Show plots?: False
 #----------------------------------------------------------------------------------------
-GENERAL PROGRAM SETTINGS
+Histogram Visual Settings
 #----------------------------------------------------------------------------------------
-fit range : [0,2e3]
-plot scale : linear
-time difference method : any_and_all
-digital delay : 750
-number of folders : 5
-meas time per folder : 60
-sort data? : yes
-save fig? : yes
-show plot? : yes
-save dir : /Users/vincentweng/Documents/PyNoise/RossiAlpha/output
-#----------------------------------------------------------------------------------------
-#HISTOGRAM SETTINGS BELOW
-#----------------------------------------------------------------------------------------
-HISTOGRAM VISUAL SETTINGS
-#------------------------
 color: b
 align: center
 edgecolor: k
 linewidth: 1
-GENERATING HISTOGRAM SETTINGS
-#-----------------------------
-reset time : 2e3
-bin width : 2
-minimum cutoff : 30
 #----------------------------------------------------------------------------------------
-LINE FITTING SETTINGS
+Histogram Generation Settings
+#----------------------------------------------------------------------------------------
+Reset time: 2000.0
+Bin width: 2
+Minimum cutoff: 30
+#----------------------------------------------------------------------------------------
+Line Fitting Settings
 #----------------------------------------------------------------------------------------
 color: red
 markeredgecolor: blue
@@ -45,7 +39,7 @@ markerfacecolor: black
 linestyle: -
 linewidth: 1
 #----------------------------------------------------------------------------------------
-RESIDUAL PLOT SETTINGS
+Residual Plot Settings
 #----------------------------------------------------------------------------------------
-s: 8
+s: 1
 #----------------------------------------------------------------------------------------

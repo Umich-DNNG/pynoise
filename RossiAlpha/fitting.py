@@ -43,8 +43,7 @@ def exp_decay_2_param(x, a, b):
 #--------------------------------------------------------------------------------    
 
 class RossiHistogramFit:
-    def __init__(self, counts, bin_centers, generating_hist_settings, 
-                 fitting_opts, general_settings, residual_opts, hist_visual_opts):
+    def __init__(self, counts, bin_centers, settings):
         
         '''
         Description:
@@ -64,17 +63,17 @@ class RossiHistogramFit:
         '''
 
         # Plotting options
-        self.fitting_options = fitting_opts
-        self.residual_options = residual_opts
-        self.hist_visual_options = hist_visual_opts
+        self.fitting_options = settings['Line Fitting Settings']
+        self.residual_options = settings['Residual Plot Settings']
+        self.hist_visual_options = settings['Histogram Visual Settings']
 
         # Required parameters
         self.counts = counts
         self.bin_centers = bin_centers
-        self.fit_range = general_settings['fit range']
-        self.min_cutoff = generating_hist_settings['minimum cutoff']
-        self.timeDifMethod = general_settings['time difference method']
-        self.save_dir = general_settings['save dir']
+        self.fit_range = settings['General Settings']['Fit range']
+        self.min_cutoff = settings['Histogram Generation Settings']['Minimum cutoff']
+        self.timeDifMethod = settings['General Settings']['Time difference method']
+        self.save_dir = settings['Input/Output Settings']['Save directory']
 
 
     def fit(self, save_fig, show_plot):
@@ -135,12 +134,12 @@ class RossiHistogramFit:
         ax1.set_ylabel(self.y_axis)
 
         # Saving figure (optional)
-        if save_fig == "yes":
+        if save_fig:
             fig.tight_layout()
             fig.savefig('fitted_only', dpi=300, bbox_inches='tight')
 
         # Showing plot (optional)
-        if show_plot == "yes":
+        if show_plot:
             plt.show()
 
         return popt
@@ -219,7 +218,7 @@ class RossiHistogramFit:
         fig.suptitle(self.timeDifMethod, fontsize=14)
 
         # Adjusting layout and saving figure (optional)
-        if save_every_fig == "yes":
+        if save_every_fig:
             fig.tight_layout()
             if folder_index is not None:
                 save_filename = os.path.join(self.save_dir, 'fitted_and_residual_folder' + str(folder_index)) 
@@ -229,7 +228,7 @@ class RossiHistogramFit:
                 fig.savefig(save_filename, dpi=300, bbox_inches='tight')
 
         # Showing plot (optional)
-        if show_plot == "yes":
+        if show_plot:
             plt.show()
 
         return popt
@@ -237,7 +236,7 @@ class RossiHistogramFit:
 #--------------------------------------------------------------------------------
 
 class Fit_With_Weighting:
-    def __init__(self,RA_hist_totals, min_cutoff, general_settings, fitting_opts, residual_opts):
+    def __init__(self,RA_hist_totals, min_cutoff, general_settings,saveDir, fitting_opts, residual_opts):
 
         '''
         Description:
@@ -263,10 +262,10 @@ class Fit_With_Weighting:
         self.num_bins = np.size(RA_hist_totals[0])
         self.time_diff_centers = RA_hist_totals[1]
         self.uncertainties = RA_hist_totals[2]
-        self.fit_range = general_settings['fit range']
+        self.fit_range = general_settings['Fit range']
         self.min_cutoff = min_cutoff
-        self.plot_scale = general_settings['plot scale']
-        self.save_dir = general_settings['save dir']
+        self.plot_scale = general_settings['Plot scale']
+        self.save_dir = saveDir
 
         # Line fitting variables
         self.xfit, self.yfit = None, None
@@ -349,11 +348,11 @@ class Fit_With_Weighting:
         ax.set_yscale(self.plot_scale)
 
         # Adjusting layout and saving figure (optional)
-        if save_fig == 'yes':
+        if save_fig:
             fig.tight_layout()
             save_filename = os.path.join(self.save_dir, 'histogram_weighting_total.png') 
             fig.savefig(save_filename, dpi=300, bbox_inches='tight')
         
         # Displaying the plot (optional)
-        if show_plot == 'yes':
+        if show_plot:
             plt.show()

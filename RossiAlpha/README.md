@@ -40,6 +40,16 @@ There are different categories of settings as follows:
 
 Users can edit this .txt file to change the settings that they wish to use.
 
+### Settings Input Format
+Default or custom settings can be imported into the program and can be changed during runtime. For the program to read in the settings correctly, the file extension must be .set and must have the following formatting:
+1. The file can begin with any number of comments (lines that start with #)
+2. Each settings group must have a header of the correct name and must have its contents surrounded by a comment line on either side (dashed lines are commonly used but the comment line can contain anything)
+3. The setting groups must come in the same order every time (Input/Output -> General -> Histogram Visual -> Histogram Generation -> Line Fitting -> Residual Plot)
+4. Input/Output, General, and Histogram Generation Settings must always have the same settings in the same order.
+5. Other settings groups can have a variable number of parameters in any order.
+
+See the default.set format for examples.
+
 ### Main
 ```main.py``` contains a driver program, which when ran, will take the settings.txt file and run the sepcified analysis and produce the plots as specified in the settings. Users can run this file without knowing how any of the code works as long as they can correctly edit settings.txt.   
 
@@ -66,26 +76,21 @@ counts, bin_centers, bin_edges = thisPlot.plot(time_diffs, save_fig="yes", show_
 
 
 ### Fitting
-In the fitting.py file, there are two classes. One is called ```RossiHistogramFit``` and the other one is called ```Fit_With_Weighting```. Currently, the difference between the two classes is that "Fit_With_Weighting" deals with parsing through folders of files, as well as creating uncertainty plots. The the class ```RossiHistogramFit```, there are two functions called "fit()" and "fit_and_residual()", the former is used to fit an exponential decay curve onto the histogram and the latter produces a residual plot on top of the curve fitting.
+In the fitting.py file, there are two classes. One is called "Fit" and the other one is called "Fit_With_Weighting". Currently, the difference between the two classes is that "Fit_With_Weighting" deals with parsing through folders of files, as well as creating uncertainty plots. The the class "Fit", there are two functions called "fit()" and "fit_and_residual()", the former is used to fit an exponential decay curve onto the histogram and the latter produces a residual plot on top of the curve fitting.
 
-**Using RossiHistogramFit**
+A Fit() object can be created first with the parameters below: 
 
-```python
-# creating Fit() object with specified settings
-    thisFit = RossiHistogramFit(counts, bin_centers, theseSettings.generating_histogram_settings, 
-                      line_fitting_settings, general_program_settings,
-                      residual_plot_settings, histogram_visual_settings)
-        
-# Fitting curve to the histogram and plotting the residuals
-    thisFit.fit_and_residual(save_every_fig=theseSettings.general_program_settings['save fig?'], 
-                                 show_plot=theseSettings.general_program_settings['show plot?'])
-        
-```
+* counts (array)
+* bin_centers (array)
+* generating_hist_settings (dict)
+* fitting_opts (dict)
+* general_settings (dict)
+* residual_opts (dict)
+* showPlot (boolean)
 
 From there, the Fit.fit() function will fit an exponential decay curve onto the histogram (given in the form of counts and bin_centers). As discussed above, the Fit.fit_and_residual() function will do the same thing as Fit.fit(), execept that it will plot the relative residuals onto a plot right below the curve fitting plot. Thus, the images produced will have two plots that correspond to a line fitted for a histogram and a residua plot describing how well the line is fitting at each Time Difference (ns) unit. 
 
 
-**Using Fit_With_Weighting**
 
 A Fit_With_Weighting() object can be created with the parameters below:
 
