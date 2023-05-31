@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 import os
-
+plt.ioff()
 def exp_decay_3_param(x, a, b, c):
 
     '''
@@ -141,7 +141,6 @@ class RossiHistogramFit:
         # Showing plot (optional)
         if show_plot:
             plt.show()
-
         return popt
 
 #--------------------------------------------------------------------------------
@@ -198,7 +197,7 @@ class RossiHistogramFit:
         # Plotting histogram and fitting curve in top subplot
         ax1.bar(self.bin_centers, self.counts, width=0.8*(self.bin_centers[1]-self.bin_centers[0]), 
             alpha=0.6, color="b", align="center", edgecolor="k", linewidth=0.5, fill=True)
-        ax1.plot(line_x, line_y, 'r--', label='Fit: A=%5.3f, alpha=%5.3f, B=%5.3f' % tuple(popt), **self.fitting_options)
+        ax1.plot(line_x, line_y, label='Fit: A=%5.3f, alpha=%5.3f, B=%5.3f' % tuple(popt), **self.fitting_options)
         ax1.legend()
         ax1.set_ylabel("Coincidence rate (s^-1)")
 
@@ -230,7 +229,6 @@ class RossiHistogramFit:
         # Showing plot (optional)
         if show_plot:
             plt.show()
-
         return popt
 
 #--------------------------------------------------------------------------------
@@ -331,7 +329,7 @@ class Fit_With_Weighting:
         Outputs: 
             - None
         '''
-
+       
         time_diff_centers = self.time_diff_centers[1:] - np.diff(self.time_diff_centers[:2])/2
         
         fig, ax = plt.subplots()
@@ -340,7 +338,7 @@ class Fit_With_Weighting:
         ax.scatter(time_diff_centers, self.hist[:-1], **self.residual_options)
         
         # Adding the fit to the data
-        ax.plot(self.xfit, self.yfit, 'r-', label='Fit', **self.fitting_options)
+        ax.plot(self.xfit, self.yfit, label='Fit', **self.fitting_options)
         
         # Setting the axis labels
         ax.set_xlabel('Time difference (ns)')
@@ -354,5 +352,5 @@ class Fit_With_Weighting:
             fig.savefig(save_filename, dpi=300, bbox_inches='tight')
         
         # Displaying the plot (optional)
-        if show_plot:
-            plt.show()
+       
+

@@ -51,7 +51,7 @@ def analyzeAllType2(settings):
                                         settings['Residual Plot Settings'])
     thisWeightedFit.fit_RA_hist_weighting()
     thisWeightedFit.plot_RA_and_fit(save_fig=settings['General Settings']['Save figures?'], 
-                                    show_plot="No")
+                                    show_plot=False)
 
 #
 #if __name__ == "__main__":

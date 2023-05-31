@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import os
-
+plt.ioff()
 class RossiHistogram:
     def __init__(self, reset_time, bin_width, plot_opts, save_dir= None):
 
@@ -46,7 +46,7 @@ class RossiHistogram:
             - bin_centers (adjusted bin centers for visual plotting)
             - bin_edges (The edges of the bins are mentioned as a parameter)
         '''
-
+  
         # Calculating the number of bins
         num_bins = int(self.reset_time / self.bin_width)
 
@@ -64,13 +64,13 @@ class RossiHistogram:
         plt.title(self.title)
 
         # Saving plot (optional)
-        if save_fig:
+        if save_fig == True:
             plt.tight_layout()
             save_filename = os.path.join(self.save_dir, 'histogram.png')
             plt.savefig(save_filename, dpi=300, bbox_inches='tight')
-
+        
         # Showing plot (optional)
-        if show_plot:
+        if show_plot == True:
             plt.show()
 
         #Set the counts, bin_centers, and bin_edges of the object
