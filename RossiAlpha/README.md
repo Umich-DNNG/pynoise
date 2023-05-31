@@ -23,7 +23,8 @@ Additionally, you will need the following:
 
 The PyNoise program can be run with a variety of options that change the visual output and type of analysis being run. This section will outline each subgroup of settings and the acceptable values for each parameter.
 
-**I/O FILE INFO** : this contains information about the input files and output files that you will be using
+**I/O FILE INFO** : this group contains information about the input and output details of the program.
+* Input type: there are two options for inputs - analyzing a single file or 
 * input file: the name of the file being analyzed (if file type is 1)
 * output file: 
 * input folder: the path to the folder being analyzed (if file type is 2)   
