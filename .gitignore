@@ -9,3 +9,6 @@
 # vscode configuration files
 *.vscode
 .DS_Store
+
+# No need to include logs
+*.log
