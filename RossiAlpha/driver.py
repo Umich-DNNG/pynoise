@@ -7,6 +7,7 @@ import plots as plt
 import timeDifs as dif
 import analyzingFolders as fol
 import os
+import time
 
 '''Function Table of Contents:
 isFloat: 34
