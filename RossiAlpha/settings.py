@@ -105,6 +105,14 @@ class Settings:
 
         return self.settings[group].get(setting)
     
+    def getGroup(self, group):
+
+        '''Get the value of a setting group.
+        
+        Assumes the group exists (no error checking).'''
+
+        return self.settings[group]
+    
     def remove(self, group, setting):
 
         '''Removes a specific setting. This function should only 

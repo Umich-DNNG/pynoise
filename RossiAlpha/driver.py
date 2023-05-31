@@ -8,6 +8,9 @@ import timeDifs as dif
 import analyzingFolders as fol
 import os
 import time
+import numpy as np
+import matplotlib.pyplot as mpl
+mpl.ioff()
 
 '''Function Table of Contents:
 isFloat: 40
@@ -34,8 +37,81 @@ parameters = set.Settings()
 # The empty log file.
 history = None
 
+# Where the time differences are stored.
+time_difs = None
+
+# Where the histogram plot is stored.
+histogram = None
+
+# Where the best fit curve is stored.
+best_fit = None
+
 # Set the current working directory for assigning absolute paths.
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
+
+def createTimeDifs():
+
+    '''Create time differences based on the input data.
+    
+    Will overwrite the current time differences, if they exist.'''
+
+    global time_difs
+    print('Creating time differences...')
+    # For signle file analysis.
+    if parameters.get('Input/Output Settings','Input type') == 1:
+        # Load data from 
+        data = np.loadtxt(parameters.get('Input/Output Settings','Input file/folder'))
+        if parameters.get('General Settings','Sort data?'):
+            data = np.sort(data)
+        time_difs = dif.timeDifCalcs(data, 
+            parameters.get('Histogram Generation Settings','Reset time'), 
+            parameters.get('General Settings','Time difference method'))
+        time_difs = time_difs.calculate_time_differences()
+        log('Calculated time differences for file ' 
+            + parameters.get('Input/Output Settings','Input file/folder') + '.\n')
+    # For folder analysis.
+    elif parameters.get('Input/Output Settings','Input type') == 2:
+        print('TODO: Add functionality to create time differences for folders.')
+    # Catchall for nonexistent input.
+    else:
+        print('ERROR: No input file/folder defined. Please edit the settings.')
+
+def createPlot():
+
+    '''Creates a histogram based on the time difference data.
+    
+    Will overwrite the current histogram, if one exists.
+
+    Assumes that the time difference data is valid.'''
+
+    global time_difs, histogram
+    print('Building plot...')
+    histogram = plt.RossiHistogram(parameters.get('Histogram Generation Settings','Reset time'),
+                              parameters.get('Histogram Generation Settings','Bin width'),
+                              parameters.getGroup('Histogram Visual Settings'),
+                              parameters.get('Input/Output Settings','Save directory'))
+    histogram.plot(time_difs,
+              save_fig=parameters.get('General Settings','Save figures?'),
+              show_plot=parameters.get('General Settings','Show plots?'))
+    log('Created a histogram plot using the current settings and time difference data.\n')
+
+def createBestFit():
+
+    '''Creates a line of best fit + residuals based on the created histogram.
+    
+    Will overwrite the current line of best fit, if one exists.
+
+    Assumes that the histogram is valid.'''
+
+    global time_difs, histogram, best_fit
+    print('Building line of best fit...')
+    counts, bin_centers, bin_edges = histogram.plot(time_difs, save_fig=False, show_plot=False)
+    best_fit = fit.RossiHistogramFit(counts, bin_centers, parameters.settings)
+        
+        # Fitting curve to the histogram and plotting the residuals
+    best_fit.fit_and_residual(save_every_fig=parameters.get('General Settings','Save figures?'), 
+                              show_plot=parameters.get('General Settings','Show plots?'))
+    log('Created line of best fit with residuals for the current histogram.\n')
 
 def isFloat(input):
 
@@ -786,6 +862,7 @@ def main():
 
     '''The main driver that runs the whole program.'''
 
+    global time_difs, histogram, best_fit
     selection = 'blank'
     print('Welcome to the DNNG/PyNoise project. With this software we are '
           + 'taking radiation data from fission reactions (recorded by organic '
@@ -831,21 +908,82 @@ def main():
             # Run the whole analysis process.
             case 'm':
                 if parameters.get('Input/Output Settings','Input type') == 1:
-                    mn.analyzeAllType1(parameters.settings)
+                    print('Running the entire RossiAlpha method...')
+                    time_difs, histogram, best_fit = mn.analyzeAllType1(parameters.settings)
+                    log('Ran the entire RossiAlpha method on file ' 
+                        + parameters.get('Input/Output Settings','Input file/folder') 
+                        + '.\n')
                 elif parameters.get('Input/Output Settings','Input type') == 2:
+                    print('Running the entire RossiAlpha method...')
                     mn.analyzeAllType2(parameters.settings)
+                    log('Ran the entire RossiAlpha method on folder ' 
+                        + parameters.get('Input/Output Settings','Input file/folder') 
+                        + '.\n')
+                    print('TODO: Implement modularity for folder analysis.')
                 else:
                     print('ERROR: No input file/folder defined. Please edit the settings.')
-                print('TODO: Add user interactions here, print statements, options, etc.\n')
-            # Utilize the timeDifs.py program.
+            # Calculate time differences for the given input.
+            # TODO: Have some method of detection for when the input has changed.
             case 't':
-                print('TODO: Run timeDifs.py accordingly\n')
-            # Utilize the plots.py program.
+                # If time differences are already stored, notify user.
+                if time_difs is not None:
+                    print('WARNING: There are already stored time differences '
+                          + 'in this runtime. Do you want to overwrite them?')
+                    choice = input('Enter y to continue and anything else to abort: ')
+                    # Confirm user wants to overwrite time differences.
+                    if choice == 'y':
+                        log('Currently stored time differences overwritten.\n')
+                    # Catchall for user canceling overwrite.
+                    else:
+                        print('Cancelling overwrite...\n')
+                        selection = 'blank'
+                # If user hasn't canceled, create the time differences.
+                if selection != 'blank':
+                    createTimeDifs()
+            # Plot the time difference data.
+            # TODO: Have some method of detection for when the input has changed.
             case 'p':
-                print('TODO: Run plots.py accordingly\n')
-            # Utilize the fitting.py program.
+                # If plot is already stored, notify user.
+                if histogram is not None:
+                    print('WARNING: There is an already stored histogram '
+                          + 'in this runtime. Do you want to overwrite it?')
+                    choice = input('Enter y to continue and anything else to abort: ')
+                    # Confirm user wants to overwrite the plot.
+                    if choice == 'y':
+                        log('Currently stored time histogram overwritten.\n')
+                    # Catchall for user canceling overwrite.
+                    else:
+                        print('Cancelling overwrite...\n')
+                        selection = 'blank'
+                # If user hasn't canceled, create the histogram.
+                if selection != 'blank':
+                    # If there aren't any current time differences, make them.
+                    if time_difs is None:
+                        createTimeDifs()
+                    createPlot()
+            # Create a line of best fit and show the residuals.
             case 'f':
-                print('TODO: Run fitting.py accordingly\n')
+                # If plot is already stored, notify user.
+                if best_fit is not None:
+                    print('WARNING: There is an already stored best fit line '
+                          + 'in this runtime. Do you want to overwrite it?')
+                    choice = input('Enter y to continue and anything else to abort: ')
+                    # Confirm user wants to overwrite the plot.
+                    if choice == 'y':
+                        log('Currently stored best fit line overwritten.\n')
+                    # Catchall for user canceling overwrite.
+                    else:
+                        print('Cancelling overwrite...\n')
+                        selection = 'blank'
+                # If user hasn't canceled, create the line of best fit.
+                if selection != 'blank':
+                    # If there aren't any current time 
+                    # differences/histogram plots, make them.
+                    if histogram is None:
+                        if time_difs is None:
+                            createTimeDifs()
+                        createPlot()
+                    createBestFit()
             # View and/or edit program settings.
             case 's':
                 print()
@@ -942,6 +1080,7 @@ def main():
                 # Catchall for invalid commands.
                 case _:
                     print('You must choose what to do with your changes.\n')
+    # Close the log file if one is open.
     global history
     if history is not None:
         history.close()
