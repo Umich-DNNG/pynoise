@@ -13,7 +13,8 @@ class Settings:
                 ioSettings={
                                 'Input type':0,
                                 'Input file/folder':'',
-                                'Save directory':''
+                                'Save directory':'',
+                                'Keep logs':False
                             },
 
                 # Initial General Settings.
@@ -184,6 +185,12 @@ class Settings:
         line = f.readline().replace('\n','')
         file = line[16:]
         self.set('Input/Output Settings','Save directory',os.path.abspath(file))
+        # Read keep logs choice and store it.
+        line = f.readline().replace('\n','')
+        if line[11] == 'T':
+            self.set('Input/Output Settings','Keep logs',True)
+        else:
+            self.set('Input/Output Settings','Keep logs',False)
         # Read past header and dashed lines.
         f.readline()
         f.readline()

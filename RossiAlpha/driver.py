@@ -32,6 +32,23 @@ parameters = set.Settings()
 # Set the current working directory for assigning absolute paths.
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
+def log(output):
+
+    '''Saves the changes '''
+
+def changeLog():
+    if parameters.get('Input/Output Settings','Keep logs'):
+        curTime = time.localtime()
+        logName = ('../.log/history-' + str(curTime.tm_year) 
+                    + '-' + str(curTime.tm_mon) 
+                    + '-' + str(curTime.tm_mday) 
+                    + '-' + str(curTime.tm_hour) 
+                    + '-' + str(curTime.tm_min) 
+                    + '-' + str(curTime.tm_sec)
+                    + '.log')
+        return open(logName,'w')
+
+
 def isFloat(input):
 
     '''Checks whether or not the input string can be converted to a float.'''
@@ -695,7 +712,6 @@ def importSettings(init):
             else:
                 print('It appears the file you selected does not exist. Please try again.\n')
     
-
 def main():
 
     '''The main driver that runs the whole program.'''
@@ -727,6 +743,7 @@ def main():
             # Catchall for invalid commands.
             case _:
                 print('You must choose what settings to import.\n')
+    changeLog()
     print('Settings initialized. You can now begin using the program.\n')
     print('----------------------------------------------------------\n')
     # Continue running the program until the user is done.
