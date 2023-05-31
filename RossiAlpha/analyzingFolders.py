@@ -31,7 +31,7 @@ def compile_sample_stdev_RA_dist(settings):
 
     data_folder = settings['Input/Output Settings']['Input file/folder']
     num_folders = int(settings['General Settings']['Number of folders'])
-    i = 0
+    i = 1
     for fol_num in range(1, num_folders + 1):
         for filename in os.listdir(data_folder + "/" + str(fol_num)):
             if filename.endswith("n_allch.txt"):
@@ -60,10 +60,10 @@ def compile_sample_stdev_RA_dist(settings):
                                           settings['Input/Output Settings']['Save directory'])
 
                 counts, bin_centers, bin_edges = thisPlot.plot(time_diffs, 
-                                                               save_fig="no", 
+                                                               save_fig=False, 
                                                                show_plot=settings['General Settings']['Show plots?'])
 
-                if i == 0:
+                if i == 1:
                     RA_hist_array = counts
                 else:
                     RA_hist_array = np.vstack((RA_hist_array, counts))
