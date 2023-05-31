@@ -8,6 +8,23 @@ import timeDifs as dif
 import analyzingFolders as fol
 import os
 
+'''Function Table of Contents:
+isFloat: 34
+fileType: 44
+plotLink: 55
+inputBool: 67
+inputNum: 98
+changePath: 135
+ioSet: 191
+genSet: 251
+histSet: 396
+plotSet: 428
+settingsEditor: 519
+printSelector: 573
+settingsDriver: 632
+importSettings: 660
+main: 698'''
+
 # The settings object to be referenced.
 parameters = set.Settings()
 
@@ -56,6 +73,7 @@ def inputBool(group, setting):
     Assumes the inputs are correct (no input error detection).'''
 
     selection = 'blank'
+    print()
     # Keep looping until the user selects yes or no, or cancels.
     while selection != '' and selection != 't' and selection != 'f':
         selection = input('Enter t/f (or leave blank to cancel): ')
@@ -64,12 +82,12 @@ def inputBool(group, setting):
             case 't':
                 parameters.set(group,setting,True)
                 parameters.update()
-                print('Updated the ' + setting + ' to True.\n')
+                print(setting + ' updated to True.\n')
             # Update settings to False.
             case 'f':
                 parameters.set(group,setting,False)
                 parameters.update()
-                print('Updated the ' + setting + ' to False.\n')
+                print(setting + ' updated to False.\n')
             # Cancel changes.
             case '':
                 print('Canceling changes...\n')
@@ -93,6 +111,7 @@ def inputNum(group, setting, type):
     Assumes the inputs are correct (no input error detection).'''
 
     selection = 'blank'
+    print()
     # Keep looping until the user input is valid, or cancels.
     while not (type[0] == 'n' and selection.isnumeric()) and not (type[0] == ' ' and isFloat(selection)) and selection != '':
         selection = input('Enter a' + type + ' (or leave blank to cancel): ')
@@ -100,18 +119,18 @@ def inputNum(group, setting, type):
         if type[0] == 'n' and selection.isnumeric():
             parameters.set(group,setting,int(selection))
             parameters.update()
-            print('Updated the ' + setting + ' to ' + selection + '.\n')
+            print(setting + ' updated to ' + selection + '.\n')
         # Update setting when input is valid float.
         elif type[0] == ' ' and isFloat(selection):
             parameters.set(group,setting,float(selection))
             parameters.update()
-            print('Updated the ' + setting + ' to ' + selection + '.\n')
+            print(setting + ' updated to ' + selection + '.\n')
         # Cancel changes.
         elif selection == '':
             print('Canceling changes...\n')
         # Catchall for invalid inputs.
         else:
-            print('Please enter a' + type + '.')
+            print('Please enter a' + type + '.\n')
 
 def changePath(setting):
 
@@ -284,7 +303,7 @@ def genSet():
                         print('Fit range updated to',parameters.get('General Settings','Fit range'),'\n')
                     # Cancel changes.
                     else:
-                        print('Returning to previous menu...\n')
+                        print('Canceling changes...\n')
                 # Cancel changes.
                 else:
                     print('Canceling changes...\n')
@@ -301,6 +320,7 @@ def genSet():
                     print('Canceling changes...\n')
             # Update the time difference method.
             case 't':
+                print()
                 selection = 'blank'
                 # Keep looping until the user input is valid, or cancels.
                 while (selection != '' and selection != 'a' and selection != 'c'
@@ -316,22 +336,22 @@ def genSet():
                         case 'a':
                             parameters.set('General Settings','Time difference method','any_and_all')
                             parameters.update()
-                            print('Successfully updated the time difference method to any and all.')
+                            print('Successfully updated the time difference method to any and all.\n')
                          # Apply cross correlations.
                         case 'c':
                             parameters.set('General Settings','Time difference method','any_and_all cross_correlations')
                             parameters.update()
-                            print('Successfully updated the time difference method to any and all + cross correlations.')
+                            print('Successfully updated the time difference method to any and all + cross correlations.\n')
                          # Apply no repeat.
                         case 'n':
                             parameters.set('General Settings','Time difference method','any_and_all cross_correlations no_repeat')
                             parameters.update()
-                            print('Successfully updated the time difference method to any and all + cross correlations + no repeat.')
+                            print('Successfully updated the time difference method to any and all + cross correlations + no repeat.\n')
                          # Apply digital delay.
                         case 'd':
                             parameters.set('General Settings','Time difference method','any_and_all cross_correlations no_repeat digital_delay')
                             parameters.update()
-                            print('Successfully updated the time difference method to any and all + cross correlations + no repeat + digital delay.')
+                            print('Successfully updated the time difference method to any and all + cross correlations + no repeat + digital delay.\n')
                         # Cancel changes.
                         case '':
                             print('Canceling changes...\n')
@@ -375,13 +395,13 @@ def genSet():
 
 def histSet():
     choice = 'blank'
-    print('What setting would you like to edit?')
-    print('r - reset time')
-    print('b - bin width')
-    print('m - minimum cutoff')
-    print('v - view current Histogram Generation Settings')
-    print('Leave the command blank if you wish to return to the previous menu.')
     while choice != '':
+        print('What setting would you like to edit?')
+        print('r - reset time')
+        print('b - bin width')
+        print('m - minimum cutoff')
+        print('v - view current Histogram Generation Settings')
+        print('Leave the command blank if you wish to return to the previous menu.')
         choice = input('Enter setting: ')
         match choice:
             # Update the reset time.
@@ -395,7 +415,9 @@ def histSet():
                 inputNum('Histogram Generation Settings','Minimum cutoff','n integer')
             # Print current Histogram Generation Settings.
             case 'v':
+                print()
                 parameters.print_section('Histogram Generation Settings')
+                print()
             # End editing.
             case '':
                 print('Returning to previous menu...\n')
@@ -403,7 +425,7 @@ def histSet():
             case _:
                 print('Unrecognized command. Please review the list of appriopriate inputs.\n')
 
-def plotSettings(plot):
+def plotSet(plot):
 
     '''The general settings editor for plot settings 
     (histogram visual, line fitting, and residual plot).
@@ -420,62 +442,79 @@ def plotSettings(plot):
           + 'settings for plots - the full list for', plot, 
           'can be found at:\n', plotLink(plot),'\nAs such, '
           + 'you can add and remove settings as you wish.\n')
-    print('Choose a following action:')
-    print('c - change new or exisitng ' + plot)
-    print('d - delete exisiting ' + plot)
-    print('v - view the current ' + plot)
-    print('Leave the command blank if you wish to return to the previous menu.')
     # Continue editing until the user is done.
     while choice != '':
+        print('Choose a following action:')
+        print('c - change new or exisitng ' + plot)
+        print('d - delete exisiting ' + plot)
+        print('v - view the current ' + plot)
+        print('Leave the command blank if you wish to return to the previous menu.')
         choice = input('Enter command: ')
         match choice:
             # Change exisitng setting.
             case 'c':
-                setting = input('Input the parameter name that you want added/modified: ')
-                # If setting did not previously exist, tell user.
-                if parameters.get(plot, setting) == None:
-                    print('Created parameter ' + setting + ' in ' + plot + '.')
-                value = input('Input the value of the parameter (make sure '
-                              + 'that it in agreement with the correct variable '
-                              'type for the parameter): ')
-                # If value is boolean, store as bool.
-                if value == 'True':
-                    set(plot,setting,True)
-                elif value == 'False':
-                    set(plot,setting,False)
-                # If value is numeric, store as integer.
-                elif value.isnumeric():
-                    parameters.set(plot,setting,int(value))
-                # If value is a float, store as float.
-                elif isFloat(value):
-                    parameters.set(plot,setting,float(value))
-                # Otherwise, store as a string.
+                print()
+                setting = input('Input the parameter name that you want added/modified (or leave blank to cancel): ')
+                # Any non-empty input is accepted (no error checking).
+                if setting != '':
+                    # If setting did not previously exist, tell user.
+                    if parameters.get(plot, setting) == None:
+                        print('Created parameter ' + setting + ' in ' + plot + '.')
+                    value = input('Input the value of the parameter (or leave blank to cancel): ')
+                    # Any non-empty input is accepted (no error checking).
+                    if value != '':
+                        # If value is boolean, store as bool.
+                        if value == 'True':
+                            parameters.set(plot,setting,True)
+                        elif value == 'False':
+                            parameters.set(plot,setting,False)
+                        # If value is numeric, store as integer.
+                        elif value.isnumeric():
+                            parameters.set(plot,setting,int(value))
+                        # If value is a float, store as float.
+                        elif isFloat(value):
+                            parameters.set(plot,setting,float(value))
+                        # Otherwise, store as a string.
+                        else:
+                            parameters.set(plot,setting,value)
+                        # Mark the settings as updated.
+                        parameters.update()
+                        print('Set paramter ' + setting + ' in ' + plot + ' to ' + value +  '.\n')
+                    # User cancels parameter addition:
+                    else:
+                        print('Cancelling changes...\n')
+                # User cancels parameter addition:
                 else:
-                    parameters.set(plot,setting,value)
-                # Mark the settings as updated.
-                parameters.update()
-                print('Set paramter ' + setting + ' in ' + plot + ' to ' + value +  '.')
+                    print('Cancelling changes...\n')
             # Delete existing setting.
             case 'd':
-                remove = input('Input the parameter name that you want removed: ')
-                # Error catch for trying to delete a setting that does no exist.
-                if parameters.get(plot, remove) == None:
-                    print('Parameter ' + remove + ' is not currently in the settings.')
-                # Remove the parameter from the dictionary.
-                else:
-                    parameters.remove(plot, remove)
-                    print('Removed parameter ' + remove + ' from ' + plot + '.')
-                    parameters.update()
+                print()
+                remove = ' '
+                while remove != '':
+                    remove = input('Input the parameter name that you want removed (or leave blank to cancel): ')
+                    # User cancels the removal.
+                    if remove == '':
+                        print('Cancelling changes...\n')
+                    # Error catch for trying to delete a setting that does no exist.
+                    elif parameters.get(plot, remove) == None:
+                        print('Parameter ' + remove + ' is not currently in the settings.\n')
+                    # Remove the parameter from the dictionary.
+                    else:
+                        parameters.remove(plot, remove)
+                        parameters.update()
+                        print('Removed parameter ' + remove + ' from ' + plot + '.\n')
+                        remove = ''
             # View current settings for the plot.
             case 'v':
+                print()
                 parameters.print_section(plot)
+                print()
             # End editing.
             case '':
                 print('Returning to previous menu...\n')
             # Catchall for invalid commands.
             case _:
                 print('Unrecognized command. Please review the list of appriopriate inputs.\n')
-                print()
 
 def settingsEditor():
 
@@ -506,7 +545,7 @@ def settingsEditor():
             # Call the plot settings editor under Histogram Visual Settings.
             case 'v':
                 print()
-                plotSettings('Histogram Visual Settings')
+                plotSet('Histogram Visual Settings')
             # Call the Histogram Generation Settings editor.
             case 'h':
                 print()
@@ -514,11 +553,11 @@ def settingsEditor():
             # Call the plot settings editor under Line Fitting Settings.
             case 'l':
                 print()
-                plotSettings('Line Fitting Settings')
+                plotSet('Line Fitting Settings')
             # Call the plot settings editor under Residual Plot Settings.
             case 'r':
                 print()
-                plotSettings('Residual Plot Settings')
+                plotSet('Residual Plot Settings')
             # Import settings from a file.
             case 'd':
                 print()
@@ -704,8 +743,10 @@ def main():
             case 'm':
                 if parameters.get('Input/Output Settings','Input type') == 1:
                     mn.analyzeAllType1(parameters.settings)
-                else:
+                elif parameters.get('Input/Output Settings','Input type') == 2:
                     mn.analyzeAllType2(parameters.settings)
+                else:
+                    print('ERROR: No input file/folder defined. Please edit the settings.')
                 print('TODO: Add user interactions here, print statements, options, etc.\n')
             # Utilize the timeDifs.py program.
             case 't':
