@@ -368,7 +368,7 @@ def genSet():
                     # Apply changes if user hasn't canceled.
                     if selection != '':
                         parameters.set('General Settings','Fit range',[begin,end])
-                        log('Fit range updated to ' + str(parameters.get('General Settings','Fit range')) + '\n')
+                        log('Fit range updated to ' + str(parameters.get('General Settings','Fit range')) + '.\n')
                     # Cancel changes.
                     else:
                         print('Canceling changes...\n')
@@ -527,7 +527,7 @@ def plotSet(plot):
                 if setting != '':
                     # If setting did not previously exist, tell user.
                     if parameters.get(plot, setting) == None:
-                        log('Created parameter ' + setting + ' in ' + plot + '.')
+                        log('Created parameter ' + setting + ' in ' + plot + '.\n')
                     value = input('Input the value of the parameter (or leave blank to cancel): ')
                     # Any non-empty input is accepted (no error checking).
                     if value != '':
