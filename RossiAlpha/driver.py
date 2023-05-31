@@ -10,21 +10,23 @@ import os
 import time
 
 '''Function Table of Contents:
-isFloat: 34
-fileType: 44
-plotLink: 55
-inputBool: 67
-inputNum: 98
-changePath: 135
-ioSet: 191
-genSet: 251
-histSet: 396
-plotSet: 428
-settingsEditor: 519
-printSelector: 573
-settingsDriver: 632
-importSettings: 660
-main: 698'''
+isFloat: 40
+fileType: 50
+plotLink: 61
+log: 73
+changeLog: 101
+inputBool: 138
+inputNum: 173
+changePath: 210
+ioSet: 265
+genSet: 339
+histSet: 484
+plotSet: 516
+settingsEditor: 607
+printSelector: 660
+settingsDriver: 719
+importSettings: 747
+main: 785'''
 
 # The settings object to be referenced.
 parameters = set.Settings()
@@ -34,53 +36,6 @@ history = None
 
 # Set the current working directory for assigning absolute paths.
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
-
-def log(output):
-
-    '''Prints the output statement to the command line 
-    and saves it to the log if logs are enabled.
-    
-    The output statement must wholly be a string object.'''
-
-    global history
-
-    print(output)
-
-    if history is not None:
-        curTime = time.localtime()
-        output = (str(curTime.tm_year) 
-          + '-' + str(curTime.tm_mon) 
-          + '-' + str(curTime.tm_mday) 
-          + ' @ ' + str(curTime.tm_hour) 
-          + (':0' if curTime.tm_min < 10 else ':') + str(curTime.tm_min) 
-          + (':0' if curTime.tm_sec < 10 else ':') + str(curTime.tm_sec) 
-          + ' - ' + output)
-        history.write(output)
-        history.flush()
-
-def changeLog():
-
-    '''Change the current use of the log file.'''
-
-    global history
-    if parameters.get('Input/Output Settings','Keep logs') and history is None:
-        curTime = time.localtime()
-        logName = ('../.logs/' + str(curTime.tm_year) 
-                    + '-' + str(curTime.tm_mon) 
-                    + '-' + str(curTime.tm_mday) 
-                    + '@' + str(curTime.tm_hour) 
-                    + (':0' if curTime.tm_min < 10 else ':') + str(curTime.tm_min) 
-                    + (':0' if curTime.tm_sec < 10 else ':') + str(curTime.tm_sec) 
-                    + '.log')
-        logName = os.path.abspath(logName)
-        history = open(logName,'w')
-    elif not parameters.get('Input/Output Settings','Keep logs') and history is not None:
-        history.close()
-        name = history.name
-        name = os.path.abspath(name)
-        os.remove(name)
-        history = None
-
 
 def isFloat(input):
 
@@ -114,6 +69,71 @@ def plotLink(plot):
         return 'https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.bar.html'
     else:
         return 'https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.plot.html'
+
+def log(output):
+
+    '''Prints the output statement to the command line 
+    and saves it to the log if logs are enabled.
+    
+    The output statement must be a string.'''
+
+    # Ensure any reference to history is to the global variable.
+    global history
+    # Print the confirmation statement to the 
+    # console regardless of log preferences.
+    print(output)
+    # If log file exists, record this confirmation.
+    if history is not None:
+        # Create a timestamp for the confirmation message.
+        curTime = time.localtime()
+        output = (str(curTime.tm_year) 
+          + '-' + str(curTime.tm_mon) 
+          + '-' + str(curTime.tm_mday) 
+          + ' @ ' + str(curTime.tm_hour) 
+          + (':0' if curTime.tm_min < 10 else ':') + str(curTime.tm_min) 
+          + (':0' if curTime.tm_sec < 10 else ':') + str(curTime.tm_sec) 
+          + ' - ' + output)
+        # Write the confirmation + timestamp to the file and flush 
+        # immediately so user can see log updates in real time.
+        history.write(output)
+        history.flush()
+
+def changeLog():
+
+    '''Change the current use of the log file.
+    
+    If setting changed:
+    * True -> False - close log file and delete it.
+    * False -> True - create/open new log file named with current timestamp.
+    * True -> True - does nothing (prevents recreation of log file).
+    * False -> False - does nothing (prevents closing/deletion of nonexistent file).'''
+
+    # Ensure any reference to history is to the global variable.
+    global history
+    # If user wants to keep logs and one is not already open.
+    if parameters.get('Input/Output Settings','Keep logs') and history is None:
+        # Get local time.
+        curTime = time.localtime()
+        # Create log file name with relative path and timestamp.
+        logName = ('../.logs/' + str(curTime.tm_year) 
+                    + '-' + str(curTime.tm_mon) 
+                    + '-' + str(curTime.tm_mday) 
+                    + '@' + str(curTime.tm_hour) 
+                    + (':0' if curTime.tm_min < 10 else ':') + str(curTime.tm_min) 
+                    + (':0' if curTime.tm_sec < 10 else ':') + str(curTime.tm_sec) 
+                    + '.log')
+        # Convert relative path into absolute path.
+        logName = os.path.abspath(logName)
+        # Create and open a log file with writing priveleges.
+        history = open(logName,'w')
+    # If user does not want logs and one is currently open.
+    elif not parameters.get('Input/Output Settings','Keep logs') and history is not None:
+        # Close file.
+        history.close()
+        # Delete file.
+        os.remove(history.name)
+        # Reset history variable.
+        history = None
 
 def inputBool(group, setting):
 
