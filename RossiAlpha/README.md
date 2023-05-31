@@ -2,10 +2,35 @@
 
 A repository for a Python suite of neutron noise analysis algorithms. This draws inspiration from faust lmx on gitlab.lanl.gov. This suite is designed specifically for pulse time-of-detection chains from organic scintillator arrays.
 
+## How to Use
+
+### Requirements
+
+To run the PyNoise project, the following programs must be downloaded:
+* driver.py
+* settings.py
+* main.py
+* analyzingFolders.py
+* timeDifs.py
+* plots.py
+* fitting.py
+Additionally, you will need the following:
+* A single file or folder of data that will be analyzed.
+* A settings configuration file (see the settings section for more information).
+
+### Settings Configuration
+
+
+
+### Running
+
 ## Rossi-Alpha Method
 
 
 ### How to Use
+
+To start the PyNoise project, 
+
 The files that you will need in order to use the Rossi-Alpha program are fitting.py, plots.py, timeDifs.py, main.py, analyzingFolders.py, readInput,py, settings.txt, and either a file that you want to analyze or a path to folder to analyze(specify in settings). The format of the file you want to analyze should be a txt file with a list of time stamps of neutron detection times, separated by new lines. The format of the settings.txt should be a list of settings:  
 There are different categories of settings as follows:  
 **I/O FILE INFO** : this contains information about the input files and output files that you will be using
