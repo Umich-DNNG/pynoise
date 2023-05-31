@@ -32,6 +32,9 @@ parameters = set.Settings()
 # Set the current working directory for assigning absolute paths.
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
+# The empty log file.
+history = None
+
 def log(output):
 
     '''Saves the changes '''
@@ -46,7 +49,7 @@ def changeLog():
                     + '-' + str(curTime.tm_min) 
                     + '-' + str(curTime.tm_sec)
                     + '.log')
-        return open(logName,'w')
+        history = open(logName,'w')
 
 
 def isFloat(input):
