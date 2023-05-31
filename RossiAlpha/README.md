@@ -4,6 +4,7 @@ A repository for a Python suite of neutron noise analysis algorithms. This draws
 
 ## How to Use
 
+
 ### Requirements
 
 To run the PyNoise project, the following programs must be downloaded:
@@ -21,16 +22,16 @@ Additionally, you will need the following:
 
 ### Settings Configurations
 
-The PyNoise program can be run with a variety of options that change the visual output and type of analysis being run. This section will outline each subgroup of settings and the acceptable values for each parameter.
+The RossiAlpha program can be run with a variety of options that change the visual output and type of analysis being run. This section will outline each subgroup of settings and the acceptable values for each parameter. The format of the file you want to analyze should be a txt file with a list of time stamps of neutron detection times, separated by new lines.
+There are different categories of settings as follows:  
 
 **I/O FILE INFO** : this group contains information about the input and output details of the program.
-* Input type: there are two options for inputs - analyzing a single file or 
-* input file: the name of the file being analyzed (if file type is 1)
-* output file: 
-* input folder: the path to the folder being analyzed (if file type is 2)   
-* file type: the type of file being analyzed
-    * file type 1 corresponds to a file that is a list of detection times with nothing else
-    * file type 2 corresponds to a folder that has folders within it and files within that folder  
+* Input type: there are two options for inputs - 
+    * option 1 corresponds to a single file with a list of neutron detection times seperated by newlines 
+    * option 2 corresponds to a folder that has folders within it and files within that folder. the first column of the file is the channel of the detection and the second column is the time of the detection
+* input file/folder: users should input the path to the file or folder that the user wants analyzed
+* save directory: users can input a path to where they want produced plots to save
+
  
 **GENERAL PROGRAM SETTINGS** : this contains general program settings     
 * fit range : format the range as follows [min,max] with min and max being ints  
@@ -43,30 +44,16 @@ The PyNoise program can be run with a variety of options that change the visual 
 * digital delay : specify if using the digital delay time difference method
 * number of folders : when using file type 2, this is the number of folders you want analyzed  
 * meas time per folder :  
-* sort data? : select yes if the data file you provide is unsorted, no otherwise  
+* sort data? : select True if the data file you provide is unsorted, False otherwise  
 
 **HISTOGRAM VISUAL SETTINGS:** these settings correspond to the histogram settings see https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.plot.html for full documentation of options TODO: change code to get boolean values
 
-**GENERATING HISTOGRAM SETTINGS**  
+**HISTOGRAM GENERATION SETTINGS**  
 * reset time :   
 * bin width : the width of the histogram bins  
 * minimum cutoff :  
 
 **LINE FITTING SETTINGS** : visual settings for the fit line see https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.plot.html for full documentation of options    
-
-### Settings File Format
-
-
-
-### Running
-
-## Rossi-Alpha Method
-
-
-### How to Use
-
-The format of the file you want to analyze should be a txt file with a list of time stamps of neutron detection times, separated by new lines.
-There are different categories of settings as follows:  
 
 ### Settings Input Format
 Default or custom settings can be imported into the program and can be changed during runtime. For the program to read in the settings correctly, the file extension must be .set and must have the following formatting:
@@ -78,8 +65,22 @@ Default or custom settings can be imported into the program and can be changed d
 
 See the default.set format for examples.
 
+
+### Driver
+```driver.py``` provides the user with an interactive command line driver program, which when ran can either use the default settings file (```default.set```) or users can import a different settings file. Follow initial instructions to choose .set file.   
+**Using Driver**   
+The main menu has 5 main options:
+* m - run the entire program through the [main driver](#main)
+* t - calculate [time differences](#time-difference-calculator)
+* p - create [plots](#rossihistogram) of the time difference data
+* f - [fit](#fitting) the data to an exponential curve
+* s - view or edit the program [settings](#settings-configurations)
+    * v - view the current settings
+    * e - edit the settings : here you can edit individual settings by following the prompts
+* Leave the command blank to end the program.
 ### Main
-```main.py``` contains a driver program, which when ran, will take the settings.txt file and run the sepcified analysis and produce the plots as specified in the settings. Users can run this file without knowing how any of the code works as long as they can correctly edit settings.txt.   
+```main.py``` contains two functions, one for file type 1 and one for file type 2. ```analyzeAllType1(settings)``` calculates the time differences of a type 1 file, constructs a histogram, and fits a curve to the histogram, and constructs a residuals plot. It uses the settings dictionary to do these functions.   
+```analyzeAllType2(settings)``` calculates the time differences for the file within each folder, constructs a histogram, fits a curve to each histogram, then constructs a scatterplot of all of the combined data and fits a curve to it
 
 ### Time Difference Calculator
 ```timeDifs.py``` contains a class, ```TimeDifsCalcs``` that can be initialized with the time data (a list of sorted detection times), the reset time, the method that we will be using, the digital delay, and the corresponding channels to the time data (if not using any_and_all method).
@@ -92,7 +93,7 @@ time_diffs = thisTimeDifCalc.calculate_time_differences() #saves the array of ti
 ```
 
 ### RossiHistogram
-In the plots.py file, there is a class called ```RossiHistogram``` which is a class that bins the data. Currently, there is one function under ```RossiHistogram``` called ```plot(self, time_diffs, save_every_fig, show_plot)```, in which the input parameter time_diffs is an array of time differences generated from the ```timeDifCalcs``` class.
+In the plots.py file, there is a class called ```RossiHistogram``` which is a class that bins the data. There is one function under ```RossiHistogram``` called ```plot(self, time_diffs, save_every_fig, show_plot)```, in which the input parameter time_diffs is an array of time differences generated from the ```timeDifCalcs``` class.
 
 **Using RossiHistogram**
 ```python
@@ -104,26 +105,26 @@ counts, bin_centers, bin_edges = thisPlot.plot(time_diffs, save_fig="yes", show_
 
 
 ### Fitting
-In the fitting.py file, there are two classes. One is called "Fit" and the other one is called "Fit_With_Weighting". Currently, the difference between the two classes is that "Fit_With_Weighting" deals with parsing through folders of files, as well as creating uncertainty plots. The the class "Fit", there are two functions called "fit()" and "fit_and_residual()", the former is used to fit an exponential decay curve onto the histogram and the latter produces a residual plot on top of the curve fitting.
+In the fitting.py file, there are two classes. One is called ```RossiHistogramFit``` and the other one is called ```Fit_With_Weighting```. The difference between the two classes is that "Fit_With_Weighting" deals with input type 1, as well as creating uncertainty plots. In ```RossiHistogramFit``` there are two functions called "fit()" and "fit_and_residual()", the former is used to fit an exponential decay curve onto the histogram and the latter produces a residual plot on top of the curve fitting.
 
-A Fit() object can be created first with the parameters below: 
+fit_and_residual() function will do the same thing as Fit.fit(), execept that it will plot the relative residuals onto a plot right below the curve fitting plot. Thus, the images produced will have two plots that correspond to a line fitted for a histogram and a residua plot describing how well the line is fitting at each Time Difference (ns) unit. 
 
-* counts (array)
-* bin_centers (array)
-* generating_hist_settings (dict)
-* fitting_opts (dict)
-* general_settings (dict)
-* residual_opts (dict)
-* showPlot (boolean)
-
-From there, the Fit.fit() function will fit an exponential decay curve onto the histogram (given in the form of counts and bin_centers). As discussed above, the Fit.fit_and_residual() function will do the same thing as Fit.fit(), execept that it will plot the relative residuals onto a plot right below the curve fitting plot. Thus, the images produced will have two plots that correspond to a line fitted for a histogram and a residua plot describing how well the line is fitting at each Time Difference (ns) unit. 
+**Using Fitting**
 
 
+```python
+thisFit = RossiHistogramFit(counts, bin_centers, settings) #construct the fit object
+# Fitting curve to the histogram and plotting the residuals
+#saves the plot with a fit on top and residuals on bottonm but does not show it
+thisFit.fit_and_residual(save_every_fig=True, show_plot=False)
+```
+```python
+RA_hist_total = analyzingFolders.compile_sample_stdev_RA_dist(settings)
+from fitting import Fit_With_Weighting
+thisWeightedFit = Fit_With_Weighting(RA_hist_total,min_cutoff = , general_settings,saveDir, fitting_opts, residual_opts)
+#creates the fit to the data 
+thisWeightedFit.fit_RA_hist_weighting()
+#plots the histogram
+thisWeightedFit.plot_RA_and_fit(save_fig= False, show_plot="No")
 
-A Fit_With_Weighting() object can be created with the parameters below:
-
-* RA_hist_totals (array)
-* generating_hist_settings (dict)
-* general_settings (dict)
-
-In the class "Fit_With_Weighting", there are two functions: "fit_RA_hist_weighting()" and "plot_RA_and_fit()", where the former calculates the histogram weights and outputs x_fit and y_fit. Those two outputs are then fed into the latter function for plotting.
+```
