@@ -1,15 +1,15 @@
-# The default settings for running the PyNoise project.
+# Custom user generated settings.
 #----------------------------------------------------------------------------------------
 Input/Output Settings
 #----------------------------------------------------------------------------------------
-Input type: 0
-Input file/folder: 
+Input type: 1
+Input file/folder: ./RF3-40_59min.txt
 Save directory: ./
-Keep logs: False
+Keep logs: True
 #----------------------------------------------------------------------------------------
 General Settings
 #----------------------------------------------------------------------------------------
-Fit range: [0,2e3]
+Fit range: [0.0, 2000.0]
 Plot scale: linear
 Time difference method: any_and_all
 Digital delay: 750
@@ -17,7 +17,7 @@ Number of folders: 10
 Meas time per folder: 60
 Sort data?: True
 Save figures?: False
-Show plots?: False
+Show plots?: True
 #----------------------------------------------------------------------------------------
 Histogram Visual Settings
 #----------------------------------------------------------------------------------------
@@ -28,7 +28,7 @@ linewidth: 1
 #----------------------------------------------------------------------------------------
 Histogram Generation Settings
 #----------------------------------------------------------------------------------------
-Reset time: 2e3
+Reset time: 2000.0
 Bin width: 2
 Minimum cutoff: 30
 #----------------------------------------------------------------------------------------
