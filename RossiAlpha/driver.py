@@ -42,7 +42,7 @@ def log(output):
 def changeLog():
     if parameters.get('Input/Output Settings','Keep logs'):
         curTime = time.localtime()
-        logName = ('../.log/history-' + str(curTime.tm_year) 
+        logName = ('../logs/history-' + str(curTime.tm_year) 
                     + '-' + str(curTime.tm_mon) 
                     + '-' + str(curTime.tm_mday) 
                     + '-' + str(curTime.tm_hour) 
