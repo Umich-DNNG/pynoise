@@ -2,13 +2,29 @@
 
 A repository for a Python suite of neutron noise analysis algorithms. This draws inspiration from faust lmx on gitlab.lanl.gov. This suite is designed specifically for pulse time-of-detection chains from organic scintillator arrays.
 
-## Rossi-Alpha Method
+## How to Use
 
+### Requirements
 
-### How to Use
-The files that you will need in order to use the Rossi-Alpha program are fitting.py, plots.py, timeDifs.py, main.py, analyzingFolders.py, readInput,py, settings.txt, and either a file that you want to analyze or a path to folder to analyze(specify in settings). The format of the file you want to analyze should be a txt file with a list of time stamps of neutron detection times, separated by new lines. The format of the settings.txt should be a list of settings:  
-There are different categories of settings as follows:  
-**I/O FILE INFO** : this contains information about the input files and output files that you will be using
+To run the PyNoise project, the following programs must be downloaded:
+* driver.py
+* settings.py
+* main.py
+* analyzingFolders.py
+* timeDifs.py
+* plots.py
+* fitting.py
+
+Additionally, you will need the following:
+* A single file or folder of data that will be analyzed.
+* A settings configuration file (see the settings section for more information).
+
+### Settings Configurations
+
+The PyNoise program can be run with a variety of options that change the visual output and type of analysis being run. This section will outline each subgroup of settings and the acceptable values for each parameter.
+
+**I/O FILE INFO** : this group contains information about the input and output details of the program.
+* Input type: there are two options for inputs - analyzing a single file or 
 * input file: the name of the file being analyzed (if file type is 1)
 * output file: 
 * input folder: the path to the folder being analyzed (if file type is 2)   
@@ -38,7 +54,19 @@ There are different categories of settings as follows:
 
 **LINE FITTING SETTINGS** : visual settings for the fit line see https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.plot.html for full documentation of options    
 
-Users can edit this .txt file to change the settings that they wish to use.
+### Settings File Format
+
+
+
+### Running
+
+## Rossi-Alpha Method
+
+
+### How to Use
+
+The format of the file you want to analyze should be a txt file with a list of time stamps of neutron detection times, separated by new lines.
+There are different categories of settings as follows:  
 
 ### Settings Input Format
 Default or custom settings can be imported into the program and can be changed during runtime. For the program to read in the settings correctly, the file extension must be .set and must have the following formatting:

@@ -5,11 +5,8 @@ import sys
 # sys.path.extend([python_scripts_path])
 # from Data_structure import DataLoader # For building data file load structure
 import numpy as np  # For processing data
-import os  # For scanning directories
 from scipy.optimize import curve_fit
 import seaborn as sns
-import readInput
-from readInput import Settings
 import analyzingFolders
 from timeDifs import timeDifCalcs
 from plots import RossiHistogram
