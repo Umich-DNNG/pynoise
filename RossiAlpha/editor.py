@@ -49,7 +49,7 @@ class Editor:
         * False -> False - does nothing (prevents closing/deletion of nonexistent file).'''
 
         # If user wants to keep logs and one is not already open.
-        if self.parameters.get('Input/Output Settings','Keep logs') and self.history is None:
+        if self.parameters.settings['Input/Output Settings']['Keep logs'] and self.history is None:
             # Get local time.
             curTime = time.localtime()
             # Create log file name with relative path and timestamp.
@@ -65,7 +65,7 @@ class Editor:
             # Create and open a log file with writing priveleges.
             self.history = open(logName,'w')
         # If user does not want logs and one is currently open.
-        elif not self.parameters.get('Input/Output Settings','Keep logs') and self.history is not None:
+        elif not self.parameters.settings['Input/Output Settings']['Keep logs'] and self.history is not None:
             # Close file.
             self.history.close()
             # Delete file.
@@ -87,8 +87,8 @@ class Editor:
             baseline.read(self.parameters.origin)
             for group in self.parameters.settings:
                 for setting in self.parameters.settings[group]:
-                    if baseline.get(group, setting) != self.parameters.get(group, setting):
-                        self.log(setting + ' in ' + group + ' updated to ' + str(self.parameters.get(group, setting)) + '.\n')
+                    if baseline.settings[group].get(setting) != self.parameters.settings[group][setting]:
+                        self.log(setting + ' in ' + group + ' updated to ' + str(self.parameters.settings[group][setting]) + '.\n')
                         self.parameters.changed = True
 
     def edit(self, file):
@@ -99,7 +99,7 @@ class Editor:
         self.changeLog()
         print('Settings viewer/editor closed.\n')
         self.compare()
-        if self.parameters.get('Input/Output Settings','Input type') == 0:
+        if self.parameters.settings['Input/Output Settings']['Input type'] == 0:
             print('WARNING: with the current settings, the input file'
                 + '/folder is not specified. You must add it manually.')
         os.remove(os.path.abspath(file))
@@ -127,6 +127,7 @@ class Editor:
                                           + 'deleted after editing is done.\n')
                     self.edit(file)
                 case 'i':
+                    file = ''
                     while not os.path.isfile(os.path.abspath(file)):
                         file = input('Enter a settings file (no .set extension): ')
                         file = file + '.set'

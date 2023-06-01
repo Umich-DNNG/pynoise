@@ -54,19 +54,19 @@ def createTimeDifs():
     global time_difs
     print('Creating time differences...')
     # For signle file analysis.
-    if editor.parameters.get('Input/Output Settings','Input type') == 1:
+    if editor.parameters.settings['Input/Output Settings']['Input type'] == 1:
         # Load data from 
-        data = np.loadtxt(editor.parameters.get('Input/Output Settings','Input file/folder'))
-        if editor.parameters.get('General Settings','Sort data?'):
+        data = np.loadtxt(editor.parameters.settings['Input/Output Settings']['Input file/folder'])
+        if editor.parameters.settings['General Settings']['Sort data?']:
             data = np.sort(data)
         time_difs = dif.timeDifCalcs(data, 
-            editor.parameters.get('Histogram Generation Settings','Reset time'), 
-            editor.parameters.get('General Settings','Time difference method'))
+            editor.parameters.settings['Histogram Generation Settings']['Reset time'], 
+            editor.parameters.settings['General Settings']['Time difference method'])
         time_difs = time_difs.calculate_time_differences()
         editor.log('Calculated time differences for file ' 
-            + editor.parameters.get('Input/Output Settings','Input file/folder') + '.\n')
+            + editor.parameters.settings['Input/Output Settings']['Input file/folder'] + '.\n')
     # For folder analysis.
-    elif editor.parameters.get('Input/Output Settings','Input type') == 2:
+    elif editor.parameters.settings['Input/Output Settings']['Input type'] == 2:
         print('TODO: Add functionality to create time differences for folders.')
     # Catchall for nonexistent input.
     else:
@@ -82,13 +82,13 @@ def createPlot():
 
     global time_difs, histogram
     print('Building plot...')
-    histogram = plt.RossiHistogram(editor.parameters.get('Histogram Generation Settings','Reset time'),
-                              editor.parameters.get('Histogram Generation Settings','Bin width'),
-                              editor.parameters.getGroup('Histogram Visual Settings'),
-                              editor.parameters.get('Input/Output Settings','Save directory'))
+    histogram = plt.RossiHistogram(editor.parameters.settings['Histogram Generation Settings']['Reset time'],
+                              editor.parameters.settings['Histogram Generation Settings']['Bin width'],
+                              editor.parameters.settings['Histogram Visual Settings'],
+                              editor.parameters.settings['Input/Output Settings']['Save directory'])
     histogram.plot(time_difs,
-              save_fig=editor.parameters.get('General Settings','Save figures?'),
-              show_plot=editor.parameters.get('General Settings','Show plots?'))
+              save_fig=editor.parameters.settings['General Settings']['Save figures?'],
+              show_plot=editor.parameters.settings['General Settings']['Show plots?'])
     editor.log('Created a histogram plot using the current settings and time difference data.\n')
 
 def createBestFit():
@@ -105,8 +105,8 @@ def createBestFit():
     best_fit = fit.RossiHistogramFit(counts, bin_centers, editor.parameters.settings)
         
         # Fitting curve to the histogram and plotting the residuals
-    best_fit.fit_and_residual(save_every_fig=editor.parameters.get('General Settings','Save figures?'), 
-                              show_plot=editor.parameters.get('General Settings','Show plots?'))
+    best_fit.fit_and_residual(save_every_fig=editor.parameters.settings['General Settings']['Save figures?'], 
+                              show_plot=editor.parameters.settings['General Settings']['Show plots?'])
     editor.log('Created line of best fit with residuals for the current histogram.\n')
 
 def main():
@@ -135,7 +135,7 @@ def main():
                 path = os.path.abspath('default.set')
                 editor.parameters.read(path)
                 editor.changeLog()
-                if editor.parameters.get('Input/Output Settings','Input type') == 0:
+                if editor.parameters.settings['Input/Output Settings']['Input type'] == 0:
                     print('WARNING: with the current settings, the input file'
                         + '/folder is not specified. You must add it manually.')
                 editor.log('Settings from default.set succesfully imported.\n')
@@ -149,7 +149,7 @@ def main():
                         print('Initializing the program with ' + file + '...')
                         editor.parameters.read(os.path.abspath(file))
                         editor.changeLog()
-                        if editor.parameters.get('Input/Output Settings','Input type') == 0:
+                        if editor.parameters.settings['Input/Output Settings']['Input type'] == 0:
                             print('WARNING: with the current settings, the input file'
                                 + '/folder is not specified. You must add it manually.')
                         editor.log('Settings from ' + file + ' succesfully imported.\n')
@@ -175,25 +175,25 @@ def main():
         match selection:
             # Run the whole analysis process.
             case 'm':
-                if editor.parameters.get('Input/Output Settings','Input type') == 1:
-                    if editor.parameters.get('General Settings','Time difference method') != 'any_and_all':
+                if editor.parameters.settings['Input/Output Settings']['Input type'] == 1:
+                    if editor.parameters.settings['General Settings']['Time difference method'] != 'any_and_all':
                         print('ERROR: To analyze a single file, you must use '
                               + 'the any_and_all time difference method only.\n')
                     else:
                         print('Running the entire RossiAlpha method...')
                         time_difs, histogram, best_fit = mn.analyzeAllType1(editor.parameters.settings)
                         editor.log('Ran the entire RossiAlpha method on file ' 
-                            + editor.parameters.get('Input/Output Settings','Input file/folder') 
+                            + editor.parameters.settings['Input/Output Settings']['Input file/folder'] 
                             + '.\n')
-                elif editor.parameters.get('Input/Output Settings','Input type') == 2:
+                elif editor.parameters.settings['Input/Output Settings']['Input type'] == 2:
                     print('Running the entire RossiAlpha method...')
                     mn.analyzeAllType2(editor.parameters.settings)
                     editor.log('Ran the entire RossiAlpha method on folder ' 
-                        + editor.parameters.get('Input/Output Settings','Input file/folder') 
+                        + editor.parameters.settings['Input/Output Settings']['Input file/folder'] 
                         + '.\n')
                     print('TODO: Implement modularity for folder analysis.')
                 else:
-                    print('ERROR: No input file/folder defined. Please edit the settings.')
+                    print('ERROR: No input file/folder defined. Please edit the settings.\n')
             # Calculate time differences for the given input.
             # TODO: Have some method of detection for when the input has changed.
             case 't':
