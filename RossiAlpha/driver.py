@@ -138,8 +138,19 @@ def main():
                 editor.log('Settings from default.set succesfully imported.\n')
             # Import custom settings.
             case 'i':
-                print()
-                editor.importSettings(True)
+                file = ''
+                while not os.path.isfile(os.path.abspath(file)):
+                    file = input('Enter a settings file (no .set extension): ')
+                    file = file + '.set'
+                    if os.path.isfile(os.path.abspath(file)):
+                        print('Initializing the program with ' + file + '...')
+                        editor.parameters.read(os.path.abspath(file))
+                        editor.changeLog()
+                        editor.log('Settings from ' + file + ' succesfully imported.\n')
+                    else:
+                        print('ERROR: ' + file + ' does not exist in this directory. '
+                              + 'Make sure that your settings file is named '
+                              + 'correctly and in the same folder as this program.\n')
             # Catchall for invalid commands.
             case _:
                 print('You must choose what settings to import.\n')
@@ -279,7 +290,7 @@ def main():
                         # file and write the current settings into it.
                         path = os.path.abspath('default.set')
                         print('Overwriting default settings...')
-                        editor.parameters.write(path, True)
+                        editor.parameters.write(path, 'The default settings for running the PyNoise project.\n')
                         editor.log('Default settings overwritten.\n')
                     # Catchall for user canceling overwrite.
                     else:
@@ -307,7 +318,7 @@ def main():
                                 # If user confirms, overwrite the settings.
                                 if choice == 'y':
                                     print('Overwriting ' + file + '...')
-                                    editor.parameters.write(path, False)
+                                    editor.parameters.write(path, 'Custom user generated settings.\n')
                                     editor.log('Settings in ' + file + ' overwritten.\n')
                                 # Catchall for user canceling overwrite.
                                 else:
@@ -316,7 +327,7 @@ def main():
                             # Otherwise, save with no confirmation needed.
                             else:
                                 print('Saving current settings to new file ' + file + '...')
-                                editor.parameters.write(path, False)
+                                editor.parameters.write(path, 'Custom user generated settings.\n')
                                 editor.log('Settings saved to file ' + file + '.\n')
                         else:
                             print()
