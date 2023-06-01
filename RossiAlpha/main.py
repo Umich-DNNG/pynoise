@@ -11,9 +11,9 @@ import analyzingFolders
 from timeDifs import timeDifCalcs
 from plots import RossiHistogram
 from fitting import RossiHistogramFit
-sns.set(rc={"figure.dpi": 350, "savefig.dpi": 350})
-sns.set_style("ticks")
-sns.set_context("talk", font_scale=0.8)
+# sns.set(rc={"figure.dpi": 350, "savefig.dpi": 350})
+# sns.set_style("ticks")
+# sns.set_context("talk", font_scale=0.8)
 
 def analyzeAllType1(settings):
     #current_path = os.path.realpath(__file__)

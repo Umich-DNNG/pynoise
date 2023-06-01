@@ -1,7 +1,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import os
+
 plt.ioff()
+plt.figure(figsize=(14, 8))
+
 class RossiHistogram:
     def __init__(self, reset_time, bin_width, plot_opts, save_dir= None):
 
