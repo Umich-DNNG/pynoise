@@ -73,17 +73,47 @@ class Editor:
             # Reset history variable.
             self.history = None
 
+    def compare(self):
+
+        '''Compare the current settings to the most recently 
+        imported version to see if they have changed.'''
+
+        self.parameters.changed = False
+        if self.parameters.origin == os.path.abspath('new.set'):
+            self.log('Created new settings.\n')
+            self.parameters.changed = True
+        else:
+            baseline = set.Settings()
+            baseline.read(self.parameters.origin)
+            for group in self.parameters.settings:
+                for setting in self.parameters.settings[group]:
+                    if baseline.get(group, setting) != self.parameters.get(group, setting):
+                        self.log(setting + ' in ' + group + ' updated to ' + str(self.parameters.get(group, setting)) + '.\n')
+                        self.parameters.changed = True
+
+    def edit(self, file):
+        EDITOR = os.environ.get('EDITOR', 'vim')
+        with open(os.path.abspath(file),'a') as settings:
+            call([EDITOR, settings.name])
+        self.parameters.read(os.path.abspath(file))
+        self.changeLog()
+        print('Settings viewer/editor closed.\n')
+        self.compare()
+        if self.parameters.get('Input/Output Settings','Input type') == 0:
+            print('WARNING: with the current settings, the input file'
+                + '/folder is not specified. You must add it manually.')
+        os.remove(os.path.abspath(file))
+
     def driver(self):
 
         '''The driver that opens the settings vim for editing.'''
 
-        EDITOR = os.environ.get('EDITOR', 'vim')
         choice = 'blank'
         file = ''
-        while choice != '' and choice != 'c' and choice != 'o' and choice != 'n':
+        while choice != '':
             print('What settings do you want to edit/view?')
             print('c - current settings')
-            print('o - other .set file')
+            print('i - import a .set file')
             print('n - new settings')
             print('Leave the command blank to cancel editing/viewing.')
             choice = input('Enter command: ')
@@ -95,12 +125,16 @@ class Editor:
                                           'The current settings during runtime.\n'
                                           + 'This file is temporary and will be '
                                           + 'deleted after editing is done.\n')
-                case 'o':
+                    self.edit(file)
+                case 'i':
                     while not os.path.isfile(os.path.abspath(file)):
                         file = input('Enter a settings file (no .set extension): ')
                         file = file + '.set'
                         if os.path.isfile(os.path.abspath(file)):
-                            print('Opening ' + file + '...')
+                            print('Importing ' + file + '...')
+                            self.parameters.read(os.path.abspath(file))
+                            self.changeLog()
+                            self.log('Imported settings from ' + file + '.\n')
                         else:
                             print('ERROR: ' + file + ' does not exist in this directory. '
                                   + 'Make sure that your settings file is named '
@@ -113,14 +147,8 @@ class Editor:
                                 'A new settings file.\n'
                                 + 'This file is temporary and will be '
                                 + 'deleted after editing is done.\n')
+                    self.edit(file)
                 case '':
-                    print('Returning to previous menu...')
+                    print('Returning to previous menu...\n')
                 case _:
                     print('Unrecognized command. Please review the list of appriopriate inputs.\n')
-
-        with open(os.path.abspath(file),'a') as settings:
-            call([EDITOR, settings.name])
-        self.parameters.read(os.path.abspath(file))
-        self.changeLog()
-        if file == 'new.set' or file == 'current.set':
-            os.remove(os.path.abspath(file))
