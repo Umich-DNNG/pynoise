@@ -352,5 +352,7 @@ class Fit_With_Weighting:
             fig.savefig(save_filename, dpi=300, bbox_inches='tight')
         
         # Displaying the plot (optional)
+        if show_plot:
+            plt.show()
        
 
