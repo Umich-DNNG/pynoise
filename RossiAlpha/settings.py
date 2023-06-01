@@ -37,7 +37,8 @@ class Settings:
         }
         # The variable that indicates whether or not the
         # settings have been changed during runtime.
-        self.changed = False
+        self.origin = ''
+        changed = False
 
     def isFloat(self, input):
 
@@ -48,18 +49,6 @@ class Settings:
             return True
         except ValueError:
             return False
-
-    def updated(self):
-
-        '''Returns whether or not the settings have been updated in the current runtime.'''
-
-        return self.changed
-
-    def update(self):
-
-        '''Indicate that the settings have been updated/altered.'''
-
-        self.changed = True
 
     def set(self, group, setting, value):
 
@@ -140,6 +129,8 @@ class Settings:
         
         The function assumes that the file path and that all formatting
         and values in the settings file are valid (no error checking).'''
+        if path != os.path.abspath('current.set'):
+            self.origin = path
 
         # Create a file object by opening the given file (read-only).
         f = open(path, "r")
@@ -152,11 +143,9 @@ class Settings:
         # Read input type and store it.
         line = f.readline().replace('\n','')
         self.set('Input/Output Settings','Input type',int(line[12]))
-        # If input type not specified, assume file is not given, and issue a warning to 
-        # the user. Then read over the input file/foler line since no input is assumed.
+        # If input type not specified read over the input 
+        # file/foler line since no input is assumed.
         if line[12] == '0':
-            print('WARNING: with the current imported settings, the input file'
-                      + '/folder is not specified. You must add it manually.')
             f.readline()
         # Otherwise, read input as given.
         else:

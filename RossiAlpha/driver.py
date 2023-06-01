@@ -135,6 +135,9 @@ def main():
                 path = os.path.abspath('default.set')
                 editor.parameters.read(path)
                 editor.changeLog()
+                if editor.parameters.get('Input/Output Settings','Input type') == 0:
+                    print('WARNING: with the current settings, the input file'
+                        + '/folder is not specified. You must add it manually.')
                 editor.log('Settings from default.set succesfully imported.\n')
             # Import custom settings.
             case 'i':
@@ -146,6 +149,9 @@ def main():
                         print('Initializing the program with ' + file + '...')
                         editor.parameters.read(os.path.abspath(file))
                         editor.changeLog()
+                        if editor.parameters.get('Input/Output Settings','Input type') == 0:
+                            print('WARNING: with the current settings, the input file'
+                                + '/folder is not specified. You must add it manually.')
                         editor.log('Settings from ' + file + ' succesfully imported.\n')
                     else:
                         print('ERROR: ' + file + ' does not exist in this directory. '
@@ -269,7 +275,7 @@ def main():
             case _:
                 print('Unrecognized command. Please review the list of appriopriate inputs.\n')
     # If the settings have been changed at any point during runtime, notify user.
-    if editor.parameters.updated():
+    if editor.parameters.changed:
         selection = ''
         # Continue looping until the user has decided what to do with their changes.
         while selection != 'd' and selection != 'n' and selection != 'a':
