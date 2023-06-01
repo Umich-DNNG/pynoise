@@ -8,6 +8,9 @@ from subprocess import call
 class Editor:
 
     def __init__(self):
+
+        '''The initializer for the '''
+
         self.parameters = set.Settings()
         self.history = None
         os.chdir(os.path.dirname(os.path.realpath(__file__)))
@@ -76,15 +79,26 @@ class Editor:
     def compare(self):
 
         '''Compare the current settings to the most recently 
-        imported version to see if they have changed.'''
+        imported version to see if they have changed.
+        
+        Logs any changes that have been made.'''
 
+        # Assume the parameters have not changed until marked otherwise.
         self.parameters.changed = False
+        # If the last imported file was a new one, 
+        # note a whole overwrite and mark as changed.
         if self.parameters.origin == os.path.abspath('new.set'):
             self.log('Created new settings.\n')
             self.parameters.changed = True
+        # For settings previously imported from a file:
         else:
+            # Create a baseline settings object 
+            # from the settings in the source file.
             baseline = set.Settings()
             baseline.read(self.parameters.origin)
+            # For every setting in every group, compare the 
+            # current value to the source value. If it differs, 
+            # note the update and mark the settings as changed.
             for group in self.parameters.settings:
                 for setting in self.parameters.settings[group]:
                     if baseline.settings[group].get(setting) != self.parameters.settings[group][setting]:
@@ -92,16 +106,33 @@ class Editor:
                         self.parameters.changed = True
 
     def edit(self, file):
+
+        '''The function that allows the user to edit settings 
+        in a vim and save them to runtime afterwards.
+        
+        Requires a filename of the .set file being opened.
+        
+        The only files that should be edited in the vim are current 
+        and new settings (current.set and new.set respectively).'''
+
+        # Create an editor using the os environ function.
         EDITOR = os.environ.get('EDITOR', 'vim')
+        # Call the editor with the given file in append mode.
         with open(os.path.abspath(file),'a') as settings:
             call([EDITOR, settings.name])
+        # After editing, reread the settings and store them
         self.parameters.read(os.path.abspath(file))
+        # Change the log state.
         self.changeLog()
+        # Notify the user the settings editing is complete.
         print('Settings viewer/editor closed.\n')
+        # Check to see if the settings have changed from the latest import.
         self.compare()
+        # If there is no input file/folder, warn the user.
         if self.parameters.settings['Input/Output Settings']['Input type'] == 0:
             print('WARNING: with the current settings, the input file'
                 + '/folder is not specified. You must add it manually.')
+        # Delete the temporary file.
         os.remove(os.path.abspath(file))
 
     def driver(self):

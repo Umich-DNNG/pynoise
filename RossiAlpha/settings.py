@@ -1,5 +1,7 @@
-'''The file that contains the Settings class for storing and modifying the program settings.'''
+'''The file that contains the Settings class for 
+importing, uploading, and storing the program settings.'''
 
+# For working with paths.
 import os
 
 # Set the current working directory for assigning absolute paths.
@@ -35,9 +37,11 @@ class Settings:
                          'Line Fitting Settings': {},
                          'Residual Plot Settings': {}
         }
+        # The variable that stores the path of the 
+        # .set file that was most recently imported.
+        self.origin = ''
         # The variable that indicates whether or not the
         # settings have been changed during runtime.
-        self.origin = ''
         changed = False
 
     def isFloat(self, input):
@@ -61,18 +65,29 @@ class Settings:
         * string
         * list (no nested loops)'''
 
+        # If input is nonexistent or is an empty string, return an empty string.
         if input == '' or input is None:
             return ''
+        # If input is a list:
         elif input[0] == '[':
+            # Create empty list.
             response = []
+            # Remove bracket characters.
             input = input[1:len(input)-1]
+            # Loop while there is more than one element left.
             while input.count(',') > 0:
+                # Get rid of leading whitespace.
                 while input[0] == ' ':
                     input = input[1:]
+                # Append the next entry to the response.
                 response.append(self.parseType(input[0:input.find(',')]))
+                # Cut out the used entry.
                 input = input[input.find(',')+1:]
+            # Append the remaining entry.
             response.append(self.parseType(input))
+            # Return the whole list.
             return response
+        # If value is True/False, store is a boolean.
         elif input == 'True':
             return True
         elif input == 'False':
@@ -89,24 +104,24 @@ class Settings:
 
     def readGroup(self, group, f):
 
-        '''Reads the settings for a plot (Histogram Visual, Line
-        Fitting, Residual Plot) in from a .set file. Requires a
-        file object and which type of plot this is for.
+        '''Reads in the settings for a group from a .set file. 
+        Requires a file object and which group this is for.
         
         Assumes the group and file object are correct (no error checking).'''
 
         # Clear all settings currently in the group.
         self.settings[group] = {}
-        # Get the first setting for the plot.
+        # Get the first setting for the plot, 
+        # discarding the leading comment line.
         f.readline()
         line = f.readline().replace('\n','')
-        # Continue looping while the input isn't a dashed line.
+        # Continue looping while the input isn't a comment.
         while line[0] != '#':
             # Find the : and store the setting name and value accordingly.
             split = line.find(':')
             setting = line[:split]
             value = line[split+2:]
-            # If value is boolean, store as bool.
+            # Store the value parsed as the correct type. 
             self.settings[group][setting] = self.parseType(value)
             # Read the next setting.
             line = f.readline().replace('\n','')
@@ -118,21 +133,31 @@ class Settings:
         
         The function assumes that the file path and that all formatting
         and values in the settings file are valid (no error checking).'''
+        
+        # If the settings being read are from an imported 
+        # or new file, set the origin to the file name.
         if path != os.path.abspath('current.set'):
             self.origin = path
         # Create a file object by opening the given file (read-only).
         f = open(path, "r")
+        # Get the first line.
         line = f.readline().replace('\n','')
-        # Loop through any initial comments/dashed lines,
-        # then read through the first header.
+        # Loop through any initial comments/dashed
+        # lines to get the first settings group.
         while line[0] == '#':
             line = f.readline().replace('\n','')
+        # Continue looping until the file is completely read.
         while line != '':
+            # Get the settings group name.
             group = line
+            # Read the settings for the group.
             self.readGroup(group, f)
+            # Get the next group name.
             line = f.readline().replace('\n','')
+        # If the input file/folder is defined, create an absolute path for it.
         if self.settings['Input/Output Settings']['Input file/folder'] != '':
-            self.settings['Input/Output Settings']['Input file/folder'] = os.path.abspath(self.settings['Input/Output Settings']['Input file/folder'])
+            self.settings['Input/Output Settings']['Input file/folder'] = (os.path.abspath(self.settings['Input/Output Settings']['Input file/folder']))
+        # Create an absolute path for the save directory.
         self.settings['Input/Output Settings']['Save directory'] = os.path.abspath(self.settings['Input/Output Settings']['Save directory'])
 
     def write(self, path, message):
