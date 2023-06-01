@@ -61,7 +61,7 @@ def compile_sample_stdev_RA_dist(settings):
 
                 counts, bin_centers, bin_edges = thisPlot.plot(time_diffs, 
                                                                save_fig=False, 
-                                                               show_plot=settings['General Settings']['Show plots?'])
+                                                               show_plot=False)
 
                 if i == 1:
                     RA_hist_array = counts
