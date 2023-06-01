@@ -1,6 +1,5 @@
 '''The main file that should be run each time the user wants to use this Python Suite.'''
 
-import settings as set
 import main as mn
 import fitting as fit
 import plots as plt
@@ -8,7 +7,6 @@ import timeDifs as dif
 import analyzingFolders as fol
 import editor as edit
 import os
-import time
 import numpy as np
 import matplotlib.pyplot as mpl
 mpl.ioff()
