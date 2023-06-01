@@ -3,6 +3,7 @@
 import settings as set
 import os
 import time
+from subprocess import call
 
 class Editor:
 
@@ -10,39 +11,6 @@ class Editor:
         self.parameters = set.Settings()
         self.history = None
         os.chdir(os.path.dirname(os.path.realpath(__file__)))
-
-    def isFloat(self, input):
-
-        '''Checks whether or not the input string can be converted to a float.'''
-
-        try:
-            float(input)
-            return True
-        except ValueError:
-            return False
-
-    def fileType(self, input):
-
-        '''Converts input type digit to text for user interactions (print statements).
-        
-        Assumes input is only either 1 or 2.'''
-
-        if input == 1:
-            return 'Single file'
-        else:
-            return 'Folder'
-
-    def plotLink(self, plot):
-
-        '''Returns the right link based on the plot type.
-        
-        Requires the settings group for the plot (Histogram 
-        Visual, Line Fitting, or Residual Plot)'''
-
-        if plot == 'Histogram Visual Settings':
-            return 'https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.bar.html'
-        else:
-            return 'https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.plot.html'
 
     def log(self, output):
 
@@ -99,655 +67,60 @@ class Editor:
         # If user does not want logs and one is currently open.
         elif not self.parameters.get('Input/Output Settings','Keep logs') and self.history is not None:
             # Close file.
-            history.close()
+            self.history.close()
             # Delete file.
-            os.remove(history.name)
+            os.remove(self.history.name)
             # Reset history variable.
-            history = None
-
-    def inputBool(self, group, setting):
-
-        '''Update a setting to be a boolean (stored as True/False).
-        
-        Send the function the setting group and the specific setting to be edited.
-        
-        Assumes the inputs are correct (no input error detection).'''
-
-        selection = 'blank'
-        print()
-        # Keep looping until the user selects yes or no, or cancels.
-        while selection != '' and selection != 't' and selection != 'f':
-            selection = input('Enter t/f (or leave blank to cancel): ')
-            match selection:
-                # Update settings to True.
-                case 't':
-                    self.parameters.set(group,setting,True)
-                    self.parameters.update()
-                    if setting == 'Keep logs':
-                        self.changeLog()
-                    self.log(setting + ' updated to True.\n')
-                # Update settings to False.
-                case 'f':
-                    self.parameters.set(group,setting,False)
-                    self.parameters.update()
-                    if setting == 'Keep logs':
-                        self.changeLog()
-                    self.log(setting + ' updated to False.\n')
-                # Cancel changes.
-                case '':
-                    print('Canceling changes...\n')
-                # Catchall for invalid inputs.
-                case _:
-                    print('This is a true/false question (t/f).\n')
-
-    def inputNum(self, group, setting, type):
-
-        '''Update a setting to be an integer or float.
-        
-        Send the function the setting group and the specific 
-        setting to be edited, and one of the two type options:
-
-        "n integer" - integer
-
-        " float" - float
-
-        The whitespace and n at the beginning of the types is for formatting/printing.
-        
-        Assumes the inputs are correct (no input error detection).'''
-
-        selection = 'blank'
-        print()
-        # Keep looping until the user input is valid, or cancels.
-        while not (type[0] == 'n' and selection.isnumeric()) and not (type[0] == ' ' and self.isFloat(selection)) and selection != '':
-            selection = input('Enter a' + type + ' (or leave blank to cancel): ')
-            # Update setting when input is valid int.
-            if type[0] == 'n' and selection.isnumeric():
-                self.parameters.set(group,setting,int(selection))
-                self.parameters.update()
-                self.log(setting + ' updated to ' + selection + '.\n')
-            # Update setting when input is valid float.
-            elif type[0] == ' ' and self.isFloat(selection):
-                self.parameters.set(group,setting,float(selection))
-                self.parameters.update()
-                self.log(setting + ' updated to ' + selection + '.\n')
-            # Cancel changes.
-            elif selection == '':
-                print('Canceling changes...\n')
-            # Catchall for invalid inputs.
-            else:
-                print('Please enter a' + type + '.\n')
-
-    def changePath(self, setting):
-
-        '''Change a settings parameter that requires an absolute 
-        or relative path (input file/folder and save directory).
-        
-        Requires a setting parameter (either 'Input file/folder' or 'Save directory') 
-        to indicate specific print statements and where to save the user input.'''
-
-        file = 'blank'
-        name = ''
-        # Continue looping until user input is valid or cancels changes.
-        while file != '' and file[0] != '/' and file[0] != '.':
-            file = input('Enter an absolute or relative path (or leave blank to cancel): ')
-            # Cancel changes.
-            if file == '':
-                print('Returning to previous menu...\n')
-            # When user enters valid input.
-            elif file[0] == '/' or file [0] == '.':
-                # For input file/folders.
-                if setting[0] == 'I':
-                    name = file[file.rfind('/')+1:]
-                    # If input name has a . in it, assume it's a file.
-                    if name.count('.') > 0:
-                        self.parameters.set('Input/Output Settings','Input type',1)
-                        # Issue warning if user input for file does not exist.
-                        if not os.path.isfile(file):
-                            print('WARNING: The inputted file does not currently '
-                                + 'exist. Ensure it does before running further analysis.')
-                    # Otherwise, assume a folder.
-                    else:
-                        self.parameters.set('Input/Output Settings','Input type',2)
-                        # Issue warning if user input for folder does not exist.
-                        if not os.path.isdir(file):
-                            print('WARNING: The inputted folder does not currently '
-                                + 'exist. Ensure it does before running further analysis.')
-                else:
-                    # Issue warning if user input for save directory does not exist.
-                        if not os.path.isdir(file):
-                            print('WARNING: The inputted directory does not currently '
-                                + 'exist. Ensure it does before running further analysis.')
-                # Update input.
-                file = os.path.abspath(file)
-                self.parameters.set('Input/Output Settings',setting,file)
-                self.parameters.update()
-                self.log(setting + ' changed to ' + self.parameters.get('Input/Output Settings',setting) + '.\n')
-                # Notify user of automatically assigned 
-                # input type for input file/folders.
-                if setting[0] == 'I':
-                    self.log(self.fileType(self.parameters.get('Input/Output Settings','Input type'))
-                        + ' input type autogenerated. If this type is wrong, '
-                        + 'you can manually change it in the settings.\n')
-            # Catchall for invalid inputs.
-            else:
-                print('Your input must be a relative or absolute path (begins with / or ./).\n')
-
-    def ioSet(self):
-
-        '''The settings editor for Input/Output Settings.'''
-
-        choice = 'blank'
-        # Continue editing until the user is done.
-        while choice != '':
-            print('What setting would you like to edit?')
-            print('t - input type')
-            print('i - input file/folder')
-            print('s - save directory')
-            print('k - keep logs')
-            print('v - view current Input/Output Settings')
-            print('Leave the command blank if you wish to return to the previous menu.')
-            choice = input('Enter setting: ')
-            match choice:
-                # User wants to change the input file/folder.
-                case 'i':
-                    print()
-                    self.changePath('Input file/folder')
-                # Change the save directory.
-                case 's':
-                    print()
-                    self.changePath('Save directory')
-                # Manual override for input type in case automatic assignment is wrong.
-                # If this function is used, there is a bug in input type assignment.
-                # Talk with the coders and explain the bug so it can be fixed.
-                case 't':
-                    print()
-                    value = 'blank'
-                    # Explain valid inputs and use case to user.
-                    print('The input type can be 1 (single file) or 2 (folder). '
-                        + 'Please note that this value is automatically assigned '
-                        + 'when entering the input file/folder and should only '
-                        + 'manually be changed if the autogenerated value is wrong.')
-                    # Keep looping until the user input is valid, or cancels.
-                    while value != '1' and value != '2' and value != '':
-                        value = input('Select an input type (or leave blank to cancel): ')
-                        # Update input type accordingly.
-                        if value == '1' or value == '2':
-                            self.parameters.set('Input/Output Settings','Input type',int(value))
-                            self.log(str(self.fileType(self.parameters.get('Input/Output Settings','Input type'))) + ' (' + value + ') set as the input type.\n')
-                            self.parameters.update()
-                        # Cancel changes.
-                        elif value == '':
-                            print('Canceling changes...\n')
-                        # Catchall for invalid commands.
-                        else:
-                            print('You must enter 1 or 2 for the file type.')
-                # Change the keep logs option.
-                case 'k':
-                    prev = self.parameters.get('Input/Output Settings','Keep logs')
-                    if prev:
-                        print('WARNING: You currently have keep logs set to True. '
-                            + 'If you change this to false, your current history '
-                            + 'for this session will be deleted and cannot be restored.')
-                    self.inputBool('Input/Output Settings','Keep logs')
-                    if prev != self.parameters.get('Input/Output Settings','Keep logs'):
-                        if self.parameters.get('Input/Output Settings','Keep logs'):
-                            self.log('Created a log file for the current session and started recording changes.\n')
-                        else:
-                            print('Deleted current log file.\n')
-                # Print current Input/Output Settings.
-                case 'v':
-                    print()
-                    self.parameters.print_section('Input/Output Settings')
-                    print()
-                # End editing.
-                case '':
-                    print('Returning to previous menu...\n')
-                # Catchall for invalid commands.
-                case _:
-                    print('Unrecognized command. Please review the list of appriopriate inputs.\n')
-
-    def genSet(self):
-
-        '''The settings editor for General Settings.'''
-
-        choice = 'blank'
-        # Continue editing until the user is done.
-        while choice != '':
-            print('What setting would you like to edit?')
-            print('r - fit range')
-            print('p - plot scale')
-            print('t - time difference method')
-            print('d - digital delay')
-            print('n - number of folders')
-            print('m - meas time per folder')
-            print('o - sort data?')
-            print('f - save fig?')
-            print('w - show plot?')
-            print('v - view current General Settings')
-            print('Leave the command blank if you wish to return to the previous menu.')
-            choice = input('Enter setting: ')
-            match choice:
-                # Update the fit range.
-                case 'r':
-                    begin = 0
-                    end = 0
-                    selection = 'blank'
-                    # Keep looping until the user input is valid, or cancels.
-                    while not self.isFloat(selection) and selection != '':
-                        print('Enter a float value to start the fitting range at.')
-                        selection = input ('Value (or blank to cancel the edit): ')
-                        # Save new beginning to fit range.
-                        if self.isFloat(selection):
-                            begin = float(selection)
-                        # Catchall for invalid inputs.
-                        elif selection != '':
-                            print('You must enter a float value.\n')
-                    # If user hasn't canceled changes, continue to next section.
-                    if selection != '':
-                        selection = 'blank'
-                        # Keep looping until the user input is valid, or cancels.
-                        while not self.isFloat(selection) and selection != '':
-                            print('Enter a float value to end the fitting range at.')
-                            selection = input ('Value (or blank to cancel the edit): ')
-                            # Save new ending to fit range.
-                            if self.isFloat(selection):
-                                end = float(selection)
-                            # Catchall for invalid inputs.
-                            elif selection != '':
-                                print('You must enter a float value.\n')
-                        # Apply changes if user hasn't canceled.
-                        if selection != '':
-                            self.parameters.set('General Settings','Fit range',[begin,end])
-                            self.log('Fit range updated to ' + str(self.parameters.get('General Settings','Fit range')) + '.\n')
-                        # Cancel changes.
-                        else:
-                            print('Canceling changes...\n')
-                    # Cancel changes.
-                    else:
-                        print('Canceling changes...\n')
-                # Update the plot scale.
-                case 'p':
-                    selection = input('Enter a new plot scale (or leave blank to cancel): ')
-                    # Apply changes if user hasn't canceled.
-                    if selection != '':
-                        self.parameters.set('General Settings','Plot scale',selection)
-                        self.parameters.update()
-                        self.log('Updated the plot scale to ' + selection + '.\n')
-                    # Cancel changes.
-                    else:
-                        print('Canceling changes...\n')
-                # Update the time difference method.
-                case 't':
-                    print()
-                    selection = 'blank'
-                    # Keep looping until the user input is valid, or cancels.
-                    while (selection != '' and selection != 'a' and selection != 'c'
-                                        and selection != 'n' and selection != 'd'):
-                        print('There are 4 time difference method options:')
-                        print('a - any and all')
-                        print('c - any and all + cross correlations')
-                        print('n - all above options + no repeat')
-                        print('d - all above options + digital delay')
-                        selection = input('Choose an option, or leave blank to cancel the edit: ')
-                        match selection:
-                            # Apply and and all.
-                            case 'a':
-                                self.parameters.set('General Settings','Time difference method','any_and_all')
-                                self.parameters.update()
-                                self.log('Updated the time difference method to any and all.\n')
-                            # Apply cross correlations.
-                            case 'c':
-                                self.parameters.set('General Settings','Time difference method','any_and_all cross_correlations')
-                                self.parameters.update()
-                                self.log('Updated the time difference method to any and all + cross correlations.\n')
-                            # Apply no repeat.
-                            case 'n':
-                                self.parameters.set('General Settings','Time difference method','any_and_all cross_correlations no_repeat')
-                                self.parameters.update()
-                                self.log('Updated the time difference method to any and all + cross correlations + no repeat.\n')
-                            # Apply digital delay.
-                            case 'd':
-                                self.parameters.set('General Settings','Time difference method','any_and_all cross_correlations no_repeat digital_delay')
-                                self.parameters.update()
-                                self.log('Updated the time difference method to any and all + cross correlations + no repeat + digital delay.\n')
-                            # Cancel changes.
-                            case '':
-                                print('Canceling changes...\n')
-                            # Catchall for invalid inputs.
-                            case _:
-                                print('Unrecognized command. Please review the list of appriopriate inputs.\n')
-                # Update the digital delay.
-                case 'd':
-                    self.inputNum('General Settings','Digital delay','n integer')
-                # Update the number of folders.
-                case 'n':
-                    # If settings indicate one file is to be analyzed, warn user of conflict.
-                    if self.parameters.get('Input/Output Settings','Input Type') == 1:
-                        print('WARNING: You current settings indicate you are only analyzing 1 '
-                            + 'file. This setting is intended for analyzing multiple folders. '
-                            + 'If you plan to do so, please update your settings.')
-                    self.inputNum('General Settings','Number of folders','n integer')
-                # Update the meas time per folder.
-                case 'm':
-                    self.inputNum('General Settings','Meas time per folder','n integer')
-                # Update the sort data choice.
-                case 'o':
-                    self.inputBool('General Settings','Sort data?')
-                # Update the save figures choice.
-                case 'f':
-                    self.inputBool('General Settings','Save figures?')
-                # Update the show plots choice.
-                case 'w':
-                    self.inputBool('General Settings','Show plots?')
-                # Print current General Settings.
-                case 'v':
-                    print()
-                    self.parameters.print_section('General Settings')
-                    print()
-                # End editing.
-                case '':
-                    print('Returning to previous menu...\n')
-                # Catchall for invalid commands.
-                case _:
-                    print('Unrecognized command. Please review the list of appriopriate inputs.\n')
-
-    def histSet(self):
-        choice = 'blank'
-        while choice != '':
-            print('What setting would you like to edit?')
-            print('r - reset time')
-            print('b - bin width')
-            print('m - minimum cutoff')
-            print('v - view current Histogram Generation Settings')
-            print('Leave the command blank if you wish to return to the previous menu.')
-            choice = input('Enter setting: ')
-            match choice:
-                # Update the reset time.
-                case 'r':
-                    self.inputNum('Histogram Generation Settings','Reset time',' float')
-                # Update the bin width.
-                case 'b':
-                    self.inputNum('Histogram Generation Settings','Bin width','n integer')
-                # Update the minimum cutoff.
-                case 'm':
-                    self.inputNum('Histogram Generation Settings','Minimum cutoff','n integer')
-                # Print current Histogram Generation Settings.
-                case 'v':
-                    print()
-                    self.parameters.print_section('Histogram Generation Settings')
-                    print()
-                # End editing.
-                case '':
-                    print('Returning to previous menu...\n')
-                # Catchall for invalid commands.
-                case _:
-                    print('Unrecognized command. Please review the list of appriopriate inputs.\n')
-
-    def plotSet(self, plot):
-
-        '''The general settings editor for plot settings 
-        (histogram visual, line fitting, and residual plot).
-        
-        Send the function the setting group to be edited.
-        
-        Assumes the inputs are correct (no input error detection).
-        
-        Since there are countless plot variables, no user error detection 
-        is supplied to insure plot paramters/values are correct.'''
-
-        choice = 'blank'
-        print('You are editing settings for a plot. There are many '
-            + 'settings for plots - the full list for', plot, 
-            'can be found at:\n', self.plotLink(plot),'\nAs such, '
-            + 'you can add and remove settings as you wish.\n')
-        # Continue editing until the user is done.
-        while choice != '':
-            print('Choose a following action:')
-            print('c - change new or exisitng ' + plot)
-            print('d - delete exisiting ' + plot)
-            print('v - view the current ' + plot)
-            print('Leave the command blank if you wish to return to the previous menu.')
-            choice = input('Enter command: ')
-            match choice:
-                # Change exisitng setting.
-                case 'c':
-                    print()
-                    setting = input('Input the parameter name that you want added/modified (or leave blank to cancel): ')
-                    # Any non-empty input is accepted (no error checking).
-                    if setting != '':
-                        # If setting did not previously exist, tell user.
-                        if self.parameters.get(plot, setting) == None:
-                            self.log('Created parameter ' + setting + ' in ' + plot + '.\n')
-                        value = input('Input the value of the parameter (or leave blank to cancel): ')
-                        # Any non-empty input is accepted (no error checking).
-                        if value != '':
-                            # If value is boolean, store as bool.
-                            if value == 'True':
-                                self.parameters.set(plot,setting,True)
-                            elif value == 'False':
-                                self.parameters.set(plot,setting,False)
-                            # If value is numeric, store as integer.
-                            elif value.isnumeric():
-                                self.parameters.set(plot,setting,int(value))
-                            # If value is a float, store as float.
-                            elif self.isFloat(value):
-                                self.parameters.set(plot,setting,float(value))
-                            # Otherwise, store as a string.
-                            else:
-                                self.parameters.set(plot,setting,value)
-                            # Mark the settings as updated.
-                            self.parameters.update()
-                            self.log('Set paramter ' + setting + ' in ' + plot + ' to ' + value +  '.\n')
-                        # User cancels parameter addition:
-                        else:
-                            print('Cancelling changes...\n')
-                    # User cancels parameter addition:
-                    else:
-                        print('Cancelling changes...\n')
-                # Delete existing setting.
-                case 'd':
-                    print()
-                    remove = ' '
-                    while remove != '':
-                        remove = input('Input the parameter name that you want removed (or leave blank to cancel): ')
-                        # User cancels the removal.
-                        if remove == '':
-                            print('Cancelling changes...\n')
-                        # Error catch for trying to delete a setting that does no exist.
-                        elif self.parameters.get(plot, remove) == None:
-                            print('Parameter ' + remove + ' is not currently in the settings.\n')
-                        # Remove the parameter from the dictionary.
-                        else:
-                            self.parameters.remove(plot, remove)
-                            self.parameters.update()
-                            self.log('Removed parameter ' + remove + ' from ' + plot + '.\n')
-                            remove = ''
-                # View current settings for the plot.
-                case 'v':
-                    print()
-                    self.parameters.print_section(plot)
-                    print()
-                # End editing.
-                case '':
-                    print('Returning to previous menu...\n')
-                # Catchall for invalid commands.
-                case _:
-                    print('Unrecognized command. Please review the list of appriopriate inputs.\n')
-
-    def importSettings(self, init):
-
-        '''The function that imports settings from .set files.
-
-        Requires an init input, which is a boolean that indicates 
-        whether or not this import is to initialize the settings.'''
-
-        path = 'blank'
-        file = 'blank'
-        # Continue looping until the user input is a valid file or the
-        # input is empty and this call is not for initialization.
-        while not os.path.isfile(path) and (init or file != ''):
-            print('Enter the name of the settings file (not including '
-                + 'the .set file extension) you want imported.')
-            # If initializing, user must select a file and cannot cancel.
-            if init:
-                file = input('Name of file: ')
-            # Otherwise, user can cancel the change.
-            else:
-                file = input('Name of file (or blank to cancel): ')
-            # If user wants to cancel and not initializing, do so.
-            if file == '' and not init:
-                print('Returning to previous menu...\n')
-            # For all other user inputs, assume it is the exact file name.
-            else:
-                # Create an absolute path to the file name.
-                file = file + '.set'
-                path = os.path.abspath(file)
-                # If file exists, import the settings.
-                if os.path.isfile(path):
-                    print('Importing settings from ' + file + '...')
-                    self.parameters.read(path)
-                    self.changeLog()
-                    self.log('Settings from ' + file + ' succesfully imported.\n')
-                # Catchall for nonexistent files.
-                else:
-                    print('It appears the file you selected does not exist. Please try again.\n')
-
-    def settingsEditor(self):
-
-        '''The main driver function for editing settings.'''
-
-        selection = 'blank'
-        # Continue editing until the user is done.
-        while selection != '':
-            print('What setting group would you like to edit?')
-            print('i - input/output settings')
-            print('g - general settings')
-            print('v - histogram visual settings')
-            print('h - histogram generation settings')
-            print('l - line fitting settings')
-            print('r - residual plot settings')
-            print('d - download settings config from file')
-            print('Leave the command blank if you wish to return to the previous menu.')
-            selection = input('Enter edit command: ')
-            match selection:
-                # Call the Input/Output Settings editor.
-                case 'i':
-                    print()
-                    self.ioSet()
-                # Call the General Settings editor.
-                case 'g':
-                    print()
-                    self.genSet()
-                # Call the plot settings editor under Histogram Visual Settings.
-                case 'v':
-                    print()
-                    self.plotSet('Histogram Visual Settings')
-                # Call the Histogram Generation Settings editor.
-                case 'h':
-                    print()
-                    self.histSet()
-                # Call the plot settings editor under Line Fitting Settings.
-                case 'l':
-                    print()
-                    self.plotSet('Line Fitting Settings')
-                # Call the plot settings editor under Residual Plot Settings.
-                case 'r':
-                    print()
-                    self.plotSet('Residual Plot Settings')
-                # Import settings from a file.
-                case 'd':
-                    print()
-                    self.importSettings(False)
-                # End editing.
-                case '':
-                    print('Returning to previous menu...\n')
-                # Catchall for invalid commands.
-                case _:
-                    print('Unrecognized command. Please review the list of appriopriate inputs.\n')
-
-    def printSelector(self):
-
-        '''The main driver function for displaying settings.'''
-
-        selection = 'blank'
-        # Continue looping until the user is done.
-        while selection != '':
-            print('What settings would you like to view?')
-            print('i - input/output settings')
-            print('g - general settings')
-            print('v - histogram visual settings')
-            print('h - histogram generation settings')
-            print('l - line fitting settings')
-            print('r - residual plot settings')
-            print('a - view all settings')
-            print('Leave the command blank if you wish to return to the previous menu.')
-            selection = input('Enter print command: ')
-            match selection:
-                # Print Input/Output Settings.
-                case 'i':
-                    print()
-                    self.parameters.print_section('Input/Output Settings')
-                    print()
-                # Print General Settings.
-                case 'g':
-                    print()
-                    self.parameters.print_section('General Settings')
-                    print()
-                # Print Histogram Visual Settings.
-                case 'v':
-                    print()
-                    self.parameters.print_section('Histogram Visual Settings')
-                    print()
-                # Print Histogram Generation Settings.
-                case 'h':
-                    print()
-                    self.parameters.print_section('Histogram Generation Settings')
-                    print()
-                # Print Line Fitting Settings.
-                case 'l':
-                    print()
-                    self.parameters.print_section('Line Fitting Settings')
-                    print()
-                # Print Residual Plot Settings.
-                case 'r':
-                    print()
-                    self.parameters.print_section('Residual Plot Settings')
-                    print()
-                # Print all settings.
-                case 'a':
-                    self.parameters.print_all()
-                    print()
-                # End editing.
-                case '':
-                    print('Returning to previous menu...\n')
-                # Catchall for invalid commands.
-                case _:
-                    print('Unrecognized command. Please review the list of appriopriate inputs.\n')
+            self.history = None
 
     def driver(self):
 
-        '''The home menu for viewing and editing settings.'''
+        '''The driver that opens the settings vim for editing.'''
 
-        selection = 'blank'
-        # Continue looping until the user is done.
-        while (selection != ''):
-            print('What would you like to do with the program settings?')
-            print('v - view the current settings')
-            print('e - edit the settings')
-            print('Leave the command blank if you wish to return to the previous menu.')
-            selection = input('Enter menu command: ')
-            match selection:
-                # Run the settings viewer driver.
-                case 'v':
-                    print()
-                    self.printSelector()
-                # Run the settings editor driver.
-                case 'e':
-                    print()
-                    self.settingsEditor()
-                # End editing.
+        EDITOR = os.environ.get('EDITOR', 'vim')
+        choice = 'blank'
+        file = ''
+        while choice != '' and choice != 'c' and choice != 'o' and choice != 'n':
+            print('What settings do you want to edit/view?')
+            print('c - current settings')
+            print('o - other .set file')
+            print('n - new settings')
+            print('Leave the command blank to cancel editing/viewing.')
+            choice = input('Enter command: ')
+            match choice:
+                case 'c':
+                    print('Opening current settings...')
+                    file = 'current.set'
+                    self.parameters.write(os.path.abspath(file),
+                                          'The current settings during runtime.\n'
+                                          + 'This file is temporary and will be '
+                                          + 'deleted after editing is done.\n')
+                case 'o':
+                    while not os.path.isfile(os.path.abspath(file)):
+                        file = input('Enter a settings file (no .set extension): ')
+                        file = file + '.set'
+                        if os.path.isfile(os.path.abspath(file)):
+                            print('Opening ' + file + '...')
+                        else:
+                            print('ERROR: ' + file + ' does not exist in this directory. '
+                                  + 'Make sure that your settings file is named '
+                                  + 'correctly and in the same folder as this program.\n')
+                case 'n':
+                    print('Opening new settings...')
+                    file = 'new.set'
+                    blank = set.Settings()
+                    blank.write(os.path.abspath(file),
+                                'A new settings file.\n'
+                                + 'This file is temporary and will be '
+                                + 'deleted after editing is done.\n')
                 case '':
-                    print('Returning to previous menu...\n')
-                # Catchall for invalid commands.
+                    print('Returning to previous menu...')
                 case _:
                     print('Unrecognized command. Please review the list of appriopriate inputs.\n')
+
+        with open(os.path.abspath(file),'a') as settings:
+            call([EDITOR, settings.name])
+        self.parameters.read(os.path.abspath(file))
+        self.changeLog()
+        if file == 'new.set' or file == 'current.set':
+            os.remove(os.path.abspath(file))
