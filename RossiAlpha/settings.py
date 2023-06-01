@@ -7,58 +7,33 @@ os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
 class Settings:
 
-    def __init__(self,
-                 
-                # Initial Input/Ouput Settings.
-                ioSettings={
-                                'Input type':0,
-                                'Input file/folder':'',
-                                'Save directory':'',
-                                'Keep logs':False
-                            },
-
-                # Initial General Settings.
-                genSettings={  
-                                'Fit range':[0,0],
-                                'Plot scale':'',
-                                'Time difference method':'',
-                                'Digital delay':0,
-                                'Number of folders':0,
-                                'Meas time per folder':0,
-                                'Sort data?':False,
-                                'Save figures?':False,
-                                'Show plots?':False,
-                            },
-
-                # Inital Histogram Visual Settings.
-                visSettings={},
-
-                # Inital Histogram Generation Settings.
-                histSettings={
-                                'Reset time':0,
-                                'Bin width':0,
-                                'Minimum cutoff':0
-                            },
-
-                # Inital Line Fitting Settings.
-                fitSettings={},
-
-                # Inital Residual Plot Settings.
-                resSettings={}
-                ):
+    def __init__(self):
 
         '''The initializer for a Settings object. The object is initialized 
-        with blank/empty values, but can be overwritten if desired. However, 
-        it is recommended to instead us the read() or set() functions.'''
+        with blank/empty values.'''
         
         # Create a dictionary that stores each group of settings,
         # and set each one to the respective input dictionary.
-        self.settings = {'Input/Output Settings': ioSettings,
-                         'General Settings': genSettings,
-                         'Histogram Visual Settings': visSettings,
-                         'Histogram Generation Settings': histSettings,
-                         'Line Fitting Settings': fitSettings,
-                         'Residual Plot Settings': resSettings
+        self.settings = {'Input/Output Settings': {'Input type':0,
+                                                   'Input file/folder':'',
+                                                   'Save directory':'',
+                                                   'Keep logs':False},
+                         'General Settings': {'Fit range':[0,0],
+                                              'Plot scale':'',
+                                              'Time difference method':'',
+                                              'Digital delay':0,
+                                              'Number of folders':0,
+                                              'Meas time per folder':0,
+                                              'Sort data?':False,
+                                              'Save figures?':False,
+                                              'Show plots?':False
+                                              },
+                         'Histogram Generation Settings': {'Reset time':0,
+                                                           'Bin width':0,
+                                                           'Minimum cutoff':0},
+                         'Histogram Visual Settings': {},
+                         'Line Fitting Settings': {},
+                         'Residual Plot Settings': {}
         }
         # The variable that indicates whether or not the
         # settings have been changed during runtime.
@@ -249,11 +224,6 @@ class Settings:
         f.readline()
         f.readline()
         f.readline()
-        # Read the Histogram Visual Settings.
-        self.readPlot('Histogram Visual Settings',f)
-        # Read past header and dashed lines.
-        f.readline()
-        f.readline()
         # Read the reset time and store it.
         line = f.readline().replace('\n','')
         self.set('Histogram Generation Settings','Reset time',float(line[12:]))
@@ -267,6 +237,11 @@ class Settings:
         f.readline()
         f.readline()
         f.readline()
+        # Read the Histogram Visual Settings.
+        self.readPlot('Histogram Visual Settings',f)
+        # Read past header and dashed lines.
+        f.readline()
+        f.readline()
         # Read the Line Fitting Settings.
         self.readPlot('Line Fitting Settings',f)
         # Read past header and dashed lines.
@@ -278,23 +253,25 @@ class Settings:
         # will have been overwritten, so mark settings as unchanged.
         self.changed = False
 
-    def write(self, path, default):
+    def write(self, path, message):
 
         '''The function that writes the current settings to a given 
         .set file. The file must be given as an absolute path.
 
-        The function takes a boolean, default, which marks whether 
-        or not the settings being written are the default.
+        The function takes a string, message, which is written 
+        to the top of the settings file: 
+        * Each newline characterin the string will start a new comment line. 
+        * The write function will autogenerate comment tags (#).
+        * The message ALWAYS ends in a newline character.
         
         The function assumes that the file path is valid (no error checking).'''
 
         # Create a file object by opening the given file (write enabled).
         f = open(path,'w')
         # Create a generic comment header and dashed line.
-        if default:
-            f.write('# The default settings for running the PyNoise project.\n')
-        else:
-            f.write('# Custom user generated settings.\n')
+        while message.count('\n') > 0:
+            f.write('# ' + message[:message.find('\n')+1])
+            message = message[message.find('\n')+1:]
         f.write('#----------------------------------------------'
                 + '------------------------------------------\n')
         # For each settings group, do the following:
