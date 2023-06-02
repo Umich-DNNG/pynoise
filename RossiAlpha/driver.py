@@ -35,10 +35,12 @@ editor = edit.Editor()
 
 # Where the time differences are stored.
 time_difs = None
-
+time_difs_file = None
+time_difs_method = None
 # Where the histogram plot is stored.
 histogram = None
-
+hist_file = None
+hist_method = None
 # Where the best fit curve is stored.
 best_fit = None
 
@@ -51,7 +53,7 @@ def createTimeDifs():
     
     Will overwrite the current time differences, if they exist.'''
 
-    global time_difs
+    global time_difs, time_difs_file, time_difs_method
     print('Creating time differences...')
     # For signle file analysis.
     if editor.parameters.get('Input/Output Settings','Input type') == 1:
@@ -65,6 +67,8 @@ def createTimeDifs():
         time_difs = time_difs.calculate_time_differences()
         editor.log('Calculated time differences for file ' 
             + editor.parameters.get('Input/Output Settings','Input file/folder') + '.\n')
+        time_difs_file = editor.parameters.get('Input/Output Settings','Input file/folder')
+        time_difs_method = editor.parameters.get('General Settings','Time difference method')
     # For folder analysis.
     elif editor.parameters.get('Input/Output Settings','Input type') == 2:
         print('TODO: Add functionality to create time differences for folders.')
@@ -80,7 +84,7 @@ def createPlot():
 
     Assumes that the time difference data is valid.'''
 
-    global time_difs, histogram
+    global time_difs, histogram, hist_file, hist_method
     print('Building plot...')
     histogram = plt.RossiHistogram(editor.parameters.get('Histogram Generation Settings','Reset time'),
                               editor.parameters.get('Histogram Generation Settings','Bin width'),
@@ -89,6 +93,8 @@ def createPlot():
     histogram.plot(time_difs,
               save_fig=editor.parameters.get('General Settings','Save figures?'),
               show_plot=editor.parameters.get('General Settings','Show plots?'))
+    hist_method = editor.parameters.get('General Settings','Time difference method')
+    hist_file = editor.parameters.get('Input/Output Settings','Input file/folder')
     editor.log('Created a histogram plot using the current settings and time difference data.\n')
 
 def createBestFit():
@@ -113,7 +119,7 @@ def main():
 
     '''The main driver that runs the whole program.'''
 
-    global time_difs, histogram, best_fit
+    global time_difs, histogram, best_fit, time_difs_file,time_difs_method
     selection = 'blank'
     print('Welcome to the DNNG/PyNoise project. With this software we are '
           + 'taking radiation data from fission reactions (recorded by organic '
@@ -229,8 +235,8 @@ def main():
                         selection = 'blank'
                 # If user hasn't canceled, create the histogram.
                 if selection != 'blank':
-                    # If there aren't any current time differences, make them.
-                    if time_difs is None:
+                    # If there aren't any current time differences or the time differences aren't current, make them.
+                    if time_difs is None or (not (time_difs_method == editor.parameters.get('General Settings','Time difference method') and time_difs_file == editor.parameters.get('Input/Output Settings','Input file/folder'))):
                         createTimeDifs()
                     createPlot()
             # Create a line of best fit and show the residuals.
@@ -251,8 +257,8 @@ def main():
                 if selection != 'blank':
                     # If there aren't any current time 
                     # differences/histogram plots, make them.
-                    if histogram is None:
-                        if time_difs is None:
+                    if histogram is None or (not (hist_method == editor.parameters.get('General Settings','Time difference method') and hist_file == editor.parameters.get('Input/Output Settings','Input file/folder'))):
+                        if time_difs is None or (not (time_difs_method == editor.parameters.get('General Settings','Time difference method') and time_difs_file == editor.parameters.get('Input/Output Settings','Input file/folder'))):
                             createTimeDifs()
                         createPlot()
                     createBestFit()
