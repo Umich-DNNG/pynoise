@@ -12,3 +12,6 @@
 
 # No need to include logs
 *.log
+
+# Settings files should be user independent
+*.set

@@ -1,4 +1,5 @@
-import numpy as np 
+import numpy as np
+
 
 class timeDifCalcs:
     
@@ -11,7 +12,15 @@ class timeDifCalcs:
         self.timeDifs = None
     
     def calculate_time_differences(self):
+        '''can be called on a timeDifCalcs object and returns the array of time differences used for constructing a histogram based on the appropriate method
         
+        inputs:
+        -None
+
+        outputs:
+        -time differences array
+        '''
+
         time_diffs = np.array([])
         n = len(self.time_vector)
         i = 0
