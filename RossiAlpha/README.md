@@ -94,9 +94,11 @@ When in view mode:
 * $ - Go to the end of the current line
 * 0 - Go to the beginning of the current line
 * Shift + arrow key: Go mutiple spaces in the direction of the arrow
+
 To enter/exit editing mode:
 * s or a - enter editing mode
 * ctrl + C: exit editing mode:
+
 To close the vim:
 * :wq or :exit
 
