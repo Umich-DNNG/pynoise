@@ -83,11 +83,14 @@ The main menu has 5 main options:
 Settings can be edited live during runtime using a vim. This operation is handled by ```editor.py```
 
 **Editor Options**
+
 There are a few choices when using the settings editor:
 * c - edit/view the current runtime settings.
 * i - overwrite current settings with an imported .set file.
 * n - create a blank settings file.
+
 **vim Commands**
+
 When editing settings, a vim editor will open in the command tab. There are a couple of essential commands that should be known to be able to effectively modify the settings.
 
 When in view mode:
