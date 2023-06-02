@@ -9,7 +9,9 @@ class Editor:
 
     def __init__(self):
 
-        '''The initializer for the '''
+        '''The initializer for the Editor class. Creates 
+        a blank settings object, blank log path, and gets 
+        the working directory for making absolute paths.'''
 
         self.parameters = set.Settings()
         self.history = None
@@ -102,7 +104,8 @@ class Editor:
             for group in self.parameters.settings:
                 for setting in self.parameters.settings[group]:
                     if baseline.settings[group].get(setting) != self.parameters.settings[group][setting]:
-                        self.log(setting + ' in ' + group + ' updated to ' + str(self.parameters.settings[group][setting]) + '.\n')
+                        self.log(setting + ' in ' + group + ' updated to ' 
+                        + str(self.parameters.settings[group][setting]) + '.\n')
                         self.parameters.changed = True
 
     def edit(self, file):
@@ -137,10 +140,11 @@ class Editor:
 
     def driver(self):
 
-        '''The driver that opens the settings vim for editing.'''
+        '''The driver that manages the settings vim for editing/viewing.'''
 
         choice = 'blank'
         file = ''
+        # Keep looping until user is done editing/viewing.
         while choice != '':
             print('What settings do you want to edit/view?')
             print('c - current settings')
@@ -149,38 +153,58 @@ class Editor:
             print('Leave the command blank to cancel editing/viewing.')
             choice = input('Enter command: ')
             match choice:
+                # User wants to view/edit current settings.
                 case 'c':
                     print('Opening current settings...')
+                    # Create temporary current.set file to edit.
                     file = 'current.set'
+                    # Write current settings to temp file.
                     self.parameters.write(os.path.abspath(file),
                                           'The current settings during runtime.\n'
                                           + 'This file is temporary and will be '
                                           + 'deleted after editing is done.\n')
+                    # Open the settings editor.
                     self.edit(file)
+                # User wants to import settings from a file.
                 case 'i':
-                    file = ''
-                    while not os.path.isfile(os.path.abspath(file)):
-                        file = input('Enter a settings file (no .set extension): ')
+                    file = 'blank'
+                    # Keep prompting the user until they 
+                    # give an existing file or they cancel.
+                    while not os.path.isfile(os.path.abspath(file)) and file != '':
+                        file = input('Enter a settings file (no .set '
+                                     + 'extension) or leave blank to cancel: ')
                         file = file + '.set'
+                        # If file exists.
                         if os.path.isfile(os.path.abspath(file)):
                             print('Importing ' + file + '...')
                             self.parameters.read(os.path.abspath(file))
                             self.changeLog()
                             self.log('Imported settings from ' + file + '.\n')
+                        # User cancels import.
+                        elif file == '':
+                            print('Canceling import...\n')
+                        # Catchall for invalid inputs.
                         else:
                             print('ERROR: ' + file + ' does not exist in this directory. '
                                   + 'Make sure that your settings file is named '
                                   + 'correctly and in the same folder as this program.\n')
+                # User wants to create entirely new settings.
                 case 'n':
                     print('Opening new settings...')
+                    # Create temporary new.set file to edit.
                     file = 'new.set'
+                    # Create blank settings object.
                     blank = set.Settings()
+                    # Write blank settings to temp file.
                     blank.write(os.path.abspath(file),
                                 'A new settings file.\n'
                                 + 'This file is temporary and will be '
                                 + 'deleted after editing is done.\n')
+                    # Open the settings editor.
                     self.edit(file)
+                # User is ready to return to the main menu.
                 case '':
                     print('Returning to previous menu...\n')
+                # Catchall for invalid commands.
                 case _:
                     print('Unrecognized command. Please review the list of appriopriate inputs.\n')
