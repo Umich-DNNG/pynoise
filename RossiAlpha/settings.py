@@ -42,7 +42,7 @@ class Settings:
         self.origin = ''
         # The variable that indicates whether or not the
         # settings have been changed during runtime.
-        changed = False
+        self.changed = False
 
     def isFloat(self, input):
 
