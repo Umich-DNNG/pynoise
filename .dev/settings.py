@@ -1,52 +1,44 @@
+'''The file that contains the Settings class for 
+importing, uploading, and storing the program settings.'''
+
 import os
 
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
 class Settings:
 
-    def __init__(self,
-                 
-                ioSettings={
-                                'Input type':0,
-                                'Input file/folder':'',
-                                'Save directory':''
-                            },
+    def __init__(self):
 
-                genSettings={  
-                                'Fit range':[0,0],
-                                'Plot scale':'',
-                                'Time difference method':'',
-                                'Digital delay':0,
-                                'Number of folders':0,
-                                'Meas time per folder':0,
-                                'Sort data?':False,
-                                'Save figures?':False,
-                                'Show plots?':False,
-                            },
-
-                visSettings={},
-
-                histSettings={
-                                'Reset time':0,
-                                'Bin width':0,
-                                'Minimum cutoff':0
-                            },
-
-                fitSettings={},
-
-                resSettings={}
-                ):
+        '''The initializer for a Settings object. The object is initialized 
+        with blank/empty values.'''
         
-        self.settings = {'Input/Output Settings': ioSettings,
-                         'General Settings': genSettings,
-                         'Histogram Visual Settings': visSettings,
-                         'Histogram Generation Settings': histSettings,
-                         'Line Fitting Settings': fitSettings,
-                         'Residual Plot Settings': resSettings
+        self.settings = {'Input/Output Settings': {'Input type':0,
+                                                   'Input file/folder':'',
+                                                   'Save directory':'',
+                                                   'Keep logs':False},
+                         'General Settings': {'Fit range':[0,0],
+                                              'Plot scale':'',
+                                              'Time difference method':'',
+                                              'Digital delay':0,
+                                              'Number of folders':0,
+                                              'Meas time per folder':0,
+                                              'Sort data?':False,
+                                              'Save figures?':False,
+                                              'Show plots?':False
+                                              },
+                         'Histogram Generation Settings': {'Reset time':0,
+                                                           'Bin width':0,
+                                                           'Minimum cutoff':0},
+                         'Histogram Visual Settings': {},
+                         'Line Fitting Settings': {},
+                         'Residual Plot Settings': {}
         }
+        self.origin = ''
         self.changed = False
 
     def isFloat(self, input):
+
+        '''Checks whether or not the input string can be converted to a float.'''
 
         try:
             float(input)
@@ -54,127 +46,96 @@ class Settings:
         except ValueError:
             return False
 
-    def updated(self):
+    def parseType(self, input):
 
-        return self.changed
+        '''Converts a string into the detected variable type.
+        
+        Accepted types:
+        * int
+        * bool
+        * float
+        * string
+        * list (no nested loops)'''
 
-    def update(self):
+        if input == '' or input is None:
+            return ''
+        elif input[0] == '[':
+            response = []
+            input = input[1:len(input)-1]
+            while input.count(',') > 0:
+                while input[0] == ' ':
+                    input = input[1:]
+                response.append(self.parseType(input[0:input.find(',')]))
+                input = input[input.find(',')+1:]
+            response.append(self.parseType(input))
+            return response
+        elif input == 'True':
+            return True
+        elif input == 'False':
+            return False
+        elif input.isnumeric():
+            return int(input)
+        elif self.isFloat(input):
+            return float(input)
+        else:
+            return input
 
-        self.changed = True
+    def readGroup(self, group, f):
 
-    def set(self, group, setting, value):
-
-        self.settings[group][setting] = value
-    
-    def get(self, group, setting):
-
-        return self.settings[group].get(setting)
-    
-    def remove(self, group, setting):
-
-        self.settings[group].pop(setting)
-
-    def readPlot(self, group, f):
+        '''Reads in the settings for a group from a .set file. 
+        Requires a file object and which group this is for.
+        
+        Assumes the group and file object are correct (no error checking).'''
 
         self.settings[group] = {}
+        f.readline()
         line = f.readline().replace('\n','')
         while line[0] != '#':
             split = line.find(':')
             setting = line[:split]
             value = line[split+2:]
-            if value == 'True':
-                self.set(group,setting,True)
-            elif value == 'False':
-                self.set(group,setting,False)
-            elif value.isnumeric():
-                self.set(group,setting,int(value))
-            elif self.isFloat(value):
-                self.set(group,setting,float(value))
-            else:
-                self.set(group,setting,value)
+            self.settings[group][setting] = self.parseType(value)
             line = f.readline().replace('\n','')
 
     def read(self, path):
 
+        '''The function that reads in settings from a given .set file. 
+        The file must be given as an absolute path.
+        
+        The function assumes that the file path and that all formatting
+        and values in the settings file are valid (no error checking).'''
+        
+        if path != os.path.abspath('current.set'):
+            self.origin = path
         f = open(path, "r")
-        line = ''
-        while line != 'Input/Output Settings':
+        line = f.readline().replace('\n','')
+        while line[0] == '#':
             line = f.readline().replace('\n','')
-        f.readline()
-        line = f.readline().replace('\n','')
-        self.set('Input/Output Settings','Input type',int(line[12]))
-        if line[12] == '0':
-            print('WARNING: with the current imported settings, the input file'
-                      + '/folder is not specified. You must add it manually.')
-            f.readline()
-        else:
+        while line != '':
+            group = line
+            self.readGroup(group, f)
             line = f.readline().replace('\n','')
-            file = line[19:]
-            self.set('Input/Output Settings','Input file/folder',os.path.abspath(file))
-        line = f.readline().replace('\n','')
-        file = line[16:]
-        self.set('Input/Output Settings','Save directory',os.path.abspath(file))
-        f.readline()
-        f.readline()
-        f.readline()
-        line = f.readline().replace('\n','')
-        line = line[12:len(line)-1]
-        begin = float(line[:line.find(',')])
-        end = float(line[line.find(',')+1:])
-        self.set('General Settings','Fit range',[begin,end])
-        line = f.readline().replace('\n','')
-        self.set('General Settings','Plot scale',line[12:])
-        line = f.readline().replace('\n','')
-        self.set('General Settings','Time difference method',line[24:])
-        line = f.readline().replace('\n','')
-        self.set('General Settings','Digital delay',int(line[15:]))
-        line = f.readline().replace('\n','')
-        self.set('General Settings','Number of folders',int(line[19:]))
-        line = f.readline().replace('\n','')
-        self.set('General Settings','Meas time per folder',int(line[22:]))
-        line = f.readline().replace('\n','')
-        if line[12] == 'T':
-            self.set('General Settings','Sort data?',True)
-        else:
-            self.set('General Settings','Sort data?',False)
-        line = f.readline().replace('\n','')
-        if line[15] == 'T':
-            self.set('General Settings','Save figures?',True)
-        else:
-            self.set('General Settings','Save figures?',False)
-        line = f.readline().replace('\n','')
-        if line[13] == 'T':
-            self.set('General Settings','Show plots?',True)
-        else:
-            self.set('General Settings','Show plots?',False)
-        f.readline()
-        f.readline()
-        f.readline()
-        self.readPlot('Histogram Visual Settings',f)
-        f.readline()
-        f.readline()
-        line = f.readline().replace('\n','')
-        self.set('Histogram Generation Settings','Reset time',float(line[12:]))
-        line = f.readline().replace('\n','')
-        self.set('Histogram Generation Settings','Bin width',int(line[11:]))
-        line = f.readline().replace('\n','')
-        self.set('Histogram Generation Settings','Minimum cutoff',int(line[16:]))
-        f.readline()
-        f.readline()
-        f.readline()
-        self.readPlot('Line Fitting Settings',f)
-        f.readline()
-        f.readline()
-        self.readPlot('Residual Plot Settings',f)
-        self.changed = False
+        if self.settings['Input/Output Settings']['Input file/folder'] != '':
+            self.settings['Input/Output Settings']['Input file/folder'] = (os.path.abspath(self.settings['Input/Output Settings']['Input file/folder']))
+        self.settings['Input/Output Settings']['Save directory'] = os.path.abspath(self.settings['Input/Output Settings']['Save directory'])
 
-    def write(self, path, default):
+    def write(self, path, message):
+
+        '''The function that writes the current settings to a given 
+        .set file. The file must be given as an absolute path.
+
+        The function takes a string, message, which is written 
+        to the top of the settings file: 
+        * Each newline characterin the string will start a new comment line. 
+        * The write function will autogenerate comment tags (#).
+        * The message ALWAYS ends in a newline character.
+        
+        The function assumes that the file path is valid (no error checking).'''
 
         f = open(path,'w')
-        if default:
-            f.write('# The default settings for running the PyNoise project.\n')
-        else:
-            f.write('# Custom user generated settings.\n')
+        while message.count('\n') > 0:
+            f.write('# ' + message[:message.find('\n')+1])
+            message = message[message.find('\n')+1:]
         f.write('#----------------------------------------------'
                 + '------------------------------------------\n')
         for group in self.settings:
@@ -183,32 +144,7 @@ class Settings:
                     + '------------------------------------------\n')
             for setting in self.settings[group]:
                 f.write(setting + ': ')
-                f.write(str(self.get(group, setting)))
+                f.write(str(self.settings[group][setting]))
                 f.write('\n')
             f.write('#----------------------------------------------'
                     + '------------------------------------------\n')
-
-    def print_section(self, group):
-
-        print(group)
-        if len(self.settings[group]) == 0:
-            print ('No specified settings.')
-        else:
-            for setting in self.settings[group]:
-                print(setting,'-',self.get(group,setting))
-
-    def print_all(self):
-
-        print('\nHere are the current settings for the program:')
-        print()
-        self.print_section('Input/Output Settings')
-        print()
-        self.print_section('General Settings')
-        print()
-        self.print_section('Histogram Visual Settings')
-        print()
-        self.print_section('Histogram Generation Settings')
-        print()
-        self.print_section('Line Fitting Settings')
-        print()
-        self.print_section('Residual Plot Settings')
