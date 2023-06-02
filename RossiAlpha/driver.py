@@ -11,25 +11,6 @@ import numpy as np
 import matplotlib.pyplot as mpl
 mpl.ioff()
 
-'''Function Table of Contents:
-isFloat: 40
-fileType: 50
-plotLink: 61
-log: 73
-changeLog: 101
-inputBool: 138
-inputNum: 173
-changePath: 210
-ioSet: 265
-genSet: 339
-histSet: 484
-plotSet: 516
-settingsEditor: 607
-printSelector: 660
-settingsDriver: 719
-importSettings: 747
-main: 785'''
-
 # The editor class that contains the settings and settings editor.
 editor = edit.Editor()
 
@@ -283,7 +264,7 @@ def main():
         selection = ''
         # Continue looping until the user has decided what to do with their changes.
         while selection != 'd' and selection != 'n' and selection != 'a':
-            print('It appears you have made changes to the default '
+            print('It appears you have made unsaved changes to the '
               + 'settings. Do you want to save your changes?')
             print('d - save current settings as the default')
             print('n - save current settings as a new settings file')
