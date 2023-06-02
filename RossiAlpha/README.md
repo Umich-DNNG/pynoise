@@ -80,7 +80,7 @@ The main menu has 5 main options:
 
 
 ### Editor
-Settings can be edited live during runtime using a vim. This operation is handled by ```editor.py```
+Settings can be edited live during runtime using a vim. This operation is handled by ```editor.py```.
 
 **Editor Options**
 
