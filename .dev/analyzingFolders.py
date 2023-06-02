@@ -4,6 +4,7 @@ from timeDifs import timeDifCalcs
 from plots import RossiHistogram
 from fitting import RossiHistogramFit
 
+# --------------------------------------------------------------------------------
 def replace_zeroes(lst):
     non_zero_elements = [x for x in lst if x != 0]
     average = sum(non_zero_elements) / len(non_zero_elements)
@@ -15,10 +16,22 @@ def replace_zeroes(lst):
     return lst
 
 def compile_sample_stdev_RA_dist(settings):
+    '''
+    Goes through folders in the specified folder path and finds the appropriate file to analyze
+    calculates the time difference and constructs a histogram and fitting for each file
+    compiles all of these folders finds the standard deviation and uncertainties
+    
+    Arguments: Settings object
+    
+    Outputs: RA_Hist_Total which contains three things:
+    RA_Hist_Total[0] is the summed histogram from all of the folders 
+    RA_Hist_Total[1] is the bin centers for the histogram
+    RA_Hist_Total[2] is the uncertainties
+    '''
 
     data_folder = settings['Input/Output Settings']['Input file/folder']
     num_folders = int(settings['General Settings']['Number of folders'])
-    i = 0
+    i = 1
     for fol_num in range(1, num_folders + 1):
         for filename in os.listdir(data_folder + "/" + str(fol_num)):
             if filename.endswith("n_allch.txt"):
@@ -47,10 +60,10 @@ def compile_sample_stdev_RA_dist(settings):
                                           settings['Input/Output Settings']['Save directory'])
 
                 counts, bin_centers, bin_edges = thisPlot.plot(time_diffs, 
-                                                               save_fig="no", 
-                                                               show_plot=settings['General Settings']['Show plots?'])
+                                                               save_fig=False, 
+                                                               show_plot=False)
 
-                if i == 0:
+                if i == 1:
                     RA_hist_array = counts
                 else:
                     RA_hist_array = np.vstack((RA_hist_array, counts))

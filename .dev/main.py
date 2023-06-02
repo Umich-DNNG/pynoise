@@ -1,3 +1,4 @@
+import sys
 import numpy as np 
 from scipy.optimize import curve_fit
 import seaborn as sns
@@ -5,9 +6,7 @@ import analyzingFolders
 from timeDifs import timeDifCalcs
 from plots import RossiHistogram
 from fitting import RossiHistogramFit
-sns.set(rc={"figure.dpi": 350, "savefig.dpi": 350})
-sns.set_style("ticks")
-sns.set_context("talk", font_scale=0.8)
+import matplotlib.pyplot as plt
 
 def analyzeAllType1(settings):
     
@@ -26,7 +25,11 @@ def analyzeAllType1(settings):
         
     thisFit.fit_and_residual(save_every_fig=settings['General Settings']['Save figures?'], 
                                  show_plot=settings['General Settings']['Show plots?'])
+    plt.close('all')
+    return time_diffs, thisPlot, thisFit
         
+
+
 def analyzeAllType2(settings):
     RA_hist_total = analyzingFolders.compile_sample_stdev_RA_dist(settings)
     from fitting import Fit_With_Weighting
@@ -35,4 +38,5 @@ def analyzeAllType2(settings):
                                         settings['Residual Plot Settings'])
     thisWeightedFit.fit_RA_hist_weighting()
     thisWeightedFit.plot_RA_and_fit(save_fig=settings['General Settings']['Save figures?'], 
-                                    show_plot="No")
+                                    show_plot=False)
+    plt.close('all')

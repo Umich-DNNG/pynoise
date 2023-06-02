@@ -2,17 +2,61 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 import os
-
+plt.ioff()
 def exp_decay_3_param(x, a, b, c):
+
+    '''
+    Description:
+        - Exponential decay function with 3 parameters including offset
+
+    Inputs:
+        - x (time differences: x-axis)
+        - a (coefficient constant)
+        - b (alpha value)
+        - c (offset constant)
+
+    Outputs:
+        - Exponential decay function
+    '''
 
     return a * np.exp(b * x) + c
 
 def exp_decay_2_param(x, a, b):
 
-    return a * np.exp(b * x)
+    '''
+    Description:
+        - Exponential decay function with 2 parameters including offset
+
+    Inputs:
+        - x (time differences: x-axis)
+        - a (coefficient constant)
+        - b (alpha value)
+    
+    Outputs:
+        - Exponential decay function
+    '''
+    
+    return a * np.exp(b * x) 
 
 class RossiHistogramFit:
     def __init__(self, counts, bin_centers, settings):
+        
+        '''
+        Description:
+            - Creating the a Fit() object and its variables.
+
+        Inputs:
+            - counts (The set of values of the histogram as a list)
+            - bin_centers (adjusted bin centers for visual plotting)
+            - generating_hist_settings (setting for histogram plotting)
+            - fitting_opts (setting for fitting)
+            - general_settings (general setting)
+            - residual_opts (setting for residuals)
+            - hist_visual_opts (setting for styling histogram plot)
+
+        Outputs: 
+            - Fit() object
+        '''
 
         self.fitting_options = settings['Line Fitting Settings']
         self.residual_options = settings['Residual Plot Settings']
@@ -27,6 +71,18 @@ class RossiHistogramFit:
 
 
     def fit(self, save_fig, show_plot):
+
+        '''
+        Description:
+            - Fitting an exponential curve onto the histogram.
+            - Saving and showing the plot can be turned on or off.
+
+        Inputs:
+            - self (encompasses all private variables)
+
+        Outputs: 
+            - popt (Optimal values for the parameters)
+        '''
 
         num_bins = np.size(self.counts)
         time_diff_centers = self.bin_centers[1:] - np.diff(self.bin_centers[:2])/2
@@ -69,11 +125,22 @@ class RossiHistogramFit:
 
         if show_plot:
             plt.show()
-
         return popt
 
 
     def fit_and_residual(self, save_every_fig, show_plot, folder_index = None):
+
+        '''
+        Description:
+            - Fitting an exponential curve onto the histogram and creating a residual plot to measure the accuracy.
+            - Saving and showing the plot can be turned on or off.
+
+        Inputs:
+            - self (encompasses all private variables)
+
+        Outputs: 
+            - popt (Optimal values for the parameters)
+        '''
 
         num_bins = np.size(self.counts)
         time_diff_centers = self.bin_centers[1:] - np.diff(self.bin_centers[:2])/2
@@ -105,7 +172,7 @@ class RossiHistogramFit:
 
         ax1.bar(self.bin_centers, self.counts, width=0.8*(self.bin_centers[1]-self.bin_centers[0]), 
             alpha=0.6, color="b", align="center", edgecolor="k", linewidth=0.5, fill=True)
-        ax1.plot(line_x, line_y, 'r--', label='Fit: A=%5.3f, alpha=%5.3f, B=%5.3f' % tuple(popt), **self.fitting_options)
+        ax1.plot(line_x, line_y, label='Fit: A=%5.3f, alpha=%5.3f, B=%5.3f' % tuple(popt), **self.fitting_options)
         ax1.legend()
         ax1.set_ylabel("Coincidence rate (s^-1)")
 
@@ -133,11 +200,25 @@ class RossiHistogramFit:
 
         if show_plot:
             plt.show()
-
         return popt
 
 class Fit_With_Weighting:
     def __init__(self,RA_hist_totals, min_cutoff, general_settings,saveDir, fitting_opts, residual_opts):
+
+        '''
+        Description:
+            - Creating the a Fit_with_Weighting() object and its variables.
+
+        Inputs:
+            - RA_hist_totals (array of counts and uncertainties)
+            - generating_hist_settings (setting for histogram plotting)
+            - general_settings (general setting)
+            - fitting_opts (setting for fitting)
+            - residual_opts (setting for residuals)
+
+        Outputs: 
+            - Fit_with_Weighting() object
+        '''
 
         self.fitting_options = fitting_opts
         self.residual_options = residual_opts
@@ -155,6 +236,18 @@ class Fit_With_Weighting:
 
 
     def fit_RA_hist_weighting(self):
+
+        '''
+        Description:
+            - Fitting an exponential curve onto the histogram with weighting.
+            - Saving and showing the plot can be turned on or off.
+
+        Inputs:
+            - self (encompasses all private variables)
+
+        Outputs: 
+            - None
+        '''
 
         fit_index = np.where(((self.time_diff_centers > self.min_cutoff) & 
             (self.time_diff_centers >= self.fit_range[0]) & 
@@ -186,13 +279,25 @@ class Fit_With_Weighting:
        
     def plot_RA_and_fit(self, save_fig, show_plot):
 
+        '''
+        Description:
+            - Plotting the sum of histograms generated.
+            - Saving and showing the plot can be turned on or off.
+
+        Inputs:
+            - self (encompasses all private variables)
+
+        Outputs: 
+            - None
+        '''
+       
         time_diff_centers = self.time_diff_centers[1:] - np.diff(self.time_diff_centers[:2])/2
         
         fig, ax = plt.subplots()
         
         ax.scatter(time_diff_centers, self.hist[:-1], **self.residual_options)
         
-        ax.plot(self.xfit, self.yfit, 'r-', label='Fit', **self.fitting_options)
+        ax.plot(self.xfit, self.yfit, label='Fit', **self.fitting_options)
         
         ax.set_xlabel('Time difference (ns)')
         ax.set_ylabel('Counts')
