@@ -11,6 +11,7 @@ import analyzingFolders
 from timeDifs import timeDifCalcs
 from plots import RossiHistogram
 from fitting import RossiHistogramFit
+import matplotlib.pyplot as plt
 # sns.set(rc={"figure.dpi": 350, "savefig.dpi": 350})
 # sns.set_style("ticks")
 # sns.set_context("talk", font_scale=0.8)
@@ -40,6 +41,7 @@ def analyzeAllType1(settings):
         # Fitting curve to the histogram and plotting the residuals
     thisFit.fit_and_residual(save_every_fig=settings['General Settings']['Save figures?'], 
                                  show_plot=settings['General Settings']['Show plots?'])
+    plt.close('all')
     return time_diffs, thisPlot, thisFit
         
 
@@ -53,6 +55,7 @@ def analyzeAllType2(settings):
     thisWeightedFit.fit_RA_hist_weighting()
     thisWeightedFit.plot_RA_and_fit(save_fig=settings['General Settings']['Save figures?'], 
                                     show_plot=False)
+    plt.close('all')
 
 #
 #if __name__ == "__main__":
