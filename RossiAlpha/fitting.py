@@ -195,8 +195,7 @@ class RossiHistogramFit:
         fig, (ax1, ax2) = plt.subplots(nrows=2, sharex=True, figsize=(8, 6), gridspec_kw={'height_ratios': [2, 1]})
 
         # Plotting histogram and fitting curve in top subplot
-        ax1.bar(self.bin_centers, self.counts, width=0.8*(self.bin_centers[1]-self.bin_centers[0]), 
-            alpha=0.6, color="b", align="center", edgecolor="k", linewidth=0.5, fill=True)
+        ax1.bar(self.bin_centers, self.counts, width=0.8*(self.bin_centers[1]-self.bin_centers[0]), **self.hist_visual_options)
         ax1.plot(line_x, line_y, label='Fit: A=%5.3f, alpha=%5.3f, B=%5.3f' % tuple(popt), **self.fitting_options)
         ax1.legend()
         ax1.set_ylabel("Coincidence rate (s^-1)")
@@ -208,7 +207,7 @@ class RossiHistogramFit:
         index = (time_diff_centers >= xfit[0]) & (time_diff_centers <= xfit[-1])
 
         ax2.scatter(time_diff_centers[index], residuals_norm, **self.residual_options)
-        ax2.axhline(y=0, color='r', linestyle='--')
+        ax2.axhline(y=0, color='#162F65', linestyle='--')
         ax2.set_ylim([-1, 1])
         ax2.set_xlabel("Time Differences(ns)")
         ax2.set_ylabel('Relative residuals')
