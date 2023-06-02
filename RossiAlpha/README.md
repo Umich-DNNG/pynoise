@@ -9,6 +9,7 @@ A repository for a Python suite of neutron noise analysis algorithms. This draws
 
 To run the PyNoise project, the following programs must be downloaded:
 * driver.py
+* editor.py
 * settings.py
 * main.py
 * analyzingFolders.py
@@ -59,9 +60,9 @@ There are different categories of settings as follows:
 Default or custom settings can be imported into the program and can be changed during runtime. For the program to read in the settings correctly, the file extension must be .set and must have the following formatting:
 1. The file can begin with any number of comments (lines that start with #)
 2. Each settings group must have a header of the correct name and must have its contents surrounded by a comment line on either side (dashed lines are commonly used but the comment line can contain anything)
-3. The setting groups must come in the same order every time (Input/Output -> General -> Histogram Visual -> Histogram Generation -> Line Fitting -> Residual Plot)
-4. Input/Output, General, and Histogram Generation Settings must always have the same settings in the same order.
-5. Other settings groups can have a variable number of parameters in any order.
+3. Input/Output, General, and Histogram Generation Settings must always have the same settings.
+4. Other settings groups can have a variable number of parameters.
+5. Settings can come in any order within a group.
 
 See the default.set format for examples.
 
@@ -75,9 +76,37 @@ The main menu has 5 main options:
 * p - create [plots](#rossihistogram) of the time difference data
 * f - [fit](#fitting) the data to an exponential curve
 * s - view or edit the program [settings](#settings-configurations)
-    * v - view the current settings
-    * e - edit the settings : here you can edit individual settings by following the prompts
 * Leave the command blank to end the program.
+
+
+### Editor
+Settings can be edited live during runtime using a vim. This operation is handled by ```editor.py```.
+
+**Editor Options**
+
+There are a few choices when using the settings editor:
+* c - edit/view the current runtime settings.
+* i - overwrite current settings with an imported .set file.
+* n - create a blank settings file.
+
+**vim Commands**
+
+When editing settings, a vim editor will open in the command tab. There are a couple of essential commands that should be known to be able to effectively modify the settings.
+
+When in view mode:
+* $ - Go to the end of the current line
+* 0 - Go to the beginning of the current line
+* Shift + arrow key: Go mutiple spaces in the direction of the arrow
+
+To enter/exit editing mode:
+* s or a - enter editing mode
+* ctrl + C: exit editing mode:
+
+To close the vim:
+* :wq or :exit
+
+*WARNING*: Try to avoid exiting/quitting the program while in the editing vim. To use vim, temporary files are created that will not be correctly deleted if vim editing is halted incorrectly. Additionally, the entire terminal tab formatting may be affected.
+
 ### Main
 ```main.py``` contains two functions, one for file type 1 and one for file type 2. ```analyzeAllType1(settings)``` calculates the time differences of a type 1 file, constructs a histogram, and fits a curve to the histogram, and constructs a residuals plot. It uses the settings dictionary to do these functions.   
 ```analyzeAllType2(settings)``` calculates the time differences for the file within each folder, constructs a histogram, fits a curve to each histogram, then constructs a scatterplot of all of the combined data and fits a curve to it

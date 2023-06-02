@@ -62,6 +62,7 @@ class RossiHistogram:
         if save_fig == True:
 
             # Plotting
+            plt.figure()
             plt.bar(bin_centers, counts, width=0.8 * (bin_centers[1] - bin_centers[0]), alpha=0.6, fill=True, **self.options)
 
             plt.xlabel(self.x_axis)
@@ -76,6 +77,8 @@ class RossiHistogram:
         if show_plot == True:
 
             # Plotting
+            if not save_fig:
+                plt.figure()
             plt.bar(bin_centers, counts, width=0.8 * (bin_centers[1] - bin_centers[0]), alpha=0.6, fill=True, **self.options)
 
             plt.xlabel(self.x_axis)
