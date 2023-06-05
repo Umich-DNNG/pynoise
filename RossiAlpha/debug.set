@@ -4,7 +4,7 @@ Input/Output Settings
 #----------------------------------------------------------------------------------------
 Input type: 1
 Input file/folder: ./RF3-40_59min.txt
-Save directory: ./
+Save directory: /Users/kate/Documents/summerResearch/outputFiles
 Keep logs: True
 #----------------------------------------------------------------------------------------
 General Settings
