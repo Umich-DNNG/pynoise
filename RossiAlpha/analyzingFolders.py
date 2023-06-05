@@ -38,7 +38,7 @@ def compile_sample_stdev_RA_dist(settings):
                 path_to_data = data_folder + "/" + str(fol_num) + "/" + filename
                 list_data_n = np.loadtxt(path_to_data, delimiter=" ")
 
-                if settings['General Settings']['Sort data?'] == True:
+                if settings['General Settings']['Sort data'] == True:
                     list_data = list_data_n[:, 1]
                     sorted_indices = np.argsort(list_data)
                     list_data_n = list_data_n[sorted_indices]
@@ -71,8 +71,8 @@ def compile_sample_stdev_RA_dist(settings):
                 thisFit = RossiHistogramFit(counts,
                                             bin_centers,settings)
 
-                thisFit.fit_and_residual(save_every_fig=settings['General Settings']['Save figures?'], 
-                                         show_plot=settings['General Settings']['Show plots?'], 
+                thisFit.fit_and_residual(save_every_fig=settings['General Settings']['Save figures'], 
+                                         show_plot=settings['General Settings']['Show plots'], 
                                          folder_index=i)
 
                 i = i + 1

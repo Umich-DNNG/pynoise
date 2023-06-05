@@ -40,7 +40,7 @@ def createTimeDifs():
     if editor.parameters.settings['Input/Output Settings']['Input type'] == 1:
         # Load data from 
         data = np.loadtxt(editor.parameters.settings['Input/Output Settings']['Input file/folder'])
-        if editor.parameters.settings['General Settings']['Sort data?']:
+        if editor.parameters.settings['General Settings']['Sort data']:
             data = np.sort(data)
         time_difs = dif.timeDifCalcs(data, 
             editor.parameters.settings['Histogram Generation Settings']['Reset time'], 
@@ -72,8 +72,8 @@ def createPlot():
                               editor.parameters.settings['Histogram Visual Settings'],
                               editor.parameters.settings['Input/Output Settings']['Save directory'])
     histogram.plot(time_difs,
-              save_fig=editor.parameters.settings['General Settings']['Save figures?'],
-              show_plot=editor.parameters.settings['General Settings']['Show plots?'])
+              save_fig=editor.parameters.settings['General Settings']['Save figures'],
+              show_plot=editor.parameters.settings['General Settings']['Show plots'])
     editor.log('Created a histogram plot using the current settings and time difference data.\n')
 
 def createBestFit():
@@ -90,8 +90,8 @@ def createBestFit():
     best_fit = fit.RossiHistogramFit(counts, bin_centers, editor.parameters.settings)
         
         # Fitting curve to the histogram and plotting the residuals
-    best_fit.fit_and_residual(save_every_fig=editor.parameters.settings['General Settings']['Save figures?'], 
-                              show_plot=editor.parameters.settings['General Settings']['Show plots?'])
+    best_fit.fit_and_residual(save_every_fig=editor.parameters.settings['General Settings']['Save figures'], 
+                              show_plot=editor.parameters.settings['General Settings']['Show plots'])
     editor.log('Created line of best fit with residuals for the current histogram.\n')
 
 def main():
