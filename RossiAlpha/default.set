@@ -2,27 +2,27 @@
 #----------------------------------------------------------------------------------------
 Input/Output Settings
 #----------------------------------------------------------------------------------------
-Input type: 0
-Input file/folder: 
-Save directory: ./
+Input type: 2
+Input file/folder: /Users/kate/Dropbox (University of Michigan)/20210322_06_RF3-42_CF_OS_run1_60min_0947
+Save directory: /Users/kate/Documents/summerResearch/outputFiles
 Keep logs: False
 #----------------------------------------------------------------------------------------
 General Settings
 #----------------------------------------------------------------------------------------
-Fit range: [0.0, 1000.0]
+Fit range: [0.0, 2000.0]
 Plot scale: linear
 Time difference method: any_and_all
 Digital delay: 750
 Number of folders: 10
 Meas time per folder: 60
 Sort data?: True
-Save figures?: False
+Save figures?: True
 Show plots?: False
 #----------------------------------------------------------------------------------------
 Histogram Generation Settings
 #----------------------------------------------------------------------------------------
-Reset time: 1000.0
-Bin width: 9
+Reset time: 2000.0
+Bin width: 30
 Minimum cutoff: 30
 #----------------------------------------------------------------------------------------
 Histogram Visual Settings
@@ -43,9 +43,5 @@ linewidth: 1
 #----------------------------------------------------------------------------------------
 Residual Plot Settings
 #----------------------------------------------------------------------------------------
-color: #B2CBDE
-edgecolor: #162F65
-linewidth: 0.4
-marker: o
-s: 20
+s: 1
 #----------------------------------------------------------------------------------------
