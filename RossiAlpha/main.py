@@ -24,7 +24,7 @@ def analyzeAllType1(settings):
     filePath = settings['Input/Output Settings']['Input file/folder']
     listData = np.loadtxt(filePath)
     # sorting timestamps to be fed into calculate_time_differences()
-    if settings['General Settings']["Sort data?"]:
+    if settings['General Settings']["Sort data"]:
         listDataSorted = np.sort(listData)
     
     # applying time differences function
@@ -34,13 +34,13 @@ def analyzeAllType1(settings):
     # creating RossiHistogram() object with specified settings
     thisPlot = RossiHistogram(settings['Histogram Generation Settings']['Reset time'], settings['Histogram Generation Settings']['Bin width'], settings['Histogram Visual Settings'], settings['Input/Output Settings']['Save directory'])
 
-    counts, bin_centers, bin_edges = thisPlot.plot(time_diffs, save_fig=settings['General Settings']['Save figures?'], show_plot=settings['General Settings']['Show plots?'])
+    counts, bin_centers, bin_edges = thisPlot.plot(time_diffs, save_fig=settings['General Settings']['Save figures'], show_plot=settings['General Settings']['Show plots'])
     # creating Fit() object with specified settings
     thisFit = RossiHistogramFit(counts, bin_centers, settings)
         
         # Fitting curve to the histogram and plotting the residuals
-    thisFit.fit_and_residual(save_every_fig=settings['General Settings']['Save figures?'], 
-                                 show_plot=settings['General Settings']['Show plots?'])
+    thisFit.fit_and_residual(save_every_fig=settings['General Settings']['Save figures'], 
+                                 show_plot=settings['General Settings']['Show plots'])
     plt.close('all')
     return time_diffs, thisPlot, thisFit
         
@@ -53,7 +53,7 @@ def analyzeAllType2(settings):
                                         settings['General Settings'],settings['Input/Output Settings']['Save directory'], settings['Line Fitting Settings'], 
                                         settings['Residual Plot Settings'])
     thisWeightedFit.fit_RA_hist_weighting()
-    thisWeightedFit.plot_RA_and_fit(save_fig=settings['General Settings']['Save figures?'], 
+    thisWeightedFit.plot_RA_and_fit(save_fig=settings['General Settings']['Save figures'], 
                                     show_plot=False)
     plt.close('all')
 
