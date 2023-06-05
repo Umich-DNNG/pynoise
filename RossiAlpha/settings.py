@@ -26,10 +26,14 @@ class Settings:
                                               'Digital delay':0,
                                               'Number of folders':0,
                                               'Meas time per folder':0,
-                                              'Sort data?':False,
-                                              'Save figures?':False,
-                                              'Show plots?':False
+                                              'Sort data':False,
+                                              'Save figures':False,
+                                              'Show plots':False
                                               },
+                         'RossiAlpha Settings': {},
+                         'PSD Settings' : {'Dwell time':0,
+                                           'Meas time range':[0,0],
+                                           'Clean pulses switch':True},
                          'Histogram Generation Settings': {'Reset time':0,
                                                            'Bin width':0,
                                                            'Minimum cutoff':0},
