@@ -2,6 +2,7 @@ import numpy as np                     # For processing data
 import matplotlib.pyplot as plt        # For plotting data summaries
 from scipy.optimize import curve_fit   # For fitting the curve
 from scipy import signal               # For welch (fourier transform)
+import os                              # For saving figures
 
 
 # ------------ Power Spectral Density Fitting Function ----------------------------------------------
@@ -35,7 +36,7 @@ class PowerSpectralDensity:
         self.meas_time_range = meas_time_range
 
 
-    def conduct_APSD(self):
+    def conduct_APSD(self, show_plot, save_fig, save_dir):
 
         '''
         Creating PSD plot from an array of data inputs.
@@ -131,7 +132,23 @@ class PowerSpectralDensity:
         ax2.set_title('Power Spectral Density Graph')
         ax2.legend(loc='upper right')
         
-        plt.show()
+
+        # Saving figure (optional)
+        if save_fig:
+
+            fig1.tight_layout()
+            save_filename = os.path.join(save_dir, 'PSD1')
+            fig1.savefig(save_filename, dpi=300, bbox_inches='tight')
+
+            fig2.tight_layout()
+            save_filename = os.path.join(save_dir, 'PSD2')
+            fig2.savefig(save_filename, dpi=300, bbox_inches='tight')
+
+
+        # Showing plot (optional)
+        if show_plot:
+            print("entered")
+            plt.show()
         
         # Outputting the PSD distribution and fit
         return f, Pxx, popt, pcov

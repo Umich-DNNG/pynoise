@@ -35,7 +35,9 @@ def main():
                                                       dwell_time=2e6, 
                                                       meas_time_range=[150e9,1e12])
                 
-                PSD_Object.conduct_APSD() # PSD Analysis
+                save_dir= "/Users/vincentweng/Documents/PyNoise/PowerSpectralDensity/output"
+                
+                PSD_Object.conduct_APSD(show_plot=False, save_fig=False, save_dir=save_dir) # PSD Analysis
                 
             case 'p':
                 print()
