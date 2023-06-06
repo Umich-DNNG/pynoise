@@ -109,7 +109,7 @@ def main():
     while selection != 'd' and selection != 'i':
         print('Would you like to use the default settings or import another .json file?')
         print('d - use default settings')
-        print('i - import custom settings')
+        print('i - import settings to overwrite the default')
         selection = input('Select settings choice: ')
         match selection:
             # Import the default settings.
@@ -127,17 +127,23 @@ def main():
             # Import custom settings.
             case 'i':
                 file = ''
-                while not os.path.isfile(os.path.abspath(file)):
+                choice = 'blank'
+                while not os.path.isfile(os.path.abspath(file)) and file != '.json':
                     file = input('Enter a settings file (no .json extension): ')
                     file = file + '.json'
                     if os.path.isfile(os.path.abspath(file)):
-                        print('Initializing the program with ' + file + '...')
-                        editor.parameters.read(os.path.abspath(file))
+                        print('Importing settings from ' + file + '...')
+                        editor.parameters.read(os.path.abspath('default.json'))
+                        editor.parameters.append(os.path.abspath(file))
                         editor.changeLog()
+                        editor.log('Settings from ' + file + ' succesfully'
+                                    + ' appended to the default.\n')
                         if editor.parameters.settings['Input/Output Settings']['Input type'] == 0:
                             print('WARNING: with the current settings, the input file'
                                 + '/folder is not specified. You must add it manually.')
-                        editor.log('Settings from ' + file + ' succesfully imported.\n')
+                    elif file == '.json':
+                        print('Canceling import...\n')
+                        selection = ''
                     else:
                         print('ERROR: ' + file + ' does not exist in this directory. '
                               + 'Make sure that your settings file is named '
@@ -309,7 +315,7 @@ def main():
                                 # If user confirms, overwrite the settings.
                                 if choice == 'y':
                                     print('Overwriting ' + file + '...')
-                                    editor.parameters.write(path)
+                                    editor.parameters.save(path)
                                     editor.log('Settings in ' + file + ' overwritten.\n')
                                 # Catchall for user canceling overwrite.
                                 else:
@@ -318,7 +324,7 @@ def main():
                             # Otherwise, save with no confirmation needed.
                             else:
                                 print('Saving current settings to new file ' + file + '...')
-                                editor.parameters.write(path)
+                                editor.parameters.save(path)
                                 editor.log('Settings saved to file ' + file + '.\n')
                         else:
                             print()
