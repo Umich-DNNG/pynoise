@@ -179,13 +179,13 @@ class Editor:
                 # User wants to import settings from a file.
                 case 'i':
                     file = 'blank'
-                    choice = 'blank'
-                    while choice != '' and choice != 'o' and choice != 'a':
+                    opt = 'blank'
+                    while opt != '' and opt != 'o' and opt != 'a':
                         print('You have two input options:')
                         print('o - overwrite the entire settings')
                         print('a - append settings')
-                        choice = input('Enter a command (or leave blank to cancel): ')
-                        match choice:
+                        opt = input('Enter a command (or leave blank to cancel): ')
+                        match opt:
                             case 'o':
                                 print('Overwrite mode selected.')
                             case 'a':
@@ -196,7 +196,7 @@ class Editor:
                                 print('Unrecognized command. Please review the list of appriopriate inputs.\n')
                     # Keep prompting the user until they 
                     # give an existing file or they cancel.
-                    while choice != '' and not os.path.isfile(os.path.abspath(file)) and file != '.json':
+                    while opt != '' and not os.path.isfile(os.path.abspath(file)) and file != '.json':
                         file = input('Enter a settings file (no .json '
                                      + 'extension) or leave blank to cancel: ')
                         file = file + '.json'
@@ -204,7 +204,7 @@ class Editor:
                         if os.path.isfile(os.path.abspath(file)):
                             print('Importing ' + file + '...')
                             # Overwrite all settings.
-                            if choice == 'o':
+                            if opt == 'o':
                                 self.parameters.read(os.path.abspath(file))
                                 self.changeLog()
                                 self.log('Imported settings from ' + file + '.\n')
