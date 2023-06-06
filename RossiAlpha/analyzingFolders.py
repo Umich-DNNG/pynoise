@@ -1,8 +1,8 @@
 import os
 import numpy as np
-from timeDifs import timeDifCalcs
-from plots import RossiHistogram
-from fitting import RossiHistogramFit
+from .timeDifs import timeDifCalcs
+from .plots import RossiHistogram
+from .fitting import RossiHistogramFit
 
 # --------------------------------------------------------------------------------
 def replace_zeroes(lst):
@@ -48,7 +48,7 @@ def compile_sample_stdev_RA_dist(settings):
 
                 thisData = timeDifCalcs(list_data, 
                                         settings['Histogram Generation Settings']['Reset time'], 
-                                        settings['General Settings']['Time difference method'], 
+                                        settings['RossiAlpha Settings']['Time difference method'], 
                                         settings['General Settings']['Digital delay'], 
                                         channels)
                 
