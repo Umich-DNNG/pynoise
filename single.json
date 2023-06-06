@@ -6,5 +6,8 @@
     "General Settings": {
         "Save figures": true,
         "Show plots": true
+    },
+    "Histogram Visual Settings": {
+        "fill": ""
     }
 }
