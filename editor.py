@@ -59,7 +59,7 @@ class Editor:
             # Get local time.
             curTime = time.localtime()
             # Create log file name with relative path and timestamp.
-            logName = ('../.logs/' + str(curTime.tm_year) 
+            logName = ('./.logs/' + str(curTime.tm_year) 
                         + '-' + str(curTime.tm_mon) 
                         + '-' + str(curTime.tm_mday) 
                         + '@' + str(curTime.tm_hour) 
