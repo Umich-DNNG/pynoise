@@ -48,13 +48,13 @@ def analyzeAllType1(settings):
 
 def analyzeAllType2(settings):
     RA_hist_total = analyzingFolders.compile_sample_stdev_RA_dist(settings)
-    from fitting import Fit_With_Weighting
+    from .fitting import Fit_With_Weighting
     thisWeightedFit = Fit_With_Weighting(RA_hist_total,settings['Histogram Generation Settings']['Minimum cutoff'], 
                                         settings['General Settings'],settings['Input/Output Settings']['Save directory'], settings['Line Fitting Settings'], 
                                         settings['Residual Plot Settings'])
     thisWeightedFit.fit_RA_hist_weighting()
     thisWeightedFit.plot_RA_and_fit(save_fig=settings['General Settings']['Save figures'], 
-                                    show_plot=False)
+                                    show_plot=False, errorBars = settings['Histogram Generation Settings']['Error Bar/Band'])
     plt.close('all')
 
 #
