@@ -1,0 +1,58 @@
+{
+    "Input/Output Settings": {
+        "Input type": 0,
+        "Input file/folder": "",
+        "Save directory": "./",
+        "Keep logs": false
+    },
+    "General Settings": {
+        "Fit range": [
+            0.0,
+            1000.0
+        ],
+        "Plot scale": "linear",
+        "Digital delay": 750,
+        "Number of folders": 10,
+        "Meas time per folder": 60,
+        "Sort data": true,
+        "Save figures": false,
+        "Show plots": false
+    },
+    "RossiAlpha Settings": {
+        "Time difference method": "any_and_all"
+    },
+    "PSD Settings": {
+        "Dwell time": 2000000.0,
+        "Meas time range": [
+            150000000000.0,
+            1000000000000.0
+        ],
+        "Clean pulses switch": true
+    },
+    "Histogram Generation Settings": {
+        "Reset time": 1000,
+        "Bin width": 9,
+        "Minimum cutoff": 30
+    },
+    "Histogram Visual Settings": {
+        "alpha": 1,
+        "fill": true,
+        "color": "#B2CBDE",
+        "edgecolor": "#162F65",
+        "linewidth": 0.4
+    },
+    "Line Fitting Settings": {
+        "color": "#162F65",
+        "markeredgecolor": "blue",
+        "markerfacecolor": "black",
+        "linestyle": "-",
+        "linewidth": 1
+    },
+    "Residual Plot Settings": {
+        "color": "#B2CBDE",
+        "edgecolor": "#162F65",
+        "linewidth": 0.4,
+        "marker": "o",
+        "s": 20
+    }
+}
