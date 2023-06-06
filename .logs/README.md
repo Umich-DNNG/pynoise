@@ -23,7 +23,7 @@ The following operations made during runtime will be recorded by the log:
 * Running an entire method (RossiAlpha)
 * Overwriting previously stored analysis data.
 * Overwriting settings files at the end of runtime.
-* Creating a new settings fil eat the end of runtime.
+* Creating a new settings file at the end of runtime.
 * Discarded the current settings at the end of runtime.
 
 It should be assumed that anything not in this list will not be included in log files.
