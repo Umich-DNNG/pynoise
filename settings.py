@@ -50,13 +50,30 @@ class Settings:
         # settings have been changed during runtime.
         self.changed = False
     
-    def read(self, path):
+    def append(self, path):
         
+        '''Appends settings from a json file into the settings 
+        object. Requires an abolsute path to the file.
+        
+        Does not change the file of origin. Cannot delete exisiting settings.'''
+
+        parameters = json.load(open(path))
+        for group in parameters:
+            for setting in parameters[group]:
+                self.settings[group][setting] = parameters[group][setting]
+
+    def read(self, path):
+
+        '''Reads in a json file that completely overwrites the 
+        exisitng settings. Requiures an absolute path to the file.'''
+
         self.settings = json.load(open(path))
         if path != os.path.abspath('current.json'):
             self.origin = path
 
     def write(self, path):
+
+        '''Write the current settings to a file.'''
 
         with open(path,'w') as file:
             file.write(json.dumps(self.settings, indent=4))
