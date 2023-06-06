@@ -315,7 +315,7 @@ class Fit_With_Weighting:
         self.xfit, self.yfit = xfit, yfit
 
        
-    def plot_RA_and_fit(self, save_fig, show_plot):
+    def plot_RA_and_fit(self, save_fig, show_plot, errorBars):
 
         '''
         Description:
@@ -336,12 +336,13 @@ class Fit_With_Weighting:
         # Creating a scatter plot with the data
         ax.scatter(time_diff_centers, self.hist[:-1], **self.residual_options)
         
-
-        #ax.errorbar(time_diff_centers, self.hist[:-1], yerr=self.uncertainties[:-1], fmt='o')
+        if errorBars == "bar":
+            ax.errorbar(time_diff_centers, self.hist[:-1], yerr=self.uncertainties[:-1], fmt='o', ecolor='black',capsize=5)
         #ax.fill_between(time_diff_centers, self.hist[:-1] - self.uncertainties[:-1], self.hist[:-1] + self.uncertainties[:-1], alpha=0.3, color='gray')
-        #lower_bound = self.hist[:-1] - self.uncertainties[:-1]
-        #upper_bound = self.hist[:-1] + self.uncertainties[:-1]
-        #ax.fill_between(time_diff_centers, lower_bound, upper_bound, alpha=0.3, color='gray')
+        elif errorBars == "band":
+            lower_bound = self.hist[:-1] - self.uncertainties[:-1]
+            upper_bound = self.hist[:-1] + self.uncertainties[:-1]
+            ax.fill_between(time_diff_centers, lower_bound, upper_bound, alpha=0.3, color='gray')
 
         # Adding the fit to the data
         ax.plot(self.xfit, self.yfit, label='Fit', **self.fitting_options)

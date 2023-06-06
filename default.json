@@ -32,7 +32,8 @@
     "Histogram Generation Settings": {
         "Reset time": 1000,
         "Bin width": 9,
-        "Minimum cutoff": 30
+        "Minimum cutoff": 30,
+        "Error Bar/Band":"band"
     },
     "Histogram Visual Settings": {
         "alpha": 1,
