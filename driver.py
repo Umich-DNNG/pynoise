@@ -1,10 +1,10 @@
 '''The main file that should be run each time the user wants to use this Python Suite.'''
 
-import main as mn
-import fitting as fit
-import plots as plt
-import timeDifs as dif
-import analyzingFolders as fol
+from RossiAlpha import main as mn
+from RossiAlpha import fitting as fit
+from RossiAlpha import plots as plt
+from RossiAlpha import timeDifs as dif
+from RossiAlpha import analyzingFolders as fol
 import editor as edit
 import os
 import numpy as np
@@ -44,12 +44,12 @@ def createTimeDifs():
             data = np.sort(data)
         time_difs = dif.timeDifCalcs(data, 
             editor.parameters.settings['Histogram Generation Settings']['Reset time'], 
-            editor.parameters.settings['General Settings']['Time difference method'])
+            editor.parameters.settings['RossiAlpha Settings']['Time difference method'])
         time_difs = time_difs.calculate_time_differences()
         editor.log('Calculated time differences for file ' 
             + editor.parameters.settings['Input/Output Settings']['Input file/folder'] + '.\n')
         time_difs_file = editor.parameters.settings['Input/Output Settings']['Input file/folder']
-        time_difs_method = editor.parameters.settings['General Settings']['Time difference method']
+        time_difs_method = editor.parameters.settings['RossiAlpha Settings']['Time difference method']
     # For folder analysis.
     elif editor.parameters.settings['Input/Output Settings']['Input type'] == 2:
         print('TODO: Add functionality to create time differences for folders.')
@@ -107,7 +107,7 @@ def main():
           + 'numerous folders.\n')
     # Continue looping until the user has selected an import option.
     while selection != 'd' and selection != 'i':
-        print('Would you like to use the default settings or import another .set file?')
+        print('Would you like to use the default settings or import another .json file?')
         print('d - use default settings')
         print('i - import custom settings')
         selection = input('Select settings choice: ')
@@ -117,19 +117,19 @@ def main():
                 print()
                 print('Initializing program with default settings...')
                 # Create absolute path for the default settings file and read it in.
-                path = os.path.abspath('default.set')
+                path = os.path.abspath('default.json')
                 editor.parameters.read(path)
                 editor.changeLog()
                 if editor.parameters.settings['Input/Output Settings']['Input type'] == 0:
                     print('WARNING: with the current settings, the input file'
                         + '/folder is not specified. You must add it manually.')
-                editor.log('Settings from default.set succesfully imported.\n')
+                editor.log('Settings from default.json succesfully imported.\n')
             # Import custom settings.
             case 'i':
                 file = ''
                 while not os.path.isfile(os.path.abspath(file)):
-                    file = input('Enter a settings file (no .set extension): ')
-                    file = file + '.set'
+                    file = input('Enter a settings file (no .json extension): ')
+                    file = file + '.json'
                     if os.path.isfile(os.path.abspath(file)):
                         print('Initializing the program with ' + file + '...')
                         editor.parameters.read(os.path.abspath(file))
@@ -161,7 +161,7 @@ def main():
             # Run the whole analysis process.
             case 'm':
                 if editor.parameters.settings['Input/Output Settings']['Input type'] == 1:
-                    if editor.parameters.settings['General Settings']['Time difference method'] != 'any_and_all':
+                    if editor.parameters.settings['RossiAlpha Settings']['Time difference method'] != 'any_and_all':
                         print('ERROR: To analyze a single file, you must use '
                               + 'the any_and_all time difference method only.\n')
                     else:
@@ -215,7 +215,7 @@ def main():
                 # If user hasn't canceled, create the histogram.
                 if selection != 'blank':
                     # If there aren't any current time differences or the time differences aren't current, make them.
-                    if time_difs is None or (not (time_difs_method == editor.parameters.settings['General Settings']['Time difference method'] and time_difs_file == editor.parameters.settings['Input/Output Settings']['Input file/folder'])):
+                    if time_difs is None or (not (time_difs_method == editor.parameters.settings['RossiAlpha Settings']['Time difference method'] and time_difs_file == editor.parameters.settings['Input/Output Settings']['Input file/folder'])):
                         createTimeDifs()
                     createPlot()
             # Create a line of best fit and show the residuals.
@@ -236,8 +236,8 @@ def main():
                 if selection != 'blank':
                     # If there aren't any current time 
                     # differences/histogram plots, make them.
-                    if histogram is None or (not (hist_method == editor.parameters.settings['General Settings']['Time difference method'] and hist_file == editor.parameters.settings['Input/Output Settings']['Input file/folder'])):
-                        if time_difs is None or (not (time_difs_method ==editor.parameters.settings['General Settings']['Time difference method'] and time_difs_file == editor.parameters.settings['Input/Output Settings']['Input file/folder'])):
+                    if histogram is None or (not (hist_method == editor.parameters.settings['RossiAlpha Settings']['Time difference method'] and hist_file == editor.parameters.settings['Input/Output Settings']['Input file/folder'])):
+                        if time_difs is None or (not (time_difs_method ==editor.parameters.settings['RossiAlpha Settings']['Time difference method'] and time_difs_file == editor.parameters.settings['Input/Output Settings']['Input file/folder'])):
                             createTimeDifs()
                         createPlot()
                     createBestFit()
@@ -279,9 +279,9 @@ def main():
                     if choice == 'y':
                         # Create an absolute path for the default settings
                         # file and write the current settings into it.
-                        path = os.path.abspath('default.set')
+                        path = os.path.abspath('default.json')
                         print('Overwriting default settings...')
-                        editor.parameters.write(path, 'The default settings for running the PyNoise project.\n')
+                        editor.parameters.write(path)
                         editor.log('Default settings overwritten.\n')
                     # Catchall for user canceling overwrite.
                     else:
@@ -294,11 +294,11 @@ def main():
                     # Loop until user cancels or the user has created a new settings
                     # file/canceled the overwriting of an existing one.
                     while file != '' and not os.path.isfile(path):
-                        print('Enter a name for the new settings (not including the .set file extension).')
+                        print('Enter a name for the new settings (not including the .json file extension).')
                         file  = input('Name of file (or blank to cancel): ')
                         if file != '':
                             # Create absolute path for user given file.
-                            file = file + '.set'
+                            file = file + '.json'
                             path = os.path.abspath(file)
                             # If settings file already exists, check that user 
                             # wants to overwrite settings currently in the file.
@@ -309,7 +309,7 @@ def main():
                                 # If user confirms, overwrite the settings.
                                 if choice == 'y':
                                     print('Overwriting ' + file + '...')
-                                    editor.parameters.write(path, 'Custom user generated settings.\n')
+                                    editor.parameters.write(path)
                                     editor.log('Settings in ' + file + ' overwritten.\n')
                                 # Catchall for user canceling overwrite.
                                 else:
@@ -318,7 +318,7 @@ def main():
                             # Otherwise, save with no confirmation needed.
                             else:
                                 print('Saving current settings to new file ' + file + '...')
-                                editor.parameters.write(path, 'Custom user generated settings.\n')
+                                editor.parameters.write(path)
                                 editor.log('Settings saved to file ' + file + '.\n')
                         else:
                             print()

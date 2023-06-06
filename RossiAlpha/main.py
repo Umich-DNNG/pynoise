@@ -7,10 +7,10 @@ import sys
 import numpy as np  # For processing data
 from scipy.optimize import curve_fit
 import seaborn as sns
-import analyzingFolders
-from timeDifs import timeDifCalcs
-from plots import RossiHistogram
-from fitting import RossiHistogramFit
+from RossiAlpha import analyzingFolders
+from .timeDifs import timeDifCalcs
+from .plots import RossiHistogram
+from .fitting import RossiHistogramFit
 import matplotlib.pyplot as plt
 # sns.set(rc={"figure.dpi": 350, "savefig.dpi": 350})
 # sns.set_style("ticks")
@@ -28,7 +28,7 @@ def analyzeAllType1(settings):
         listDataSorted = np.sort(listData)
     
     # applying time differences function
-    thisTimeDifCalc = timeDifCalcs(listDataSorted, settings['Histogram Generation Settings']["Reset time"],  settings['General Settings']["Time difference method"])
+    thisTimeDifCalc = timeDifCalcs(listDataSorted, settings['Histogram Generation Settings']["Reset time"],  settings['RossiAlpha Settings']["Time difference method"])
     time_diffs = thisTimeDifCalc.calculate_time_differences()
 
     # creating RossiHistogram() object with specified settings
