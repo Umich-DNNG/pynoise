@@ -1,5 +1,6 @@
 import numpy as np  # For processing data
-
+import matplotlib.pyplot as plt
+import os
 
 class timeDifCalcs:
     
@@ -53,3 +54,76 @@ class timeDifCalcs:
         self.time_diffs = time_diffs
         
         return self.time_diffs
+    
+
+    def calculateTimeDifsAndBin(self, bin_width, save_fig,show_plot,save_dir,options):
+        time_diffs = np.array([])
+        n = len(self.time_vector)
+        i = 0
+        num_bins = int(self.reset_time / bin_width)
+        dataMin = np.inf
+        dataMax = -np.inf
+        histogram = np.zeros(num_bins)
+        # iterate from 0 through the whole time vector
+        while i < len(self.time_vector):
+            ch_bank = set()
+            # iterate through the rest of the vector starting 1 after i
+            for j in range(i + 1, n):
+                # if we get outside the reset_time range, break to the next iteratiion of i
+                if self.time_vector[j] - self.time_vector[i] > self.reset_time:
+                    break
+                # if the method is any and all, there are no additional conditions, but if any other method, check that the channels are diff
+                if((self.method == 'any_and_all') or self.channels[j] != self.channels[i]):
+                    # if the method checks for repeats, check that it is not in the channels bank, otherwise we can add the time_diff
+                    if(self.method == 'any_and_all' or self.method == 'any_and_all cross_correlations' or self.channels[j] not in ch_bank):
+                        thisDif = self.time_vector[j] - self.time_vector[i]
+                        time_diffs = np.append(time_diffs,(thisDif))
+                        dataMin = min(dataMin, thisDif)
+                        dataMax = max(dataMax, thisDif)
+                        binIndex = int((thisDif - dataMin) / bin_width)
+                        if(binIndex < num_bins):
+                            histogram[binIndex] += 1       
+                    elif(self.method == 'any_and_all cross_correlations no_repeat digital_delay'):
+                        # add the digital delay if digital delay is on
+                        stamped_time = self.time_vector[i]
+                        while self.time_vector[i] < stamped_time + self.digital_delay:
+                           i = i + 1
+                    # add the current channel to the channels set if considering channels
+                    if(self.method != "any_and_all"):
+                        ch_bank.add(self.channels[j])
+            i = i + 1
+
+        #Normalize the histogram
+        histogram /= len(time_diffs)
+        bin_edges = np.linspace(dataMin, dataMax, num_bins + 1)
+        bin_centers = 0.5 * (bin_edges[1:] + bin_edges[:-1])
+         # Saving plot (optional)
+        
+        if save_fig == True:
+
+            # Plotting
+            plt.figure()
+            plt.bar(bin_centers, histogram, width=0.8 * (bin_centers[1] - bin_centers[0]), **options)
+
+            #plt.xlabel(self.x_axis)
+            #plt.ylabel(self.y_axis)
+            #plt.title(self.title)
+
+            plt.tight_layout()
+            save_filename = os.path.join(save_dir, 'histogram.png')
+            plt.savefig(save_filename, dpi=300, bbox_inches='tight')
+        
+        # Showing plot (optional)
+        if show_plot == True:
+
+            # Plotting
+            if not save_fig:
+                plt.figure()
+            plt.bar(bin_centers, histogram, width=0.8 * (bin_centers[1] - bin_centers[0]), **options)
+
+            #plt.xlabel(self.x_axis)
+            #plt.ylabel(self.y_axis)
+            #plt.title(self.title)
+            
+            plt.show()
+        return histogram,bin_edges
