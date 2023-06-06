@@ -2,6 +2,7 @@
 
 import settings as set
 import os
+import json
 import time
 from subprocess import call
 
@@ -89,35 +90,21 @@ class Editor:
         self.parameters.changed = False
         # If the settings were just created from a blank file,
         # note a whole overwrite and mark as changed.
-        if (self.parameters.origin == os.path.abspath('new.json') 
-            and not os.path.isfile(os.path.abspath('comp.json'))):
-                self.log('Created new settings.\n')
-                self.parameters.changed = True
-        # For settings previously imported from a file:
-        else:
-            # Create a baseline settings object 
-            # from the settings in the source file.
-            baseline = set.Settings()
-            # If previously imported file was a blank file,
-            # read from the temporary comparison file and
-            # mark as changed since settings are not saved
-            # to a permanent file.
-            if os.path.isfile(os.path.abspath('comp.json')):
-                baseline.read(os.path.abspath('comp.json'))
-                self.parameters.changed = True
-                os.remove(os.path.abspath('comp.json'))
-            # Otherwise, read from the static origin file.
-            else:
-                baseline.read(self.parameters.origin)
-            # For every setting in every group, compare the 
-            # current value to the source value. If it differs, 
-            # note the update and mark the settings as changed.
-            for group in self.parameters.settings:
-                for setting in self.parameters.settings[group]:
-                    if baseline.settings[group].get(setting) != self.parameters.settings[group][setting]:
-                        self.log(setting + ' in ' + group + ' updated to ' 
-                        + str(self.parameters.settings[group][setting]) + '.\n')
-                        self.parameters.changed = True
+        # Create a baseline settings object 
+        # from the settings in the source file.
+        baseline = set.Settings()
+        # Read in previous settings and delete temp file.
+        baseline.read(os.path.abspath('comp.json'))
+        os.remove(os.path.abspath('comp.json'))
+        # For every setting in every group, compare the 
+        # current value to the source value. If it differs, 
+        # note the update and mark the settings as changed.
+        for group in self.parameters.settings:
+            for setting in self.parameters.settings[group]:
+                if baseline.settings[group].get(setting) != self.parameters.settings[group][setting]:
+                    self.log(setting + ' in ' + group + ' updated to ' 
+                    + str(self.parameters.settings[group][setting]) + '.\n')
+                    self.parameters.changed = True
 
     def edit(self, file):
 
@@ -133,14 +120,25 @@ class Editor:
         EDITOR = os.environ.get('EDITOR', 'vim')
         # Call the editor with the given file in append mode.
         with open(os.path.abspath(file),'a') as settings:
+            if file == 'append.json':
+                settings.write('{\n\t"Input/Output Settings": {\n\t\t\n\t},\n')
+                settings.write('\t"General Settings": {\n\t\t\n\t},\n')
+                settings.write('\t"RossiAlpha Settings": {\n\t\t\n\t},\n')
+                settings.write('\t"PSD Settings": {\n\t\t\n\t},\n')
+                settings.write('\t"Histogram Generation Settings": {\n\t\t\n\t},\n')
+                settings.write('\t"Histogram Visual Settings": {\n\t\t\n\t},\n')
+                settings.write('\t"Line Fitting Settings": {\n\t\t\n\t},\n')
+                settings.write('\t"Residual Plot Settings": {\n\t\t\n\t}\n}')
+                settings.flush()
             call([EDITOR, settings.name])
-        # If settings originating from a blank settings file are being edited, 
-        # create a temp file to compare the edited settings to the previous ones.
-        if (file == 'current.json' 
-            and self.parameters.origin == os.path.abspath('new.json')):
-            self.parameters.write(os.path.abspath('comp.json'))
-        # After editing, reread the settings and store them
-        self.parameters.read(os.path.abspath(file))
+        # Create a temp file to compare the edited settings to the previous ones.
+        self.parameters.write(os.path.abspath('comp.json'))
+        # If in append mode.
+        if file == 'append.json':
+            self.parameters.append(os.path.abspath(file))
+        # If in overwrite mode.
+        else:
+            self.parameters.read(os.path.abspath(file))
         # Change the log state.
         self.changeLog()
         # Notify the user the settings editing is complete.
@@ -165,7 +163,7 @@ class Editor:
             print('What settings do you want to edit/view?')
             print('c - current settings')
             print('i - import a .json file')
-            print('n - new settings')
+            print('a - append settings')
             print('Leave the command blank to cancel editing/viewing.')
             choice = input('Enter command: ')
             match choice:
@@ -181,18 +179,40 @@ class Editor:
                 # User wants to import settings from a file.
                 case 'i':
                     file = 'blank'
+                    choice = 'blank'
+                    while choice != '' and choice != 'o' and choice != 'a':
+                        print('You have two input options:')
+                        print('o - overwrite the entire settings')
+                        print('a - append settings')
+                        choice = input('Enter a command (or leave blank to cancel): ')
+                        match choice:
+                            case 'o':
+                                print('Overwrite mode selected.')
+                            case 'a':
+                                print('Append mode selected.')
+                            case '':
+                                print('Canceling import...\n')
+                            case _:
+                                print('Unrecognized command. Please review the list of appriopriate inputs.\n')
                     # Keep prompting the user until they 
                     # give an existing file or they cancel.
-                    while not os.path.isfile(os.path.abspath(file)) and file != '.json':
+                    while choice != '' and not os.path.isfile(os.path.abspath(file)) and file != '.json':
                         file = input('Enter a settings file (no .json '
                                      + 'extension) or leave blank to cancel: ')
                         file = file + '.json'
                         # If file exists.
                         if os.path.isfile(os.path.abspath(file)):
                             print('Importing ' + file + '...')
-                            self.parameters.read(os.path.abspath(file))
-                            self.changeLog()
-                            self.log('Imported settings from ' + file + '.\n')
+                            # Overwrite all settings.
+                            if choice == 'o':
+                                self.parameters.read(os.path.abspath(file))
+                                self.changeLog()
+                                self.log('Imported settings from ' + file + '.\n')
+                            # Append settings in file.
+                            else:
+                                self.parameters.append(os.path.abspath(file))
+                                self.changeLog()
+                                self.log('Appended settings from ' + file + '.\n')
                         # User cancels import.
                         elif file == '.json':
                             print('Canceling import...\n')
@@ -202,14 +222,10 @@ class Editor:
                                   + 'Make sure that your settings file is named '
                                   + 'correctly and in the same folder as this program.\n')
                 # User wants to create entirely new settings.
-                case 'n':
-                    print('Opening new settings...')
+                case 'a':
+                    print('Opening empty settings...')
                     # Create temporary new.json file to edit.
-                    file = 'new.json'
-                    # Create blank settings object.
-                    blank = set.Settings()
-                    # Write blank settings to temp file.
-                    blank.write(os.path.abspath(file))
+                    file = 'append.json'
                     # Open the settings editor.
                     self.edit(file)
                 # User is ready to return to the main menu.
