@@ -60,7 +60,10 @@ class Settings:
         parameters = json.load(open(path))
         for group in parameters:
             for setting in parameters[group]:
-                self.settings[group][setting] = parameters[group][setting]
+                if parameters[group][setting] == '' and self.settings[group].get(setting) != None:
+                    self.settings[group].pop(setting)
+                else:
+                    self.settings[group][setting] = parameters[group][setting]
 
     def read(self, path):
 
@@ -92,5 +95,11 @@ class Settings:
                     if output.get(group) == None:
                         output[group] = {}
                     output[group][setting] = self.settings[group][setting]
+        for group in default.settings:
+            for setting in default.settings[group]:
+                if self.settings[group].get(setting) == None:
+                    if output.get(group) == None:
+                        output[group] = {}
+                    output[group][setting] = ""
         with open(path,'w') as file:
             file.write(json.dumps(output, indent=4))
