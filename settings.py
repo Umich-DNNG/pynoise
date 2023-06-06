@@ -77,3 +77,20 @@ class Settings:
 
         with open(path,'w') as file:
             file.write(json.dumps(self.settings, indent=4))
+
+    def save(self, path):
+
+        '''Save the current settings to a file, listing 
+        only those that overwrite the default.'''
+
+        default = Settings()
+        default.read(os.path.abspath('default.json'))
+        output = {}
+        for group in self.settings:
+            for setting in self.settings[group]:
+                if default.settings[group].get(setting) != self.settings[group][setting]:
+                    if output.get(group) == None:
+                        output[group] = {}
+                    output[group][setting] = self.settings[group][setting]
+        with open(path,'w') as file:
+            file.write(json.dumps(output, indent=4))
