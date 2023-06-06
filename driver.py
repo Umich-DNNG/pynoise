@@ -109,7 +109,7 @@ def main():
     while selection != 'd' and selection != 'i':
         print('Would you like to use the default settings or import another .json file?')
         print('d - use default settings')
-        print('i - import settings to overwrite the default')
+        print('i - import custom settings')
         selection = input('Select settings choice: ')
         match selection:
             # Import the default settings.
@@ -128,16 +128,37 @@ def main():
             case 'i':
                 file = ''
                 choice = 'blank'
-                while not os.path.isfile(os.path.abspath(file)) and file != '.json':
+                opt = 'blank'
+                while opt != '' and opt != 'o' and opt != 'a':
+                    print('\nYou have two input options:')
+                    print('o - overwrite entire settings')
+                    print('a - append settings to default')
+                    opt = input('Enter a command (or leave blank to cancel): ')
+                    match opt:
+                        case 'o':
+                            print('Overwrite mode selected.')
+                        case 'a':
+                            print('Append mode selected.')
+                        case '':
+                            print('Canceling import...\n')
+                            selection = ''
+                        case _:
+                            print('Unrecognized command. Please review the list of appriopriate inputs.')
+                while opt != '' and not os.path.isfile(os.path.abspath(file)) and file != '.json':
                     file = input('Enter a settings file (no .json extension): ')
                     file = file + '.json'
                     if os.path.isfile(os.path.abspath(file)):
                         print('Importing settings from ' + file + '...')
-                        editor.parameters.read(os.path.abspath('default.json'))
-                        editor.parameters.append(os.path.abspath(file))
-                        editor.changeLog()
-                        editor.log('Settings from ' + file + ' succesfully'
-                                    + ' appended to the default.\n')
+                        if opt == 'a':
+                            editor.parameters.read(os.path.abspath('default.json'))
+                            editor.parameters.append(os.path.abspath(file))
+                            editor.changeLog()
+                            editor.log('Settings from ' + file + ' succesfully'
+                                       + ' appended to the default.\n')
+                        else:
+                            editor.parameters.read(os.path.abspath(file))
+                            editor.changeLog()
+                            editor.log('Settings from ' + file + ' succesfully imported.\n')
                         if editor.parameters.settings['Input/Output Settings']['Input type'] == 0:
                             print('WARNING: with the current settings, the input file'
                                 + '/folder is not specified. You must add it manually.')
