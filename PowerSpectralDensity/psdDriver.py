@@ -5,8 +5,8 @@ Created on Thu Jun  1 11:42:16 2023
 @author: 357375
 """
 
-import numpy as np                    # For processing data
-import matplotlib.pyplot as plt       # For plotting data summaries
+import numpy as np
+import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 from scipy import signal
 import power_spectral_density_scripts as psd
