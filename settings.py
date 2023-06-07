@@ -22,8 +22,6 @@ class Settings:
                                                    'Save directory':'',
                                                    'Keep logs':False},
                          'General Settings': {'Fit range':[0,0],
-                                              'Plot scale':'',
-                                              'Digital delay':0,
                                               'Number of folders':0,
                                               'Meas time per folder':0,
                                               'Sort data':False,
@@ -32,13 +30,19 @@ class Settings:
                                               },
                          'RossiAlpha Settings': {
                                                 'Time difference method':'',
+                                                'Digital delay':0,
+                                                'Histogram Generation Settings': {
+                                                    'Reset time':0,
+                                                    'Bin width':0,
+                                                    'Error Bar/Band':''
+                                                },
+                                                "Fit Region Settings": {
+                                                    "Minimum cutoff": 0
+                                                }
                          },
                          'PSD Settings' : {'Dwell time':0,
                                            'Meas time range':[0,0],
                                            'Clean pulses switch': False},
-                         'Histogram Generation Settings': {'Reset time':0,
-                                                           'Bin width':0,
-                                                           'Minimum cutoff':0},
                          'Histogram Visual Settings': {},
                          'Line Fitting Settings': {},
                          'Residual Plot Settings': {}

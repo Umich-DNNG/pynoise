@@ -71,7 +71,7 @@ class RossiHistogramFit:
         self.counts = counts
         self.bin_centers = bin_centers
         self.fit_range = settings['General Settings']['Fit range']
-        self.min_cutoff = settings['Histogram Generation Settings']['Minimum cutoff']
+        self.min_cutoff = settings['RossiAlpha Settings']['Fit Region Settings']['Minimum cutoff']
         self.timeDifMethod = settings['RossiAlpha Settings']['Time difference method']
         self.save_dir = settings['Input/Output Settings']['Save directory']
 
