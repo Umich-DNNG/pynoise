@@ -105,9 +105,9 @@ class timeDifCalcs:
             plt.figure()
             plt.bar(bin_centers, histogram, width=0.8 * (bin_centers[1] - bin_centers[0]), **options)
 
-            #plt.xlabel(self.x_axis)
-            #plt.ylabel(self.y_axis)
-            #plt.title(self.title)
+            plt.xlabel("Time Differences")
+            plt.ylabel("Count")
+            plt.title("Histogram")
 
             plt.tight_layout()
             save_filename = os.path.join(save_dir, 'histogram.png')
@@ -121,9 +121,9 @@ class timeDifCalcs:
                 plt.figure()
             plt.bar(bin_centers, histogram, width=0.8 * (bin_centers[1] - bin_centers[0]), **options)
 
-            #plt.xlabel(self.x_axis)
-            #plt.ylabel(self.y_axis)
-            #plt.title(self.title)
+            plt.xlabel("Time Differences")
+            plt.ylabel("Count")
+            plt.title("Histogram")
             
             plt.show()
-        return histogram,bin_edges
+        return histogram, bin_centers, bin_edges
