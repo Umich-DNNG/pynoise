@@ -36,8 +36,10 @@ def createTimeDifs():
 
     global time_difs, time_difs_file, time_difs_method
     print('Creating time differences...')
+    name = editor.parameters.settings['Input/Output Settings']['Input file/folder']
+    name = name[name.rfind('/')+1:]
     # For signle file analysis.
-    if editor.parameters.settings['Input/Output Settings']['Input type'] == 1:
+    if name.count('.') > 0:
         # Load data from 
         data = np.loadtxt(editor.parameters.settings['Input/Output Settings']['Input file/folder'])
         if editor.parameters.settings['General Settings']['Sort data']:
@@ -51,11 +53,8 @@ def createTimeDifs():
         time_difs_file = editor.parameters.settings['Input/Output Settings']['Input file/folder']
         time_difs_method = editor.parameters.settings['RossiAlpha Settings']['Time difference method']
     # For folder analysis.
-    elif editor.parameters.settings['Input/Output Settings']['Input type'] == 2:
-        print('TODO: Add functionality to create time differences for folders.')
-    # Catchall for nonexistent input.
     else:
-        print('ERROR: No input file/folder defined. Please edit the settings.')
+        print('TODO: Add functionality to create time differences for folders.')
 
 def createPlot():
 
@@ -120,9 +119,6 @@ def main():
                 path = os.path.abspath('default.json')
                 editor.parameters.read(path)
                 editor.changeLog()
-                if editor.parameters.settings['Input/Output Settings']['Input type'] == 0:
-                    print('WARNING: with the current settings, the input file'
-                        + '/folder is not specified. You must add it manually.')
                 editor.log('Settings from default.json succesfully imported.\n')
             # Import custom settings.
             case 'i':
@@ -159,9 +155,6 @@ def main():
                             editor.parameters.read(os.path.abspath(file))
                             editor.changeLog()
                             editor.log('Settings from ' + file + ' succesfully imported.\n')
-                        if editor.parameters.settings['Input/Output Settings']['Input type'] == 0:
-                            print('WARNING: with the current settings, the input file'
-                                + '/folder is not specified. You must add it manually.')
                     elif file == '.json':
                         print('Canceling import...\n')
                         selection = ''
@@ -187,7 +180,9 @@ def main():
         match selection:
             # Run the whole analysis process.
             case 'm':
-                if editor.parameters.settings['Input/Output Settings']['Input type'] == 1:
+                name = editor.parameters.settings['Input/Output Settings']['Input file/folder']
+                name = name[name.rfind('/')+1:]
+                if name.count('.') > 0:
                     if editor.parameters.settings['RossiAlpha Settings']['Time difference method'] != 'any_and_all':
                         print('ERROR: To analyze a single file, you must use '
                               + 'the any_and_all time difference method only.\n')
@@ -197,15 +192,13 @@ def main():
                         editor.log('Ran the entire RossiAlpha method on file ' 
                             + editor.parameters.settings['Input/Output Settings']['Input file/folder'] 
                             + '.\n')
-                elif editor.parameters.settings['Input/Output Settings']['Input type'] == 2:
+                else:
                     print('Running the entire RossiAlpha method...')
                     mn.analyzeAllType2(editor.parameters.settings)
                     editor.log('Ran the entire RossiAlpha method on folder ' 
                         + editor.parameters.settings['Input/Output Settings']['Input file/folder'] 
                         + '.\n')
                     print('TODO: Implement modularity for folder analysis.')
-                else:
-                    print('ERROR: No input file/folder defined. Please edit the settings.\n')
             # Calculate time differences for the given input.
             # TODO: Have some method of detection for when the input has changed.
             case 't':
