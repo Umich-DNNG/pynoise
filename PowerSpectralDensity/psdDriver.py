@@ -9,7 +9,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 from scipy import signal
-import power_spectral_density_scripts as psd
+import PSD as psd
 
 def main():
     selection = 'blank'
