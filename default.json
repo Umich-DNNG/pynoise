@@ -9,8 +9,6 @@
             0.0,
             1000.0
         ],
-        "Plot scale": "linear",
-        "Digital delay": 750,
         "Number of folders": 10,
         "Meas time per folder": 60,
         "Sort data": true,
@@ -18,7 +16,16 @@
         "Show plots": false
     },
     "RossiAlpha Settings": {
-        "Time difference method": "any_and_all"
+        "Time difference method": "any_and_all",
+        "Digital delay": 750,
+        "Histogram Generation Settings": {
+            "Reset time": 1000,
+            "Bin width": 9,
+            "Error Bar/Band":"band"
+        },
+        "Fit Region Settings": {
+            "Minimum cutoff": 30
+        }
     },
     "PSD Settings": {
         "Dwell time": 2000000.0,
@@ -27,12 +34,6 @@
             1000000000000.0
         ],
         "Clean pulses switch": true
-    },
-    "Histogram Generation Settings": {
-        "Reset time": 1000,
-        "Bin width": 9,
-        "Minimum cutoff": 30,
-        "Error Bar/Band":"band"
     },
     "Histogram Visual Settings": {
         "alpha": 1,
