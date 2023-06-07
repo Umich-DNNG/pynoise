@@ -47,15 +47,15 @@ def compile_sample_stdev_RA_dist(settings):
                 channels = list_data_n[:,0]
 
                 thisData = timeDifCalcs(list_data, 
-                                        settings['Histogram Generation Settings']['Reset time'], 
+                                        settings['RossiAlpha Settings']['Histogram Generation Settings']['Reset time'], 
                                         settings['RossiAlpha Settings']['Time difference method'], 
-                                        settings['General Settings']['Digital delay'], 
+                                        settings['RossiAlpha Settings']['Digital delay'], 
                                         channels)
                 
                 time_diffs = thisData.calculate_time_differences()
 
-                thisPlot = RossiHistogram(settings['Histogram Generation Settings']['Reset time'],
-                                          settings['Histogram Generation Settings']['Bin width'],
+                thisPlot = RossiHistogram(settings['RossiAlpha Settings']['Histogram Generation Settings']['Reset time'],
+                                          settings['RossiAlpha Settings']['Histogram Generation Settings']['Bin width'],
                                           settings['Histogram Visual Settings'], 
                                           settings['Input/Output Settings']['Save directory'])
 

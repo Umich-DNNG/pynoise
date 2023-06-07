@@ -45,7 +45,7 @@ def createTimeDifs():
         if editor.parameters.settings['General Settings']['Sort data']:
             data = np.sort(data)
         time_difs = dif.timeDifCalcs(data, 
-            editor.parameters.settings['Histogram Generation Settings']['Reset time'], 
+            editor.parameters.settings['RossiAlpha Settings']['Histogram Generation Settings']['Reset time'], 
             editor.parameters.settings['RossiAlpha Settings']['Time difference method'])
         time_difs = time_difs.calculate_time_differences()
         editor.log('Calculated time differences for file ' 
@@ -66,8 +66,8 @@ def createPlot():
 
     global time_difs, histogram, hist_file, hist_method
     print('Building plot...')
-    histogram = plt.RossiHistogram(editor.parameters.settings['Histogram Generation Settings']['Reset time'],
-                              editor.parameters.settings['Histogram Generation Settings']['Bin width'],
+    histogram = plt.RossiHistogram(editor.parameters.settings['RossiAlpha Settings']['Histogram Generation Settings']['Reset time'],
+                              editor.parameters.settings['RossiAlpha Settings']['Histogram Generation Settings']['Bin width'],
                               editor.parameters.settings['Histogram Visual Settings'],
                               editor.parameters.settings['Input/Output Settings']['Save directory'])
     histogram.plot(time_difs,
