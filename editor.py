@@ -145,10 +145,6 @@ class Editor:
         print('Settings viewer/editor closed.\n')
         # Check to see if the settings have changed from the latest import.
         self.compare()
-        # If there is no input file/folder, warn the user.
-        if self.parameters.settings['Input/Output Settings']['Input type'] == 0:
-            print('WARNING: with the current settings, the input file'
-                + '/folder is not specified. You must add it manually.')
         # Delete the temporary file.
         os.remove(os.path.abspath(file))
 
