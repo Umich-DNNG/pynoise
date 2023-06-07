@@ -9,9 +9,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 from scipy import signal
-import PSD as psd
+from PowerSpectralDensity import PSD as psd
 
-def main():
+editor = None
+
+def main(editorIn):
+    global editor
+    editor = editorIn
     selection = 'blank'
     print('You are running the Power Spectral Density Method.')
     while selection != '':
@@ -19,6 +23,7 @@ def main():
         print('m - run the entire program through the main driver')
         print('p - plot the data')
         print('f - fit the data to a curve')
+        print('s - view or edit the program settings')
         print('Leave the command blank to end the program.')
         selection = input('Enter a command: ')
         match selection:
@@ -45,6 +50,17 @@ def main():
             case 'f':
                 print()
                 print('Fitting the data...')
+            # View and/or edit program settings.
+            case 's':
+                print()
+                editor.driver()
+            # End the program.
+            case '':
+                print('Returning to main menu...\n')
+            # Catchall for invalid commands.
+            case _:
+                print('Unrecognized command. Please review the list of appriopriate inputs.\n')
+    return editor
 
 
 # Tells the program what function to start if this is the main program being run (TO BE DELETED)
