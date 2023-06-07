@@ -1,6 +1,5 @@
 {
     "Input/Output Settings": {
-        "Input type": 0,
         "Input file/folder": "none",
         "Save directory": "./",
         "Keep logs": false
