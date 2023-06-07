@@ -28,11 +28,11 @@ def analyzeAllType1(settings):
         listDataSorted = np.sort(listData)
     
     # applying time differences function
-    thisTimeDifCalc = timeDifCalcs(listDataSorted, settings['Histogram Generation Settings']["Reset time"],  settings['RossiAlpha Settings']["Time difference method"])
+    thisTimeDifCalc = timeDifCalcs(listDataSorted, settings['RossiAlpha Settings']['Histogram Generation Settings']["Reset time"],  settings['RossiAlpha Settings']["Time difference method"])
     time_diffs = thisTimeDifCalc.calculate_time_differences()
 
     # creating RossiHistogram() object with specified settings
-    thisPlot = RossiHistogram(settings['Histogram Generation Settings']['Reset time'], settings['Histogram Generation Settings']['Bin width'], settings['Histogram Visual Settings'], settings['Input/Output Settings']['Save directory'])
+    thisPlot = RossiHistogram(settings['RossiAlpha Settings']['Histogram Generation Settings']['Reset time'], settings['RossiAlpha Settings']['Histogram Generation Settings']['Bin width'], settings['Histogram Visual Settings'], settings['Input/Output Settings']['Save directory'])
 
     counts, bin_centers, bin_edges = thisPlot.plot(time_diffs, save_fig=settings['General Settings']['Save figures'], show_plot=settings['General Settings']['Show plots'])
     # creating Fit() object with specified settings
@@ -49,7 +49,7 @@ def analyzeAllType1(settings):
 def analyzeAllType2(settings):
     RA_hist_total = analyzingFolders.compile_sample_stdev_RA_dist(settings)
     from .fitting import Fit_With_Weighting
-    thisWeightedFit = Fit_With_Weighting(RA_hist_total,settings['Histogram Generation Settings']['Minimum cutoff'], 
+    thisWeightedFit = Fit_With_Weighting(RA_hist_total,settings['RossiAlpha Settings']['Fit Region Settings']['Minimum cutoff'], 
                                         settings['General Settings'],settings['Input/Output Settings']['Save directory'], settings['Line Fitting Settings'], 
                                         settings['Residual Plot Settings'])
     thisWeightedFit.fit_RA_hist_weighting()
