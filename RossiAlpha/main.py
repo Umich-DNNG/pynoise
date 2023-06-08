@@ -22,8 +22,12 @@ def analyzeAllType1(settings):
 
     
     filePath = settings['Input/Output Settings']['Input file/folder']
-    listData = np.loadtxt(filePath)
+    if settings['Input/Output Settings'].get('Data Column') is not None:
+        listData = np.loadtxt(filePath,delimiter=" ", usecols=(settings['Input/Output Settings']['Data Column']))
+    else:
+        listData = np.loadtxt(filePath)
     # sorting timestamps to be fed into calculate_time_differences()
+    
     if settings['General Settings']["Sort data"]:
         listDataSorted = np.sort(listData)
     

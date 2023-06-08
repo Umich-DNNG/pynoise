@@ -34,7 +34,11 @@ def createTimeDifs():
     # For signle file analysis.
     if name.count('.') > 0:
         # Load data from 
-        data = np.loadtxt(editor.parameters.settings['Input/Output Settings']['Input file/folder'])
+        if editor.parameters.settings['Input/Output Settings'].get('Data Column') is not None:
+            data = np.loadtxt(editor.parameters.settings['Input/Output Settings']['Input file/folder'],delimiter=" ", usecols=(editor.parameters.settings['Input/Output Settings']['Data Column']))
+        else:
+            data = np.loadtxt(editor.parameters.settings['Input/Output Settings']['Input file/folder'])
+
         if editor.parameters.settings['General Settings']['Sort data']:
             data = np.sort(data)
         time_difs = dif.timeDifCalcs(data, 
