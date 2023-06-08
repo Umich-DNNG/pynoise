@@ -2,7 +2,20 @@
 
 This section of the PyNoise suite is for Rossi Alpha Algorithm analysis. This draws inspiration from faust lmx on gitlab.lanl.gov. This suite is designed specifically for pulse time-of-detection chains from organic scintillator arrays. If you are unfamiliar with the Rossi Alpha method, please familiarize yourself before using this package and reading the README file.
 
-## How to Use
+### Requirements
+
+Besides those mentioned in the main README file, the following programs must be downloaded to run RossiAlpha analysis:
+* main.py
+* analyzingFolders.py
+* timeDifs.py
+* plots.py
+* fitting.py
+
+**TODO**: Add required libraries.
+
+Additionally, you will need the following:
+* A single file or folder of data that will be analyzed.
+* A settings configuration file (see the settings section for more information).
 
 ### I/O FILE INFO
 
