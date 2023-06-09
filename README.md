@@ -8,14 +8,45 @@ Welcome to the PyNoise Project! The goal of this Python suite is to process and 
 
 ### Requirements
 
-To run the PyNoise project, the following programs must be downloaded:
+To run the PyNoise project, the following programs ust be downloaded:
 * driver.py
 * editor.py
 * settings.py
 * raDriver.py
 * psdDriver.py
 
-**TODO**: Add required libraries.
+### Python Packages & Virtal Environment.
+
+Ensure that Python and ```pip``` are installed on your system. You can check this by running the following commands in the terminal:
+```python
+python --version
+pip --version
+```
+
+Create a virtual environment (optional): It is recommended to isolate the programs' dependencies from other Python installations. In 
+the terminal, navigate to the PyNoise directory and run the following command to create a virtual environment:
+```python
+python -m venv myenv
+```
+
+Activate the virtual environment (optional). Run the following command for the different operating systems:
+
+For MacOS/Linux:
+```python
+source myenv/bin/activate
+```
+
+For Windows:
+```python
+myenv\Scipts\activate
+```
+
+With the virtual environment activated (or without one), navigate to the PyNoise directory and run the following command to install the 
+project dependencies:
+```python
+pip install -r requirements.txt
+```
+
 
 Additionally, you will need the following:
 * A single file or folder of data that will be analyzed.
