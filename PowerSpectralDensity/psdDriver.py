@@ -40,8 +40,10 @@ def main(editorIn):
     while selection != '':
         print('You can utilize any of the following functions:')
         print('m - run the entire program through the main driver')
+        '''
         print('p - plot the data')
         print('f - fit the data to a curve')
+        '''
         print('s - view or edit the program settings')
         print('Leave the command blank to end the program.')
         selection = input('Enter a command: ')
@@ -50,12 +52,14 @@ def main(editorIn):
                 print()
                 print('Running the entire power spectral density analysis...')
                 conduct_PSD()
+                '''
             case 'p':
                 print()
                 print('Plotting the data...')
             case 'f':
                 print()
                 print('Fitting the data...')
+                '''
             # View and/or edit program settings.
             case 's':
                 print()
