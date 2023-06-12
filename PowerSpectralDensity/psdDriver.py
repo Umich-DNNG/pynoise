@@ -22,10 +22,10 @@ def conduct_PSD():
     values = np.loadtxt(file_path, usecols=(0,3), max_rows=2000000, dtype=float)
 
     PSD_Object = psd.PowerSpectralDensity(list_data_array=values, 
-                                                      leg_label="TEST", 
-                                                      clean_pulses_switch=1, 
-                                                      dwell_time=2e6, 
-                                                      meas_time_range=[150e9,1e12])
+                                        leg_label="TEST", 
+                                        clean_pulses_switch=editor.parameters.settings['PSD Settings']['Clean pulses switch'], 
+                                        dwell_time=editor.parameters.settings['PSD Settings']['Dwell time'], 
+                                        meas_time_range=editor.parameters.settings['PSD Settings']['Meas time range'])
     
     PSD_Object.conduct_APSD(show_plot=editor.parameters.settings['General Settings']['Show plots'], 
                             save_fig=editor.parameters.settings['General Settings']['Save figures'],
