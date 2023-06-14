@@ -1,4 +1,4 @@
-from . import main as mn
+from . import analyzeAll as mn
 from . import fitting as fit
 from . import plots as plt
 from . import timeDifs as dif
