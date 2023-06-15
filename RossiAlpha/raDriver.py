@@ -91,7 +91,7 @@ def createBestFit():
     editor.log('Created line of best fit with residuals for the current histogram.\n')
 
 def main(editorIn):
-    global editor
+    global editor, time_difs, histogram, best_fit
     editor = editorIn
     selection = 'blank'
     while selection != '':
