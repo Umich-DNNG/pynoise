@@ -4,6 +4,7 @@ import editor as edit
 from RossiAlpha import raDriver as ra
 from PowerSpectralDensity import psdDriver as psd
 import os
+import sys
 
 # The editor class that contains the settings and settings editor.
 editor = edit.Editor()
@@ -15,8 +16,23 @@ def main():
 
     '''The main driver that runs the whole program.'''
 
+    print(sys.argv)
     global editor
     selection = 'blank'
+    queue = []
+    while len(sys.argv) > 1:
+        if sys.argv[1].count('.') > 0:
+            file = open(os.path.abspath(sys.argv[1]))
+            commands = file.read()
+            while commands.find('\n') != -1:
+                entry = commands[0:commands.find('\n')]
+                commands = commands[commands.find('\n')+1:]
+                queue.append(entry)
+            queue.append(commands)
+        else:
+            queue.append(sys.argv[1])
+        sys.argv.pop(1)
+    print(queue)
     print('Welcome to the DNNG/PyNoise project. With this software we are '
           + 'taking radiation data from fission reactions (recorded by organic '
           + 'scintillators) and applying a line of best fit to the decay rate. '
@@ -27,7 +43,11 @@ def main():
         print('Would you like to use the default settings or import another .json file?')
         print('d - use default settings')
         print('i - import custom settings')
-        selection = input('Select settings choice: ')
+        if len(queue) != 0:
+            selection = queue[0]
+            queue.pop(0)
+        else:
+            selection = input('Select settings choice: ')
         match selection:
             # Import the default settings.
             case 'd':
@@ -44,10 +64,14 @@ def main():
                 choice = 'blank'
                 opt = 'blank'
                 while opt != '' and opt != 'o' and opt != 'a':
-                    print('\nYou have two input options:')
+                    print('\nYou have two import options:')
                     print('o - overwrite entire settings')
                     print('a - append settings to default')
-                    opt = input('Enter a command (or leave blank to cancel): ')
+                    if len(queue) != 0:
+                        opt = queue[0]
+                        queue.pop(0)
+                    else:
+                        opt = input('Enter a command (or leave blank to cancel): ')
                     match opt:
                         case 'o':
                             print('Overwrite mode selected.')
@@ -59,7 +83,11 @@ def main():
                         case _:
                             print('Unrecognized command. Please review the list of appriopriate inputs.')
                 while opt != '' and not os.path.isfile(os.path.abspath(file)) and file != '.json':
-                    file = input('Enter a settings file (no .json extension): ')
+                    if len(queue) != 0:
+                        file = queue[0]
+                        queue.pop(0)
+                    else:
+                        file = input('Enter a settings file (no .json extension): ')
                     file = file + '.json'
                     if os.path.isfile(os.path.abspath(file)):
                         print('Importing settings from ' + file + '...')
@@ -91,24 +119,46 @@ def main():
         print('r - run Rossi Alpha analysis')
         print('p - run Power Spectral Density Analysis')
         print('s - view or edit the program settings')
-        print('Leave the command blank to end the program.')
-        selection = input('Enter a command: ')
+        print('Leave the command blank or enter x to end the program.')
+        if len(queue) != 0:
+            selection = queue[0]
+            queue.pop(0)
+        else:
+            selection = input('Enter a command: ')
         match selection:
             # Run RossiAlpha analysis.
             case 'r':
                 print()
-                editor = ra.main(editor)
+                editor, queue = ra.main(editor, queue)
             case 'p':
                 print()
-                editor = psd.main(editor)
+                editor, queue = psd.main(editor, queue)
             # View and/or edit program settings.
             case 's':
                 print()
-                editor.driver()
+                queue = editor.driver(queue)
             # End the program.
             case '':
                 print('\nAre you sure you want to quit the program?')
-                choice = input('Enter q to quit and anything else to abort: ')
+                if len(queue) != 0:
+                    choice = queue[0]
+                    queue.pop(0)
+                else:
+                    choice = input('Enter q to quit and anything else to abort: ')
+                # Confirm quit command.
+                if choice == 'q':
+                    print('Ending program...\n')
+                # Catchall for user canceling shutdown.
+                else:
+                    print('Quit aborted.\n')
+                    selection = 'blank'
+            case 'x':
+                print('\nAre you sure you want to quit the program?')
+                if len(queue) != 0:
+                    choice = queue[0]
+                    queue.pop(0)
+                else:
+                    choice = input('Enter q to quit and anything else to abort: ')
                 # Confirm quit command.
                 if choice == 'q':
                     print('Ending program...\n')
@@ -129,12 +179,20 @@ def main():
             print('d - save current settings as the default')
             print('n - save current settings as a new settings file')
             print('a - abandon current settings')
-            selection = input('Select an option: ')
+            if len(queue) != 0:
+                selection = queue[0]
+                queue.pop(0)
+            else:
+                selection = input('Select an option: ')
             match selection:
                 # User wants to overwrite the defualt settings.
                 case 'd':
                     print('This will overwrite the current default settings. Are you sure you want to do this?')
-                    choice = input('Enter y to continue and anything else to abort: ')
+                    if len(queue) != 0:
+                        choice = queue[0]
+                        queue.pop(0)
+                    else:
+                        choice = input('Enter y to continue and anything else to abort: ')
                     # Confirm user wants to overwrite.
                     if choice == 'y':
                         # Create an absolute path for the default settings
@@ -155,7 +213,11 @@ def main():
                     # file/canceled the overwriting of an existing one.
                     while file != '' and not os.path.isfile(path):
                         print('Enter a name for the new settings (not including the .json file extension).')
-                        file  = input('Name of file (or blank to cancel): ')
+                        if len(queue) != 0:
+                            file = queue[0]
+                            queue.pop(0)
+                        else:
+                            file  = input('Name of file (or blank to cancel): ')
                         if file != '':
                             # Create absolute path for user given file.
                             file = file + '.json'
@@ -165,7 +227,11 @@ def main():
                             if os.path.isfile(path):
                                 print('WARNING: settings file ' + file + ' already exists.'
                                     + ' Do you want to overwrite the previous stored settings?')
-                                choice = input('Enter y to continue and anything else to abort: ')
+                                if len(queue) != 0:
+                                    choice = queue[0]
+                                    queue.pop(0)
+                                else:
+                                    choice = input('Enter y to continue and anything else to abort: ')
                                 # If user confirms, overwrite the settings.
                                 if choice == 'y':
                                     print('Overwriting ' + file + '...')
@@ -186,7 +252,11 @@ def main():
                 # User wants to discard changes.
                 case 'a':
                     print('WARNING: all your current changes will be lost. Are you sure you want to do this?')
-                    choice = input('Enter y to continue and anything else to abort: ')
+                    if len(queue) != 0:
+                        choice = queue[0]
+                        queue.pop(0)
+                    else:
+                        choice = input('Enter y to continue and anything else to abort: ')
                     # Confirm user choice.
                     if choice == 'y':
                         editor.log('Discarded the current settings.\n')

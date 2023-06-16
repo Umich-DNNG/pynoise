@@ -148,7 +148,7 @@ class Editor:
         # Delete the temporary file.
         os.remove(os.path.abspath(file))
 
-    def driver(self):
+    def driver(self, queue):
 
         '''The driver that manages the settings vim for editing/viewing.'''
 
@@ -161,7 +161,11 @@ class Editor:
             print('i - import a .json file')
             print('a - append settings')
             print('Leave the command blank to cancel editing/viewing.')
-            choice = input('Enter command: ')
+            if len(queue) != 0:
+                choice = queue[0]
+                queue.pop(0)
+            else:
+                choice = input('Enter command: ')
             match choice:
                 # User wants to view/edit current settings.
                 case 'c':
@@ -180,7 +184,11 @@ class Editor:
                         print('You have two input options:')
                         print('o - overwrite the entire settings')
                         print('a - append settings')
-                        opt = input('Enter a command (or leave blank to cancel): ')
+                        if len(queue) != 0:
+                            opt = queue[0]
+                            queue.pop(0)
+                        else:
+                            opt = input('Enter a command (or leave blank to cancel): ')
                         match opt:
                             case 'o':
                                 print('Overwrite mode selected.')
@@ -193,7 +201,11 @@ class Editor:
                     # Keep prompting the user until they 
                     # give an existing file or they cancel.
                     while opt != '' and not os.path.isfile(os.path.abspath(file)) and file != '.json':
-                        file = input('Enter a settings file (no .json '
+                        if len(queue) != 0:
+                            file = queue[0]
+                            queue.pop(0)
+                        else:
+                            file = input('Enter a settings file (no .json '
                                      + 'extension) or leave blank to cancel: ')
                         file = file + '.json'
                         # If file exists.
@@ -230,6 +242,7 @@ class Editor:
                 # Catchall for invalid commands.
                 case _:
                     print('Unrecognized command. Please review the list of appriopriate inputs.\n')
+        return queue
 
 if __name__ == "__main__":
     Editor.driver(Editor())
