@@ -206,7 +206,7 @@ def main(editorIn, queue):
             # View and/or edit program settings.
             case 's':
                 print()
-                editor.driver()
+                editor.driver(queue)
             # End the program.
             case '':
                 print('Returning to main menu...\n')
