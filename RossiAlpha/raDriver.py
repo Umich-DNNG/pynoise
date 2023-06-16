@@ -90,7 +90,7 @@ def createBestFit():
                               show_plot=editor.parameters.settings['General Settings']['Show plots'])
     editor.log('Created line of best fit with residuals for the current histogram.\n')
 
-def main(editorIn):
+def main(editorIn, queue):
     global editor, time_difs, histogram, best_fit
     editor = editorIn
     selection = 'blank'
@@ -101,8 +101,12 @@ def main(editorIn):
         print('p - create plots of the time difference data')
         print('f - fit the data to an exponential curve')
         print('s - view or edit the program settings')
-        print('Leave the command blank to end the program.')
-        selection = input('Enter a command: ')
+        print('Leave the command blank or enter x to return to the main menu.')
+        if len(queue) != 0:
+            selection = queue[0]
+            queue.pop(0)
+        else:
+            selection = input('Enter a command: ')
         match selection:
             # Run the whole analysis process.
             case 'm':
@@ -132,7 +136,11 @@ def main(editorIn):
                 if time_difs is not None:
                     print('WARNING: There are already stored time differences '
                           + 'in this runtime. Do you want to overwrite them?')
-                    choice = input('Enter y to continue and anything else to abort: ')
+                    if len(queue) != 0:
+                        choice = queue[0]
+                        queue.pop(0)
+                    else:
+                        choice = input('Enter y to continue and anything else to abort: ')
                     # Confirm user wants to overwrite time differences.
                     if choice == 'y':
                         editor.log('Currently stored time differences overwritten.\n')
@@ -150,7 +158,11 @@ def main(editorIn):
                 if histogram is not None:
                     print('WARNING: There is an already stored histogram '
                           + 'in this runtime. Do you want to overwrite it?')
-                    choice = input('Enter y to continue and anything else to abort: ')
+                    if len(queue) != 0:
+                        choice = queue[0]
+                        queue.pop(0)
+                    else:
+                        choice = input('Enter y to continue and anything else to abort: ')
                     # Confirm user wants to overwrite the plot.
                     if choice == 'y':
                         editor.log('Currently stored time histogram overwritten.\n')
@@ -170,7 +182,11 @@ def main(editorIn):
                 if best_fit is not None:
                     print('WARNING: There is an already stored best fit line '
                           + 'in this runtime. Do you want to overwrite it?')
-                    choice = input('Enter y to continue and anything else to abort: ')
+                    if len(queue) != 0:
+                        choice = queue[0]
+                        queue.pop(0)
+                    else:
+                        choice = input('Enter y to continue and anything else to abort: ')
                     # Confirm user wants to overwrite the plot.
                     if choice == 'y':
                         editor.log('Currently stored best fit line overwritten.\n')
@@ -194,7 +210,9 @@ def main(editorIn):
             # End the program.
             case '':
                 print('Returning to main menu...\n')
+            case 'x':
+                print('Returning to main menu...\n')
             # Catchall for invalid commands.
             case _:
                 print('Unrecognized command. Please review the list of appriopriate inputs.\n')
-    return editor
+    return editor, queue

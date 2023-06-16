@@ -15,3 +15,6 @@
 
 # Settings files should be user independent
 *.json
+
+# Input files are usually user independent
+*.txt

@@ -32,7 +32,7 @@ def conduct_PSD():
                             save_dir=editor.parameters.settings['Input/Output Settings']['Save directory'])
 
 
-def main(editorIn):
+def main(editorIn, queue):
     global editor
     editor = editorIn
     selection = 'blank'
@@ -45,8 +45,12 @@ def main(editorIn):
         print('f - fit the data to a curve')
         '''
         print('s - view or edit the program settings')
-        print('Leave the command blank to end the program.')
-        selection = input('Enter a command: ')
+        print('Leave the command blank or enter x to return to the main menu.')
+        if len(queue) != 0:
+            selection = queue[0]
+            queue.pop(0)
+        else:
+            selection = input('Enter a command: ')
         match selection:
             case 'm':
                 print()
@@ -63,14 +67,16 @@ def main(editorIn):
             # View and/or edit program settings.
             case 's':
                 print()
-                editor.driver()
+                editor.driver(queue)
             # End the program.
             case '':
+                print('Returning to main menu...\n')
+            case 'x':
                 print('Returning to main menu...\n')
             # Catchall for invalid commands.
             case _:
                 print('Unrecognized command. Please review the list of appriopriate inputs.\n')
-    return editor
+    return editor, queue
 
 
 # Tells the program what function to start if this is the main program being ran (TO BE DELETED)
