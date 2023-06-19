@@ -170,11 +170,17 @@ Note that instead of an empty input for exiting the program, there is an x inste
 2. Send a file as a command line argument. In this mode, the file you are sending (can be given as an absolute or relative path) will contain a command on each line. As long as the file has as extension (.txt, for example), any file name is valid. In this example, the file will be called ```input.txt``` and will be formatted as follows:
 
 ```input.txt```:
+
 i
+
 a
+
 single
+
 (blank)
+
 q
+
 
 Then, to run the program with these commands, the command line call would be:
 
