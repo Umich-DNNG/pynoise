@@ -193,3 +193,12 @@ Both of these examples would result in the same code execution. However, note it
 The automated command input is quite flexibile - it can take in any number of command line arguments, and the user can mix and match raw commands and file names as needed. Furthermore, the commands given to the program do not need to end the program. If the program runs out of given commands, it will prompt the user to enter commands as usual.
 
 Besides the necessity of the x command with raw commands, note there is another restriction on automated commands in that they cannot control vim editing. If an automated command chooses to edit the current settings or append new ones, it will be up to the user to manually do so. However, once the vim editor is closed the automated commands will continue running as normal.
+
+
+### Using pyNoise as a Python Package
+
+To download this program as a package, navigate into the pyNoise folder on your machine, and run the following command: 
+```python setup.py sdist```
+This should create a subfolder called "dist" within your pyNoise folder. Within the dist folder, there should be a file ending in .tar.gz. Install the package by running the following command with the correct path to this .tar.gz file:
+```pip install ./dist/pyNoise-1.0.0.tar.gz```
+You should now be able to use pyNoise as a python package. 
