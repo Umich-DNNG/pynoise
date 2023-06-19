@@ -19,6 +19,10 @@ class Editor:
         os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
     def print(self, message):
+
+        '''Prints a string if quiet mode 
+        is off. Otherwise, does nothng.'''
+
         if not self.parameters.settings['General Settings']['Quiet mode']:
             print(message)
 
@@ -165,9 +169,12 @@ class Editor:
             self.print('i - import a .json file')
             self.print('a - append settings')
             self.print('Leave the command blank or enter x to cancel editing/viewing.')
+            # If there's currently something in the command queue, 
+            # take that as the input and remove it from the queue.
             if len(queue) != 0:
                 choice = queue[0]
                 queue.pop(0)
+            # Otherwise, prompt the user.
             else:
                 choice = input('Enter command: ')
             match choice:
@@ -184,34 +191,46 @@ class Editor:
                 case 'i':
                     file = 'blank'
                     opt = 'blank'
+                    # Keep looping until valid command or user cancels.
                     while opt != '' and opt != 'o' and opt != 'a':
                         self.print('You have two input options:')
                         self.print('o - overwrite the entire settings')
                         self.print('a - append settings')
+                        # If there's currently something in the command queue, 
+                        # take that as the input and remove it from the queue.
                         if len(queue) != 0:
                             opt = queue[0]
                             queue.pop(0)
+                        # Otherwise, prompt the user.
                         else:
-                            opt = input('Enter a command (or leave blank to cancel): ')
+                            opt = input('Enter a command (or leave blank to cancel): ')   
                         match opt:
+                            # User chooses overwrite mode.
                             case 'o':
                                 self.print('Overwrite mode selected.')
+                            # User chooses append mode.
                             case 'a':
                                 self.print('Append mode selected.')
+                            # User cancels file import.
                             case '':
                                 self.print('Canceling import...\n')
+                            # Catchall for invalid commands.
                             case _:
                                 print('ERROR: Unrecognized command ' + opt 
                                         + '. Please review the list of appriopriate inputs.\n')
                     # Keep prompting the user until they 
                     # give an existing file or they cancel.
                     while opt != '' and not os.path.isfile(os.path.abspath(file)) and file != '.json':
+                        # If there's currently something in the command queue, 
+                        # take that as the input and remove it from the queue.
                         if len(queue) != 0:
                             file = queue[0]
                             queue.pop(0)
+                        # Otherwise, prompt the user.
                         else:
                             file = input('Enter a settings file (no .json '
                                      + 'extension) or leave blank to cancel: ')
+                        # Add .json extension.
                         file = file + '.json'
                         # If file exists.
                         if os.path.isfile(os.path.abspath(file)):
@@ -229,7 +248,7 @@ class Editor:
                         # User cancels import.
                         elif file == '.json':
                             self.print('Canceling import...\n')
-                        # Catchall for invalid inputs.
+                        # Catchall for invalid files.
                         else:
                             print('ERROR: ' + file + ' does not exist in the given directory. '
                               + 'Make sure that your settings file is named correctly, '
