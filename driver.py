@@ -19,28 +19,46 @@ def main():
     global editor
     selection = 'blank'
     queue = []
-    while len(sys.argv) > 1:
-        if sys.argv[1].count('.') > 0:
-            file = open(os.path.abspath(sys.argv[1]))
-            commands = file.read()
-            while commands.find('\n') != -1:
-                entry = commands[0:commands.find('\n')]
-                commands = commands[commands.find('\n')+1:]
-                queue.append(entry)
-            queue.append(commands)
-        else:
-            queue.append(sys.argv[1])
-        sys.argv.pop(1)
-    print('Welcome to the DNNG/PyNoise project. With this software we are '
+    try:
+        start = sys.argv.index('-c')
+    except ValueError:
+        try:
+            start = sys.argv.index('--commands')
+        except ValueError:
+            start = -1
+    try:
+        sys.argv.index('-q')
+        editor.parameters.settings['General Settings']['Quiet mode'] = True
+    except ValueError:
+        try:
+            sys.argv.index('--quiet')
+            editor.parameters.settings['General Settings']['Quiet mode'] = True
+        except ValueError:
+            editor.parameters.settings['General Settings']['Quiet mode'] = False
+    if start != -1:
+        start = start + 1
+        while start < len(sys.argv) and sys.argv[start].find('-') == -1:
+            if sys.argv[start].count('.') > 0:
+                file = open(os.path.abspath(sys.argv[start]))
+                commands = file.read()
+                while commands.find('\n') != -1:
+                    entry = commands[0:commands.find('\n')]
+                    commands = commands[commands.find('\n')+1:]
+                    queue.append(entry)
+                queue.append(commands)
+            else:
+                queue.append(sys.argv[start])
+            start = start + 1
+    editor.print('Welcome to the DNNG/PyNoise project. With this software we are '
           + 'taking radiation data from fission reactions (recorded by organic '
           + 'scintillators) and applying a line of best fit to the decay rate. '
           + 'Use this Python suite to analyze a single file or multiple across '
           + 'numerous folders.\n')
     # Continue looping until the user has selected an import option.
     while selection != 'd' and selection != 'i':
-        print('Would you like to use the default settings or import another .json file?')
-        print('d - use default settings')
-        print('i - import custom settings')
+        editor.print('Would you like to use the default settings or import another .json file?')
+        editor.print('d - use default settings')
+        editor.print('i - import custom settings')
         if len(queue) != 0:
             selection = queue[0]
             queue.pop(0)
@@ -49,8 +67,8 @@ def main():
         match selection:
             # Import the default settings.
             case 'd':
-                print()
-                print('Initializing program with default settings...')
+                editor.print('')
+                editor.print('Initializing program with default settings...')
                 # Create absolute path for the default settings file and read it in.
                 path = os.path.abspath('default.json')
                 editor.parameters.read(path)
@@ -62,9 +80,9 @@ def main():
                 choice = 'blank'
                 opt = 'blank'
                 while opt != '' and opt != 'o' and opt != 'a':
-                    print('\nYou have two import options:')
-                    print('o - overwrite entire settings')
-                    print('a - append settings to default')
+                    editor.print('\nYou have two import options:')
+                    editor.print('o - overwrite entire settings')
+                    editor.print('a - append settings to default')
                     if len(queue) != 0:
                         opt = queue[0]
                         queue.pop(0)
@@ -72,14 +90,15 @@ def main():
                         opt = input('Enter a command (or leave blank to cancel): ')
                     match opt:
                         case 'o':
-                            print('Overwrite mode selected.')
+                            editor.print('Overwrite mode selected.')
                         case 'a':
-                            print('Append mode selected.')
+                            editor.print('Append mode selected.')
                         case '':
-                            print('Canceling import...\n')
+                            editor.print('Canceling import...\n')
                             selection = ''
                         case _:
-                            print('Unrecognized command. Please review the list of appriopriate inputs.')
+                            print('ERROR: Unrecognized command ' + opt 
+                                  + '. Please review the list of appriopriate inputs.\n')
                 while opt != '' and not os.path.isfile(os.path.abspath(file)) and file != '.json':
                     if len(queue) != 0:
                         file = queue[0]
@@ -88,7 +107,7 @@ def main():
                         file = input('Enter a settings file (no .json extension): ')
                     file = file + '.json'
                     if os.path.isfile(os.path.abspath(file)):
-                        print('Importing settings from ' + file + '...')
+                        editor.print('Importing settings from ' + file + '...')
                         if opt == 'a':
                             editor.parameters.read(os.path.abspath('default.json'))
                             editor.parameters.append(os.path.abspath(file))
@@ -100,7 +119,7 @@ def main():
                             editor.changeLog()
                             editor.log('Settings from ' + file + ' succesfully imported.\n')
                     elif file == '.json':
-                        print('Canceling import...\n')
+                        editor.print('Canceling import...\n')
                         selection = ''
                     else:
                         print('ERROR: ' + file + ' does not exist in the given directory. '
@@ -109,16 +128,16 @@ def main():
                               + 'you did not include the .json extenstion in your input.\n')
             # Catchall for invalid commands.
             case _:
-                print('You must choose what settings to import.\n')
-    print('Settings initialized. You can now begin using the program.\n')
-    print('----------------------------------------------------------\n')
+                print('ERROR: You must choose what settings to import.\n')
+    editor.print('Settings initialized. You can now begin using the program.\n')
+    editor.print('----------------------------------------------------------\n')
     # Continue running the program until the user is done.
     while selection != '':
-        print('You can utitilze any of the following functions:')
-        print('r - run Rossi Alpha analysis')
-        print('p - run Power Spectral Density Analysis')
-        print('s - view or edit the program settings')
-        print('Leave the command blank or enter x to end the program.')
+        editor.print('You can utitilze any of the following functions:')
+        editor.print('r - run Rossi Alpha analysis')
+        editor.print('p - run Power Spectral Density Analysis')
+        editor.print('s - view or edit the program settings')
+        editor.print('Leave the command blank or enter x to end the program.')
         if len(queue) != 0:
             selection = queue[0]
             queue.pop(0)
@@ -127,18 +146,18 @@ def main():
         match selection:
             # Run RossiAlpha analysis.
             case 'r':
-                print()
+                editor.print('')
                 editor, queue = ra.main(editor, queue)
             case 'p':
-                print()
+                editor.print('')
                 editor, queue = psd.main(editor, queue)
             # View and/or edit program settings.
             case 's':
-                print()
+                editor.print('')
                 queue = editor.driver(queue)
             # End the program.
             case '':
-                print('\nAre you sure you want to quit the program?')
+                editor.print('\nAre you sure you want to quit the program?')
                 if len(queue) != 0:
                     choice = queue[0]
                     queue.pop(0)
@@ -146,13 +165,13 @@ def main():
                     choice = input('Enter q to quit and anything else to abort: ')
                 # Confirm quit command.
                 if choice == 'q':
-                    print('Ending program...\n')
+                    editor.print('Ending program...\n')
                 # Catchall for user canceling shutdown.
                 else:
-                    print('Quit aborted.\n')
+                    editor.print('Quit aborted.\n')
                     selection = 'blank'
             case 'x':
-                print('\nAre you sure you want to quit the program?')
+                editor.print('\nAre you sure you want to quit the program?')
                 if len(queue) != 0:
                     choice = queue[0]
                     queue.pop(0)
@@ -160,24 +179,25 @@ def main():
                     choice = input('Enter q to quit and anything else to abort: ')
                 # Confirm quit command.
                 if choice == 'q':
-                    print('Ending program...\n')
+                    editor.print('Ending program...\n')
                 # Catchall for user canceling shutdown.
                 else:
-                    print('Quit aborted.\n')
+                    editor.print('Quit aborted.\n')
                     selection = 'blank'
             # Catchall for invalid commands.
             case _:
-                print('Unrecognized command. Please review the list of appriopriate inputs.\n')
+                print('ERROR: Unrecognized command ' + selection 
+                    + '. Please review the list of appriopriate inputs.\n')
     # If the settings have been changed at any point during runtime, notify user.
     if editor.parameters.changed:
         selection = ''
         # Continue looping until the user has decided what to do with their changes.
         while selection != 'd' and selection != 'n' and selection != 'a':
-            print('It appears you have made unsaved changes to the '
+            editor.print('It appears you have made unsaved changes to the '
               + 'settings. Do you want to save your changes?')
-            print('d - save current settings as the default')
-            print('n - save current settings as a new settings file')
-            print('a - abandon current settings')
+            editor.print('d - save current settings as the default')
+            editor.print('n - save current settings as a new settings file')
+            editor.print('a - abandon current settings')
             if len(queue) != 0:
                 selection = queue[0]
                 queue.pop(0)
@@ -186,7 +206,7 @@ def main():
             match selection:
                 # User wants to overwrite the defualt settings.
                 case 'd':
-                    print('This will overwrite the current default settings. Are you sure you want to do this?')
+                    editor.print('This will overwrite the current default settings. Are you sure you want to do this?')
                     if len(queue) != 0:
                         choice = queue[0]
                         queue.pop(0)
@@ -197,12 +217,12 @@ def main():
                         # Create an absolute path for the default settings
                         # file and write the current settings into it.
                         path = os.path.abspath('default.json')
-                        print('Overwriting default settings...')
+                        editor.print('Overwriting default settings...')
                         editor.parameters.write(path)
                         editor.log('Default settings overwritten.\n')
                     # Catchall for user canceling overwrite.
                     else:
-                        print()
+                        editor.print('')
                         selection = ''
                 # User wants to save settings in a new file.
                 case 'n':
@@ -211,7 +231,7 @@ def main():
                     # Loop until user cancels or the user has created a new settings
                     # file/canceled the overwriting of an existing one.
                     while file != '' and not os.path.isfile(path):
-                        print('Enter a name for the new settings (not including the .json file extension).')
+                        editor.print('Enter a name for the new settings (not including the .json file extension).')
                         if len(queue) != 0:
                             file = queue[0]
                             queue.pop(0)
@@ -224,7 +244,7 @@ def main():
                             # If settings file already exists, check that user 
                             # wants to overwrite settings currently in the file.
                             if os.path.isfile(path):
-                                print('WARNING: settings file ' + file + ' already exists.'
+                                editor.print('WARNING: settings file ' + file + ' already exists.'
                                     + ' Do you want to overwrite the previous stored settings?')
                                 if len(queue) != 0:
                                     choice = queue[0]
@@ -233,24 +253,24 @@ def main():
                                     choice = input('Enter y to continue and anything else to abort: ')
                                 # If user confirms, overwrite the settings.
                                 if choice == 'y':
-                                    print('Overwriting ' + file + '...')
+                                    editor.print('Overwriting ' + file + '...')
                                     editor.parameters.save(path)
                                     editor.log('Settings in ' + file + ' overwritten.\n')
                                 # Catchall for user canceling overwrite.
                                 else:
-                                    print()
+                                    editor.print('')
                                     path = 'blank'
                             # Otherwise, save with no confirmation needed.
                             else:
-                                print('Saving current settings to new file ' + file + '...')
+                                editor.print('Saving current settings to new file ' + file + '...')
                                 editor.parameters.save(path)
                                 editor.log('Settings saved to file ' + file + '.\n')
                         else:
-                            print()
+                            editor.print('')
                             selection = ''
                 # User wants to discard changes.
                 case 'a':
-                    print('WARNING: all your current changes will be lost. Are you sure you want to do this?')
+                    editor.print('WARNING: all your current changes will be lost. Are you sure you want to do this?')
                     if len(queue) != 0:
                         choice = queue[0]
                         queue.pop(0)
@@ -261,11 +281,11 @@ def main():
                         editor.log('Discarded the current settings.\n')
                     # Catchall for user canceling.
                     else:
-                        print()
+                        editor.print('')
                         selection = ''
                 # Catchall for invalid commands.
                 case _:
-                    print('You must choose what to do with your changes.\n')
+                    print('ERROR: You must choose what to do with your changes.\n')
     # Close the log file if one is open.
     if editor.history is not None:
         editor.history.close()

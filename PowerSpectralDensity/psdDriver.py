@@ -36,16 +36,16 @@ def main(editorIn, queue):
     global editor
     editor = editorIn
     selection = 'blank'
-    print('You are running the Power Spectral Density Method.')
+    editor.print('You are running the Power Spectral Density Method.')
     while selection != '':
-        print('You can utilize any of the following functions:')
-        print('m - run the entire program through the main driver')
+        editor.print('You can utilize any of the following functions:')
+        editor.print('m - run the entire program through the main driver')
         '''
-        print('p - plot the data')
-        print('f - fit the data to a curve')
+        editor.print('p - plot the data')
+        editor.print('f - fit the data to a curve')
         '''
-        print('s - view or edit the program settings')
-        print('Leave the command blank or enter x to return to the main menu.')
+        editor.print('s - view or edit the program settings')
+        editor.print('Leave the command blank or enter x to return to the main menu.')
         if len(queue) != 0:
             selection = queue[0]
             queue.pop(0)
@@ -57,29 +57,30 @@ def main(editorIn, queue):
                     print('ERROR: You currently have no input file or folder defined. '
                           + 'Please make sure to specify one before running any analysis.\n')
                 else:
-                    print()
-                    print('Running the entire power spectral density analysis...')
+                    editor.print('')
+                    editor.print('Running the entire power spectral density analysis...')
                     conduct_PSD()
                 '''
             case 'p':
-                print()
-                print('Plotting the data...')
+                editor.print('')
+                editor.print('Plotting the data...')
             case 'f':
-                print()
-                print('Fitting the data...')
+                editor.print('')
+                editor.print('Fitting the data...')
                 '''
             # View and/or edit program settings.
             case 's':
-                print()
+                editor.print('')
                 queue = editor.driver(queue)
             # End the program.
             case '':
-                print('Returning to main menu...\n')
+                editor.print('Returning to main menu...\n')
             case 'x':
-                print('Returning to main menu...\n')
+                editor.print('Returning to main menu...\n')
             # Catchall for invalid commands.
             case _:
-                print('Unrecognized command. Please review the list of appriopriate inputs.\n')
+                print('ERROR: Unrecognized command ' + selection 
+                        + '. Please review the list of appriopriate inputs.\n')
     return editor, queue
 
 
