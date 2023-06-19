@@ -18,37 +18,62 @@ def main():
 
     global editor
     selection = 'blank'
+    # Command queue.
     queue = []
+    # Try to find the -c command line argument.
     try:
+        # If found, store the index of it.
         start = sys.argv.index('-c')
+    # If not, try to find the --commands command line argument.
     except ValueError:
         try:
+            # If found, store the index of it.
             start = sys.argv.index('--commands')
+        # If not, store the index as -1.
         except ValueError:
             start = -1
+    # Try to find the -q command line argument.
     try:
         sys.argv.index('-q')
+        # If found, set quiet mode to true.
         editor.parameters.settings['General Settings']['Quiet mode'] = True
+    # If not, try to find the --quiet command line argument.
     except ValueError:
         try:
             sys.argv.index('--quiet')
+            # If found, set quiet mode to true.
             editor.parameters.settings['General Settings']['Quiet mode'] = True
+        # If not, set quiet mode to false.
         except ValueError:
             editor.parameters.settings['General Settings']['Quiet mode'] = False
+    # If there are program commands, loop through them.
     if start != -1:
+        # Skip over --commands/-c.
         start = start + 1
+        # Keep looping until reaching the end of the commands 
+        # or reaching another command line argument.
         while start < len(sys.argv) and sys.argv[start].find('-') == -1:
+            # If a file is given.
             if sys.argv[start].count('.') > 0:
+                # Open the file and read the entire file.
                 file = open(os.path.abspath(sys.argv[start]))
                 commands = file.read()
+                # Keep looping until there are no more newlines.
                 while commands.find('\n') != -1:
+                    # Isolate the next entry, remove it from the 
+                    # list of commands, and add it to the queue.
                     entry = commands[0:commands.find('\n')]
                     commands = commands[commands.find('\n')+1:]
                     queue.append(entry)
+                # Append the final command.
                 queue.append(commands)
+            # Otherwise, assume a raw command is 
+            # given and add it to the queue.
             else:
                 queue.append(sys.argv[start])
+            # Continue to next command.
             start = start + 1
+    # Welcome statement.
     editor.print('Welcome to the DNNG/PyNoise project. With this software we are '
           + 'taking radiation data from fission reactions (recorded by organic '
           + 'scintillators) and applying a line of best fit to the decay rate. '
@@ -59,9 +84,12 @@ def main():
         editor.print('Would you like to use the default settings or import another .json file?')
         editor.print('d - use default settings')
         editor.print('i - import custom settings')
+        # If there's currently something in the command queue, 
+        # take that as the input and remove it from the queue.
         if len(queue) != 0:
             selection = queue[0]
             queue.pop(0)
+        # Otherwise, prompt the user.
         else:
             selection = input('Select settings choice: ')
         match selection:
@@ -79,48 +107,70 @@ def main():
                 file = ''
                 choice = 'blank'
                 opt = 'blank'
+                # Keep looping until valid command or user cancels.
                 while opt != '' and opt != 'o' and opt != 'a':
                     editor.print('\nYou have two import options:')
                     editor.print('o - overwrite entire settings')
                     editor.print('a - append settings to default')
+                    # If there's currently something in the command queue, 
+                    # take that as the input and remove it from the queue.
                     if len(queue) != 0:
                         opt = queue[0]
                         queue.pop(0)
+                    # Otherwise, prompt the user.
                     else:
                         opt = input('Enter a command (or leave blank to cancel): ')
                     match opt:
+                        # User chooses overwrite mode.
                         case 'o':
                             editor.print('Overwrite mode selected.')
+                        # User chooses append mode.
                         case 'a':
                             editor.print('Append mode selected.')
+                        # User cancels file import.
                         case '':
                             editor.print('Canceling import...\n')
                             selection = ''
+                        # Catchall for invalid commands.
                         case _:
                             print('ERROR: Unrecognized command ' + opt 
                                   + '. Please review the list of appriopriate inputs.\n')
-                while opt != '' and not os.path.isfile(os.path.abspath(file)) and file != '.json':
+                # Keep looping until valid file or user cancels.
+                while (opt != '' 
+                       and not os.path.isfile(os.path.abspath(file)) 
+                       and file != '.json'):
+                    # If there's currently something in the command queue, 
+                    # take that as the input and remove it from the queue.
                     if len(queue) != 0:
                         file = queue[0]
                         queue.pop(0)
+                    # Otherwise, prompt the user.
                     else:
                         file = input('Enter a settings file (no .json extension): ')
+                    # Add .json extension.
                     file = file + '.json'
+                    # If file exists.
                     if os.path.isfile(os.path.abspath(file)):
                         editor.print('Importing settings from ' + file + '...')
+                        # Append settings.
                         if opt == 'a':
+                            # Read default settings first to append over.
                             editor.parameters.read(os.path.abspath('default.json'))
+                            # Append changed/removed settings.
                             editor.parameters.append(os.path.abspath(file))
                             editor.changeLog()
                             editor.log('Settings from ' + file + ' succesfully'
                                        + ' appended to the default.\n')
+                        # Overwrite all settings.
                         else:
                             editor.parameters.read(os.path.abspath(file))
                             editor.changeLog()
                             editor.log('Settings from ' + file + ' succesfully imported.\n')
+                    # User cancels import.
                     elif file == '.json':
                         editor.print('Canceling import...\n')
                         selection = ''
+                    # Catchall for invalid files.
                     else:
                         print('ERROR: ' + file + ' does not exist in the given directory. '
                               + 'Make sure that your settings file is named correctly, '
@@ -138,9 +188,12 @@ def main():
         editor.print('p - run Power Spectral Density Analysis')
         editor.print('s - view or edit the program settings')
         editor.print('Leave the command blank or enter x to end the program.')
+        # If there's currently something in the command queue, 
+        # take that as the input and remove it from the queue.
         if len(queue) != 0:
             selection = queue[0]
             queue.pop(0)
+        # Otherwise, prompt the user.
         else:
             selection = input('Enter a command: ')
         match selection:
@@ -148,6 +201,7 @@ def main():
             case 'r':
                 editor.print('')
                 editor, queue = ra.main(editor, queue)
+            # Run PowerSpectralDensity analysis.
             case 'p':
                 editor.print('')
                 editor, queue = psd.main(editor, queue)
@@ -158,9 +212,12 @@ def main():
             # End the program.
             case '':
                 editor.print('\nAre you sure you want to quit the program?')
+                # If there's currently something in the command queue, 
+                # take that as the input and remove it from the queue.
                 if len(queue) != 0:
                     choice = queue[0]
                     queue.pop(0)
+                # Otherwise, prompt the user.
                 else:
                     choice = input('Enter q to quit and anything else to abort: ')
                 # Confirm quit command.
@@ -172,9 +229,12 @@ def main():
                     selection = 'blank'
             case 'x':
                 editor.print('\nAre you sure you want to quit the program?')
+                # If there's currently something in the command queue, 
+                # take that as the input and remove it from the queue.
                 if len(queue) != 0:
                     choice = queue[0]
                     queue.pop(0)
+                # Otherwise, prompt the user.
                 else:
                     choice = input('Enter q to quit and anything else to abort: ')
                 # Confirm quit command.
@@ -198,18 +258,24 @@ def main():
             editor.print('d - save current settings as the default')
             editor.print('n - save current settings as a new settings file')
             editor.print('a - abandon current settings')
+            # If there's currently something in the command queue, 
+            # take that as the input and remove it from the queue.
             if len(queue) != 0:
                 selection = queue[0]
                 queue.pop(0)
+            # Otherwise, prompt the user.
             else:
                 selection = input('Select an option: ')
             match selection:
                 # User wants to overwrite the defualt settings.
                 case 'd':
                     editor.print('This will overwrite the current default settings. Are you sure you want to do this?')
+                    # If there's currently something in the command queue, 
+                    # take that as the input and remove it from the queue.
                     if len(queue) != 0:
                         choice = queue[0]
                         queue.pop(0)
+                    # Otherwise, prompt the user.
                     else:
                         choice = input('Enter y to continue and anything else to abort: ')
                     # Confirm user wants to overwrite.
@@ -232,9 +298,12 @@ def main():
                     # file/canceled the overwriting of an existing one.
                     while file != '' and not os.path.isfile(path):
                         editor.print('Enter a name for the new settings (not including the .json file extension).')
+                        # If there's currently something in the command queue, 
+                        # take that as the input and remove it from the queue.
                         if len(queue) != 0:
                             file = queue[0]
                             queue.pop(0)
+                        # Otherwise, prompt the user.
                         else:
                             file  = input('Name of file (or blank to cancel): ')
                         if file != '':
@@ -246,9 +315,12 @@ def main():
                             if os.path.isfile(path):
                                 editor.print('WARNING: settings file ' + file + ' already exists.'
                                     + ' Do you want to overwrite the previous stored settings?')
+                                # If there's currently something in the command queue, 
+                                # take that as the input and remove it from the queue.
                                 if len(queue) != 0:
                                     choice = queue[0]
                                     queue.pop(0)
+                                # Otherwise, prompt the user.
                                 else:
                                     choice = input('Enter y to continue and anything else to abort: ')
                                 # If user confirms, overwrite the settings.
@@ -271,9 +343,12 @@ def main():
                 # User wants to discard changes.
                 case 'a':
                     editor.print('WARNING: all your current changes will be lost. Are you sure you want to do this?')
+                    # If there's currently something in the command queue, 
+                    # take that as the input and remove it from the queue.
                     if len(queue) != 0:
                         choice = queue[0]
                         queue.pop(0)
+                    # Otherwise, prompt the user.
                     else:
                         choice = input('Enter y to continue and anything else to abort: ')
                     # Confirm user choice.
@@ -290,7 +365,7 @@ def main():
     if editor.history is not None:
         editor.history.close()
     # Shutdown message.
-    print('Thank you for using the DNNG/PyNoise project.')
+    editor.print('Thank you for using the DNNG/PyNoise project.')
 
 # Tells the program what function to start if this is the main program being run.
 if __name__ == "__main__":
