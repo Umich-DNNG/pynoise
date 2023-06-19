@@ -160,7 +160,7 @@ class Editor:
             print('c - current settings')
             print('i - import a .json file')
             print('a - append settings')
-            print('Leave the command blank to cancel editing/viewing.')
+            print('Leave the command blank or enter x to cancel editing/viewing.')
             if len(queue) != 0:
                 choice = queue[0]
                 queue.pop(0)
@@ -238,6 +238,8 @@ class Editor:
                     self.edit(file)
                 # User is ready to return to the main menu.
                 case '':
+                    print('Returning to previous menu...\n')
+                case 'x':
                     print('Returning to previous menu...\n')
                 # Catchall for invalid commands.
                 case _:

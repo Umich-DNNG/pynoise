@@ -147,3 +147,43 @@ To close the vim:
 * :wq or :exit
 
 *WARNING*: Try to avoid exiting/quitting the program while in the editing vim. To use vim, temporary files are created that will not be correctly deleted if vim editing is halted incorrectly. Additionally, terminal tab formatting may be affected and functionality may be broken.
+
+### Automating Commands
+
+When the user wants to run the same thing multiple times, it may become tedious to manually enter each command. For this reason command inputs can be automated in two different ways. This section will walk through the example of opening the program, importing settings from single.json, and closing the program. Commands for this would normally be:
+* i - import custom settings
+* a - append settings to default
+* single - the name of the settings file
+* (blank) - exit the program
+* q - confirm the quit
+
+**Formatting**
+
+Commands can be handed to the program through command line arguments when calling the program. There are two acceptable ways to pass commands:
+
+1. Send raw commands as command line arguments. In this mode, the command line arguments can directly be the commands that would be entered during runtime. For the example, the formatting would be as follows:
+
+```python3.10 driver.py i a single x q```
+
+Note that instead of an empty input for exiting the program, there is an x instead. This is because it is not possible to have empty command line arguments. As such, x is also a valid command for returning from submenus (Rossi Alpha, Power Spectral Density, and Settings Editor) as well as exiting the program. However, be aware that it is not acceptable to use an x command in any other circumstance. If a blank command is needed, use the following option to pass commands.
+
+2. Send a file as a command line argument. In this mode, the file you are sending (can be given as an absolute or relative path) will contain a command on each line. As long as the file has as extension (.txt, for example), any file name is valid. In this example, the file will be called ```input.txt``` and will be formatted as follows:
+
+```input.txt```:
+i
+a
+single
+(blank)
+q
+
+Then, to run the program with these commands, the command line call would be:
+
+```python3.10 driver.py single.txt```
+
+Both of these examples would result in the same code execution. However, note it is possible to have a blank command in the file format (the (blank) text is just a placeholder - see the input.txt file included in this package for a literal example). For this reason, there should be no extra newlines at the end of the file unless the last desired command is a blank command.
+
+**Flexibility and Restrictions**
+
+The automated command input is quite flexibile - it can take in any number of command line arguments, and the user can mix and match raw commands and file names as needed. Furthermore, the commands given to the program do not need to end the program. If the program runs out of given commands, it will prompt the user to enter commands as usual.
+
+Besides the necessity of the x command with raw commands, note there is another restirction on automated commands in that they cannot control vim editing. If an automated command choose to edit the current settings or append new ones, it will be up to the user to manually do so. However, once the vim editor is closed the automated commands will continue running as normal.
