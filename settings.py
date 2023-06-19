@@ -17,13 +17,14 @@ class Settings:
         
         # Create a dictionary that stores each group of settings,
         # and set each one to the respective input dictionary.
-        self.settings = {'Input/Output Settings': {'Input type':0,
-                                                   'Input file/folder':'',
-                                                   'Save directory':'',
-                                                   'Keep logs':False},
+        self.settings = {'Input/Output Settings': {'Input file/folder': '',
+                                                    'Data Column': 0,
+                                                    'Save directory': '',
+                                                    'Keep logs': False},
                          'General Settings': {'Fit range':[0,0],
                                               'Number of folders':0,
                                               'Meas time per folder':0,
+                                              'Quiet mode':False,
                                               'Sort data':False,
                                               'Save figures':False,
                                               'Show plots':False
