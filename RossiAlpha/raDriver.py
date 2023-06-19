@@ -28,7 +28,7 @@ def createTimeDifs():
     Will overwrite the current time differences, if they exist.'''
 
     global time_difs, time_difs_file, time_difs_method, editor
-    print('Creating time differences...')
+    editor.print('Creating time differences...')
     name = editor.parameters.settings['Input/Output Settings']['Input file/folder']
     name = name[name.rfind('/')+1:]
     # For signle file analysis.
@@ -51,7 +51,7 @@ def createTimeDifs():
         time_difs_method = editor.parameters.settings['RossiAlpha Settings']['Time difference method']
     # For folder analysis.
     else:
-        print('TODO: Add functionality to create time differences for folders.')
+        editor.print('TODO: Add functionality to create time differences for folders.')
 
 def createPlot():
 
@@ -62,7 +62,7 @@ def createPlot():
     Assumes that the time difference data is valid.'''
 
     global time_difs, histogram, hist_file, hist_method, editor
-    print('Building plot...')
+    editor.print('Building plot...')
     histogram = plt.RossiHistogram(editor.parameters.settings['RossiAlpha Settings']['Histogram Generation Settings']['Reset time'],
                               editor.parameters.settings['RossiAlpha Settings']['Histogram Generation Settings']['Bin width'],
                               editor.parameters.settings['Histogram Visual Settings'],
@@ -81,7 +81,7 @@ def createBestFit():
     Assumes that the histogram is valid.'''
 
     global time_difs, histogram, best_fit, editor
-    print('Building line of best fit...')
+    editor.print('Building line of best fit...')
     counts, bin_centers, bin_edges = histogram.plot(time_difs, save_fig=False, show_plot=False)
     best_fit = fit.RossiHistogramFit(counts, bin_centers, editor.parameters.settings)
         
@@ -95,13 +95,13 @@ def main(editorIn, queue):
     editor = editorIn
     selection = 'blank'
     while selection != '':
-        print('What analysis would you like to perform?')
-        print('m - run the entire program through the main driver')
-        print('t - calculate time differences')
-        print('p - create plots of the time difference data')
-        print('f - fit the data to an exponential curve')
-        print('s - view or edit the program settings')
-        print('Leave the command blank or enter x to return to the main menu.')
+        editor.print('What analysis would you like to perform?')
+        editor.print('m - run the entire program through the main driver')
+        editor.print('t - calculate time differences')
+        editor.print('p - create plots of the time difference data')
+        editor.print('f - fit the data to an exponential curve')
+        editor.print('s - view or edit the program settings')
+        editor.print('Leave the command blank or enter x to return to the main menu.')
         if len(queue) != 0:
             selection = queue[0]
             queue.pop(0)
@@ -121,18 +121,18 @@ def main(editorIn, queue):
                             print('ERROR: To analyze a single file, you must use '
                                 + 'the any_and_all time difference method only.\n')
                         else:
-                            print('Running the entire RossiAlpha method...')
+                            editor.print('Running the entire RossiAlpha method...')
                             time_difs, histogram, best_fit = mn.analyzeAllType1(editor.parameters.settings)
                             editor.log('Ran the entire RossiAlpha method on file ' 
                                 + editor.parameters.settings['Input/Output Settings']['Input file/folder'] 
                                 + '.\n')
                     else:
-                        print('Running the entire RossiAlpha method...')
+                        editor.print('Running the entire RossiAlpha method...')
                         mn.analyzeAllType2(editor.parameters.settings)
                         editor.log('Ran the entire RossiAlpha method on folder ' 
                             + editor.parameters.settings['Input/Output Settings']['Input file/folder'] 
                             + '.\n')
-                        print('TODO: Implement modularity for folder analysis.')
+                        editor.print('TODO: Implement modularity for folder analysis.')
             # Calculate time differences for the given input.
             # TODO: Have some method of detection for when the input has changed.
             case 't':
@@ -142,7 +142,7 @@ def main(editorIn, queue):
                 else:
                     # If time differences are already stored, notify user.
                     if time_difs is not None:
-                        print('WARNING: There are already stored time differences '
+                        editor.print('WARNING: There are already stored time differences '
                             + 'in this runtime. Do you want to overwrite them?')
                         if len(queue) != 0:
                             choice = queue[0]
@@ -154,7 +154,7 @@ def main(editorIn, queue):
                             editor.log('Currently stored time differences overwritten.\n')
                         # Catchall for user canceling overwrite.
                         else:
-                            print('Cancelling overwrite...\n')
+                            editor.print('Cancelling overwrite...\n')
                             selection = 'blank'
                     # If user hasn't canceled, create the time differences.
                     if selection != 'blank':
@@ -168,7 +168,7 @@ def main(editorIn, queue):
                 else:
                     # If plot is already stored, notify user.
                     if histogram is not None:
-                        print('WARNING: There is an already stored histogram '
+                        editor.print('WARNING: There is an already stored histogram '
                             + 'in this runtime. Do you want to overwrite it?')
                         if len(queue) != 0:
                             choice = queue[0]
@@ -180,7 +180,7 @@ def main(editorIn, queue):
                             editor.log('Currently stored time histogram overwritten.\n')
                         # Catchall for user canceling overwrite.
                         else:
-                            print('Cancelling overwrite...\n')
+                            editor.print('Cancelling overwrite...\n')
                             selection = 'blank'
                     # If user hasn't canceled, create the histogram.
                     if selection != 'blank':
@@ -196,7 +196,7 @@ def main(editorIn, queue):
                 else:
                     # If plot is already stored, notify user.
                     if best_fit is not None:
-                        print('WARNING: There is an already stored best fit line '
+                        editor.print('WARNING: There is an already stored best fit line '
                             + 'in this runtime. Do you want to overwrite it?')
                         if len(queue) != 0:
                             choice = queue[0]
@@ -208,7 +208,7 @@ def main(editorIn, queue):
                             editor.log('Currently stored best fit line overwritten.\n')
                         # Catchall for user canceling overwrite.
                         else:
-                            print('Cancelling overwrite...\n')
+                            editor.print('Cancelling overwrite...\n')
                             selection = 'blank'
                     # If user hasn't canceled, create the line of best fit.
                     if selection != 'blank':
@@ -221,14 +221,15 @@ def main(editorIn, queue):
                         createBestFit()
             # View and/or edit program settings.
             case 's':
-                print()
+                editor.print('')
                 queue = editor.driver(queue)
             # End the program.
             case '':
-                print('Returning to main menu...\n')
+                editor.print('Returning to main menu...\n')
             case 'x':
-                print('Returning to main menu...\n')
+                editor.print('Returning to main menu...\n')
             # Catchall for invalid commands.
             case _:
-                print('Unrecognized command. Please review the list of appriopriate inputs.\n')
+                print('ERROR: Unrecognized command ' + selection 
+                        + '. Please review the list of appriopriate inputs.\n')
     return editor, queue
