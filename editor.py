@@ -18,6 +18,10 @@ class Editor:
         self.history = None
         os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
+    def print(self, message):
+        if not self.parameters.settings['General Settings']['Quiet mode']:
+            print(message)
+
     def log(self, output):
 
         '''Prints the output statement to the command line 
@@ -26,8 +30,8 @@ class Editor:
         The output statement must be a string.'''
 
         # Print the confirmation statement to the 
-        # console regardless of log preferences.
-        print(output)
+        # console if the user is not in quiet mode.
+        self.print(output)
         # If log file exists, record this confirmation.
         if self.history is not None:
             # Create a timestamp for the confirmation message.
@@ -142,7 +146,7 @@ class Editor:
         # Change the log state.
         self.changeLog()
         # Notify the user the settings editing is complete.
-        print('Settings viewer/editor closed.\n')
+        self.print('Settings viewer/editor closed.\n')
         # Check to see if the settings have changed from the latest import.
         self.compare()
         # Delete the temporary file.
@@ -156,11 +160,11 @@ class Editor:
         file = ''
         # Keep looping until user is done editing/viewing.
         while choice != '':
-            print('What settings do you want to edit/view?')
-            print('c - current settings')
-            print('i - import a .json file')
-            print('a - append settings')
-            print('Leave the command blank or enter x to cancel editing/viewing.')
+            self.print('What settings do you want to edit/view?')
+            self.print('c - current settings')
+            self.print('i - import a .json file')
+            self.print('a - append settings')
+            self.print('Leave the command blank or enter x to cancel editing/viewing.')
             if len(queue) != 0:
                 choice = queue[0]
                 queue.pop(0)
@@ -169,7 +173,7 @@ class Editor:
             match choice:
                 # User wants to view/edit current settings.
                 case 'c':
-                    print('Opening current settings...')
+                    self.print('Opening current settings...')
                     # Create temporary current.json file to edit.
                     file = 'current.json'
                     # Write current settings to temp file.
@@ -181,9 +185,9 @@ class Editor:
                     file = 'blank'
                     opt = 'blank'
                     while opt != '' and opt != 'o' and opt != 'a':
-                        print('You have two input options:')
-                        print('o - overwrite the entire settings')
-                        print('a - append settings')
+                        self.print('You have two input options:')
+                        self.print('o - overwrite the entire settings')
+                        self.print('a - append settings')
                         if len(queue) != 0:
                             opt = queue[0]
                             queue.pop(0)
@@ -191,13 +195,14 @@ class Editor:
                             opt = input('Enter a command (or leave blank to cancel): ')
                         match opt:
                             case 'o':
-                                print('Overwrite mode selected.')
+                                self.print('Overwrite mode selected.')
                             case 'a':
-                                print('Append mode selected.')
+                                self.print('Append mode selected.')
                             case '':
-                                print('Canceling import...\n')
+                                self.print('Canceling import...\n')
                             case _:
-                                print('Unrecognized command. Please review the list of appriopriate inputs.\n')
+                                print('ERROR: Unrecognized command ' + opt 
+                                        + '. Please review the list of appriopriate inputs.\n')
                     # Keep prompting the user until they 
                     # give an existing file or they cancel.
                     while opt != '' and not os.path.isfile(os.path.abspath(file)) and file != '.json':
@@ -210,7 +215,7 @@ class Editor:
                         file = file + '.json'
                         # If file exists.
                         if os.path.isfile(os.path.abspath(file)):
-                            print('Importing ' + file + '...')
+                            self.print('Importing ' + file + '...')
                             # Overwrite all settings.
                             if opt == 'o':
                                 self.parameters.read(os.path.abspath(file))
@@ -223,7 +228,7 @@ class Editor:
                                 self.log('Appended settings from ' + file + '.\n')
                         # User cancels import.
                         elif file == '.json':
-                            print('Canceling import...\n')
+                            self.print('Canceling import...\n')
                         # Catchall for invalid inputs.
                         else:
                             print('ERROR: ' + file + ' does not exist in the given directory. '
@@ -232,19 +237,20 @@ class Editor:
                               + 'you did not include the .json extenstion in your input.\n')
                 # User wants to create entirely new settings.
                 case 'a':
-                    print('Opening empty settings...')
+                    self.print('Opening empty settings...')
                     # Create temporary new.json file to edit.
                     file = 'append.json'
                     # Open the settings editor.
                     self.edit(file)
                 # User is ready to return to the main menu.
                 case '':
-                    print('Returning to previous menu...\n')
+                    self.print('Returning to previous menu...\n')
                 case 'x':
-                    print('Returning to previous menu...\n')
+                    self.print('Returning to previous menu...\n')
                 # Catchall for invalid commands.
                 case _:
-                    print('Unrecognized command. Please review the list of appriopriate inputs.\n')
+                    print('ERROR: Unrecognized command ' + choice 
+                        + '. Please review the list of appriopriate inputs.\n')
         return queue
 
 if __name__ == "__main__":
