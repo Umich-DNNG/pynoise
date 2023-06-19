@@ -16,7 +16,6 @@ def main():
 
     '''The main driver that runs the whole program.'''
 
-    print(sys.argv)
     global editor
     selection = 'blank'
     queue = []
@@ -32,7 +31,6 @@ def main():
         else:
             queue.append(sys.argv[1])
         sys.argv.pop(1)
-    print(queue)
     print('Welcome to the DNNG/PyNoise project. With this software we are '
           + 'taking radiation data from fission reactions (recorded by organic '
           + 'scintillators) and applying a line of best fit to the decay rate. '
