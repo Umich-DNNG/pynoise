@@ -261,7 +261,6 @@ class Fit_With_Weighting:
         self.uncertainties = RA_hist_totals[2]
         self.fit_range = general_settings['Fit range']
         self.min_cutoff = min_cutoff
-        self.plot_scale = general_settings['Plot scale']
         self.save_dir = saveDir
 
         # Line fitting variables
@@ -350,7 +349,6 @@ class Fit_With_Weighting:
         # Setting the axis labels
         ax.set_xlabel('Time difference (ns)')
         ax.set_ylabel('Counts')
-        ax.set_yscale(self.plot_scale)
 
         # Adjusting layout and saving figure (optional)
         if save_fig:
