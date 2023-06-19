@@ -184,7 +184,7 @@ q
 
 Then, to run the program with these commands, the command line call would be:
 
-```python3.10 driver.py single.txt```
+```python3.10 driver.py input.txt```
 
 Both of these examples would result in the same code execution. However, note it is possible to have a blank command in the file format (the (blank) text is just a placeholder - see the input.txt file included in this package for a literal example). For this reason, there should be no extra newlines at the end of the file unless the last desired command is a blank command.
 
