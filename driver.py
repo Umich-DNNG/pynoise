@@ -74,11 +74,12 @@ def main():
             # Continue to next command.
             start = start + 1
     # Welcome statement.
-    editor.print('Welcome to the DNNG/PyNoise project. With this software we are '
-          + 'taking radiation data from fission reactions (recorded by organic '
-          + 'scintillators) and applying a line of best fit to the decay rate. '
-          + 'Use this Python suite to analyze a single file or multiple across '
-          + 'numerous folders.\n')
+    editor.print('Welcome to the DNNG/PyNoise project.') 
+    editor.print('With this software we are taking radiation data from '
+                 + 'fission reactions (recorded by organic scintillators) '
+                 + 'and analyzing it using various methods and tools.')
+    editor.print('Use this Python suite to analyze a single '
+                 + 'file or multiple across numerous folders.\n')
     # Continue looping until the user has selected an import option.
     while selection != 'd' and selection != 'i':
         editor.print('Would you like to use the default settings or import another .json file?')
@@ -182,7 +183,7 @@ def main():
     editor.print('Settings initialized. You can now begin using the program.\n')
     editor.print('----------------------------------------------------------\n')
     # Continue running the program until the user is done.
-    while selection != '':
+    while selection != '' and selection != 'x':
         editor.print('You can utitilze any of the following functions:')
         editor.print('r - run Rossi Alpha analysis')
         editor.print('p - run Power Spectral Density Analysis')
