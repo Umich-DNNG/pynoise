@@ -182,7 +182,7 @@ single
 q
 
 
-Then, to run the program with these commands (assuming input.txt is in the same folder as driver.py), the command line call would be:
+Then, to run the program with these commands (in this case assuming input.txt is in the same folder as driver.py), the command line call would be:
 
 ```python3.10 driver.py input.txt```
 
