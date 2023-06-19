@@ -60,13 +60,16 @@ class Settings:
         '''Appends settings from a json file into the settings 
         object. Requires an abolsute path to the file.
         
-        Does not change the file of origin. Cannot delete exisiting settings.'''
+        Does not change the file of origin.'''
 
+        # Load the new parameters from the json file.
         parameters = json.load(open(path))
         for group in parameters:
             for setting in parameters[group]:
+                # If user wants the setting removed and it currently exists, remove it.
                 if parameters[group][setting] == '' and self.settings[group].get(setting) != None:
                     self.settings[group].pop(setting)
+                # Otherwise, add/modify the specified setting.
                 else:
                     self.settings[group][setting] = parameters[group][setting]
 
@@ -75,13 +78,17 @@ class Settings:
         '''Reads in a json file that completely overwrites the 
         exisitng settings. Requiures an absolute path to the file.'''
 
+        # Load the new parameters from the json file.
         self.settings = json.load(open(path))
+        # If the JSON file being loaded is a permanent 
+        # file, change the settings origin.
         if path != os.path.abspath('current.json'):
             self.origin = path
 
     def write(self, path):
 
-        '''Write the current settings to a file.'''
+        '''Write the current settings to a file.
+        Requiures an absolute path to the file.'''
 
         with open(path,'w') as file:
             file.write(json.dumps(self.settings, indent=4))
@@ -91,20 +98,30 @@ class Settings:
         '''Save the current settings to a file, listing 
         only those that overwrite the default.'''
 
+        # Create and load a default settings object.
         default = Settings()
         default.read(os.path.abspath('default.json'))
+        # The dictionary to be outputted.
         output = {}
         for group in self.settings:
             for setting in self.settings[group]:
+                # For each setting in the current settings, if 
+                # it is different/new from the default, store it.
                 if default.settings[group].get(setting) != self.settings[group][setting]:
+                    # If group doesn't currently exist, make it.
                     if output.get(group) == None:
                         output[group] = {}
+                    # Set setting to specified value.
                     output[group][setting] = self.settings[group][setting]
         for group in default.settings:
             for setting in default.settings[group]:
+                # If there is a setting in the default that is not 
+                # in the current settings, mark it as deleted.
                 if self.settings[group].get(setting) == None:
+                    # If group doesn't currently exist, make it.
                     if output.get(group) == None:
                         output[group] = {}
                     output[group][setting] = ""
+        # Open file and store settings in JSON format.
         with open(path,'w') as file:
             file.write(json.dumps(output, indent=4))
