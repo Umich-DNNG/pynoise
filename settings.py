@@ -17,33 +17,33 @@ class Settings:
         
         # Create a dictionary that stores each group of settings,
         # and set each one to the respective input dictionary.
-        self.settings = {'Input/Output Settings': {'Input file/folder': '',
+        self.settings = {'Input/Output Settings': {'Input file/folder': 'none',
                                                     'Data Column': 0,
-                                                    'Save directory': '',
+                                                    'Save directory': './',
                                                     'Keep logs': False},
-                         'General Settings': {'Fit range':[0,0],
-                                              'Number of folders':0,
-                                              'Meas time per folder':0,
+                         'General Settings': {'Fit range':[0.0,1000.0],
+                                              'Number of folders':10,
+                                              'Meas time per folder':60,
                                               'Quiet mode':False,
-                                              'Sort data':False,
+                                              'Sort data':True,
                                               'Save figures':False,
                                               'Show plots':False
                                               },
                          'RossiAlpha Settings': {
-                                                'Time difference method':'',
-                                                'Digital delay':0,
+                                                'Time difference method':'any_and_all',
+                                                'Digital delay':750,
                                                 'Histogram Generation Settings': {
-                                                    'Reset time':0,
-                                                    'Bin width':0,
-                                                    'Error Bar/Band':''
+                                                    'Reset time':1000,
+                                                    'Bin width':9,
+                                                    'Error Bar/Band':'band'
                                                 },
                                                 "Fit Region Settings": {
-                                                    "Minimum cutoff": 0
+                                                    "Minimum cutoff": 30
                                                 }
                          },
-                         'PSD Settings' : {'Dwell time':0,
-                                           'Meas time range':[0,0],
-                                           'Clean pulses switch': False},
+                         'PSD Settings' : {'Dwell time':2.0e6,
+                                           'Meas time range':[1.5e11,1.0e12],
+                                           'Clean pulses switch': True},
                          'Histogram Visual Settings': {},
                          'Line Fitting Settings': {},
                          'Residual Plot Settings': {}

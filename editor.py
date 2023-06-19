@@ -163,7 +163,7 @@ class Editor:
         choice = 'blank'
         file = ''
         # Keep looping until user is done editing/viewing.
-        while choice != '':
+        while choice != '' and choice != 'x':
             self.print('What settings do you want to edit/view?')
             self.print('c - current settings')
             self.print('i - import a .json file')
