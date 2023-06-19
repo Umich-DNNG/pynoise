@@ -226,9 +226,10 @@ class Editor:
                             print('Canceling import...\n')
                         # Catchall for invalid inputs.
                         else:
-                            print('ERROR: ' + file + ' does not exist in this directory. '
-                                  + 'Make sure that your settings file is named '
-                                  + 'correctly and in the same folder as this program.\n')
+                            print('ERROR: ' + file + ' does not exist in the given directory. '
+                              + 'Make sure that your settings file is named correctly, '
+                              + 'the correct absolute/relative path to it is given, and '
+                              + 'you did not include the .json extenstion in your input.\n')
                 # User wants to create entirely new settings.
                 case 'a':
                     print('Opening empty settings...')
