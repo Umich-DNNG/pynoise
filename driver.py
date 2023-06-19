@@ -103,9 +103,10 @@ def main():
                         print('Canceling import...\n')
                         selection = ''
                     else:
-                        print('ERROR: ' + file + ' does not exist in this directory. '
-                              + 'Make sure that your settings file is named '
-                              + 'correctly and in the same folder as this program.\n')
+                        print('ERROR: ' + file + ' does not exist in the given directory. '
+                              + 'Make sure that your settings file is named correctly, '
+                              + 'the correct absolute/relative path to it is given, and '
+                              + 'you did not include the .json extenstion in your input.\n')
             # Catchall for invalid commands.
             case _:
                 print('You must choose what settings to import.\n')
