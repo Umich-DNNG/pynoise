@@ -53,9 +53,13 @@ def main(editorIn, queue):
             selection = input('Enter a command: ')
         match selection:
             case 'm':
-                print()
-                print('Running the entire power spectral density analysis...')
-                conduct_PSD()
+                if editor.parameters.settings['Input/Output Settings']['Input file/folder'] == 'none':
+                    print('ERROR: You currently have no input file or folder defined. '
+                          + 'Please make sure to specify one before running any analysis.\n')
+                else:
+                    print()
+                    print('Running the entire power spectral density analysis...')
+                    conduct_PSD()
                 '''
             case 'p':
                 print()
@@ -67,7 +71,7 @@ def main(editorIn, queue):
             # View and/or edit program settings.
             case 's':
                 print()
-                editor.driver(queue)
+                queue = editor.driver(queue)
             # End the program.
             case '':
                 print('Returning to main menu...\n')
