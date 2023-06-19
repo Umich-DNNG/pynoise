@@ -94,7 +94,7 @@ def main(editorIn, queue):
     global editor, time_difs, histogram, best_fit
     editor = editorIn
     selection = 'blank'
-    while selection != '':
+    while selection != '' and selection != 'x':
         editor.print('What analysis would you like to perform?')
         editor.print('m - run the entire program through the main driver')
         editor.print('t - calculate time differences')

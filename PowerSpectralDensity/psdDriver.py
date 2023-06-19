@@ -37,7 +37,7 @@ def main(editorIn, queue):
     editor = editorIn
     selection = 'blank'
     editor.print('You are running the Power Spectral Density Method.')
-    while selection != '':
+    while selection != '' and selection != 'x':
         editor.print('You can utilize any of the following functions:')
         editor.print('m - run the entire program through the main driver')
         '''
