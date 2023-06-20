@@ -106,9 +106,20 @@ class Editor:
         for group in self.parameters.settings:
             for setting in self.parameters.settings[group]:
                 if baseline.settings[group].get(setting) != self.parameters.settings[group][setting]:
-                    self.log(setting + ' in ' + group + ' updated to ' 
-                    + str(self.parameters.settings[group][setting]) + '.\n')
-                    self.parameters.changed = True
+                    self.log(setting + ' in ' + group + ': ' 
+                            + str(baseline.settings[group].get(setting)) 
+                            + ' -> ' + str(self.parameters.settings[group][setting]) + '.\n')
+        for group in baseline.settings:
+            for setting in baseline.settings[group]:
+                # If there is a setting in the default that is not 
+                # in the current settings, mark it as deleted.
+                if self.parameters.settings[group].get(setting) == None:
+                    self.log(setting + ' in ' + group + ' removed.\n')
+
+    def changes(self):
+        list = self.parameters.compare()
+        for change in list:
+            self.print(change)
 
     def edit(self, file):
 
@@ -139,7 +150,7 @@ class Editor:
         self.parameters.write(os.path.abspath('comp.json'))
         # If in append mode.
         if file == 'append.json':
-            self.parameters.append(os.path.abspath(file))
+            self.parameters.append(os.path.abspath(file), False)
         # If in overwrite mode.
         else:
             self.parameters.read(os.path.abspath(file))
@@ -238,7 +249,7 @@ class Editor:
                                 self.log('Imported settings from ' + file + '.\n')
                             # Append settings in file.
                             else:
-                                self.parameters.append(os.path.abspath(file))
+                                self.parameters.append(os.path.abspath(file), False)
                                 self.changeLog()
                                 self.log('Appended settings from ' + file + '.\n')
                         # User cancels import.
