@@ -60,8 +60,8 @@ class timeDifCalcs:
         #time_diffs = np.array([])
         n = len(self.time_vector)
         i = 0
-        num_bins = int(self.reset_time / bin_width)
-        
+        num_bins = int(self.reset_time / bin_width) + 1
+
         histogram = np.zeros(num_bins)
         # iterate from 0 through the whole time vector
         while i < len(self.time_vector):
