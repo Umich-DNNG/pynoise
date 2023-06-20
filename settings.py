@@ -120,8 +120,9 @@ class Settings:
         for group in parameters:
             for setting in parameters[group]:
                 # If user wants the setting removed and it currently exists, remove it.
-                if parameters[group][setting] == '' and self.settings[group].get(setting) != None:
-                    self.settings[group].pop(setting)
+                if parameters[group][setting] == '':
+                    if self.settings[group].get(setting) != None:
+                        self.settings[group].pop(setting)
                 # Otherwise, add/modify the specified setting.
                 else:
                     self.settings[group][setting] = parameters[group][setting]
