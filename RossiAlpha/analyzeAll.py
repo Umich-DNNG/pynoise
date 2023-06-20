@@ -19,7 +19,7 @@ import matplotlib.pyplot as plt
 def analyzeAllType1(settings):
     #current_path = os.path.realpath(__file__)
     #theseSettings = readInput.readInput()
-    separate = false
+    separate = False
     
     filePath = settings['Input/Output Settings']['Input file/folder']
     if settings['Input/Output Settings'].get('Data Column') is not None:
