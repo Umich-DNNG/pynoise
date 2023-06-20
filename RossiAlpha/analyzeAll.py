@@ -19,7 +19,7 @@ import matplotlib.pyplot as plt
 def analyzeAllType1(settings):
     #current_path = os.path.realpath(__file__)
     #theseSettings = readInput.readInput()
-
+    separate = false
     
     filePath = settings['Input/Output Settings']['Input file/folder']
     if settings['Input/Output Settings'].get('Data Column') is not None:
@@ -33,12 +33,23 @@ def analyzeAllType1(settings):
     
     # applying time differences function
     thisTimeDifCalc = timeDifCalcs(listDataSorted, settings['RossiAlpha Settings']['Histogram Generation Settings']["Reset time"],  settings['RossiAlpha Settings']["Time difference method"])
-    time_diffs = thisTimeDifCalc.calculate_time_differences()
+
+    if(separate):
+        time_diffs = thisTimeDifCalc.calculate_time_differences()
 
     # creating RossiHistogram() object with specified settings
-    thisPlot = RossiHistogram(settings['RossiAlpha Settings']['Histogram Generation Settings']['Reset time'], settings['RossiAlpha Settings']['Histogram Generation Settings']['Bin width'], settings['Histogram Visual Settings'], settings['Input/Output Settings']['Save directory'])
+        thisPlot = RossiHistogram(settings['RossiAlpha Settings']['Histogram Generation Settings']['Reset time'], settings['RossiAlpha Settings']['Histogram Generation Settings']['Bin width'], settings['Histogram Visual Settings'], settings['Input/Output Settings']['Save directory'])
 
-    counts, bin_centers, bin_edges = thisPlot.plot(time_diffs, save_fig=settings['General Settings']['Save figures'], show_plot=settings['General Settings']['Show plots'])
+
+
+        counts, bin_centers, bin_edges = thisPlot.plot(time_diffs, save_fig=settings['General Settings']['Save figures'], show_plot=settings['General Settings']['Show plots'])
+    
+    else:
+        thisTimeDifCalc.calculateTimeDifsAndBin(settings['RossiAlpha Settings']['Histogram Generation Settings']['Bin width'], settings['General Settings']['Save figures'], settings['General Settings']['Show plots'], settings['Input/Output Settings']['Save directory'], settings['Histogram Visual Settings'])
+    #testing doing them at the same time
+
+    
+
     # creating Fit() object with specified settings
     thisFit = RossiHistogramFit(counts, bin_centers, settings)
         
