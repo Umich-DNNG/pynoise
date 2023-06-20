@@ -19,7 +19,7 @@ import matplotlib.pyplot as plt
 def analyzeAllType1(settings):
     #current_path = os.path.realpath(__file__)
     #theseSettings = readInput.readInput()
-    separate = False
+    separate = True
     
     filePath = settings['Input/Output Settings']['Input file/folder']
     if settings['Input/Output Settings'].get('Data Column') is not None:
@@ -45,7 +45,8 @@ def analyzeAllType1(settings):
         counts, bin_centers, bin_edges = thisPlot.plot(time_diffs, save_fig=settings['General Settings']['Save figures'], show_plot=settings['General Settings']['Show plots'])
     
     else:
-        counts, bin_centers, bin_edges = thisTimeDifCalc.calculateTimeDifsAndBin(settings['RossiAlpha Settings']['Histogram Generation Settings']['Bin width'], settings['General Settings']['Save figures'], settings['General Settings']['Show plots'], settings['Input/Output Settings']['Save directory'], settings['Histogram Visual Settings'])
+        thisPlot, counts, bin_centers, bin_edges = thisTimeDifCalc.calculateTimeDifsAndBin(settings['RossiAlpha Settings']['Histogram Generation Settings']['Bin width'], settings['General Settings']['Save figures'], settings['General Settings']['Show plots'], settings['Input/Output Settings']['Save directory'], settings['Histogram Visual Settings'])
+        time_diffs = None
     #testing doing them at the same time
 
     
