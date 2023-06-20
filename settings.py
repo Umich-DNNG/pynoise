@@ -45,18 +45,70 @@ class Settings:
                          'PSD Settings' : {'Dwell time':2.0e6,
                                            'Meas time range':[1.5e11,1.0e12],
                                            'Clean pulses switch': True},
-                         'Histogram Visual Settings': {},
-                         'Line Fitting Settings': {},
-                         'Residual Plot Settings': {}
+                         'Histogram Visual Settings': {'alpha': 1,
+                                                        'fill': True,
+                                                        'color': '#B2CBDE',
+                                                        'edgecolor': '#162F65',
+                                                        'linewidth': 0.4
+                         },
+                         'Line Fitting Settings': {'color': '#162F65',
+                                                    'markeredgecolor': 'blue',
+                                                    'markerfacecolor': 'black',
+                                                    'linestyle': '-',
+                                                    'linewidth': 1  
+                         },
+                         'Residual Plot Settings': {'color': '#B2CBDE',
+                                                    'edgecolor': '#162F65',
+                                                    'linewidth': 0.4,
+                                                    'marker': 'o',
+                                                    's': 20
+                         }
         }
         # The variable that stores the path of the 
         # .json file that was most recently imported.
-        self.origin = ''
+        self.origin = 'None'
+        self.appended = 'None'
         # The variable that indicates whether or not the
         # settings have been changed during runtime.
         self.changed = False
     
-    def append(self, path):
+    def compare(self):
+
+        '''Compare the current settings to the most recently 
+        imported + appended version to see if they have changed.'''
+
+        # If the settings were just created from a blank file,
+        # note a whole overwrite and mark as changed.
+        # Create a baseline settings object 
+        # from the settings in the source file.
+        baseline = Settings()
+        list = []
+        # Read in previous settings and delete temp file.
+        baseline.read(self.origin)
+        if self.appended != 'None':
+            baseline.append(self.appended, True)
+        # For every setting in every group, compare the 
+        # current value to the source value. If it differs, 
+        # note the update and mark the settings as changed.
+        for group in self.settings:
+            for setting in self.settings[group]:
+                if baseline.settings[group].get(setting) != self.settings[group][setting]:
+                    self.changed = True
+                    list.append(setting + ' in ' + group + ': ' 
+                                + str(baseline.settings[group].get(setting)) 
+                                + ' -> ' + str(self.settings[group][setting]))
+        for group in baseline.settings:
+            for setting in baseline.settings[group]:
+                # If there is a setting in the default that is not 
+                # in the current settings, mark it as deleted.
+                if self.settings[group].get(setting) == None:
+                    self.changed = True
+                    list.append(setting + ' in ' + group + ' removed')
+        if len(list) == 0:
+            self.changed = False
+        return list
+
+    def append(self, path, baseline):
         
         '''Appends settings from a json file into the settings 
         object. Requires an abolsute path to the file.
@@ -68,11 +120,15 @@ class Settings:
         for group in parameters:
             for setting in parameters[group]:
                 # If user wants the setting removed and it currently exists, remove it.
-                if parameters[group][setting] == '' and self.settings[group].get(setting) != None:
-                    self.settings[group].pop(setting)
+                if parameters[group][setting] == '':
+                    if self.settings[group].get(setting) != None:
+                        self.settings[group].pop(setting)
                 # Otherwise, add/modify the specified setting.
                 else:
                     self.settings[group][setting] = parameters[group][setting]
+        if path != os.path.abspath('append.json') and not baseline:
+            self.appended = path
+            self.changed = False
 
     def read(self, path):
 
@@ -84,7 +140,9 @@ class Settings:
         # If the JSON file being loaded is a permanent 
         # file, change the settings origin.
         if path != os.path.abspath('current.json'):
+            self.changed = False
             self.origin = path
+            self.appended = 'None'
 
     def write(self, path):
 
