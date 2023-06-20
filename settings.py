@@ -44,9 +44,24 @@ class Settings:
                          'PSD Settings' : {'Dwell time':2.0e6,
                                            'Meas time range':[1.5e11,1.0e12],
                                            'Clean pulses switch': True},
-                         'Histogram Visual Settings': {},
-                         'Line Fitting Settings': {},
-                         'Residual Plot Settings': {}
+                         'Histogram Visual Settings': {'alpha': 1,
+                                                        'fill': True,
+                                                        'color': '#B2CBDE',
+                                                        'edgecolor': '#162F65',
+                                                        'linewidth': 0.4
+                         },
+                         'Line Fitting Settings': {'color': '#162F65',
+                                                    'markeredgecolor': 'blue',
+                                                    'markerfacecolor': 'black',
+                                                    'linestyle': '-',
+                                                    'linewidth': 1  
+                         },
+                         'Residual Plot Settings': {'color': '#B2CBDE',
+                                                    'edgecolor': '#162F65',
+                                                    'linewidth': 0.4,
+                                                    'marker': 'o',
+                                                    's': 20
+                         }
         }
         # The variable that stores the path of the 
         # .json file that was most recently imported.
