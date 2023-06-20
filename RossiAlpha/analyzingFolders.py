@@ -51,15 +51,18 @@ def compile_sample_stdev_RA_dist(settings):
                                         settings['RossiAlpha Settings']['Time difference method'], 
                                         settings['RossiAlpha Settings']['Digital delay'], 
                                         channels)
-                
-                time_diffs = thisData.calculate_time_differences()
+                if(settings['RossiAlpha Settings']['Combine Calc and Binning']):
+                    thisPlot, counts, bin_centers, bin_edges   = thisData.calculateTimeDifsAndBin( settings['RossiAlpha Settings']['Histogram Generation Settings']['Bin width'], False, False, settings['Input/Output Settings']['Save directory'], settings['Histogram Visual Settings'])
 
-                thisPlot = RossiHistogram(settings['RossiAlpha Settings']['Histogram Generation Settings']['Reset time'],
+                else:
+                    time_diffs = thisData.calculate_time_differences()
+
+                    thisPlot = RossiHistogram(settings['RossiAlpha Settings']['Histogram Generation Settings']['Reset time'],
                                           settings['RossiAlpha Settings']['Histogram Generation Settings']['Bin width'],
                                           settings['Histogram Visual Settings'], 
                                           settings['Input/Output Settings']['Save directory'])
 
-                counts, bin_centers, bin_edges = thisPlot.plot(time_diffs, 
+                    counts, bin_centers, bin_edges = thisPlot.plot(time_diffs, 
                                                                save_fig=False, 
                                                                show_plot=False)
 
