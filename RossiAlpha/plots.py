@@ -93,3 +93,37 @@ class RossiHistogram:
         self.bin_edges = bin_edges
 
         return counts, bin_centers, bin_edges
+    
+    def plotFromHist(self, counts, bin_centers, bin_edges, show_plot, save_fig):
+        if save_fig == True:
+
+            # Plotting
+            plt.figure()
+            plt.bar(bin_centers, counts, width=0.8 * (bin_centers[1] - bin_centers[0]), **self.options)
+
+            plt.xlabel(self.x_axis)
+            plt.ylabel(self.y_axis)
+            plt.title(self.title)
+
+            plt.tight_layout()
+            save_filename = os.path.join(self.save_dir, 'histogram.png')
+            plt.savefig(save_filename, dpi=300, bbox_inches='tight')
+        
+        # Showing plot (optional)
+        if show_plot == True:
+
+            # Plotting
+            if not save_fig:
+                plt.figure()
+            plt.bar(bin_centers, counts, width=0.8 * (bin_centers[1] - bin_centers[0]), **self.options)
+
+            plt.xlabel(self.x_axis)
+            plt.ylabel(self.y_axis)
+            plt.title(self.title)
+            
+            plt.show()
+
+        #Set the counts, bin_centers, and bin_edges of the object
+        self.counts = counts
+        self.bin_centers = bin_centers
+        self.bin_edges = bin_edges
