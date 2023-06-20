@@ -32,6 +32,7 @@ class Settings:
                          'RossiAlpha Settings': {
                                                 'Time difference method':'any_and_all',
                                                 'Digital delay':750,
+                                                'Combine Calc and Binning': False,
                                                 'Histogram Generation Settings': {
                                                     'Reset time':1000,
                                                     'Bin width':9,
