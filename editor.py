@@ -94,10 +94,6 @@ class Editor:
         
         Logs any changes that have been made.'''
 
-        # Assume the parameters have not changed until marked otherwise.
-        self.parameters.changed = False
-        # If the settings were just created from a blank file,
-        # note a whole overwrite and mark as changed.
         # Create a baseline settings object 
         # from the settings in the source file.
         baseline = set.Settings()
@@ -273,4 +269,4 @@ class Editor:
         return queue
 
 if __name__ == "__main__":
-    Editor.driver(Editor())
+    Editor.driver(Editor(),[])

@@ -66,10 +66,33 @@ class Settings:
         # The variable that stores the path of the 
         # .json file that was most recently imported.
         self.origin = ''
+        self.appended = ''
         # The variable that indicates whether or not the
         # settings have been changed during runtime.
         self.changed = False
     
+    def compare(self):
+
+        '''Compare the current settings to the most recently 
+        imported + appended version to see if they have changed.'''
+
+        # If the settings were just created from a blank file,
+        # note a whole overwrite and mark as changed.
+        # Create a baseline settings object 
+        # from the settings in the source file.
+        baseline = Settings()
+        # Read in previous settings and delete temp file.
+        baseline.read(self.origin)
+        if self.append != '':
+            baseline.append(self.appended)
+        # For every setting in every group, compare the 
+        # current value to the source value. If it differs, 
+        # note the update and mark the settings as changed.
+        for group in self.settings:
+            for setting in self.settings[group]:
+                if baseline.settings[group].get(setting) != self.settings[group][setting]:
+                    self.changed = True
+
     def append(self, path):
         
         '''Appends settings from a json file into the settings 
@@ -87,6 +110,10 @@ class Settings:
                 # Otherwise, add/modify the specified setting.
                 else:
                     self.settings[group][setting] = parameters[group][setting]
+        if path != os.path.abspath('append.json'):
+            self.appended = path
+            self.changed = False
+            self.compare()
 
     def read(self, path):
 
@@ -98,7 +125,9 @@ class Settings:
         # If the JSON file being loaded is a permanent 
         # file, change the settings origin.
         if path != os.path.abspath('current.json'):
+            self.changed = False
             self.origin = path
+            self.appended = ''
 
     def write(self, path):
 
