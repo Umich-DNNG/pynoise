@@ -1,6 +1,7 @@
 import numpy as np  # For processing data
 import matplotlib.pyplot as plt
 import os
+from . import plots as plt
 
 class timeDifCalcs:
     
@@ -57,12 +58,23 @@ class timeDifCalcs:
     
 
     def calculateTimeDifsAndBin(self, bin_width, save_fig,show_plot,save_dir,options):
-        time_diffs = np.array([])
+        '''can be called on a timeDifCalcs object and simultaneously calculates the time differences
+        and adds them to a histogram.
+        
+        inputs:
+        - bin width
+        -save_fig
+        -show_plot
+        -save_dir
+        -options
+        
+        outputs:
+        RossiHistogram object'''
+        
+        #time_diffs = np.array([])
         n = len(self.time_vector)
         i = 0
         num_bins = int(self.reset_time / bin_width)
-        dataMin = np.inf
-        dataMax = -np.inf
         histogram = np.zeros(num_bins)
         # iterate from 0 through the whole time vector
         while i < len(self.time_vector):
@@ -77,12 +89,12 @@ class timeDifCalcs:
                     # if the method checks for repeats, check that it is not in the channels bank, otherwise we can add the time_diff
                     if(self.method == 'any_and_all' or self.method == 'any_and_all cross_correlations' or self.channels[j] not in ch_bank):
                         thisDif = self.time_vector[j] - self.time_vector[i]
-                        time_diffs = np.append(time_diffs,(thisDif))
-                        dataMin = min(dataMin, thisDif)
-                        dataMax = max(dataMax, thisDif)
-                        binIndex = int((thisDif - dataMin) / bin_width)
-                        if(binIndex < num_bins):
-                            histogram[binIndex] += 1       
+                        #time_diffs = np.append(time_diffs,(thisDif))
+
+                        binIndex = int((thisDif) / bin_width)
+                        if(binIndex == num_bins):
+                            binIndex -= 1
+                        histogram[binIndex] += 1       
                     elif(self.method == 'any_and_all cross_correlations no_repeat digital_delay'):
                         # add the digital delay if digital delay is on
                         stamped_time = self.time_vector[i]
@@ -94,36 +106,10 @@ class timeDifCalcs:
             i = i + 1
 
         #Normalize the histogram
-        histogram /= len(time_diffs)
-        bin_edges = np.linspace(dataMin, dataMax, num_bins + 1)
+        bin_edges = np.linspace(0, self.reset_time, num_bins + 1)
         bin_centers = 0.5 * (bin_edges[1:] + bin_edges[:-1])
          # Saving plot (optional)
+        rossiHistogram = plt.RossiHistogram(self.reset_time, bin_width, options, save_dir)
+        rossiHistogram.plotFromHist(histogram, bin_centers,bin_edges,show_plot,save_fig)
         
-        if save_fig == True:
-
-            # Plotting
-            plt.figure()
-            plt.bar(bin_centers, histogram, width=0.8 * (bin_centers[1] - bin_centers[0]), **options)
-
-            plt.xlabel("Time Differences")
-            plt.ylabel("Count")
-            plt.title("Histogram")
-
-            plt.tight_layout()
-            save_filename = os.path.join(save_dir, 'histogram.png')
-            plt.savefig(save_filename, dpi=300, bbox_inches='tight')
-        
-        # Showing plot (optional)
-        if show_plot == True:
-
-            # Plotting
-            if not save_fig:
-                plt.figure()
-            plt.bar(bin_centers, histogram, width=0.8 * (bin_centers[1] - bin_centers[0]), **options)
-
-            plt.xlabel("Time Differences")
-            plt.ylabel("Count")
-            plt.title("Histogram")
-            
-            plt.show()
-        return histogram, bin_centers, bin_edges
+        return rossiHistogram, histogram, bin_centers, bin_edges
