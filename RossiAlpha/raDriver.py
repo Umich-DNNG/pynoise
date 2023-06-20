@@ -72,6 +72,31 @@ def createPlot():
               show_plot=editor.parameters.settings['General Settings']['Show plots'])
     editor.log('Created a histogram plot using the current settings and time difference data.\n')
 
+def calculateTimeDifsAndPlot():
+
+    '''Simultaneously Calculates Time Differences and Creates a Plot.
+    
+    Will overwrite current historgram, if one exists.
+    
+    Does not store time data.
+    
+    '''
+    global histogram, time_difs
+    time_difs = None
+    editor.print('Calculating Time Differences and Building plot...')
+    if editor.parameters.settings['Input/Output Settings'].get('Data Column') is not None:
+        data = np.loadtxt(editor.parameters.settings['Input/Output Settings']['Input file/folder'],delimiter=" ", usecols=(editor.parameters.settings['Input/Output Settings']['Data Column']))
+    else:
+        data = np.loadtxt(editor.parameters.settings['Input/Output Settings']['Input file/folder'])
+
+    if editor.parameters.settings['General Settings']['Sort data']:
+        data = np.sort(data)
+
+    thisTimeDifCalc = dif.timeDifCalcs(data, editor.parameters.settings['RossiAlpha Settings']['Histogram Generation Settings']['Reset time'], editor.parameters.settings['RossiAlpha Settings']['Time difference method'])
+
+    histogram, counts, bin_centers, bin_edges = thisTimeDifCalc.calculateTimeDifsAndBin(editor.parameters.settings['RossiAlpha Settings']['Histogram Generation Settings']['Bin width'], editor.parameters.settings['General Settings']['Save figures'], editor.parameters.settings['General Settings']['Show plots'], editor.parameters.settings['Input/Output Settings']['Save directory'], editor.parameters.settings['Histogram Visual Settings'])
+    editor.log('Calculated time differences and simultaneously created a histogram plot using the current settings and time difference data.\n')
+
 def createBestFit():
 
     '''Creates a line of best fit + residuals based on the created histogram.
@@ -185,9 +210,14 @@ def main(editorIn, queue):
                     # If user hasn't canceled, create the histogram.
                     if selection != 'blank':
                         # If there aren't any current time differences or the time differences aren't current, make them.
+                        
                         if time_difs is None or (not (time_difs_method == editor.parameters.settings['RossiAlpha Settings']['Time difference method'] and time_difs_file == editor.parameters.settings['Input/Output Settings']['Input file/folder'])):
-                            createTimeDifs()
-                        createPlot()
+                            if (editor.parameters.settings['RossiAlpha Settings']['Combine Calc and Binning']):
+                                calculateTimeDifsAndPlot()
+                            else:
+                                createTimeDifs()
+                        if not editor.parameters.settings['RossiAlpha Settings']['Combine Calc and Binning'] :
+                            createPlot()
             # Create a line of best fit and show the residuals.
             case 'f':
                 if editor.parameters.settings['Input/Output Settings']['Input file/folder'] == 'none':
