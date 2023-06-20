@@ -107,7 +107,10 @@ def createBestFit():
 
     global time_difs, histogram, best_fit, editor
     editor.print('Building line of best fit...')
-    counts, bin_centers, bin_edges = histogram.plot(time_difs, save_fig=False, show_plot=False)
+    #counts, bin_centers, bin_edges = histogram.plot(time_difs, save_fig=False, show_plot=False)
+    counts = histogram.counts
+    bin_centers = histogram.bin_centers
+
     best_fit = fit.RossiHistogramFit(counts, bin_centers, editor.parameters.settings)
         
         # Fitting curve to the histogram and plotting the residuals
@@ -216,7 +219,9 @@ def main(editorIn, queue):
                                 calculateTimeDifsAndPlot()
                             else:
                                 createTimeDifs()
-                        if not editor.parameters.settings['RossiAlpha Settings']['Combine Calc and Binning'] :
+                                if not editor.parameters.settings['RossiAlpha Settings']['Combine Calc and Binning'] :
+                                    createPlot()
+                        else:
                             createPlot()
             # Create a line of best fit and show the residuals.
             case 'f':
@@ -245,8 +250,14 @@ def main(editorIn, queue):
                         # If there aren't any current time 
                         # differences/histogram plots, make them.
                         if histogram is None or (not (hist_method == editor.parameters.settings['RossiAlpha Settings']['Time difference method'] and hist_file == editor.parameters.settings['Input/Output Settings']['Input file/folder'])):
-                            if time_difs is None or (not (time_difs_method ==editor.parameters.settings['RossiAlpha Settings']['Time difference method'] and time_difs_file == editor.parameters.settings['Input/Output Settings']['Input file/folder'])):
-                                createTimeDifs()
+                            if time_difs is None or (not (time_difs_method == editor.parameters.settings['RossiAlpha Settings']['Time difference method'] and time_difs_file == editor.parameters.settings['Input/Output Settings']['Input file/folder'])):
+                                if (editor.parameters.settings['RossiAlpha Settings']['Combine Calc and Binning']):
+                                    calculateTimeDifsAndPlot()
+                                else:
+                                    createTimeDifs()
+                                    if not editor.parameters.settings['RossiAlpha Settings']['Combine Calc and Binning'] :
+                                        createPlot()
+                        else:
                             createPlot()
                         createBestFit()
             # View and/or edit program settings.
