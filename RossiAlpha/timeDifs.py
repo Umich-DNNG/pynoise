@@ -60,8 +60,7 @@ class timeDifCalcs:
         #time_diffs = np.array([])
         n = len(self.time_vector)
         i = 0
-        num_bins = int(self.reset_time / bin_width) + 1
-
+        num_bins = int(self.reset_time / bin_width)
         histogram = np.zeros(num_bins)
         # iterate from 0 through the whole time vector
         while i < len(self.time_vector):
@@ -77,7 +76,10 @@ class timeDifCalcs:
                     if(self.method == 'any_and_all' or self.method == 'any_and_all cross_correlations' or self.channels[j] not in ch_bank):
                         thisDif = self.time_vector[j] - self.time_vector[i]
                         #time_diffs = np.append(time_diffs,(thisDif))
+
                         binIndex = int((thisDif) / bin_width)
+                        if(binIndex == num_bins):
+                            binIndex -= 1
                         histogram[binIndex] += 1       
                     elif(self.method == 'any_and_all cross_correlations no_repeat digital_delay'):
                         # add the digital delay if digital delay is on
