@@ -5,7 +5,7 @@ This section of the PyNoise suite is for Rossi Alpha Algorithm analysis. This dr
 ### Requirements
 
 Besides those mentioned in the main README file, the following programs must be downloaded to run RossiAlpha analysis:
-* main.py
+* analyzeAll.py
 * analyzingFolders.py
 * timeDifs.py
 * plots.py
@@ -50,8 +50,8 @@ The RossiAlpha program can be run with a variety of options that change the visu
 ### Editor
 The editor class for modifying settings is also accessible from the raDriver. See the main README file for more information on its proper use.
 
-### Main
-```main.py``` contains two functions, one for file type 1 and one for file type 2. ```analyzeAllType1(settings)``` calculates the time differences of a type 1 file, constructs a histogram, and fits a curve to the histogram, and constructs a residuals plot. It uses the settings dictionary to do these functions.   
+### analyzeALL
+```analyzeAll.py``` contains two functions, one for file type 1 and one for file type 2. ```analyzeAllType1(settings)``` calculates the time differences of a type 1 file, constructs a histogram, and fits a curve to the histogram, and constructs a residuals plot. It uses the settings dictionary to do these functions.   
 ```analyzeAllType2(settings)``` calculates the time differences for the file within each folder, constructs a histogram, fits a curve to each histogram, then constructs a scatterplot of all of the combined data and fits a curve to it
 
 ### Time Difference Calculator
@@ -74,7 +74,7 @@ thisPlot = RossiHistogram(reset_time = 2e3, bin_width = 2, histogram_visual_sett
 counts, bin_centers, bin_edges = thisPlot.plot(time_diffs, save_fig="yes", show_plot="no") #constructs the histogram with the time differences and saves it to the save_dir
 #Returns the counts,bin_centers, and bin_edges for later use
 ```
-
+<img src="./histogram.png" width="400" >
 
 ### Fitting
 In the fitting.py file, there are two classes. One is called ```RossiHistogramFit``` and the other one is called ```Fit_With_Weighting```. The difference between the two classes is that "Fit_With_Weighting" deals with input type 1, as well as creating uncertainty plots. In ```RossiHistogramFit``` there are two functions called "fit()" and "fit_and_residual()", the former is used to fit an exponential decay curve onto the histogram and the latter produces a residual plot on top of the curve fitting.
@@ -90,6 +90,8 @@ thisFit = RossiHistogramFit(counts, bin_centers, settings) #construct the fit ob
 #saves the plot with a fit on top and residuals on bottonm but does not show it
 thisFit.fit_and_residual(save_every_fig=True, show_plot=False)
 ```
+<img src="./fitted_and_residual.png" width="400" >
+
 ```python
 RA_hist_total = analyzingFolders.compile_sample_stdev_RA_dist(settings)
 from fitting import Fit_With_Weighting
@@ -97,6 +99,6 @@ thisWeightedFit = Fit_With_Weighting(RA_hist_total,min_cutoff = , general_settin
 #creates the fit to the data 
 thisWeightedFit.fit_RA_hist_weighting()
 #plots the histogram
-thisWeightedFit.plot_RA_and_fit(save_fig= False, show_plot="No")
+thisWeightedFit.plot_RA_and_fit(save_fig= False, show_plot=True)
 
 ```
