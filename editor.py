@@ -132,7 +132,6 @@ class Editor:
                 settings.write('\t"General Settings": {\n\t\t\n\t},\n')
                 settings.write('\t"RossiAlpha Settings": {\n\t\t\n\t},\n')
                 settings.write('\t"PSD Settings": {\n\t\t\n\t},\n')
-                settings.write('\t"Histogram Generation Settings": {\n\t\t\n\t},\n')
                 settings.write('\t"Histogram Visual Settings": {\n\t\t\n\t},\n')
                 settings.write('\t"Line Fitting Settings": {\n\t\t\n\t},\n')
                 settings.write('\t"Residual Plot Settings": {\n\t\t\n\t}\n}')
