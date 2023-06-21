@@ -66,68 +66,64 @@ class Settings:
         # The variable that stores the path of the 
         # .json file that was most recently imported.
         self.origin = 'None'
+        # The variable that stores the path of the 
+        # .json file that was most recently appended.
         self.appended = 'None'
-        # The variable that indicates whether or not the
-        # settings have been changed during runtime.
-        self.changed = False
     
     def compare(self):
 
         '''Compare the current settings to the most recently 
         imported + appended version to see if they have changed.'''
 
-        # If the settings were just created from a blank file,
-        # note a whole overwrite and mark as changed.
-        # Create a baseline settings object 
-        # from the settings in the source file.
+        # Create a baseline settings object and the list of changes.
         baseline = Settings()
         list = []
-        # Read in previous settings and delete temp file.
+        # Read in previous settings and append 
+        # most recently appended settings, if any.
         baseline.read(self.origin)
         if self.appended != 'None':
-            baseline.append(self.appended, True)
-        # For every setting in every group, compare the 
-        # current value to the source value. If it differs, 
-        # note the update and mark the settings as changed.
+            baseline.append(self.appended)
+        # For each setting in the current settings, if it's different 
+        # compared to the baseline or new, store the difference.
         for group in self.settings:
             for setting in self.settings[group]:
                 if baseline.settings[group].get(setting) != self.settings[group][setting]:
-                    self.changed = True
                     list.append(setting + ' in ' + group + ': ' 
                                 + str(baseline.settings[group].get(setting)) 
                                 + ' -> ' + str(self.settings[group][setting]))
+        # For each setting in the baseline, if it does not 
+        # exist in the current settings, store the removal.
         for group in baseline.settings:
             for setting in baseline.settings[group]:
-                # If there is a setting in the default that is not 
-                # in the current settings, mark it as deleted.
                 if self.settings[group].get(setting) == None:
-                    self.changed = True
                     list.append(setting + ' in ' + group + ' removed')
-        if len(list) == 0:
-            self.changed = False
+        # Return the list of changes for printing.
         return list
 
-    def append(self, path, baseline):
+    def append(self, path):
         
         '''Appends settings from a json file into the settings 
-        object. Requires an abolsute path to the file.
+        object. Requires an abolsute path to the settings file.
         
         Does not change the file of origin.'''
 
         # Load the new parameters from the json file.
         parameters = json.load(open(path))
+        # For each of the settings listed:
         for group in parameters:
             for setting in parameters[group]:
-                # If user wants the setting removed and it currently exists, remove it.
+                # If user wants the setting removed and it currently exists, 
+                # remove it. If the setting doesn't exist, do nothing.
                 if parameters[group][setting] == '':
                     if self.settings[group].get(setting) != None:
                         self.settings[group].pop(setting)
                 # Otherwise, add/modify the specified setting.
                 else:
                     self.settings[group][setting] = parameters[group][setting]
-        if path != os.path.abspath('append.json') and not baseline:
+        # If the append is from a permanent file, mark that 
+        # file as the most recently file appended from.
+        if path != os.path.abspath('append.json'):
             self.appended = path
-            self.changed = False
 
     def read(self, path):
 
@@ -136,10 +132,9 @@ class Settings:
 
         # Load the new parameters from the json file.
         self.settings = json.load(open(path))
-        # If the JSON file being loaded is a permanent 
-        # file, change the settings origin.
+        # If the JSON file being loaded is a permanent file, change the 
+        # settings origin and clear the most recently appended variable.
         if path != os.path.abspath('current.json'):
-            self.changed = False
             self.origin = path
             self.appended = 'None'
 

@@ -87,39 +87,31 @@ class Editor:
             # Reset history variable.
             self.history = None
 
-    def compare(self):
+    def changes(self):
 
-        '''Compare the current settings to the most recently 
-        imported version to see if they have changed.
-        
-        Logs any changes that have been made.'''
+        '''Compare recently edited settings to the 
+        previous version and log any changes.'''
 
-        # Create a baseline settings object 
-        # from the settings in the source file.
+        # Create a baseline settings object for comparison.
         baseline = set.Settings()
         # Read in previous settings and delete temp file.
         baseline.read(os.path.abspath('comp.json'))
         os.remove(os.path.abspath('comp.json'))
-        # For every setting in every group, compare the 
-        # current value to the source value. If it differs, 
-        # note the update and mark the settings as changed.
+        # For every setting in the current settings, compare its
+        # value to the source value and log if it is new or changed.
         for group in self.parameters.settings:
             for setting in self.parameters.settings[group]:
-                if baseline.settings[group].get(setting) != self.parameters.settings[group][setting]:
+                if (baseline.settings[group].get(setting) 
+                    != self.parameters.settings[group][setting]):
                     self.log(setting + ' in ' + group + ': ' 
-                            + str(baseline.settings[group].get(setting)) 
-                            + ' -> ' + str(self.parameters.settings[group][setting]) + '.\n')
+                            + str(baseline.settings[group].get(setting)) + ' -> '
+                            + str(self.parameters.settings[group][setting]) + '.\n')
+        # For each setting in the baseline, if it does not 
+        # exist in the current settings, log the removal.
         for group in baseline.settings:
             for setting in baseline.settings[group]:
-                # If there is a setting in the default that is not 
-                # in the current settings, mark it as deleted.
                 if self.parameters.settings[group].get(setting) == None:
                     self.log(setting + ' in ' + group + ' removed.\n')
-
-    def changes(self):
-        list = self.parameters.compare()
-        for change in list:
-            self.print(change)
 
     def edit(self, file):
 
@@ -150,7 +142,7 @@ class Editor:
         self.parameters.write(os.path.abspath('comp.json'))
         # If in append mode.
         if file == 'append.json':
-            self.parameters.append(os.path.abspath(file), False)
+            self.parameters.append(os.path.abspath(file))
         # If in overwrite mode.
         else:
             self.parameters.read(os.path.abspath(file))
@@ -159,7 +151,7 @@ class Editor:
         # Notify the user the settings editing is complete.
         self.print('Settings viewer/editor closed.\n')
         # Check to see if the settings have changed from the latest import.
-        self.compare()
+        self.changes()
         # Delete the temporary file.
         os.remove(os.path.abspath(file))
 
@@ -249,7 +241,7 @@ class Editor:
                                 self.log('Imported settings from ' + file + '.\n')
                             # Append settings in file.
                             else:
-                                self.parameters.append(os.path.abspath(file), False)
+                                self.parameters.append(os.path.abspath(file))
                                 self.changeLog()
                                 self.log('Appended settings from ' + file + '.\n')
                         # User cancels import.

@@ -158,7 +158,7 @@ def main():
                             # Read default settings first to append over.
                             editor.parameters.read(os.path.abspath('default.json'))
                             # Append changed/removed settings.
-                            editor.parameters.append(os.path.abspath(file), False)
+                            editor.parameters.append(os.path.abspath(file))
                             editor.changeLog()
                             editor.log('Settings from ' + file + ' succesfully'
                                        + ' appended to the default.\n')
@@ -250,8 +250,8 @@ def main():
                 print('ERROR: Unrecognized command ' + selection 
                     + '. Please review the list of appriopriate inputs.\n')
     # If the settings have been changed at any point during runtime, notify user.
-    editor.parameters.compare()
-    if editor.parameters.changed:
+    list = editor.parameters.compare()
+    if len(list) != 0:
         selection = ''
         # Continue looping until the user has decided what to do with their changes.
         while selection != 'd' and selection != 'n' and selection != 'a':
@@ -259,7 +259,8 @@ def main():
               + 'settings:\n')
             editor.print('Base settings: ' + editor.parameters.origin)
             editor.print('Most recently appended settings: ' + editor.parameters.appended + '\n')
-            editor.changes()
+            for change in list:
+                editor.print(change)
             editor.print('\nDo you want to save your changes?')
             editor.print('d - save current settings as the default')
             editor.print('n - save current settings as a new settings file')
