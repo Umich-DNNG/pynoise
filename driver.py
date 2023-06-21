@@ -90,6 +90,10 @@ def main():
         if len(queue) != 0:
             selection = queue[0]
             queue.pop(0)
+            if selection == '':
+                editor.print('Running automated return command...')
+            else:
+                editor.print('Running automated command ' + selection + '...')
         # Otherwise, prompt the user.
         else:
             selection = input('Select settings choice: ')
@@ -118,6 +122,10 @@ def main():
                     if len(queue) != 0:
                         opt = queue[0]
                         queue.pop(0)
+                        if opt == '':
+                            editor.print('Running automated return command...')
+                        else:
+                            editor.print('Running automated command ' + opt + '...')
                     # Otherwise, prompt the user.
                     else:
                         opt = input('Enter a command (or leave blank to cancel): ')
@@ -145,6 +153,10 @@ def main():
                     if len(queue) != 0:
                         file = queue[0]
                         queue.pop(0)
+                        if file == '':
+                            editor.print('Running automated return command...')
+                        else:
+                            editor.print('Using automated file ' + file + '...')
                     # Otherwise, prompt the user.
                     else:
                         file = input('Enter a settings file (no .json extension): ')
@@ -194,6 +206,10 @@ def main():
         if len(queue) != 0:
             selection = queue[0]
             queue.pop(0)
+            if selection == '':
+                editor.print('Running automated return command...')
+            else:
+                editor.print('Running automated command ' + selection + '...')
         # Otherwise, prompt the user.
         else:
             selection = input('Enter a command: ')
@@ -218,6 +234,10 @@ def main():
                 if len(queue) != 0:
                     choice = queue[0]
                     queue.pop(0)
+                    if choice == '':
+                        editor.print('Running automated return command...')
+                    else:
+                        editor.print('Running automated command ' + choice + '...')
                 # Otherwise, prompt the user.
                 else:
                     choice = input('Enter q to quit and anything else to abort: ')
@@ -235,6 +255,10 @@ def main():
                 if len(queue) != 0:
                     choice = queue[0]
                     queue.pop(0)
+                    if choice == '':
+                        editor.print('Running automated return command...')
+                    else:
+                        editor.print('Running automated command ' + choice + '...')
                 # Otherwise, prompt the user.
                 else:
                     choice = input('Enter q to quit and anything else to abort: ')
@@ -270,6 +294,10 @@ def main():
             if len(queue) != 0:
                 selection = queue[0]
                 queue.pop(0)
+                if selection == '':
+                    editor.print('Running automated return command...')
+                else:
+                    editor.print('Running automated command ' + selection + '...')
             # Otherwise, prompt the user.
             else:
                 selection = input('Select an option: ')
@@ -282,6 +310,10 @@ def main():
                     if len(queue) != 0:
                         choice = queue[0]
                         queue.pop(0)
+                        if choice == '':
+                            editor.print('Running automated return command...')
+                        else:
+                            editor.print('Running automated command ' + choice + '...')
                     # Otherwise, prompt the user.
                     else:
                         choice = input('Enter y to continue and anything else to abort: ')
@@ -310,6 +342,10 @@ def main():
                         if len(queue) != 0:
                             file = queue[0]
                             queue.pop(0)
+                            if file == '':
+                                editor.print('Running automated return command...')
+                            else:
+                                editor.print('Using automated file ' + file + '...')
                         # Otherwise, prompt the user.
                         else:
                             file  = input('Name of file (or blank to cancel): ')
@@ -327,6 +363,10 @@ def main():
                                 if len(queue) != 0:
                                     choice = queue[0]
                                     queue.pop(0)
+                                    if choice == '':
+                                        editor.print('Running automated return command...')
+                                    else:
+                                        editor.print('Running automated command ' + choice + '...')
                                 # Otherwise, prompt the user.
                                 else:
                                     choice = input('Enter y to continue and anything else to abort: ')
@@ -355,6 +395,10 @@ def main():
                     if len(queue) != 0:
                         choice = queue[0]
                         queue.pop(0)
+                        if choice == '':
+                            editor.print('Running automated return command...')
+                        else:
+                            editor.print('Running automated command ' + choice + '...')
                     # Otherwise, prompt the user.
                     else:
                         choice = input('Enter y to continue and anything else to abort: ')

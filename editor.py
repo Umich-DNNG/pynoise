@@ -172,6 +172,10 @@ class Editor:
             if len(queue) != 0:
                 choice = queue[0]
                 queue.pop(0)
+                if choice == '':
+                    self.print('Running automated return command...')
+                else:
+                    self.print('Running automated command ' + choice + '...')
             # Otherwise, prompt the user.
             else:
                 choice = input('Enter command: ')
@@ -199,6 +203,10 @@ class Editor:
                         if len(queue) != 0:
                             opt = queue[0]
                             queue.pop(0)
+                            if opt == '':
+                                self.print('Running automated return command...')
+                            else:
+                                self.print('Running automated command ' + opt + '...')
                         # Otherwise, prompt the user.
                         else:
                             opt = input('Enter a command (or leave blank to cancel): ')   
@@ -224,6 +232,10 @@ class Editor:
                         if len(queue) != 0:
                             file = queue[0]
                             queue.pop(0)
+                            if file == '':
+                                self.print('Running automated return command...')
+                            else:
+                                self.print('Using automated file ' + file + '...')
                         # Otherwise, prompt the user.
                         else:
                             file = input('Enter a settings file (no .json '
