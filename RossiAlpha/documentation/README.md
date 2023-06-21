@@ -74,7 +74,7 @@ thisPlot = RossiHistogram(reset_time = 2e3, bin_width = 2, histogram_visual_sett
 counts, bin_centers, bin_edges = thisPlot.plot(time_diffs, save_fig="yes", show_plot="no") #constructs the histogram with the time differences and saves it to the save_dir
 #Returns the counts,bin_centers, and bin_edges for later use
 ```
-<img src="histogram.png" width="400" >
+<img src="./RossiAlpha/documentation/histogram.png" width="400" >
 
 ### Fitting
 In the fitting.py file, there are two classes. One is called ```RossiHistogramFit``` and the other one is called ```Fit_With_Weighting```. The difference between the two classes is that "Fit_With_Weighting" deals with input type 1, as well as creating uncertainty plots. In ```RossiHistogramFit``` there are two functions called "fit()" and "fit_and_residual()", the former is used to fit an exponential decay curve onto the histogram and the latter produces a residual plot on top of the curve fitting.
@@ -90,7 +90,7 @@ thisFit = RossiHistogramFit(counts, bin_centers, settings) #construct the fit ob
 #saves the plot with a fit on top and residuals on bottonm but does not show it
 thisFit.fit_and_residual(save_every_fig=True, show_plot=False)
 ```
-<img src="fitted_and_residual.png" width="400" >
+<img src="./fitted_and_residual.png" width="400" >
 
 ```python
 RA_hist_total = analyzingFolders.compile_sample_stdev_RA_dist(settings)
