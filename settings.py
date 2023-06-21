@@ -23,7 +23,6 @@ class Settings:
                                                     'Keep logs': False},
                          'General Settings': {'Fit range':[0.0,1000.0],
                                               'Number of folders':10,
-                                              'Meas time per folder':60,
                                               'Quiet mode':False,
                                               'Sort data':True,
                                               'Save figures':False,
