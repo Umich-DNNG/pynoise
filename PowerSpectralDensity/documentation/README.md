@@ -10,7 +10,10 @@ Besides those mentioned in the main README file, the following programs must be 
 * PSD.py
 * psdDriver.py
 
-**TODO**: Add required libraries.
+Required python libraries:  
+* numpy   
+* matplotlib   
+* scipy
 
 Additionally, you will need the following:
 * A single file of data that will be analyzed.
@@ -33,15 +36,15 @@ The PowerSpectralDensity program can be run with a variety of options that chang
 
 
 ### Driver
-```psdDriver.py``` is used to run all analysis pertaining to the Rossi Alpha method, and is called from the main driver. **Trying to call psdDriver independently will not work**. The driver has been designed modularly, so that analysis at any stage can be done without having to run through the entire process. There are 5 main options:
+```psdDriver.py``` is used to run all analysis pertaining to the Power Spectral Density method, and is called from the main driver. **Trying to call psdDriver independently will not work**. 
+There are 2 options for this method:  
 * m - run the entire program through the [main driver](#main)
-* t - calculate [time differences](#time-difference-calculator)
 * s - view or edit the program [settings](#settings-configurations)
 * Leave the command blank to end the program.
 
 
 ### Editor
-The editor class for modifying settings is also accessible from the raDriver. See the main README file for more information on its proper use.
+The editor class for modifying settings is also accessible from the psdDriver. See the main README file for more information on its proper use.
 
 
 ### PSD.py
