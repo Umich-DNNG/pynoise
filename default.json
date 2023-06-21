@@ -30,10 +30,10 @@
         }
     },
     "PSD Settings": {
-        "Dwell time": 2000000.0,
+        "Dwell time": 2.0e6,
         "Meas time range": [
-            150000000000.0,
-            1000000000000.0
+            1.5e11,
+            1.0e12
         ],
         "Clean pulses switch": true
     },

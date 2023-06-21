@@ -49,6 +49,10 @@ def main(editorIn, queue):
         if len(queue) != 0:
             selection = queue[0]
             queue.pop(0)
+            if selection == '':
+                editor.print('Running automated return command...')
+            else:
+                editor.print('Running automated command ' + selection + '...')
         else:
             selection = input('Enter a command: ')
         match selection:
