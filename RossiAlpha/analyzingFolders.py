@@ -70,9 +70,9 @@ def compile_sample_stdev_RA_dist(settings):
                     RA_hist_array = counts
                 else:
                     RA_hist_array = np.vstack((RA_hist_array, counts))
-
+                save_dir = data_folder + "/" + str(fol_num)
                 thisFit = RossiHistogramFit(counts,
-                                            bin_centers,settings)
+                                            bin_centers,settings, save_dir)
 
                 thisFit.fit_and_residual(save_every_fig=settings['General Settings']['Save figures'], 
                                          show_plot=settings['General Settings']['Show plots'], 
