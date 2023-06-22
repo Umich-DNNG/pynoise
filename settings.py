@@ -32,14 +32,10 @@ class Settings:
                                                 'Time difference method':'any_and_all',
                                                 'Digital delay':750,
                                                 'Combine Calc and Binning': False,
-                                                'Histogram Generation Settings': {
-                                                    'Reset time':1000,
-                                                    'Bin width':9,
-                                                    'Error Bar/Band':'band'
-                                                },
-                                                "Fit Region Settings": {
-                                                    "Minimum cutoff": 30
-                                                }
+                                                'Reset time':1000,
+                                                'Bin width':9,
+                                                'Error Bar/Band':'band',
+                                                "Minimum cutoff": 30
                          },
                          'PSD Settings' : {'Dwell time':2.0e6,
                                            'Meas time range':[1.5e11,1.0e12],
