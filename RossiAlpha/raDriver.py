@@ -71,6 +71,8 @@ def createPlot():
               save_fig=editor.parameters.settings['General Settings']['Save figures'],
               show_plot=editor.parameters.settings['General Settings']['Show plots'])
     editor.log('Created a histogram plot using the current settings and time difference data.\n')
+    hist_file = editor.parameters.settings['Input/Output Settings']['Input file/folder']
+    hist_method = editor.parameters.settings['RossiAlpha Settings']['Time difference method']
 
 def calculateTimeDifsAndPlot():
 
@@ -81,7 +83,7 @@ def calculateTimeDifsAndPlot():
     Does not store time data.
     
     '''
-    global histogram, time_difs
+    global histogram, time_difs, hist_file, hist_method
     time_difs = None
     editor.print('Calculating Time Differences and Building plot...')
     if editor.parameters.settings['Input/Output Settings'].get('Data Column') is not None:
@@ -96,6 +98,9 @@ def calculateTimeDifsAndPlot():
 
     histogram, counts, bin_centers, bin_edges = thisTimeDifCalc.calculateTimeDifsAndBin(editor.parameters.settings['RossiAlpha Settings']['Histogram Generation Settings']['Bin width'], editor.parameters.settings['General Settings']['Save figures'], editor.parameters.settings['General Settings']['Show plots'], editor.parameters.settings['Input/Output Settings']['Save directory'], editor.parameters.settings['Histogram Visual Settings'])
     editor.log('Calculated time differences and simultaneously created a histogram plot using the current settings and time difference data.\n')
+    hist_file = editor.parameters.settings['Input/Output Settings']['Input file/folder']
+    hist_method = editor.parameters.settings['RossiAlpha Settings']['Time difference method']
+
 
 def createBestFit():
 
@@ -273,8 +278,8 @@ def main(editorIn, queue):
                                     createTimeDifs()
                                     if not editor.parameters.settings['RossiAlpha Settings']['Combine Calc and Binning'] :
                                         createPlot()
-                        else:
-                            createPlot()
+                        #else:
+                        #   createPlot()
                         createBestFit()
             # View and/or edit program settings.
             case 's':
