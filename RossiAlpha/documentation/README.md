@@ -40,10 +40,11 @@ The RossiAlpha program can be run with a variety of options that change the visu
 
 
 ### Running the RossiAlpha Method from the Main Driver
-<video src="./RossiAlphaDemo.mov" controls="controls" style="max-width: 730px;">
-</video>
-
-
+<figure class="video_container">
+ <video controls="true" allowfullscreen="true" style = "width: 500px;">
+ <source src="./RossiAlphaDemo.mp4" type="video/mp4" >
+ </video>
+</figure>
 ### Driver
 ```raDriver.py``` is used to run all analysis pertaining to the Rossi Alpha method, and is called from the main driver. **Trying to call raDriver independently will not work**. The driver has been designed modularly, so that analysis at any stage can be done without having to run through the entire process. There are 5 main options:
 * m - run the entire program through the [main driver](#main)
