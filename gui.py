@@ -26,68 +26,182 @@ hist_method = None
 # Where the best fit curve is stored.
 best_fit = None
 
-def prompt(message, title, function, prev):
+def prompt(message, title, prev, to):
+    '''Create a prompt window to get a text input from the user.
+    
+    Requires:
+    - message: the message that the user sees above the entry box.
+    - title: the title of the window
+    - prev: the function to return to if the user cancels the input.
+    - to: the function that is called when the user confirms their input.'''
+
     global window, response
     response = tk.StringVar()
+    # Clear the window of all previous entries, labels, and buttons.
     for item in window.winfo_children():
         item.destroy()
+    # Properly name the window.
     window.title(title)
+    # The label with the appropriate message.
     ttk.Label(window,
               name='prompt',
               text=message
               ).grid(column=0,row=0)
+    # The text box where the user can type their response.
     ttk.Entry(window,
               name='response',
               textvariable=response,
               ).grid(column=0,row=1)
+    # The confirmation button.
     ttk.Button(window,
               name='continue',
               text='Continue',
-              command=function
+              command=to
               ).grid(column=0,row=2)
+    # The cancel button.
     ttk.Button(window,
               name='cancel',
               text='Cancel',
               command=prev
               ).grid(column=0,row=3)
     
-def error(message):
-    window=Tk()
-    window.title('ERROR!')
-    ttk.Label(window,
+def error(message, title='ERROR!'):
+    '''Create an error window for when the user encounters an error.
+    
+    Requires:
+    - message: the error message that the user will see.
+    Optional:
+    - title: the title of the window.'''
+
+    # Create a new window and title it accordingly.
+    popup=Tk()
+    popup.title(title)
+    # The label with the appropriate error message.
+    ttk.Label(popup,
             name='message',
             text=message
             ).grid(column=0,row=0)
-    ttk.Button(window,
+    # The button to confirm the user has seen the error.
+    ttk.Button(popup,
                name='return',
                text='OK',
-               command=window.destroy
+               command=popup.destroy
                ).grid(column=0,row=1)
-    window.mainloop()
+    # Start up the window.
+    popup.mainloop()
 
-def warningFunction(to, window):
-    window.destroy()
-    to()
+def warningFunction(popup, to, param=None):
+    '''The function that is called when the user chooses to ignore a warning.
+    
+    Requires:
+    - popup: the warning window that will be deleted.
+    - to: the main function that will be called.
+    '''
+
+    # Destroy the warning window and run the desired function.
+    popup.destroy()
+    if param == None:
+        to()
+    else:
+        to(param)
 
 
-def warning(message, to):
-    window=Tk()
-    window.title('WARNING!')
-    ttk.Label(window,
+def warning(message, to, param=None, title='WARNING!'):
+    popup=Tk()
+    popup.title(title)
+    ttk.Label(popup,
             name='message',
             text=message
             ).grid(column=0,row=0)
-    ttk.Button(window,
+    ttk.Button(popup,
                name='yes',
                text='Yes',
-               command=lambda: warningFunction(to, window)
+               command=lambda: warningFunction(popup, to, param)
                ).grid(column=0,row=1)
-    ttk.Button(window,
+    ttk.Button(popup,
                name='no',
                text='No',
-               command=window.destroy
+               command=popup.destroy
                ).grid(column=0,row=2)
-    window.mainloop()
+    popup.mainloop()
+
+def shutdown(file=''):
+    global window, response
+    if file == '':
+        file = os.path.abspath(response.get() + '.json')
+        if os.path.isfile(file):
+            warning('Settings file ' + file + ' already exists.'
+                    + ' Do you want to overwrite the previous stored settings?',
+                    shutdown,
+                    file)
+            return
+        else:
+            parameters.save(file)
+    else:
+        if file == os.path.abspath('default.json'):
+            parameters.write(file)
+        else:
+            parameters.save(file)
+    window.destroy()
+
+def shutdown_menu():
+    global window, parameters
+    list = parameters.compare()
+    for item in window.winfo_children():
+        item.destroy()
+    window.title('Unsaved Changes')
+    if len(list) != 0:
+        ttk.Label(window,
+                name='message',
+                text='You have made unsaved changes to the settings:\n\n'
+                + 'Base settings: ' + parameters.origin + '\n\nMost recently '
+                + 'appended settings: ' + parameters.appended + '\n'
+                ).grid(column=0,row=0)
+        total = 0
+        for entry in list:
+            if total == 5:
+                break
+            ttk.Label(window,
+                name='entry' + str(total),
+                text=entry
+                ).grid(column=0,row=total+1)
+            total += 1
+        if len(list) > 5:
+            ttk.Label(window,
+                name='extra',
+                text='\n...plus ' + str(len(list)-5) + ' more change(s).'
+                ).grid(column=0,row=6)
+            total += 1
+        ttk.Label(window,
+                name='prompt',
+                text='\nWhat would you like to do with your changes?'
+                ).grid(column=0,row=total+1)
+        ttk.Button(window,
+                name='default',
+                text='Save as default',
+                command=lambda: warning('This will overwrite the current default settings. '
+                                        + 'Are you sure you want to do this?',
+                                        shutdown,
+                                        os.path.abspath('default.json'))
+                ).grid(column=0,row=total+2)
+        ttk.Button(window,
+                name='new',
+                text='Save to new file',
+                command=lambda: prompt('Enter a name for the new settings '
+                                    + '(not including the .json file extension).',
+                                    'Export Settings',
+                                    shutdown_menu,
+                                    lambda: shutdown())
+                ).grid(column=0,row=total+3)
+        ttk.Button(window,
+                name='abandon',
+                text='Abandon changes',
+                command=lambda: warning('All your current changes will be lost. '
+                                        + 'Are you sure you want to do this?',
+                                        window.destroy)
+                ).grid(column=0,row=total+4)
+    else:
+        window.destroy()
 
 def createTimeDifs():
     global time_difs, time_difs_file, time_difs_method, parameters
@@ -427,12 +541,12 @@ def download_menu(prev, to, param):
     ttk.Button(window,
                name='overwrite',
                text='Overwrite entire settings',
-               command=lambda: prompt('Enter a settings file (no .json extension):','Overwrite Settings',lambda: download(False, to, param),lambda: download_menu(prev, to, param))
+               command=lambda: prompt('Enter a settings file (no .json extension):','Overwrite Settings',lambda: download_menu(prev, to, param),lambda: download(False, to, param))
                ).grid(column=0,row=1)
     ttk.Button(window,
                name='append',
                text='Append settings to default',
-               command=lambda: prompt('Enter a settings file (no .json extension):','Append Settings to Default',lambda: download(True, to, param),lambda: download_menu(prev, to, param))
+               command=lambda: prompt('Enter a settings file (no .json extension):','Append Settings to Default',lambda: download_menu(prev, to, param),lambda: download(True, to, param))
                ).grid(column=0,row=2)
     ttk.Button(window,
                name='cancel',
@@ -486,7 +600,7 @@ def main():
     ttk.Button(window,
                name='quit',
                text='Quit the program',
-               command=lambda: warning('Are you sure you want to quit the program?',window.destroy)
+               command=lambda: warning('Are you sure you want to quit the program?',shutdown_menu)
                ).grid(column=0,row=4)
 
 def startup():
