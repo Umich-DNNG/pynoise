@@ -47,18 +47,18 @@ def compile_sample_stdev_RA_dist(settings):
                 channels = list_data_n[:,0]
 
                 thisData = timeDifCalcs(list_data, 
-                                        settings['RossiAlpha Settings']['Histogram Generation Settings']['Reset time'], 
+                                        settings['RossiAlpha Settings']['Reset time'], 
                                         settings['RossiAlpha Settings']['Time difference method'], 
                                         settings['RossiAlpha Settings']['Digital delay'], 
                                         channels)
                 if(settings['RossiAlpha Settings']['Combine Calc and Binning']):
-                    thisPlot, counts, bin_centers, bin_edges   = thisData.calculateTimeDifsAndBin( settings['RossiAlpha Settings']['Histogram Generation Settings']['Bin width'], False, False, settings['Input/Output Settings']['Save directory'], settings['Histogram Visual Settings'])
+                    thisPlot, counts, bin_centers, bin_edges   = thisData.calculateTimeDifsAndBin( settings['RossiAlpha Settings']['Bin width'], False, False, settings['Input/Output Settings']['Save directory'], settings['Histogram Visual Settings'])
 
                 else:
                     time_diffs = thisData.calculate_time_differences()
 
-                    thisPlot = RossiHistogram(settings['RossiAlpha Settings']['Histogram Generation Settings']['Reset time'],
-                                          settings['RossiAlpha Settings']['Histogram Generation Settings']['Bin width'],
+                    thisPlot = RossiHistogram(settings['RossiAlpha Settings']['Reset time'],
+                                          settings['RossiAlpha Settings']['Bin width'],
                                           settings['Histogram Visual Settings'], 
                                           settings['Input/Output Settings']['Save directory'])
 
