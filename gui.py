@@ -4,181 +4,209 @@ import tkinter as tk
 import settings as set
 import os
 
-root = None
-frame = None
+window = None
 parameters = None
 response = None
 
 def prompt(message, title, function, prev):
-    global root, frame, response
+    global window, response
     response = tk.StringVar()
-    for item in frame.winfo_children():
+    for item in window.winfo_children():
         item.destroy()
-    root.title(title)
-    ttk.Label(frame,
+    window.title(title)
+    ttk.Label(window,
               name='prompt',
               text=message
               ).grid(column=0,row=0)
-    ttk.Entry(frame,
+    ttk.Entry(window,
               name='response',
               textvariable=response,
               ).grid(column=0,row=1)
-    ttk.Button(frame,
+    ttk.Button(window,
               name='continue',
               text='Continue',
               command=function
               ).grid(column=0,row=2)
-    ttk.Button(frame,
+    ttk.Button(window,
               name='cancel',
               text='Cancel',
               command=prev
               ).grid(column=0,row=3)
     
 def error(message):
-    root=Tk()
-    root.title('Uh oh!')
-    frame = ttk.Frame(root, name='error_menu', padding=10)
-    frame.grid()
-    ttk.Label(frame,
+    window=Tk()
+    window.title('Uh oh!')
+    ttk.Label(window,
             name='message',
             text=message
             ).grid(column=0,row=0)
-    ttk.Button(frame,
+    ttk.Button(window,
                name='return',
                text='OK',
-               command=root.destroy
+               command=window.destroy
                ).grid(column=0,row=1)
-    root.mainloop()
+    window.mainloop()
+
+def edit(append):
+    print('TODO!!!')
 
 def editor_menu(append):
-    global root, frame, parameters
+    global window, parameters
     groupNum=0
+    curTop=0
+    curMax = 0
     inputs=[]
-    for item in frame.winfo_children():
+    for item in window.winfo_children():
         item.destroy()
     if append:
-        root.title('Append Settings')
+        window.title('Append Settings')
     else:
-        root.title('View/Edit Current Settings')
+        window.title('View/Edit Current Settings')
     for group in parameters.settings:
-        ttk.Label(frame,
-                  name=group.lower(),
-                  text=group + ':'
-                  ).grid(column=(groupNum*3) % 6,row=groupNum)
-        setNum=0
+        if (groupNum*3) % 9 == 0:
+            curTop += curMax
+            curMax = 0
+        ttk.Label(window,
+                  name=group[0:group.find(' Settings')].lower(),
+                  text=group[0:group.find(' Settings')] + ':'
+                  ).grid(column=(groupNum*3) % 9,row=curTop)
+        setNum=1
         for setting in parameters.settings[group]:
-            inputs.append(tk.StringVar(value=parameters.settings[group][setting]))
-            ttk.Label(frame,
+            inputs.append(tk.StringVar())
+            ttk.Label(window,
                   name=(group + ' ' + setting).lower(),
                   text=setting + ':'
-                  ).grid(column=(groupNum*3+1) % 6,row=groupNum+setNum)
-            ttk.Entry(frame,
+                  ).grid(column=(groupNum*3+1) % 9,row=curTop+setNum)
+            tk.Entry(window,
                   name=(group + ' ' + setting + ' value').lower(),
                   textvariable=inputs[len(inputs)-1]
-                  ).grid(column=(groupNum*3+2) % 6,row=groupNum+setNum)
+                  ).grid(column=(groupNum*3+2) % 9,row=curTop+setNum)
+            if isinstance(parameters.settings[group][setting], bool):
+                if parameters.settings[group][setting]:
+                    window.children[(group + ' ' + setting + ' value').lower()].insert(0,'True')
+                else:
+                    window.children[(group + ' ' + setting + ' value').lower()].insert(0,'False')
+            elif isinstance(parameters.settings[group][setting], float) and (parameters.settings[group][setting] > 1000 or parameters.settings[group][setting] < 0.01):
+                window.children[(group + ' ' + setting + ' value').lower()].insert(0,"{:e}".format(parameters.settings[group][setting]))
+            else:
+                window.children[(group + ' ' + setting + ' value').lower()].insert(0,parameters.settings[group][setting])
             setNum += 1
+        if setNum > curMax:
+            curMax = setNum
         groupNum += 1
+    curTop += curMax
+    ttk.Button(window,
+                name='save',
+                text='Save changes',
+                command=lambda: edit(append)
+                ).grid(column=0 % 9,row=curTop)
+    ttk.Button(window,
+                  name='cancel',
+                  text='Cancel changes',
+                  command=setMenu
+                  ).grid(column=0 % 9,row=curTop+1)
 
 
 def setMenu():
-    global root, frame
-    for item in frame.winfo_children():
+    global window
+    for item in window.winfo_children():
         item.destroy()
-    root.title('Settings Editor & Viewer')
-    ttk.Label(frame,
+    window.title('Settings Editor & Viewer')
+    ttk.Label(window,
               name='prompt',
               text='What settings do you want to edit/view?',
               ).grid(column=0,row=0)
-    ttk.Button(frame,
+    ttk.Button(window,
               name='current',
               text='Current Settings',
               command=lambda: editor_menu(False)
               ).grid(column=0,row=1)
-    ttk.Button(frame,
+    ttk.Button(window,
               name='import',
-              text='Import settings file'
+              text='Import settings file',
+              command=lambda: download_menu(setMenu, setMenu)
               ).grid(column=0,row=2)
-    ttk.Button(frame,
+    ttk.Button(window,
               name='append',
               text='Append settings',
               command=lambda: editor_menu(True)
               ).grid(column=0,row=3)
-    ttk.Button(frame,
+    ttk.Button(window,
               name='return',
               text='Return to main menu',
               command=main
               ).grid(column=0,row=4)
 
 def raMenu():
-    global root, frame
-    for item in frame.winfo_children():
+    global window
+    for item in window.winfo_children():
         item.destroy()
-    root.title('Rossi Alpha Analysis')
-    ttk.Label(frame,
+    window.title('Rossi Alpha Analysis')
+    ttk.Label(window,
               name='prompt',
               text='What analysis would you like to perform?'
               ).grid(column=0,row=0)
-    ttk.Button(frame,
+    ttk.Button(window,
               name='all',
               text='Run entire analysis'
               ).grid(column=0,row=1)
-    ttk.Button(frame,
+    ttk.Button(window,
               name='time_dif',
               text='Calculate time differences'
               ).grid(column=0,row=2)
-    ttk.Button(frame,
+    ttk.Button(window,
               name='histogram',
               text='Create histogram'
               ).grid(column=0,row=3)
-    ttk.Button(frame,
+    ttk.Button(window,
               name='fit',
               text='Fit data'
               ).grid(column=0,row=4)
-    ttk.Button(frame,
+    ttk.Button(window,
               name='settings',
               text='Program settings',
               command=setMenu
               ).grid(column=0,row=5)
-    ttk.Button(frame,
+    ttk.Button(window,
               name='return',
               text='Return to main menu',
               command=main
               ).grid(column=0,row=6)
 
 def psdMenu():
-    global root, frame
-    for item in frame.winfo_children():
+    global window
+    for item in window.winfo_children():
         item.destroy()
-    root.title('Power Spectral Density Analysis')
-    ttk.Label(frame,
+    window.title('Power Spectral Density Analysis')
+    ttk.Label(window,
               name='prompt',
               text='What analysis would you like to perform?'
               ).grid(column=0,row=0)
-    ttk.Button(frame,
+    ttk.Button(window,
               name='settings',
               text='Program settings'
               ).grid(column=0,row=5)
-    ttk.Button(frame,
+    ttk.Button(window,
               name='return',
               text='Return to main menu',
               command=main
               ).grid(column=0,row=6)
 
 def shutdown():
-    global root
-    for item in frame.winfo_children():
+    global window
+    for item in window.winfo_children():
         item.destroy()
-    root.title('Confirm shutdown')
-    ttk.Label(frame,
+    window.title('Confirm shutdown')
+    ttk.Label(window,
               name='message',
               text='Are you sure you want to quit the program?'
               ).grid(column=0,row=0)
-    ttk.Button(frame,
+    ttk.Button(window,
               name='yes',
               text='Yes',
-              command=root.destroy
+              command=window.destroy
               ).grid(column=0,row=1)
-    ttk.Button(frame,
+    ttk.Button(window,
               name='no',
               text='No',
               command=main
@@ -190,33 +218,33 @@ def default():
     parameters.read(path)
     main()
 
-def download_menu(prev):
-    global root, frame
-    for item in frame.winfo_children():
+def download_menu(prev, to):
+    global window
+    for item in window.winfo_children():
         item.destroy()
-    root.title('Download Settings')
-    ttk.Label(frame,
+    window.title('Download Settings')
+    ttk.Label(window,
               name='choice',
               text='You have two import options:'
               ).grid(column=0,row=0)
-    ttk.Button(frame,
+    ttk.Button(window,
                name='overwrite',
                text='Overwrite entire settings',
-               command=lambda: prompt('Enter a settings file (no .json extension):','Overwrite Settings',lambda: download(False),lambda: download_menu(prev))
+               command=lambda: prompt('Enter a settings file (no .json extension):','Overwrite Settings',lambda: download(False, to),lambda: download_menu(prev, to))
                ).grid(column=0,row=1)
-    ttk.Button(frame,
+    ttk.Button(window,
                name='append',
                text='Append settings to default',
-               command=lambda: prompt('Enter a settings file (no .json extension):','Append Settings to Default',lambda: download(True),lambda: download_menu(prev))
+               command=lambda: prompt('Enter a settings file (no .json extension):','Append Settings to Default',lambda: download(True, to),lambda: download_menu(prev, to))
                ).grid(column=0,row=2)
-    ttk.Button(frame,
+    ttk.Button(window,
                name='cancel',
                text='Cancel',
                command=prev
                ).grid(column=0,row=3)
 
-def download(append):
-    global root, response, parameters
+def download(append, prev):
+    global window, response, parameters
     file = response.get() + '.json'
     if os.path.isfile(os.path.abspath(file)):
         if append:
@@ -224,7 +252,7 @@ def download(append):
             parameters.append(os.path.abspath(file))
         else:
             parameters.read(os.path.abspath(file))
-        main()
+        prev()
     else:
         error('ERROR: ' + file + ' does not exist in the given directory.\n\n'
             + 'Make sure that your settings file is named correctly, '
@@ -232,48 +260,46 @@ def download(append):
             + 'you did not include the .json extenstion in your input.')
 
 def main():
-    global root, frame
-    for item in frame.winfo_children():
+    global window
+    for item in window.winfo_children():
         item.destroy()
-    root.title('Main Menu')
-    ttk.Label(frame,
+    window.title('Main Menu')
+    ttk.Label(window,
               name='choice',
               text='You can utilize any of the following functions:'
               ).grid(column=0,row=0)
-    ttk.Button(frame,
+    ttk.Button(window,
                name='rossi_alpha',
                text='Run Rossi Alpha analysis',
                command=raMenu
                ).grid(column=0,row=1)
-    ttk.Button(frame,
+    ttk.Button(window,
                name='power_spectral_density',
                text='Run Power Spectral Density analysis'
                ).grid(column=0,row=2)
-    ttk.Button(frame,
+    ttk.Button(window,
                name='settings',
                text='Edit the program settings',
                command=setMenu
                ).grid(column=0,row=3)
-    ttk.Button(frame,
+    ttk.Button(window,
                name='quit',
                text='Quit the program',
                command=shutdown
                ).grid(column=0,row=4)
 
 def startup():
-    global root, frame, parameters
-    if root == None:
-        root = Tk()
-        root.title('Welcome!')
-    if frame == None:
-        frame = ttk.Frame(root, name='startup_menu', padding=10)
+    global window, parameters
+    if window == None:
+        window = Tk()
+        window.title('Welcome!')
     else:
-        for item in frame.winfo_children():
+        for item in window.winfo_children():
             item.destroy()
     if parameters == None:
         parameters = set.Settings()
-    frame.grid()
-    ttk.Label(frame,
+    window.grid()
+    ttk.Label(window,
             name='welcome',
             text='Welcome to the DNNG/PyNoise project.\n\nWith '
             + 'this software we are taking radiation data from '
@@ -282,10 +308,10 @@ def startup():
             + 'Use this Python suite to analyze a single file or '
             + 'multiple across numerous folders.\n'
             ).grid(column=0, row=0)
-    ttk.Label(frame,
+    ttk.Label(window,
             name='choice',
             text='Would you like to use the default settings or import another .json file?'
             ).grid(column=0, row=1)
-    ttk.Button(frame, name='default', text="Default", command=default).grid(column=0, row=2)
-    ttk.Button(frame, name='import', text="Import Settings", command=lambda:download_menu(startup)).grid(column=0, row=3)
-    root.mainloop()
+    ttk.Button(window, name='default', text="Default", command=default).grid(column=0, row=2)
+    ttk.Button(window, name='import', text="Import Settings", command=lambda:download_menu(startup, main)).grid(column=0, row=3)
+    window.mainloop()
