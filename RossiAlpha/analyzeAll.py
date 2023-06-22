@@ -70,7 +70,7 @@ def analyzeAllType2(settings):
                                         settings['Residual Plot Settings'])
     thisWeightedFit.fit_RA_hist_weighting()
     thisWeightedFit.plot_RA_and_fit(save_fig=settings['General Settings']['Save figures'], 
-                                    show_plot=False, errorBars = settings['RossiAlpha Settings']['Histogram Generation Settings']['Error Bar/Band'])
+                                    show_plot=settings['General Settings']['Show plots'], errorBars = settings['RossiAlpha Settings']['Histogram Generation Settings']['Error Bar/Band'])
     plt.close('all')
 
 #
