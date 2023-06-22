@@ -29,15 +29,17 @@ hist_method = None
 # Where the best fit curve data is stored.
 best_fit = None
 
-def prompt(message, title, prev, to):
+def prompt(prev, to, message='Enter your choice:', title='User Prompt'):
 
     '''Create a prompt window to get a text input from the user.
     
     Requires:
-    - message: the message that the user sees above the entry box.
-    - title: the title of the window
     - prev: the function to return to if the user cancels the input.
-    - to: the function that is called when the user confirms their input.'''
+    - to: the function that is called when the user confirms their input.
+    
+    Optional:
+    - message: the message that the user sees above the entry box.
+    - title: the title of the window'''
 
     global window, response
     response = tk.StringVar()
@@ -46,7 +48,7 @@ def prompt(message, title, prev, to):
         item.destroy()
     # Properly name the window.
     window.title(title)
-    # The label with the appropriate message.
+    # The label with the appropriate prompt message.
     ttk.Label(window,
               name='prompt',
               text=message
@@ -69,15 +71,17 @@ def prompt(message, title, prev, to):
               command=prev
               ).grid(column=0,row=3)
     
-def error(message, title='ERROR!'):
-    '''Create an error window for when the user encounters an error.
+def error(message='Something went wrong. Please contact the developers.',
+          title='ERROR!'):
+    '''Create an error popup for when the user encounters an error.
     
-    Requires:
+    Parameters:
     - message: the error message that the user will see.
-    Optional:
-    - title: the title of the window.'''
+    - title: the title of the window.
+    
+    If no parameters are given, a default error popup is shown. '''
 
-    # Create a new window and title it accordingly.
+    # Create a new popup and title it accordingly.
     popup=Tk()
     popup.title(title)
     # The label with the appropriate error message.
@@ -91,7 +95,7 @@ def error(message, title='ERROR!'):
                text='OK',
                command=popup.destroy
                ).grid(column=0,row=1)
-    # Start up the window.
+    # Open the popup.
     popup.mainloop()
 
 def warningFunction(popup, to):
@@ -108,102 +112,155 @@ def warningFunction(popup, to):
     to()
 
 
-def warning(message, to, title='WARNING!'):
+def warning(to,
+            message='This action will delete data. Are you sure you want to do this?',
+            title='WARNING!'):
+
+    '''Display a warning popup when the user is at risk of deleting/overwriting data.
+    
+    Requires:
+    - to: the function to be called should the user choose to ignore the warning.
+    
+    Optional:
+    - message: the warning the user will receive.
+    - title: the title of the popup.'''
+
+    # Create a new popup and title it accordingly.
     popup=Tk()
     popup.title(title)
+    # The label with the appropriate warning message.
     ttk.Label(popup,
             name='message',
             text=message
             ).grid(column=0,row=0)
+    # The yes button.
     ttk.Button(popup,
                name='yes',
                text='Yes',
                command=lambda: warningFunction(popup, to)
                ).grid(column=0,row=1)
+    # The no button.
     ttk.Button(popup,
                name='no',
                text='No',
                command=popup.destroy
                ).grid(column=0,row=2)
+    # Open the popup.
     popup.mainloop()
 
 def shutdown(file=''):
+
+    '''Save settings to the specified file at the end of runtime.
+    
+    Parameters:
+    - file: the absolute path of the file being saved to.
+    
+    If no file is given, the function assumes the 
+    file is in the global response variable.'''
+
     global window, response
+    # If no file given.
     if file == '':
+        # Get the file from the response variable and convert it to a path.
         file = os.path.abspath(response.get() + '.json')
+        # If the file already exists, warns the user of the overwrite.
         if os.path.isfile(file):
-            warning('Settings file ' + file + ' already exists.'
-                    + ' Do you want to overwrite the previous stored settings?',
-                    lambda: shutdown(file))
+            warning(lambda: shutdown(file))
+            # Return so the window isn't deleted.
             return
+        # Otherwise, save to the new file.
         else:
             parameters.save(file)
+    # If a file is given.
     else:
+        # If saving to the default, write the settings completely.
         if file == os.path.abspath('default.json'):
             parameters.write(file)
+        # Otherwise, save a shortened version.
         else:
             parameters.save(file)
+    # Close the program.
     window.destroy()
 
 def shutdown_menu():
+    '''Load the shutdown menu if need be.'''
     global window, parameters
+    # Compare the current settings to the most recently 
+    # imported + appended and store the changes.
     list = parameters.compare()
-    for item in window.winfo_children():
-        item.destroy()
-    window.title('Unsaved Changes')
+    # If there were changes from the baseline.
     if len(list) != 0:
+        # Clear the window of all previous entries, labels, and buttons.
+        for item in window.winfo_children():
+            item.destroy()
+        # Properly name the window.
+        window.title('Unsaved Changes')
+        # Notify the user of unsaved changes and note their
+        # most recently imported and appended settings.
         ttk.Label(window,
                 name='message',
                 text='You have made unsaved changes to the settings:\n\n'
                 + 'Base settings: ' + parameters.origin + '\n\nMost recently '
                 + 'appended settings: ' + parameters.appended + '\n'
                 ).grid(column=0,row=0)
+        # Keep track of the total listed changes.
         total = 0
-        for entry in list:
-            if total == 5:
-                break
+        # For up to 5 entries in the list.
+        while total != 5 and total < len(list):
+            # List the entry.
             ttk.Label(window,
                 name='entry' + str(total),
-                text=entry
+                text=list[total]
                 ).grid(column=0,row=total+1)
+            # Increase the count.
             total += 1
+        # If there were more than 5 entries,
+        # note how many more there are.
         if len(list) > 5:
             ttk.Label(window,
                 name='extra',
                 text='\n...plus ' + str(len(list)-5) + ' more change(s).'
                 ).grid(column=0,row=6)
             total += 1
+        # Ask the user what they want to do.
         ttk.Label(window,
                 name='prompt',
                 text='\nWhat would you like to do with your changes?'
                 ).grid(column=0,row=total+1)
+        # Button for saving current settings to the default.
         ttk.Button(window,
                 name='default',
                 text='Save as default',
-                command=lambda: warning('This will overwrite the current default settings. '
-                                        + 'Are you sure you want to do this?',
-                                        lambda: shutdown(os.path.abspath('default.json')))
+                command=lambda: warning(lambda: shutdown(os.path.abspath('default.json')))
                 ).grid(column=0,row=total+2)
+        # Button for saving current settings to another file.
         ttk.Button(window,
                 name='new',
-                text='Save to new file',
-                command=lambda: prompt('Enter a name for the new settings '
-                                    + '(not including the .json file extension).',
-                                    'Export Settings',
-                                    shutdown_menu,
-                                    lambda: shutdown())
+                text='Save to other file',
+                command=lambda: prompt(shutdown_menu,
+                                       lambda: shutdown(),
+                                       'Enter a name for the new settings '
+                                        + '(not including the .json file extension).',
+                                        'Export Settings',)
                 ).grid(column=0,row=total+3)
+        # Button for discarding the current settings.
         ttk.Button(window,
-                name='abandon',
-                text='Abandon changes',
-                command=lambda: warning('All your current changes will be lost. '
-                                        + 'Are you sure you want to do this?',
-                                        window.destroy)
+                name='discard',
+                text='Discard changes',
+                command=lambda: warning(window.destroy,
+                                        'All your current changes will be lost. '
+                                        + 'Are you sure you want to do this?')
                 ).grid(column=0,row=total+4)
+    # If no changes, program can just end here.
     else:
         window.destroy()
 
 def createTimeDifs():
+
+    '''Copy and pasted function from raDriver for creating time differences.
+    
+    See the original for more info.'''
+
     global time_difs, time_difs_file, time_difs_method, parameters
     name = parameters.settings['Input/Output Settings']['Input file/folder']
     name = name[name.rfind('/')+1:]
@@ -224,11 +281,9 @@ def createTimeDifs():
 
 def createPlot():
 
-    '''Creates a histogram based on the time difference data.
+    '''Copy and pasted function from raDriver for creating the histogram.
     
-    Will overwrite the current histogram, if one exists.
-
-    Assumes that the time difference data is valid.'''
+    See the original for more info.'''
 
     global time_difs, histogram, hist_file, hist_method, parameters
     histogram = plt.RossiHistogram(parameters.settings['RossiAlpha Settings']['Reset time'],
@@ -242,6 +297,11 @@ def createPlot():
     hist_method = parameters.settings['RossiAlpha Settings']['Time difference method']
 
 def calculateTimeDifsAndPlot():
+
+    '''Copy and pasted function from raDriver for creating the 
+    time differences and histogram plot in parallel.
+    
+    See the original for more info.'''
 
     global histogram, time_difs, hist_file, hist_method, parameters
     time_difs = None
@@ -260,18 +320,33 @@ def calculateTimeDifsAndPlot():
     hist_method = parameters.settings['RossiAlpha Settings']['Time difference method']
 
 def plotSplit():
+
+    '''The split for plotting the histogram to determine 
+    whether it is generated in series or parallel with 
+    creating the time differences.'''
+
     global parameters
-    if time_difs is None or (not (time_difs_method == parameters.settings['RossiAlpha Settings']['Time difference method'] and time_difs_file == parameters.settings['Input/Output Settings']['Input file/folder'])):
+    # If no time difs have been made or the input file/
+    # method of time difference calculation has changed.
+    if time_difs is None or (not 
+                             (time_difs_method == parameters.settings['RossiAlpha Settings']['Time difference method'] 
+                          and time_difs_file == parameters.settings['Input/Output Settings']['Input file/folder'])):
+        # Combine time difference calculation and plot generation if applicable.
         if (parameters.settings['RossiAlpha Settings']['Combine Calc and Binning']):
             calculateTimeDifsAndPlot()
+        # Otherwise, do them separately.
         else:
             createTimeDifs()
-            if not parameters.settings['RossiAlpha Settings']['Combine Calc and Binning'] :
-                createPlot()
+            createPlot()
+    # Otherwise, just create the plot.
     else:
         createPlot()
 
 def createBestFit():
+
+    '''Copy and pasted function from raDriver for creating a line of best fit.
+    
+    See the original for more info.'''
 
     global time_difs, histogram, best_fit, parameters
     counts = histogram.counts
@@ -282,14 +357,24 @@ def createBestFit():
     best_fit.fit_and_residual(save_every_fig=parameters.settings['General Settings']['Save figures'], 
                               show_plot=parameters.settings['General Settings']['Show plots'])
 
-def raAll(single):
+def raAll(single: bool):
+
+    '''Run all of the Rossi Alpha analyis.
+    
+    Reqires:
+    - single: a boolean that marks whether the input is a single file or folder.'''
+
     global time_difs, histogram, best_fit
+    # Run and save accordingly based on the input type.
     if single:
         time_difs, histogram, best_fit = mn.analyzeAllType1(parameters.settings)
     else:
         mn.analyzeAllType2(parameters.settings)
 
 def raSplit(mode):
+
+    ''''''
+
     if parameters.settings['Input/Output Settings']['Input file/folder'] == 'none':
         error('You currently have no input file or folder defined.\n\n'
             + 'Please make sure to specify one before running any analysis.\n')
@@ -305,17 +390,17 @@ def raSplit(mode):
                     case 'raAll':
                         raAll(True)
                     case 'createTimeDifs':
-                        warning('There are already stored time differences '
-                            + 'in this runtime. Do you want to overwrite them?',
-                            createTimeDifs)
+                        warning(createTimeDifs,
+                                'There are already stored time differences '
+                                + 'in this runtime. Do you want to overwrite them?')
                     case 'plotSplit':
-                        warning('There is an already stored histogram '
-                            + 'in this runtime. Do you want to overwrite it?',
-                            plotSplit)
+                        warning(plotSplit,
+                                'There is an already stored histogram '
+                                + 'in this runtime. Do you want to overwrite it?')
                     case 'createBestFit':
-                        warning('There is an already stored best fit line '
-                            + 'in this runtime. Do you want to overwrite it?',
-                            createBestFit)
+                        warning(createBestFit,
+                                'There is an already stored best fit line '
+                                + 'in this runtime. Do you want to overwrite it?')
 
         else:
             if mode != 'raAll':
@@ -541,12 +626,18 @@ def download_menu(prev, to):
     ttk.Button(window,
                name='overwrite',
                text='Overwrite entire settings',
-               command=lambda: prompt('Enter a settings file (no .json extension):','Overwrite Settings',lambda: download_menu(prev, to),lambda: download(False, to))
+               command=lambda: prompt(lambda: download_menu(prev, to),
+                                      lambda: download(False, to),
+                                      'Enter a settings file (no .json extension):',
+                                      'Overwrite Settings')
                ).grid(column=0,row=1)
     ttk.Button(window,
                name='append',
                text='Append settings to default',
-               command=lambda: prompt('Enter a settings file (no .json extension):','Append Settings to Default',lambda: download_menu(prev, to),lambda: download(True, to))
+               command=lambda: prompt(lambda: download_menu(prev, to),
+                                      lambda: download(True, to),
+                                      'Enter a settings file (no .json extension):',
+                                      'Append Settings to Default')
                ).grid(column=0,row=2)
     ttk.Button(window,
                name='cancel',
@@ -597,7 +688,9 @@ def main():
     ttk.Button(window,
                name='quit',
                text='Quit the program',
-               command=lambda: warning('Are you sure you want to quit the program?',shutdown_menu)
+               command=lambda: warning(shutdown_menu,
+                                       'Are you sure you want to quit the program?',
+                                       'Shutdown Confirmation')
                ).grid(column=0,row=4)
 
 def startup():
