@@ -11,22 +11,26 @@ from RossiAlpha import plots as plt
 from RossiAlpha import timeDifs as dif
 from RossiAlpha import analyzingFolders as fol
 
+# The main window that is used for the program.
 window = None
+# The settings used during runtime
 parameters = None
+# The response variable used for entry boxes.
 response = None
 
-# Where the time differences are stored.
+# Where the time difference data us stored.
 time_difs = None
 time_difs_file = None
 time_difs_method = None
-# Where the histogram plot is stored.
+# Where the histogram plot data is stored.
 histogram = None
 hist_file = None
 hist_method = None
-# Where the best fit curve is stored.
+# Where the best fit curve data is stored.
 best_fit = None
 
 def prompt(message, title, prev, to):
+
     '''Create a prompt window to get a text input from the user.
     
     Requires:
@@ -90,7 +94,8 @@ def error(message, title='ERROR!'):
     # Start up the window.
     popup.mainloop()
 
-def warningFunction(popup, to, param=None):
+def warningFunction(popup, to):
+
     '''The function that is called when the user chooses to ignore a warning.
     
     Requires:
@@ -100,13 +105,10 @@ def warningFunction(popup, to, param=None):
 
     # Destroy the warning window and run the desired function.
     popup.destroy()
-    if param == None:
-        to()
-    else:
-        to(param)
+    to()
 
 
-def warning(message, to, param=None, title='WARNING!'):
+def warning(message, to, title='WARNING!'):
     popup=Tk()
     popup.title(title)
     ttk.Label(popup,
@@ -116,7 +118,7 @@ def warning(message, to, param=None, title='WARNING!'):
     ttk.Button(popup,
                name='yes',
                text='Yes',
-               command=lambda: warningFunction(popup, to, param)
+               command=lambda: warningFunction(popup, to)
                ).grid(column=0,row=1)
     ttk.Button(popup,
                name='no',
@@ -132,8 +134,7 @@ def shutdown(file=''):
         if os.path.isfile(file):
             warning('Settings file ' + file + ' already exists.'
                     + ' Do you want to overwrite the previous stored settings?',
-                    shutdown,
-                    file)
+                    lambda: shutdown(file))
             return
         else:
             parameters.save(file)
@@ -181,8 +182,7 @@ def shutdown_menu():
                 text='Save as default',
                 command=lambda: warning('This will overwrite the current default settings. '
                                         + 'Are you sure you want to do this?',
-                                        shutdown,
-                                        os.path.abspath('default.json'))
+                                        lambda: shutdown(os.path.abspath('default.json')))
                 ).grid(column=0,row=total+2)
         ttk.Button(window,
                 name='new',
@@ -396,7 +396,7 @@ def setMenu(prev):
     ttk.Button(window,
               name='import',
               text='Import settings file',
-              command=lambda: download_menu(lambda: setMenu(prev), setMenu, prev)
+              command=lambda: download_menu(lambda: setMenu(prev), lambda: setMenu(prev))
               ).grid(column=0,row=2)
     ttk.Button(window,
               name='return',
@@ -529,7 +529,7 @@ def default():
     parameters.read(path)
     main()
 
-def download_menu(prev, to, param):
+def download_menu(prev, to):
     global window
     for item in window.winfo_children():
         item.destroy()
@@ -541,12 +541,12 @@ def download_menu(prev, to, param):
     ttk.Button(window,
                name='overwrite',
                text='Overwrite entire settings',
-               command=lambda: prompt('Enter a settings file (no .json extension):','Overwrite Settings',lambda: download_menu(prev, to, param),lambda: download(False, to, param))
+               command=lambda: prompt('Enter a settings file (no .json extension):','Overwrite Settings',lambda: download_menu(prev, to),lambda: download(False, to))
                ).grid(column=0,row=1)
     ttk.Button(window,
                name='append',
                text='Append settings to default',
-               command=lambda: prompt('Enter a settings file (no .json extension):','Append Settings to Default',lambda: download_menu(prev, to, param),lambda: download(True, to, param))
+               command=lambda: prompt('Enter a settings file (no .json extension):','Append Settings to Default',lambda: download_menu(prev, to),lambda: download(True, to))
                ).grid(column=0,row=2)
     ttk.Button(window,
                name='cancel',
@@ -554,7 +554,7 @@ def download_menu(prev, to, param):
                command=prev
                ).grid(column=0,row=3)
 
-def download(append, prev, param):
+def download(append, prev):
     global window, response, parameters
     file = response.get() + '.json'
     if os.path.isfile(os.path.abspath(file)):
@@ -563,10 +563,7 @@ def download(append, prev, param):
             parameters.append(os.path.abspath(file))
         else:
             parameters.read(os.path.abspath(file))
-        if param != None:
-            prev(param)
-        else:
-            prev()
+        prev()
     else:
         error(file + ' does not exist in the given directory.\n\n'
             + 'Make sure that your settings file is named correctly, '
@@ -628,5 +625,5 @@ def startup():
             text='Would you like to use the default settings or import another .json file?'
             ).grid(column=0, row=1)
     ttk.Button(window, name='default', text="Default", command=default).grid(column=0, row=2)
-    ttk.Button(window, name='import', text="Import Settings", command=lambda:download_menu(startup, main, None)).grid(column=0, row=3)
+    ttk.Button(window, name='import', text="Import Settings", command=lambda:download_menu(startup, main)).grid(column=0, row=3)
     window.mainloop()
