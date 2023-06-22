@@ -22,7 +22,7 @@
         "Combine Calc and Binning": false,
         "Reset time": 1000,
         "Bin width": 9,
-        "Error Bar/Band":"band",
+        "Error Bar/Band": "band",
         "Minimum cutoff": 30
     },
     "PSD Settings": {
