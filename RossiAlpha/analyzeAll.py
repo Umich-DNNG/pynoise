@@ -32,13 +32,13 @@ def analyzeAllType1(settings):
         listDataSorted = np.sort(listData)
     
     # applying time differences function
-    thisTimeDifCalc = timeDifCalcs(listDataSorted, settings['RossiAlpha Settings']['Histogram Generation Settings']["Reset time"],  settings['RossiAlpha Settings']["Time difference method"])
+    thisTimeDifCalc = timeDifCalcs(listDataSorted, settings['RossiAlpha Settings']["Reset time"],  settings['RossiAlpha Settings']["Time difference method"])
 
     if(not settings['RossiAlpha Settings']['Combine Calc and Binning']):
         time_diffs = thisTimeDifCalc.calculate_time_differences()
 
         # creating RossiHistogram() object with specified settings
-        thisPlot = RossiHistogram(settings['RossiAlpha Settings']['Histogram Generation Settings']['Reset time'], settings['RossiAlpha Settings']['Histogram Generation Settings']['Bin width'], settings['Histogram Visual Settings'], settings['Input/Output Settings']['Save directory'])
+        thisPlot = RossiHistogram(settings['RossiAlpha Settings']['Reset time'], settings['RossiAlpha Settings']['Bin width'], settings['Histogram Visual Settings'], settings['Input/Output Settings']['Save directory'])
 
 
 
@@ -46,7 +46,7 @@ def analyzeAllType1(settings):
     
     #combined calculating time differences and binning them
     else:
-        thisPlot, counts, bin_centers, bin_edges = thisTimeDifCalc.calculateTimeDifsAndBin(settings['RossiAlpha Settings']['Histogram Generation Settings']['Bin width'], settings['General Settings']['Save figures'], settings['General Settings']['Show plots'], settings['Input/Output Settings']['Save directory'], settings['Histogram Visual Settings'])
+        thisPlot, counts, bin_centers, bin_edges = thisTimeDifCalc.calculateTimeDifsAndBin(settings['RossiAlpha Settings']['Bin width'], settings['General Settings']['Save figures'], settings['General Settings']['Show plots'], settings['Input/Output Settings']['Save directory'], settings['Histogram Visual Settings'])
         time_diffs = None
 
     
@@ -65,12 +65,12 @@ def analyzeAllType1(settings):
 def analyzeAllType2(settings):
     RA_hist_total = analyzingFolders.compile_sample_stdev_RA_dist(settings)
     from .fitting import Fit_With_Weighting
-    thisWeightedFit = Fit_With_Weighting(RA_hist_total,settings['RossiAlpha Settings']['Fit Region Settings']['Minimum cutoff'], 
+    thisWeightedFit = Fit_With_Weighting(RA_hist_total,settings['RossiAlpha Settings']['Minimum cutoff'], 
                                         settings['General Settings'],settings['Input/Output Settings']['Save directory'], settings['Line Fitting Settings'], 
                                         settings['Residual Plot Settings'])
     thisWeightedFit.fit_RA_hist_weighting()
     thisWeightedFit.plot_RA_and_fit(save_fig=settings['General Settings']['Save figures'], 
-                                    show_plot=settings['General Settings']['Show plots'], errorBars = settings['RossiAlpha Settings']['Histogram Generation Settings']['Error Bar/Band'])
+                                    show_plot=settings['General Settings']['Show plots'], errorBars = settings['RossiAlpha Settings']['Error Bar/Band'])
     plt.close('all')
 
 #

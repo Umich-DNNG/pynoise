@@ -5,10 +5,210 @@ import settings as set
 import os
 import numpy as np
 from PowerSpectralDensity import PSD
+from RossiAlpha import analyzeAll as mn
+from RossiAlpha import fitting as fit
+from RossiAlpha import plots as plt
+from RossiAlpha import timeDifs as dif
+from RossiAlpha import analyzingFolders as fol
 
 window = None
 parameters = None
 response = None
+
+# Where the time differences are stored.
+time_difs = None
+time_difs_file = None
+time_difs_method = None
+# Where the histogram plot is stored.
+histogram = None
+hist_file = None
+hist_method = None
+# Where the best fit curve is stored.
+best_fit = None
+
+def prompt(message, title, function, prev):
+    global window, response
+    response = tk.StringVar()
+    for item in window.winfo_children():
+        item.destroy()
+    window.title(title)
+    ttk.Label(window,
+              name='prompt',
+              text=message
+              ).grid(column=0,row=0)
+    ttk.Entry(window,
+              name='response',
+              textvariable=response,
+              ).grid(column=0,row=1)
+    ttk.Button(window,
+              name='continue',
+              text='Continue',
+              command=function
+              ).grid(column=0,row=2)
+    ttk.Button(window,
+              name='cancel',
+              text='Cancel',
+              command=prev
+              ).grid(column=0,row=3)
+    
+def error(message):
+    window=Tk()
+    window.title('ERROR!')
+    ttk.Label(window,
+            name='message',
+            text=message
+            ).grid(column=0,row=0)
+    ttk.Button(window,
+               name='return',
+               text='OK',
+               command=window.destroy
+               ).grid(column=0,row=1)
+    window.mainloop()
+
+def warningFunction(to, window):
+    window.destroy()
+    to()
+
+
+def warning(message, to):
+    window=Tk()
+    window.title('WARNING!')
+    ttk.Label(window,
+            name='message',
+            text=message
+            ).grid(column=0,row=0)
+    ttk.Button(window,
+               name='yes',
+               text='Yes',
+               command=lambda: warningFunction(to, window)
+               ).grid(column=0,row=1)
+    ttk.Button(window,
+               name='no',
+               text='No',
+               command=window.destroy
+               ).grid(column=0,row=2)
+    window.mainloop()
+
+def createTimeDifs():
+    global time_difs, time_difs_file, time_difs_method, parameters
+    name = parameters.settings['Input/Output Settings']['Input file/folder']
+    name = name[name.rfind('/')+1:]
+    if name.count('.') > 0:
+        if parameters.settings['Input/Output Settings'].get('Data Column') is not None:
+            data = np.loadtxt(parameters.settings['Input/Output Settings']['Input file/folder'],delimiter=" ", usecols=(parameters.settings['Input/Output Settings']['Data Column']))
+        else:
+            data = np.loadtxt(parameters.settings['Input/Output Settings']['Input file/folder'])
+
+        if parameters.settings['General Settings']['Sort data']:
+            data = np.sort(data)
+        time_difs = dif.timeDifCalcs(data, 
+            parameters.settings['RossiAlpha Settings']['Reset time'], 
+            parameters.settings['RossiAlpha Settings']['Time difference method'])
+        time_difs = time_difs.calculate_time_differences()
+        time_difs_file = parameters.settings['Input/Output Settings']['Input file/folder']
+        time_difs_method = parameters.settings['RossiAlpha Settings']['Time difference method']
+
+def createPlot():
+
+    '''Creates a histogram based on the time difference data.
+    
+    Will overwrite the current histogram, if one exists.
+
+    Assumes that the time difference data is valid.'''
+
+    global time_difs, histogram, hist_file, hist_method, parameters
+    histogram = plt.RossiHistogram(parameters.settings['RossiAlpha Settings']['Reset time'],
+                              parameters.settings['RossiAlpha Settings']['Bin width'],
+                              parameters.settings['Histogram Visual Settings'],
+                              parameters.settings['Input/Output Settings']['Save directory'])
+    histogram.plot(time_difs,
+              save_fig=parameters.settings['General Settings']['Save figures'],
+              show_plot=parameters.settings['General Settings']['Show plots'])
+    hist_file = parameters.settings['Input/Output Settings']['Input file/folder']
+    hist_method = parameters.settings['RossiAlpha Settings']['Time difference method']
+
+def calculateTimeDifsAndPlot():
+
+    global histogram, time_difs, hist_file, hist_method, parameters
+    time_difs = None
+    if parameters.settings['Input/Output Settings'].get('Data Column') is not None:
+        data = np.loadtxt(parameters.settings['Input/Output Settings']['Input file/folder'],delimiter=" ", usecols=(parameters.settings['Input/Output Settings']['Data Column']))
+    else:
+        data = np.loadtxt(parameters.settings['Input/Output Settings']['Input file/folder'])
+
+    if parameters.settings['General Settings']['Sort data']:
+        data = np.sort(data)
+
+    thisTimeDifCalc = dif.timeDifCalcs(data, parameters.settings['RossiAlpha Settings']['Reset time'], parameters.settings['RossiAlpha Settings']['Time difference method'])
+
+    histogram, counts, bin_centers, bin_edges = thisTimeDifCalc.calculateTimeDifsAndBin(parameters.settings['RossiAlpha Settings']['Bin width'], parameters.settings['General Settings']['Save figures'], parameters.settings['General Settings']['Show plots'], parameters.settings['Input/Output Settings']['Save directory'], parameters.settings['Histogram Visual Settings'])
+    hist_file = parameters.settings['Input/Output Settings']['Input file/folder']
+    hist_method = parameters.settings['RossiAlpha Settings']['Time difference method']
+
+def plotSplit():
+    global parameters
+    if time_difs is None or (not (time_difs_method == parameters.settings['RossiAlpha Settings']['Time difference method'] and time_difs_file == parameters.settings['Input/Output Settings']['Input file/folder'])):
+        if (parameters.settings['RossiAlpha Settings']['Combine Calc and Binning']):
+            calculateTimeDifsAndPlot()
+        else:
+            createTimeDifs()
+            if not parameters.settings['RossiAlpha Settings']['Combine Calc and Binning'] :
+                createPlot()
+    else:
+        createPlot()
+
+def createBestFit():
+
+    global time_difs, histogram, best_fit, parameters
+    counts = histogram.counts
+    bin_centers = histogram.bin_centers
+
+    best_fit = fit.RossiHistogramFit(counts, bin_centers, parameters.settings)
+        
+    best_fit.fit_and_residual(save_every_fig=parameters.settings['General Settings']['Save figures'], 
+                              show_plot=parameters.settings['General Settings']['Show plots'])
+
+def raAll(single):
+    global time_difs, histogram, best_fit
+    if single:
+        time_difs, histogram, best_fit = mn.analyzeAllType1(parameters.settings)
+    else:
+        mn.analyzeAllType2(parameters.settings)
+
+def raSplit(mode):
+    if parameters.settings['Input/Output Settings']['Input file/folder'] == 'none':
+        error('You currently have no input file or folder defined.\n\n'
+            + 'Please make sure to specify one before running any analysis.\n')
+    else:
+        name = parameters.settings['Input/Output Settings']['Input file/folder']
+        name = name[name.rfind('/')+1:]
+        if name.count('.') > 0:
+            if parameters.settings['RossiAlpha Settings']['Time difference method'] != 'any_and_all':
+                error('To analyze a single file, you must use '
+                    + 'the any_and_all time difference method only.\n')
+            else:
+                match mode:
+                    case 'raAll':
+                        raAll(True)
+                    case 'createTimeDifs':
+                        warning('There are already stored time differences '
+                            + 'in this runtime. Do you want to overwrite them?',
+                            createTimeDifs)
+                    case 'plotSplit':
+                        warning('There is an already stored histogram '
+                            + 'in this runtime. Do you want to overwrite it?',
+                            plotSplit)
+                    case 'createBestFit':
+                        warning('There is an already stored best fit line '
+                            + 'in this runtime. Do you want to overwrite it?',
+                            createBestFit)
+
+        else:
+            if mode != 'raAll':
+                error('You can only run full folder analysis.\n\n'
+                      + 'These modular options are for single files.')
+            else:
+                raAll(False)
 
 def conduct_PSD():
     global parameters
@@ -64,45 +264,6 @@ def saveType(value: str):
         return response
     except ValueError:
         return value
-
-def prompt(message, title, function, prev):
-    global window, response
-    response = tk.StringVar()
-    for item in window.winfo_children():
-        item.destroy()
-    window.title(title)
-    ttk.Label(window,
-              name='prompt',
-              text=message
-              ).grid(column=0,row=0)
-    ttk.Entry(window,
-              name='response',
-              textvariable=response,
-              ).grid(column=0,row=1)
-    ttk.Button(window,
-              name='continue',
-              text='Continue',
-              command=function
-              ).grid(column=0,row=2)
-    ttk.Button(window,
-              name='cancel',
-              text='Cancel',
-              command=prev
-              ).grid(column=0,row=3)
-    
-def error(message):
-    window=Tk()
-    window.title('Uh oh!')
-    ttk.Label(window,
-            name='message',
-            text=message
-            ).grid(column=0,row=0)
-    ttk.Button(window,
-               name='return',
-               text='OK',
-               command=window.destroy
-               ).grid(column=0,row=1)
-    window.mainloop()
 
 def setMenu(prev):
     global window
@@ -194,19 +355,23 @@ def raMenu():
               ).grid(column=0,row=0)
     ttk.Button(window,
               name='all',
-              text='Run entire analysis'
+              text='Run entire analysis',
+              command=lambda: raSplit('raAll')
               ).grid(column=0,row=1)
     ttk.Button(window,
               name='time_dif',
-              text='Calculate time differences'
+              text='Calculate time differences',
+              command=lambda: raSplit('createTimeDifs')
               ).grid(column=0,row=2)
     ttk.Button(window,
               name='histogram',
-              text='Create histogram'
+              text='Create histogram',
+              command=lambda: raSplit('plotSplit')
               ).grid(column=0,row=3)
     ttk.Button(window,
               name='fit',
-              text='Fit data'
+              text='Fit data',
+              command=lambda: raSplit('createBestFit')
               ).grid(column=0,row=4)
     ttk.Button(window,
               name='settings',
@@ -243,26 +408,6 @@ def psdMenu():
               text='Return to main menu',
               command=main
               ).grid(column=0,row=3)
-
-def shutdown():
-    global window
-    for item in window.winfo_children():
-        item.destroy()
-    window.title('Confirm shutdown')
-    ttk.Label(window,
-              name='message',
-              text='Are you sure you want to quit the program?'
-              ).grid(column=0,row=0)
-    ttk.Button(window,
-              name='yes',
-              text='Yes',
-              command=window.destroy
-              ).grid(column=0,row=1)
-    ttk.Button(window,
-              name='no',
-              text='No',
-              command=main
-              ).grid(column=0,row=2)
 
 def default():
     global parameters
@@ -309,7 +454,7 @@ def download(append, prev, param):
         else:
             prev()
     else:
-        error('ERROR: ' + file + ' does not exist in the given directory.\n\n'
+        error(file + ' does not exist in the given directory.\n\n'
             + 'Make sure that your settings file is named correctly, '
             + 'the correct absolute/relative path to it is given, and '
             + 'you did not include the .json extenstion in your input.')
@@ -341,7 +486,7 @@ def main():
     ttk.Button(window,
                name='quit',
                text='Quit the program',
-               command=shutdown
+               command=lambda: warning('Are you sure you want to quit the program?',window.destroy)
                ).grid(column=0,row=4)
 
 def startup():

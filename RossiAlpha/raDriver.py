@@ -42,7 +42,7 @@ def createTimeDifs():
         if editor.parameters.settings['General Settings']['Sort data']:
             data = np.sort(data)
         time_difs = dif.timeDifCalcs(data, 
-            editor.parameters.settings['RossiAlpha Settings']['Histogram Generation Settings']['Reset time'], 
+            editor.parameters.settings['RossiAlpha Settings']['Reset time'], 
             editor.parameters.settings['RossiAlpha Settings']['Time difference method'])
         time_difs = time_difs.calculate_time_differences()
         editor.log('Calculated time differences for file ' 
@@ -63,8 +63,8 @@ def createPlot():
 
     global time_difs, histogram, hist_file, hist_method, editor
     editor.print('Building plot...')
-    histogram = plt.RossiHistogram(editor.parameters.settings['RossiAlpha Settings']['Histogram Generation Settings']['Reset time'],
-                              editor.parameters.settings['RossiAlpha Settings']['Histogram Generation Settings']['Bin width'],
+    histogram = plt.RossiHistogram(editor.parameters.settings['RossiAlpha Settings']['Reset time'],
+                              editor.parameters.settings['RossiAlpha Settings']['Bin width'],
                               editor.parameters.settings['Histogram Visual Settings'],
                               editor.parameters.settings['Input/Output Settings']['Save directory'])
     histogram.plot(time_difs,
@@ -94,9 +94,9 @@ def calculateTimeDifsAndPlot():
     if editor.parameters.settings['General Settings']['Sort data']:
         data = np.sort(data)
 
-    thisTimeDifCalc = dif.timeDifCalcs(data, editor.parameters.settings['RossiAlpha Settings']['Histogram Generation Settings']['Reset time'], editor.parameters.settings['RossiAlpha Settings']['Time difference method'])
+    thisTimeDifCalc = dif.timeDifCalcs(data, editor.parameters.settings['RossiAlpha Settings']['Reset time'], editor.parameters.settings['RossiAlpha Settings']['Time difference method'])
 
-    histogram, counts, bin_centers, bin_edges = thisTimeDifCalc.calculateTimeDifsAndBin(editor.parameters.settings['RossiAlpha Settings']['Histogram Generation Settings']['Bin width'], editor.parameters.settings['General Settings']['Save figures'], editor.parameters.settings['General Settings']['Show plots'], editor.parameters.settings['Input/Output Settings']['Save directory'], editor.parameters.settings['Histogram Visual Settings'])
+    histogram, counts, bin_centers, bin_edges = thisTimeDifCalc.calculateTimeDifsAndBin(editor.parameters.settings['RossiAlpha Settings']['Bin width'], editor.parameters.settings['General Settings']['Save figures'], editor.parameters.settings['General Settings']['Show plots'], editor.parameters.settings['Input/Output Settings']['Save directory'], editor.parameters.settings['Histogram Visual Settings'])
     editor.log('Calculated time differences and simultaneously created a histogram plot using the current settings and time difference data.\n')
     hist_file = editor.parameters.settings['Input/Output Settings']['Input file/folder']
     hist_method = editor.parameters.settings['RossiAlpha Settings']['Time difference method']
