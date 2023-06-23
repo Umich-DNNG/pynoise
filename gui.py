@@ -168,14 +168,20 @@ def shutdown_menu():
         ttk.Button(window,
                 name='default',
                 text='Save as default',
-                command=lambda: warning(lambda: run.shutdown(window, parameters, os.path.abspath('default.json')))
+                command=lambda: run.shutdown(window,
+                                             parameters,
+                                             os.path.abspath('./settings/default.json'),
+                                             True)
                 ).grid(column=0,row=total+2)
         # Button for saving current settings to another file.
         ttk.Button(window,
                 name='new',
                 text='Save to other file',
                 command=lambda: prompt(shutdown_menu,
-                                       lambda file: run.shutdown(window, parameters, os.path.abspath(file+'.json')),
+                                       lambda file: run.shutdown(window,
+                                                                 parameters,
+                                                                 os.path.abspath(file+'.json'),
+                                                                 True),
                                        'Enter a name for the new settings '
                                         + '(not including the .json file extension).',
                                         'Export Settings',)
@@ -516,7 +522,7 @@ def startup():
     ttk.Button(window,
                name='default',
                text="Default",
-               command=lambda:run.download(parameters,os.path.abspath('default.json'),False,main)
+               command=lambda:run.download(parameters,os.path.abspath('./settings/default.json'),False,main)
                ).grid(column=0, row=2)
     # Button for importing other settings.
     ttk.Button(window,

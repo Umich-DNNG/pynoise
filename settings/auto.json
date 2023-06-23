@@ -1,0 +1,10 @@
+{
+    "Input/Output Settings": {
+        "Input file/folder": "./RossiAlpha/sample_data/RF3-40_59min.txt",
+        "Keep logs": true
+    },
+    "General Settings": {
+        "Quiet mode": true,
+        "Save figures": true
+    }
+}
