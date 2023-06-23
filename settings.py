@@ -66,6 +66,36 @@ class Settings:
         # .json file that was most recently appended.
         self.appended = 'None'
     
+    def format(self, value):
+
+        '''Converts a variable to a properly formatted string. 
+        This is needed for floats/ints in scientific notation.
+        
+        Requires:
+        - value: the variable that is to be converted into a string.'''
+
+        # If variable is a list.
+        if isinstance(value, list):
+            response ='['
+            # For each entry, properly convert it to a string and 
+            # add it to the list string with a separating ', '.
+            for entry in value:
+                response += self.format(entry) + ', '
+            # Remove the extra ', ' and close the list.
+            response = response[0:len(response)-2] + ']'
+            # Return completed list.
+            return response
+        # If variable is a float/int and is of an excessively large or 
+        # small magnitude, display it in scientific notation.
+        elif ((isinstance(value, float) or isinstance(value, int)) 
+            and (value > 1000 
+                or value < -1000 
+                or (value < 0.01 and value > -0.01 and value != 0))):
+            return f'{value:g}'
+        # Otherwise, just return a string cast of the variable.
+        else:
+            return str(value)
+
     def compare(self):
 
         '''Compare the current settings to the most recently 
@@ -85,8 +115,8 @@ class Settings:
             for setting in self.settings[group]:
                 if baseline.settings[group].get(setting) != self.settings[group][setting]:
                     list.append(setting + ' in ' + group + ': ' 
-                                + str(baseline.settings[group].get(setting)) 
-                                + ' -> ' + str(self.settings[group][setting]))
+                                + self.format(baseline.settings[group].get(setting)) 
+                                + ' -> ' + self.format(self.settings[group][setting]))
         # For each setting in the baseline, if it does not 
         # exist in the current settings, store the removal.
         for group in baseline.settings:

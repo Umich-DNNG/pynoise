@@ -168,20 +168,20 @@ def shutdown_menu():
         ttk.Button(window,
                 name='default',
                 text='Save as default',
-                command=lambda: run.shutdown(window,
-                                             parameters,
-                                             os.path.abspath('./settings/default.json'),
-                                             True)
+                command=lambda: run.export(window,
+                                           parameters,
+                                           os.path.abspath('./settings/default.json'),
+                                           True)
                 ).grid(column=0,row=total+2)
         # Button for saving current settings to another file.
         ttk.Button(window,
                 name='new',
                 text='Save to other file',
                 command=lambda: prompt(shutdown_menu,
-                                       lambda file: run.shutdown(window,
-                                                                 parameters,
-                                                                 os.path.abspath(file+'.json'),
-                                                                 True),
+                                       lambda file: run.export(window,
+                                                               parameters,
+                                                               os.path.abspath(file+'.json'),
+                                                               True),
                                        'Enter a name for the new settings '
                                         + '(not including the .json file extension).',
                                         'Export Settings',)
@@ -190,13 +190,13 @@ def shutdown_menu():
         ttk.Button(window,
                 name='discard',
                 text='Discard changes',
-                command=lambda: warning(window.destroy,
+                command=lambda: warning(lambda: run.shutdown(window,parameters),
                                         'All your current changes will be lost. '
                                         + 'Are you sure you want to do this?')
                 ).grid(column=0,row=total+4)
     # If no changes, program can just end here.
     else:
-        window.destroy()
+        run.shutdown(window,parameters)
 
 def setMenu(prev):
 
@@ -502,6 +502,8 @@ def startup():
     # If settings are not yet defined, construct an empty settings object.
     if parameters == None:
         parameters = set.Settings()
+    # Create a logfile if one doesn't already exist.
+    run.create_logfile()
     # Welcome information for the user.
     ttk.Label(window,
             name='welcome',
