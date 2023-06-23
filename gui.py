@@ -5,30 +5,12 @@ from tkinter import ttk
 import tkinter as tk
 import settings as set
 import os
-import numpy as np
-from PowerSpectralDensity import PSD
-from RossiAlpha import analyzeAll as mn
-from RossiAlpha import fitting as fit
-from RossiAlpha import plots as plt
-from RossiAlpha import timeDifs as dif
+import run
 
 # The main window that is used for the program.
 window = None
 # The settings used during runtime
 parameters = None
-# The response variable used for entry boxes.
-response = None
-
-# Where the time difference data us stored.
-time_difs = None
-time_difs_file = None
-time_difs_method = None
-# Where the histogram plot data is stored.
-histogram = None
-hist_file = None
-hist_method = None
-# Where the best fit curve data is stored.
-best_fit = None
 
 def prompt(prev, to, message='Enter your choice:', title='User Prompt'):
 
@@ -42,7 +24,7 @@ def prompt(prev, to, message='Enter your choice:', title='User Prompt'):
     - message: the message that the user sees above the entry box.
     - title: the title of the window'''
 
-    global window, response
+    global window
     response = tk.StringVar()
     # Clear the window of all previous entries, labels, and buttons.
     for item in window.winfo_children():
@@ -63,7 +45,7 @@ def prompt(prev, to, message='Enter your choice:', title='User Prompt'):
     ttk.Button(window,
               name='continue',
               text='Continue',
-              command=to
+              command=lambda: to(response.get())
               ).grid(column=0,row=2)
     # The cancel button.
     ttk.Button(window,
@@ -99,20 +81,6 @@ def error(message='Something went wrong. Please contact the developers.',
     # Open the popup.
     popup.mainloop()
 
-def warningFunction(popup, to):
-
-    '''The function that is called when the user chooses to ignore a warning.
-    
-    Requires:
-    - popup: the warning window that will be deleted.
-    - to: the main function that will be called.
-    '''
-
-    # Destroy the warning window and run the desired function.
-    popup.destroy()
-    to()
-
-
 def warning(to,
             message='This action will delete data. Are you sure you want to do this?',
             title='WARNING!'):
@@ -138,7 +106,7 @@ def warning(to,
     ttk.Button(popup,
                name='yes',
                text='Yes',
-               command=lambda: warningFunction(popup, to)
+               command=lambda: run.warningFunction(popup, to)
                ).grid(column=0,row=1)
     # The no button.
     ttk.Button(popup,
@@ -148,40 +116,6 @@ def warning(to,
                ).grid(column=0,row=2)
     # Open the popup.
     popup.mainloop()
-
-def shutdown(file=''):
-
-    '''Save settings to the specified file at the end of runtime.
-    
-    Parameters:
-    - file: the absolute path of the file being saved to.
-    
-    If no file is given, the function assumes the 
-    file is in the global response variable.'''
-
-    global window, response
-    # If no file given.
-    if file == '':
-        # Get the file from the response variable and convert it to a path.
-        file = os.path.abspath(response.get() + '.json')
-        # If the file already exists, warns the user of the overwrite.
-        if os.path.isfile(file):
-            warning(lambda: shutdown(file))
-            # Return so the window isn't deleted.
-            return
-        # Otherwise, save to the new file.
-        else:
-            parameters.save(file)
-    # If a file is given.
-    else:
-        # If saving to the default, write the settings completely.
-        if file == os.path.abspath('default.json'):
-            parameters.write(file)
-        # Otherwise, save a shortened version.
-        else:
-            parameters.save(file)
-    # Close the program.
-    window.destroy()
 
 def shutdown_menu():
 
@@ -234,14 +168,14 @@ def shutdown_menu():
         ttk.Button(window,
                 name='default',
                 text='Save as default',
-                command=lambda: warning(lambda: shutdown(os.path.abspath('default.json')))
+                command=lambda: warning(lambda: run.shutdown(window, parameters, os.path.abspath('default.json')))
                 ).grid(column=0,row=total+2)
         # Button for saving current settings to another file.
         ttk.Button(window,
                 name='new',
                 text='Save to other file',
                 command=lambda: prompt(shutdown_menu,
-                                       lambda: shutdown(),
+                                       lambda file: run.shutdown(window, parameters, os.path.abspath(file+'.json')),
                                        'Enter a name for the new settings '
                                         + '(not including the .json file extension).',
                                         'Export Settings',)
@@ -257,285 +191,6 @@ def shutdown_menu():
     # If no changes, program can just end here.
     else:
         window.destroy()
-
-def createTimeDifs():
-
-    '''Copy and pasted function from raDriver for creating time differences.
-    
-    See the original for more info.'''
-
-    global time_difs, time_difs_file, time_difs_method, parameters
-    name = parameters.settings['Input/Output Settings']['Input file/folder']
-    name = name[name.rfind('/')+1:]
-    if name.count('.') > 0:
-        if parameters.settings['Input/Output Settings'].get('Data Column') is not None:
-            data = np.loadtxt(parameters.settings['Input/Output Settings']['Input file/folder'],delimiter=" ", usecols=(parameters.settings['Input/Output Settings']['Data Column']))
-        else:
-            data = np.loadtxt(parameters.settings['Input/Output Settings']['Input file/folder'])
-
-        if parameters.settings['General Settings']['Sort data']:
-            data = np.sort(data)
-        time_difs = dif.timeDifCalcs(data, 
-            parameters.settings['RossiAlpha Settings']['Reset time'], 
-            parameters.settings['RossiAlpha Settings']['Time difference method'])
-        time_difs = time_difs.calculate_time_differences()
-        time_difs_file = parameters.settings['Input/Output Settings']['Input file/folder']
-        time_difs_method = parameters.settings['RossiAlpha Settings']['Time difference method']
-
-def createPlot():
-
-    '''Copy and pasted function from raDriver for creating the histogram.
-    
-    See the original for more info.'''
-
-    global time_difs, histogram, hist_file, hist_method, parameters
-    histogram = plt.RossiHistogram(parameters.settings['RossiAlpha Settings']['Reset time'],
-                              parameters.settings['RossiAlpha Settings']['Bin width'],
-                              parameters.settings['Histogram Visual Settings'],
-                              parameters.settings['Input/Output Settings']['Save directory'])
-    histogram.plot(time_difs,
-              save_fig=parameters.settings['General Settings']['Save figures'],
-              show_plot=parameters.settings['General Settings']['Show plots'])
-    hist_file = parameters.settings['Input/Output Settings']['Input file/folder']
-    hist_method = parameters.settings['RossiAlpha Settings']['Time difference method']
-
-def calculateTimeDifsAndPlot():
-
-    '''Copy and pasted function from raDriver for creating the 
-    time differences and histogram plot in parallel.
-    
-    See the original for more info.'''
-
-    global histogram, time_difs, hist_file, hist_method, parameters
-    time_difs = None
-    if parameters.settings['Input/Output Settings'].get('Data Column') is not None:
-        data = np.loadtxt(parameters.settings['Input/Output Settings']['Input file/folder'],delimiter=" ", usecols=(parameters.settings['Input/Output Settings']['Data Column']))
-    else:
-        data = np.loadtxt(parameters.settings['Input/Output Settings']['Input file/folder'])
-
-    if parameters.settings['General Settings']['Sort data']:
-        data = np.sort(data)
-
-    thisTimeDifCalc = dif.timeDifCalcs(data, parameters.settings['RossiAlpha Settings']['Reset time'], parameters.settings['RossiAlpha Settings']['Time difference method'])
-
-    histogram, counts, bin_centers, bin_edges = thisTimeDifCalc.calculateTimeDifsAndBin(parameters.settings['RossiAlpha Settings']['Bin width'], parameters.settings['General Settings']['Save figures'], parameters.settings['General Settings']['Show plots'], parameters.settings['Input/Output Settings']['Save directory'], parameters.settings['Histogram Visual Settings'])
-    hist_file = parameters.settings['Input/Output Settings']['Input file/folder']
-    hist_method = parameters.settings['RossiAlpha Settings']['Time difference method']
-
-def plotSplit():
-
-    '''The split for plotting the histogram to determine 
-    whether it is generated in series or parallel with 
-    creating the time differences.'''
-
-    global parameters
-    # If no time difs have been made or the input file/
-    # method of time difference calculation has changed.
-    if time_difs is None or (not 
-                             (time_difs_method == parameters.settings['RossiAlpha Settings']['Time difference method'] 
-                          and time_difs_file == parameters.settings['Input/Output Settings']['Input file/folder'])):
-        # Combine time difference calculation and plot generation if applicable.
-        if (parameters.settings['RossiAlpha Settings']['Combine Calc and Binning']):
-            calculateTimeDifsAndPlot()
-        # Otherwise, do them separately.
-        else:
-            createTimeDifs()
-            createPlot()
-    # Otherwise, just create the plot.
-    else:
-        createPlot()
-
-def createBestFit():
-
-    '''Copy and pasted function from raDriver for creating a line of best fit.
-    
-    See the original for more info.'''
-
-    global time_difs, histogram, best_fit, parameters
-    counts = histogram.counts
-    bin_centers = histogram.bin_centers
-
-    best_fit = fit.RossiHistogramFit(counts, bin_centers, parameters.settings)
-        
-    best_fit.fit_and_residual(save_every_fig=parameters.settings['General Settings']['Save figures'], 
-                              show_plot=parameters.settings['General Settings']['Show plots'])
-
-def raAll(single: bool):
-
-    '''Run all of the Rossi Alpha analyis.
-    
-    Reqires:
-    - single: a boolean that marks whether the input is a single file or folder.'''
-
-    global time_difs, histogram, best_fit
-    # Run and save accordingly based on the input type.
-    if single:
-        time_difs, histogram, best_fit = mn.analyzeAllType1(parameters.settings)
-    else:
-        mn.analyzeAllType2(parameters.settings)
-
-def raSplit(mode: str):
-
-    '''The main driver for the Rossi Alpha analysis. 
-    Checks for user error and saved data overwriting.
-    
-    Requires:
-    - mode: a string of the analysis that is desired. It should 
-    exactly match the name of the function to be called.'''
-
-    global time_difs, histogram, best_fit
-
-    # If no input defined, throw error.
-    if parameters.settings['Input/Output Settings']['Input file/folder'] == 'none':
-        error('You currently have no input file or folder defined.\n\n'
-            + 'Please make sure to specify one before running any analysis.\n')
-    # If user does have an input.
-    else:
-        # Get name of actual file/folder without entire path.
-        name = parameters.settings['Input/Output Settings']['Input file/folder']
-        name = name[name.rfind('/')+1:]
-        # If name has a . in it, assume a single file.
-        if name.count('.') > 0:
-            # If time difference method is not any and all, throw an error.
-            if parameters.settings['RossiAlpha Settings']['Time difference method'] != 'any_and_all':
-                error('To analyze a single file, you must use '
-                    + 'the any_and_all time difference method only.\n')
-            # Otherwise, split on the analysis type.
-            else:
-                match mode:
-                    # Run all analysis; no checks needed.
-                    case 'raAll':
-                        raAll(True)
-                    # Create time differences.
-                    case 'createTimeDifs':
-                        # If time differences already exist, warn user.
-                        if time_difs is not None:
-                            warning(createTimeDifs,
-                                    'There are already stored time differences '
-                                    + 'in this runtime. Do you want to overwrite them?')
-                        # Otherwise, create with no warning.
-                        else:
-                            createTimeDifs()
-                    # Create a histogram plot.
-                    case 'plotSplit':
-                        # If histogram already exists, warn user.
-                        if histogram is not None:
-                            warning(plotSplit,
-                                    'There is an already stored histogram '
-                                    + 'in this runtime. Do you want to overwrite it?')
-                        # Otherwise, create with no warning.
-                        else:
-                            plotSplit()
-                    # Create a best fit + residual.
-                    case 'createBestFit':
-                        # If best fit already exists, warn user.
-                        if best_fit is not None:
-                            warning(createBestFit,
-                                    'There is an already stored best fit line '
-                                    + 'in this runtime. Do you want to overwrite it?')
-                        # Otherwise, create with no warning.
-                        else:
-                            createBestFit()
-        # Otherwise, assume folder data.
-        else:
-            # If modular analysis is attempted, throw and error.
-            if mode != 'raAll':
-                error('You can only run full folder analysis.\n\n'
-                      + 'These modular options are for single files.')
-            # Otherwise, run the full analysis.
-            else:
-                raAll(False)
-
-def conduct_PSD():
-
-    '''Copy and pasted function from psdDriver for 
-    running Power Spectral Density analysis.
-    
-    See the original for more info.'''
-
-    global parameters
-
-    file_path = parameters.settings['Input/Output Settings']['Input file/folder']
-
-    values = np.loadtxt(file_path, usecols=(0,3), max_rows=2000000, dtype=float)
-
-    PSD_Object = PSD.PowerSpectralDensity(list_data_array=values, 
-                                        leg_label="TEST", 
-                                        clean_pulses_switch=parameters.settings['PSD Settings']['Clean pulses switch'], 
-                                        dwell_time=parameters.settings['PSD Settings']['Dwell time'], 
-                                        meas_time_range=parameters.settings['PSD Settings']['Meas time range'])
-    
-    PSD_Object.conduct_APSD(show_plot=parameters.settings['General Settings']['Show plots'], 
-                            save_fig=parameters.settings['General Settings']['Save figures'],
-                            save_dir=parameters.settings['Input/Output Settings']['Save directory'])
-
-def format(value):
-
-    '''Converts a variable to a properly formatted string. 
-    This is needed for floats in scientific notation.
-    
-    Requires:
-    - value: the variable that is to be converted into a string.'''
-
-    # If variable is a list.
-    if isinstance(value, list):
-        response ='['
-        # For each entry, properly convert it to a string and 
-        # add it to the list string with a separating ', '.
-        for entry in value:
-            response += format(entry) + ', '
-        # Remove the extra ', ' and close the list.
-        response = response[0:len(response)-2] + ']'
-        # Return completed list.
-        return response
-    # If variable is a float and is of an excessively large or 
-    # small magnitude, display it in scientific notation.
-    elif isinstance(value, float) and (value > 1000 or value < -1000 or (value < 0.01 and value > -0.01 and value != 0)):
-        return f'{value:g}'
-    # Otherwise, just return a string cast of the variable.
-    else:
-        return str(value)
-
-def saveType(value: str):
-
-    '''Converts the output of a tkinter string variable to 
-    its proper value for storage. WARNING: this implementation 
-    does not support nested lists or any dictionaries.
-    
-    Requires:
-    - value: the string to be converted to a value.'''
-
-    # If variable is a list:
-    if value[0] == '[':
-        # Get rid of brackets and make empty list variable.
-        value = value[1:len(value)-1]
-        response = []
-        # Loop while there are still entries in the list string.
-        while value.find(', ') != -1:
-            # Add the proper type of the next variable.
-            response.append(saveType(value[0:value.find(', ')]))
-            # Remove the appended variable from the list string.
-            value=value[value.find(', ')+2:]
-        # Append the final value.
-        response.append(saveType(value))
-        # Return the completed list.
-        return response
-    # If string represents a boolean, return accordingly.
-    elif value == 'True':
-        return True
-    elif value == 'False':
-        return False
-    # If string is numeric, cast it to an integer.
-    elif value.isnumeric():
-        return int(value)
-    # Try casting the response to a float.
-    try:
-        response = float(value)
-        # If it works, return the float.
-        return response
-    # Otherwise, assume a string type and return it.
-    except ValueError:
-        return value
 
 def setMenu(prev):
 
@@ -573,25 +228,6 @@ def setMenu(prev):
               text='Return to previous menu',
               command=prev
               ).grid(column=0,row=3)
-
-def edit(inputs, prev):
-
-    '''Save the inputs from the editor menu to the settings.
-    
-    Requires:
-    - inputs: a dictionary of tkinter string variables. 
-    Should have groups that match the current settings.
-    - prev: the GUI function for the menu 
-    to return to after the settings menu.'''
-
-    global parameters
-    # For each group and setting in the inputs, convert the 
-    # string to the correct time and save it accordingly.
-    for group in inputs:
-        for setting in inputs[group]:
-            parameters.settings[group][setting] = saveType(inputs[group][setting].get())
-    # Return to the settings menu.
-    setMenu(prev)
 
 def editor_menu(prev):
 
@@ -648,7 +284,7 @@ def editor_menu(prev):
                   textvariable=inputs[group][setting]
                   ).grid(column=(groupNum*3+2) % 9,row=curTop+setNum)
             # Insert into the entry box the current value of the setting.
-            window.children[(group + ' ' + setting + ' value').lower()].insert(0,format(parameters.settings[group][setting]))
+            window.children[(group + ' ' + setting + ' value').lower()].insert(0,run.format(parameters.settings[group][setting]))
             # Increase the setting number.
             setNum += 1
         # If the total settings in this group were the max 
@@ -664,7 +300,7 @@ def editor_menu(prev):
     ttk.Button(window,
                 name='save',
                 text='Save changes',
-                command=lambda: edit(inputs, prev)
+                command=lambda: run.edit(inputs, parameters, prev)
                 ).grid(column=0 % 9,row=curTop)
     # Button for canceling changes.
     ttk.Button(window,
@@ -677,7 +313,7 @@ def raMenu():
 
     '''The GUI for the Rossi Alpha menu.'''
 
-    global window
+    global window, parameters
     # Clear the window of all previous entries, labels, and buttons.
     for item in window.winfo_children():
         item.destroy()
@@ -692,25 +328,25 @@ def raMenu():
     ttk.Button(window,
               name='all',
               text='Run entire analysis',
-              command=lambda: raSplit('raAll')
+              command=lambda: run.raSplit('raAll', parameters)
               ).grid(column=0,row=1)
     # Button for calculating time differences.
     ttk.Button(window,
               name='time_dif',
               text='Calculate time differences',
-              command=lambda: raSplit('createTimeDifs')
+              command=lambda: run.raSplit('createTimeDifs', parameters)
               ).grid(column=0,row=2)
     # Button for creating a histogram.
     ttk.Button(window,
               name='histogram',
               text='Create histogram',
-              command=lambda: raSplit('plotSplit')
+              command=lambda: run.raSplit('plotSplit', parameters)
               ).grid(column=0,row=3)
     # Button for creating a line fit + residual.
     ttk.Button(window,
               name='fit',
               text='Fit data',
-              command=lambda: raSplit('createBestFit')
+              command=lambda: run.raSplit('createBestFit', parameters)
               ).grid(column=0,row=4)
     # Button to view the program settings.
     ttk.Button(window,
@@ -729,7 +365,7 @@ def psdMenu():
 
     '''The GUI for the Power Spectral Density menu.'''
 
-    global window
+    global window, parameters
     # Clear the window of all previous entries, labels, and buttons.
     for item in window.winfo_children():
         item.destroy()
@@ -744,7 +380,7 @@ def psdMenu():
     ttk.Button(window,
               name='run',
               text='Run analysis',
-              command=conduct_PSD
+              command=lambda: run.conduct_PSD(parameters)
               ).grid(column=0,row=1)
     # Button to view the program settings.
     ttk.Button(window,
@@ -759,58 +395,11 @@ def psdMenu():
               command=main
               ).grid(column=0,row=3)
 
-def default():
-
-    '''Import the default settings 
-    at the beginning of runtime.'''
-
-    global parameters
-    # Create the absolute path for the 
-    # default settings and read them in.
-    path = os.path.abspath('default.json')
-    parameters.read(path)
-    # Run the main menu.
-    main()
-
-def download(append: bool, prev):
-
-    '''Download the file given in the global response variable.
-    
-    Requires:
-    - append: a boolean that represents whether this download is 
-    meant for appending or overwriting the entire settings.
-    - prev: the menu to return to after downloading.'''
-
-    global window, response, parameters
-    # Get the response, add the .json extension, 
-    # and convert it to an absolute path.
-    file = os.path.abspath(response.get() + '.json')
-    # If file exists.
-    if os.path.isfile(file):
-        # If in append mode.
-        if append:
-            # If settings have not been initialized, read in the defualt.
-            if parameters.origin == 'None':
-                parameters.read(os.path.abspath('default.json'))
-            # Append the file to the current settings.
-            parameters.append(file)
-        # If in overwrite mode, read in the settings.
-        else:
-            parameters.read(file)
-        # Return to the previous menu.
-        prev()
-    # If not, throw an error.
-    else:
-        error(file + ' is not a correct path or references an invalid settings '
-              + 'file.\n\nMake sure that your settings file is named correctly, '
-              + 'the correct absolute/relative path to it is given, and '
-              + 'you did not include the .json extenstion in your input.')
-
 def download_menu(prev, to):
 
     '''The GUI for the settings download menu.'''
 
-    global window
+    global window, parameters
     # Clear the window of all previous entries, labels, and buttons.
     for item in window.winfo_children():
         item.destroy()
@@ -826,7 +415,7 @@ def download_menu(prev, to):
                name='overwrite',
                text='Overwrite entire settings',
                command=lambda: prompt(lambda: download_menu(prev, to),
-                                      lambda: download(False, to),
+                                      lambda file: run.download(parameters, os.path.abspath(file + '.json'), False, to),
                                       'Enter a settings file (no .json extension):',
                                       'Overwrite Settings')
                ).grid(column=0,row=1)
@@ -835,7 +424,7 @@ def download_menu(prev, to):
                name='append',
                text='Append settings',
                command=lambda: prompt(lambda: download_menu(prev, to),
-                                      lambda: download(True, to),
+                                      lambda file: run.download(parameters, os.path.abspath(file + '.json'), True, to),
                                       'Enter a settings file (no .json extension):',
                                       'Append Settings to Default')
                ).grid(column=0,row=2)
@@ -927,7 +516,7 @@ def startup():
     ttk.Button(window,
                name='default',
                text="Default",
-               command=default
+               command=lambda:run.download(parameters,os.path.abspath('default.json'),False,main)
                ).grid(column=0, row=2)
     # Button for importing other settings.
     ttk.Button(window,
