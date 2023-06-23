@@ -97,6 +97,8 @@ class PowerSpectralDensity:
                             p0=[Pxx[2], 25, 0.001],
                             bounds=(0, np.inf),
                             maxfev=100000)
+        print('alpha = ' + str(np.around(popt[1]*2*np.pi, decimals=2)) + ', uncertainty = '+ 
+                    str(np.around(pcov[1,1]*2*np.pi, decimals=2)))
         
         # Plotting the auto-power-spectral-density distribution and fit
         fig2, ax2 = plt.subplots()
@@ -147,7 +149,6 @@ class PowerSpectralDensity:
 
         # Showing plot (optional)
         if show_plot:
-            print("entered")
             plt.show()
         
         # Outputting the PSD distribution and fit
