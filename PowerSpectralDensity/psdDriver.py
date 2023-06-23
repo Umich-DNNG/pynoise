@@ -61,9 +61,11 @@ def main(editorIn, queue):
                     print('ERROR: You currently have no input file or folder defined. '
                           + 'Please make sure to specify one before running any analysis.\n')
                 else:
-                    editor.print('')
-                    editor.print('Running the entire power spectral density analysis...')
+                    editor.print('\nRunning the entire power spectral density analysis...')
                     conduct_PSD()
+                    editor.log('Ran the entire RossiAlpha method on file ' 
+                                + editor.parameters.settings['Input/Output Settings']['Input file/folder'] 
+                                + '.\n')
                 '''
             case 'p':
                 editor.print('')
