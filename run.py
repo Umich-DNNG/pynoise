@@ -1,4 +1,5 @@
 '''The file that runs code related to the GUI implementation.'''
+
 import os
 import numpy as np
 from tkinter import *
