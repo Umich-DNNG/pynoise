@@ -1,8 +1,11 @@
 '''The file that runs code related to the GUI implementation.'''
 
 import os
+import io
+import time
 import numpy as np
 from tkinter import *
+from tkinter import ttk
 import gui
 import settings as set
 from RossiAlpha import analyzeAll as mn
@@ -11,16 +14,84 @@ from RossiAlpha import plots as plt
 from RossiAlpha import timeDifs as dif
 from PowerSpectralDensity import PSD
 
+#--------------------Global Variables--------------------#
+
 # Where the time difference data us stored.
-time_difs = None
-time_difs_file = None
-time_difs_method = None
+time_difs: dif.timeDifCalcs = None
+time_difs_file: str = None
+time_difs_method: str = None
 # Where the histogram plot data is stored.
-histogram = None
-hist_file = None
-hist_method = None
+histogram: plt.RossiHistogram = None
+hist_file: str = None
+hist_method: str = None
 # Where the best fit curve data is stored.
-best_fit = None
+best_fit: fit.RossiHistogramFit = None
+
+# The file that will have logs written to it.
+logfile: io.TextIOWrapper = None
+
+#--------------------GUI Functions--------------------#
+
+def create_logfile():
+
+    '''Create a log file for logging user interactions.'''
+
+    global logfile
+    # Ensure a log file does not already exist.
+    if logfile is None:
+        # Get local time.
+        curTime = time.localtime()
+        # Create log file name with relative path and timestamp.
+        logName = ('./logs/' + str(curTime.tm_year) 
+                    + '-' + str(curTime.tm_mon) 
+                    + '-' + str(curTime.tm_mday) 
+                    + '@' + str(curTime.tm_hour)
+                    + (':0' if curTime.tm_min < 10 else ':') + str(curTime.tm_min)
+                    + (':0' if curTime.tm_sec < 10 else ':') + str(curTime.tm_sec)
+                    + '.log')
+        # Open the logfile.
+        logfile = open(os.path.abspath(logName),'w')
+        # Write an introductory message at the top.
+        logfile.write('# A logfile for the runtime started at the given '
+                    + 'timestamp.\n# If keep logs is set to false at the end '
+                    + 'of runtime, this file will automatically be deleted.\n')
+        # Flush the file so it can be read immediately.
+        logfile.flush()
+
+def log(message: str, xor=None, label: ttk.Label=None):
+
+    '''Log a message to the current window and the logfile.
+    
+    Requires:
+    - message: the string that will be displayed.
+
+    Optional:    
+    - xor: a boolean that determines where this message should be displayed:
+        - True: show only in the given label.
+        - False: show only in the logfile.
+        - not provided: show in both.
+    - label: the label within which the notification will be put. 
+    This is required when xor is True or not provided.'''
+
+    global logfile
+    # When applicable, log the message to the logfile.
+    if xor == None or not xor:
+        # Create a timestamp for the confirmation message.
+        curTime = time.localtime()
+        message = (str(curTime.tm_year) 
+        + '-' + str(curTime.tm_mon) 
+        + '-' + str(curTime.tm_mday) 
+        + ' @ ' + str(curTime.tm_hour) 
+        + (':0' if curTime.tm_min < 10 else ':') + str(curTime.tm_min) 
+        + (':0' if curTime.tm_sec < 10 else ':') + str(curTime.tm_sec) 
+        + ' - ' + message)
+        # Write the confirmation + timestamp to the file and flush 
+        # immediately so user can see log updates in real time.
+        logfile.write(message)
+        logfile.flush()
+    # When applicable, set the label in the window to have the correct message.
+    if xor == None or xor:
+        label.config(text=message)
 
 def warningFunction(popup: Tk, to):
 
@@ -35,14 +106,175 @@ def warningFunction(popup: Tk, to):
     popup.destroy()
     to()
 
-def shutdown(window: Tk, parameters: set.Settings, file: str, warn: bool):
+def format(value):
+
+    '''Converts a variable to a properly formatted string. 
+    This is needed for floats/ints in scientific notation.
+    
+    Requires:
+    - value: the variable that is to be converted into a string.'''
+
+    # If variable is a list.
+    if isinstance(value, list):
+        response ='['
+        # For each entry, properly convert it to a string and 
+        # add it to the list string with a separating ', '.
+        for entry in value:
+            response += format(entry) + ', '
+        # Remove the extra ', ' and close the list.
+        response = response[0:len(response)-2] + ']'
+        # Return completed list.
+        return response
+    # If variable is a float/int and is of an excessively large or 
+    # small magnitude, display it in scientific notation.
+    elif ((isinstance(value, float) or isinstance(value, int)) 
+          and (value > 1000 
+               or value < -1000 
+               or (value < 0.01 and value > -0.01 and value != 0))):
+        return f'{value:g}'
+    # Otherwise, just return a string cast of the variable.
+    else:
+        return str(value)
+
+def saveType(value: str):
+
+    '''Converts the output of a tkinter string variable to 
+    its proper value for storage. WARNING: this implementation 
+    does not support nested lists or any dictionaries.
+    
+    Requires:
+    - value: the string to be converted to a value.'''
+
+    # If variable is a list:
+    if value[0] == '[':
+        # Get rid of brackets and make empty list variable.
+        value = value[1:len(value)-1]
+        response = []
+        # Loop while there are still entries in the list string.
+        while value.find(', ') != -1:
+            # Add the proper type of the next variable.
+            response.append(saveType(value[0:value.find(', ')]))
+            # Remove the appended variable from the list string.
+            value=value[value.find(', ')+2:]
+        # Append the final value.
+        response.append(saveType(value))
+        # Return the completed list.
+        return response
+    # If string represents a boolean, return accordingly.
+    elif value == 'True':
+        return True
+    elif value == 'False':
+        return False
+    # If string is numeric, cast it to an integer.
+    elif value.isnumeric():
+        return int(value)
+    # Try casting the response to a float.
+    try:
+        response = float(value)
+        # If it works, return the float.
+        return response
+    # Otherwise, assume a string type and return it.
+    except ValueError:
+        return value
+
+def changes(parameters: set.Settings):
+
+    '''Compare recently edited settings to the 
+    previous version and log any changes.
+    
+    Requires:
+    - parameters: the settings object holding the current settings.
+    
+    Returns:
+    - count: the number of changes made.'''
+
+    # Create a baseline settings object for comparison.
+    baseline = set.Settings()
+    count = 0
+    # Read in previous settings and delete temp file.
+    baseline.read(os.path.abspath('./settings/comp.json'))
+    os.remove(os.path.abspath('./settings/comp.json'))
+    # For every setting in the current settings, compare its
+    # value to the source value and log if it is new or changed.
+    for group in parameters.settings:
+        for setting in parameters.settings[group]:
+            if (baseline.settings[group].get(setting) 
+                != parameters.settings[group][setting]):
+                log(setting + ' in ' + group + ': ' 
+                    + format(baseline.settings[group].get(setting)) + ' -> '
+                    + format(parameters.settings[group][setting]) + '.\n',
+                    xor=False)
+                count += 1
+    # For each setting in the baseline, if it does not 
+    # exist in the current settings, log the removal.
+    for group in baseline.settings:
+        for setting in baseline.settings[group]:
+            if parameters.settings[group].get(setting) == None:
+                log(setting + ' in ' + group + ' removed.\n', xor=False)
+                count += 1
+
+def edit(inputs: dict, parameters: set.Settings, prev):
+
+    '''Save the inputs from the editor menu to the settings.
+    
+    Requires:
+    - inputs: a dictionary of tkinter string variables. 
+    Should have groups that match the current settings.
+    - parameters: the settings object holding the current settings.
+    - prev: the GUI function for the menu 
+    to return to after the settings menu.'''
+
+    parameters.write(os.path.abspath('./settings/comp.json'))
+    # For each group and setting in the inputs, convert the 
+    # string to the correct time and save it accordingly.
+    for group in inputs:
+        for setting in inputs[group]:
+            parameters.settings[group][setting] = saveType(inputs[group][setting].get())
+    # Compare the modified settings to the previous and save the number of changes.
+    total = changes(parameters)
+    # Return to the settings menu.
+    gui.setMenu(prev)
+
+def download(parameters: set.Settings, file: str, append: bool, prev):
+
+    '''Download the file given in the global response variable.
+    
+    Requires:
+    - parameters: the settings object holding the current settings.
+    - file: the absolute path of the file being saved to.
+    - append: a boolean that represents whether this download is 
+    meant for appending or overwriting the entire settings.
+    - prev: the menu to return to after downloading.'''
+
+    # If file exists.
+    if os.path.isfile(file):
+        # If in append mode.
+        if append:
+            # If settings have not been initialized, read in the defualt.
+            if parameters.origin == 'None':
+                parameters.read(os.path.abspath('./settings/default.json'))
+            # Append the file to the current settings.
+            parameters.append(file)
+        # If in overwrite mode, read in the settings.
+        else:
+            parameters.read(file)
+        # Return to the previous menu.
+        prev()
+    # If not, throw an error.
+    else:
+        gui.error(file + ' is not a correct path or references an invalid settings '
+              + 'file.\n\nMake sure that your settings file is named correctly, '
+              + 'the correct absolute/relative path to it is given, and '
+              + 'you did not include the .json extenstion in your input.')
+
+def export(window: Tk, parameters: set.Settings, file: str, warn: bool):
 
     '''Save settings to the specified file at the end of runtime.
     
     Requires:
     - window: the main window that will be closed down.
-    - file: the absolute path of the file being saved to.
     - parameters: the settings object holding the current settings.
+    - file: the absolute path of the file being saved to.
     - warn: a boolean that determines whether or not 
     the program should warn the user of the overwrite.
     
@@ -51,8 +283,8 @@ def shutdown(window: Tk, parameters: set.Settings, file: str, warn: bool):
 
     # If the file already exists, warns the user of the overwrite.
     if warn and os.path.isfile(file):
-        gui.warning(lambda: shutdown(window, parameters, file, False))
-        # Return so the window isn't deleted.
+        gui.warning(lambda: export(window, parameters, file, False))
+        # Return so the shutdown doesn't happen twice.
         return
      # Otherwise, save to the new file.
     else:
@@ -60,8 +292,26 @@ def shutdown(window: Tk, parameters: set.Settings, file: str, warn: bool):
             parameters.write(file)
         else:
             parameters.save(file)
+    shutdown(window, parameters)
+
+def shutdown(window: Tk, parameters: set.Settings):
+
+    '''Close the program & logfile and delete the logfile is applicable.
+    
+    Requires:
+    - window: the main window that will be closed down.
+    - parameters: the settings object holding the current settings.'''
+
+    global logfile
+    # Close the logfile.
+    logfile.close()
+    # If user doesn't want logs, delete the logfile.
+    if not parameters.settings['Input/Output Settings']['Keep logs']:
+        os.remove(logfile.name)
     # Close the program.
     window.destroy()
+
+#--------------------RossiAlpha Functions--------------------#
 
 def createTimeDifs(parameters: set.Settings):
 
@@ -268,6 +518,8 @@ def raSplit(mode: str, parameters: set.Settings):
             else:
                 raAll(False, parameters)
 
+#--------------------PowerSpectralDensity Functions--------------------#
+
 def conduct_PSD(parameters: set.Settings):
 
     '''Copy and pasted function from psdDriver for 
@@ -291,122 +543,3 @@ def conduct_PSD(parameters: set.Settings):
     PSD_Object.conduct_APSD(show_plot=parameters.settings['General Settings']['Show plots'], 
                             save_fig=parameters.settings['General Settings']['Save figures'],
                             save_dir=parameters.settings['Input/Output Settings']['Save directory'])
-
-def format(value):
-
-    '''Converts a variable to a properly formatted string. 
-    This is needed for floats in scientific notation.
-    
-    Requires:
-    - value: the variable that is to be converted into a string.'''
-
-    # If variable is a list.
-    if isinstance(value, list):
-        response ='['
-        # For each entry, properly convert it to a string and 
-        # add it to the list string with a separating ', '.
-        for entry in value:
-            response += format(entry) + ', '
-        # Remove the extra ', ' and close the list.
-        response = response[0:len(response)-2] + ']'
-        # Return completed list.
-        return response
-    # If variable is a float and is of an excessively large or 
-    # small magnitude, display it in scientific notation.
-    elif isinstance(value, float) and (value > 1000 or value < -1000 or (value < 0.01 and value > -0.01 and value != 0)):
-        return f'{value:g}'
-    # Otherwise, just return a string cast of the variable.
-    else:
-        return str(value)
-
-def saveType(value: str):
-
-    '''Converts the output of a tkinter string variable to 
-    its proper value for storage. WARNING: this implementation 
-    does not support nested lists or any dictionaries.
-    
-    Requires:
-    - value: the string to be converted to a value.'''
-
-    # If variable is a list:
-    if value[0] == '[':
-        # Get rid of brackets and make empty list variable.
-        value = value[1:len(value)-1]
-        response = []
-        # Loop while there are still entries in the list string.
-        while value.find(', ') != -1:
-            # Add the proper type of the next variable.
-            response.append(saveType(value[0:value.find(', ')]))
-            # Remove the appended variable from the list string.
-            value=value[value.find(', ')+2:]
-        # Append the final value.
-        response.append(saveType(value))
-        # Return the completed list.
-        return response
-    # If string represents a boolean, return accordingly.
-    elif value == 'True':
-        return True
-    elif value == 'False':
-        return False
-    # If string is numeric, cast it to an integer.
-    elif value.isnumeric():
-        return int(value)
-    # Try casting the response to a float.
-    try:
-        response = float(value)
-        # If it works, return the float.
-        return response
-    # Otherwise, assume a string type and return it.
-    except ValueError:
-        return value
-    
-def edit(inputs: dict, parameters: set.Settings, prev):
-
-    '''Save the inputs from the editor menu to the settings.
-    
-    Requires:
-    - inputs: a dictionary of tkinter string variables. 
-    Should have groups that match the current settings.
-    - parameters: the settings object holding the current settings.
-    - prev: the GUI function for the menu 
-    to return to after the settings menu.'''
-
-    # For each group and setting in the inputs, convert the 
-    # string to the correct time and save it accordingly.
-    for group in inputs:
-        for setting in inputs[group]:
-            parameters.settings[group][setting] = saveType(inputs[group][setting].get())
-    # Return to the settings menu.
-    gui.setMenu(prev)
-
-def download(parameters: set.Settings, file: str, append: bool, prev):
-
-    '''Download the file given in the global response variable.
-    
-    Requires:
-    - parameters: the settings object holding the current settings.
-    - file: the absolute path of the file being saved to.
-    - append: a boolean that represents whether this download is 
-    meant for appending or overwriting the entire settings.
-    - prev: the menu to return to after downloading.'''
-
-    # If file exists.
-    if os.path.isfile(file):
-        # If in append mode.
-        if append:
-            # If settings have not been initialized, read in the defualt.
-            if parameters.origin == 'None':
-                parameters.read(os.path.abspath('./settings/default.json'))
-            # Append the file to the current settings.
-            parameters.append(file)
-        # If in overwrite mode, read in the settings.
-        else:
-            parameters.read(file)
-        # Return to the previous menu.
-        prev()
-    # If not, throw an error.
-    else:
-        gui.error(file + ' is not a correct path or references an invalid settings '
-              + 'file.\n\nMake sure that your settings file is named correctly, '
-              + 'the correct absolute/relative path to it is given, and '
-              + 'you did not include the .json extenstion in your input.')
