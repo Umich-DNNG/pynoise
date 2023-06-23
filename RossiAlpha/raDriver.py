@@ -2,7 +2,6 @@ from . import analyzeAll as mn
 from . import fitting as fit
 from . import plots as plt
 from . import timeDifs as dif
-from . import analyzingFolders as fol
 import matplotlib.pyplot as mpl
 import numpy as np
 mpl.ioff()
