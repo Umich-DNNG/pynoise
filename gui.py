@@ -1,3 +1,5 @@
+'''The file that creates and runs all program GUI elements.'''
+
 from tkinter import *
 from tkinter import ttk
 import tkinter as tk
@@ -9,7 +11,6 @@ from RossiAlpha import analyzeAll as mn
 from RossiAlpha import fitting as fit
 from RossiAlpha import plots as plt
 from RossiAlpha import timeDifs as dif
-from RossiAlpha import analyzingFolders as fol
 
 # The main window that is used for the program.
 window = None
@@ -183,7 +184,9 @@ def shutdown(file=''):
     window.destroy()
 
 def shutdown_menu():
-    '''Load the shutdown menu if need be.'''
+
+    '''Load the shutdown menu GUI if need be.'''
+
     global window, parameters
     # Compare the current settings to the most recently 
     # imported + appended and store the changes.
@@ -371,45 +374,85 @@ def raAll(single: bool):
     else:
         mn.analyzeAllType2(parameters.settings)
 
-def raSplit(mode):
+def raSplit(mode: str):
 
-    ''''''
+    '''The main driver for the Rossi Alpha analysis. 
+    Checks for user error and saved data overwriting.
+    
+    Requires:
+    - mode: a string of the analysis that is desired. It should 
+    exactly match the name of the function to be called.'''
 
+    global time_difs, histogram, best_fit
+
+    # If no input defined, throw error.
     if parameters.settings['Input/Output Settings']['Input file/folder'] == 'none':
         error('You currently have no input file or folder defined.\n\n'
             + 'Please make sure to specify one before running any analysis.\n')
+    # If user does have an input.
     else:
+        # Get name of actual file/folder without entire path.
         name = parameters.settings['Input/Output Settings']['Input file/folder']
         name = name[name.rfind('/')+1:]
+        # If name has a . in it, assume a single file.
         if name.count('.') > 0:
+            # If time difference method is not any and all, throw an error.
             if parameters.settings['RossiAlpha Settings']['Time difference method'] != 'any_and_all':
                 error('To analyze a single file, you must use '
                     + 'the any_and_all time difference method only.\n')
+            # Otherwise, split on the analysis type.
             else:
                 match mode:
+                    # Run all analysis; no checks needed.
                     case 'raAll':
                         raAll(True)
+                    # Create time differences.
                     case 'createTimeDifs':
-                        warning(createTimeDifs,
-                                'There are already stored time differences '
-                                + 'in this runtime. Do you want to overwrite them?')
+                        # If time differences already exist, warn user.
+                        if time_difs is not None:
+                            warning(createTimeDifs,
+                                    'There are already stored time differences '
+                                    + 'in this runtime. Do you want to overwrite them?')
+                        # Otherwise, create with no warning.
+                        else:
+                            createTimeDifs()
+                    # Create a histogram plot.
                     case 'plotSplit':
-                        warning(plotSplit,
-                                'There is an already stored histogram '
-                                + 'in this runtime. Do you want to overwrite it?')
+                        # If histogram already exists, warn user.
+                        if histogram is not None:
+                            warning(plotSplit,
+                                    'There is an already stored histogram '
+                                    + 'in this runtime. Do you want to overwrite it?')
+                        # Otherwise, create with no warning.
+                        else:
+                            plotSplit()
+                    # Create a best fit + residual.
                     case 'createBestFit':
-                        warning(createBestFit,
-                                'There is an already stored best fit line '
-                                + 'in this runtime. Do you want to overwrite it?')
-
+                        # If best fit already exists, warn user.
+                        if best_fit is not None:
+                            warning(createBestFit,
+                                    'There is an already stored best fit line '
+                                    + 'in this runtime. Do you want to overwrite it?')
+                        # Otherwise, create with no warning.
+                        else:
+                            createBestFit()
+        # Otherwise, assume folder data.
         else:
+            # If modular analysis is attempted, throw and error.
             if mode != 'raAll':
                 error('You can only run full folder analysis.\n\n'
                       + 'These modular options are for single files.')
+            # Otherwise, run the full analysis.
             else:
                 raAll(False)
 
 def conduct_PSD():
+
+    '''Copy and pasted function from psdDriver for 
+    running Power Spectral Density analysis.
+    
+    See the original for more info.'''
+
     global parameters
 
     file_path = parameters.settings['Input/Output Settings']['Input file/folder']
@@ -426,63 +469,105 @@ def conduct_PSD():
                             save_fig=parameters.settings['General Settings']['Save figures'],
                             save_dir=parameters.settings['Input/Output Settings']['Save directory'])
 
-def printType(value):
+def format(value):
+
+    '''Converts a variable to a properly formatted string. 
+    This is needed for floats in scientific notation.
+    
+    Requires:
+    - value: the variable that is to be converted into a string.'''
+
+    # If variable is a list.
     if isinstance(value, list):
         response ='['
+        # For each entry, properly convert it to a string and 
+        # add it to the list string with a separating ', '.
         for entry in value:
-            response += printType(entry) + ', '
+            response += format(entry) + ', '
+        # Remove the extra ', ' and close the list.
         response = response[0:len(response)-2] + ']'
+        # Return completed list.
         return response
-    if isinstance(value, bool):
-        if value:
-            return 'True'
-        else:
-            return 'False'
+    # If variable is a float and is of an excessively large or 
+    # small magnitude, display it in scientific notation.
     elif isinstance(value, float) and (value > 1000 or value < -1000 or (value < 0.01 and value > -0.01 and value != 0)):
-        return "{:e}".format(value)
+        return f'{value:g}'
+    # Otherwise, just return a string cast of the variable.
     else:
         return str(value)
 
 def saveType(value: str):
+
+    '''Converts the output of a tkinter string variable to 
+    its proper value for storage. WARNING: this implementation 
+    does not support nested lists or any dictionaries.
+    
+    Requires:
+    - value: the string to be converted to a value.'''
+
+    # If variable is a list:
     if value[0] == '[':
+        # Get rid of brackets and make empty list variable.
         value = value[1:len(value)-1]
         response = []
+        # Loop while there are still entries in the list string.
         while value.find(', ') != -1:
+            # Add the proper type of the next variable.
             response.append(saveType(value[0:value.find(', ')]))
+            # Remove the appended variable from the list string.
             value=value[value.find(', ')+2:]
+        # Append the final value.
         response.append(saveType(value))
+        # Return the completed list.
         return response
+    # If string represents a boolean, return accordingly.
     elif value == 'True':
         return True
     elif value == 'False':
         return False
+    # If string is numeric, cast it to an integer.
     elif value.isnumeric():
         return int(value)
+    # Try casting the response to a float.
     try:
         response = float(value)
+        # If it works, return the float.
         return response
+    # Otherwise, assume a string type and return it.
     except ValueError:
         return value
 
 def setMenu(prev):
+
+    '''The GUI for the settings menu.
+    
+    Requires:
+    - prev: the GUI function for the previous menu.'''
+
     global window
+    # Clear the window of all previous entries, labels, and buttons.
     for item in window.winfo_children():
         item.destroy()
+    # Properly name the window.
     window.title('Settings Editor & Viewer')
+    # Lable to prompt the user.
     ttk.Label(window,
               name='prompt',
               text='What settings do you want to edit/view?',
               ).grid(column=0,row=0)
+    # Button to edit/view current settings.
     ttk.Button(window,
               name='current',
               text='Current Settings',
               command=lambda: editor_menu(prev)
               ).grid(column=0,row=1)
+    # Button to import settings files.
     ttk.Button(window,
               name='import',
               text='Import settings file',
               command=lambda: download_menu(lambda: setMenu(prev), lambda: setMenu(prev))
               ).grid(column=0,row=2)
+    # Button to return to the previous menu.
     ttk.Button(window,
               name='return',
               text='Return to previous menu',
@@ -490,53 +575,98 @@ def setMenu(prev):
               ).grid(column=0,row=3)
 
 def edit(inputs, prev):
+
+    '''Save the inputs from the editor menu to the settings.
+    
+    Requires:
+    - inputs: a dictionary of tkinter string variables. 
+    Should have groups that match the current settings.
+    - prev: the GUI function for the menu 
+    to return to after the settings menu.'''
+
     global parameters
+    # For each group and setting in the inputs, convert the 
+    # string to the correct time and save it accordingly.
     for group in inputs:
         for setting in inputs[group]:
             parameters.settings[group][setting] = saveType(inputs[group][setting].get())
+    # Return to the settings menu.
     setMenu(prev)
 
 def editor_menu(prev):
+
+    '''The GUI for the editor menu.
+    
+    Requires:
+    - prev: the GUI function for the menu 
+    to return to after the settings menu.'''
+
     global window, parameters
     groupNum=0
     curTop=0
     curMax = 0
-    inputs={}
+    # Initialize inputs dictionary (assume settings groups are constant).
+    inputs={'Input/Output Settings': {},
+            'General Settings': {},
+            'RossiAlpha Settings': {},
+            'PSD Settings': {},
+            'Histogram Visual Settings': {},
+            'Line Fitting Settings': {},
+            'Residual Plot Settings': {},}
+    # Clear the window of all previous entries, labels, and buttons.
     for item in window.winfo_children():
         item.destroy()
+    # Properly name the window.
     window.title('View/Edit Current Settings')
+    # For each group in the settings.
     for group in parameters.settings:
+        # If the start of a new row, add the previous current maximum 
+        # to the current top and reset the current maximum variable. 
         if (groupNum*3) % 9 == 0:
             curTop += curMax
             curMax = 0
+        # The label for the settings group.
         ttk.Label(window,
                   name=group[0:group.find(' Settings')].lower(),
                   text=group[0:group.find(' Settings')] + ':'
                   ).grid(column=(groupNum*3) % 9,row=curTop)
+        # Reset the settings number (1-indexed)
         setNum=1
+        # For each setting in the group.
         for setting in parameters.settings[group]:
-            if inputs.get(group) == None:
-                inputs[group] = {}
+            # Create a string variable linked to 
+            # this setting in the inputs dictionary.
             inputs[group][setting]=tk.StringVar()
+            # The label for the setting name.
             ttk.Label(window,
                   name=(group + ' ' + setting).lower(),
                   text=setting + ':'
                   ).grid(column=(groupNum*3+1) % 9,row=curTop+setNum)
+            # The entry box for inputting/viewing the setting value.
             tk.Entry(window,
                   name=(group + ' ' + setting + ' value').lower(),
                   textvariable=inputs[group][setting]
                   ).grid(column=(groupNum*3+2) % 9,row=curTop+setNum)
-            window.children[(group + ' ' + setting + ' value').lower()].insert(0,printType(parameters.settings[group][setting]))
+            # Insert into the entry box the current value of the setting.
+            window.children[(group + ' ' + setting + ' value').lower()].insert(0,format(parameters.settings[group][setting]))
+            # Increase the setting number.
             setNum += 1
+        # If the total settings in this group were the max 
+        # in this row, set the current max to this value.
         if setNum > curMax:
             curMax = setNum
+        # Increase the group number.
         groupNum += 1
+    # Add the previous current maximum to 
+    # the current top for button formatting.
     curTop += curMax
+    # Button for saving changes.
     ttk.Button(window,
                 name='save',
                 text='Save changes',
                 command=lambda: edit(inputs, prev)
                 ).grid(column=0 % 9,row=curTop)
+    # Button for canceling changes.
     ttk.Button(window,
                   name='cancel',
                   text='Cancel changes',
@@ -544,39 +674,51 @@ def editor_menu(prev):
                   ).grid(column=0 % 9,row=curTop+1)
 
 def raMenu():
+
+    '''The GUI for the Rossi Alpha menu.'''
+
     global window
+    # Clear the window of all previous entries, labels, and buttons.
     for item in window.winfo_children():
         item.destroy()
+    # Properly name the window.
     window.title('Rossi Alpha Analysis')
+    # Prompt the user.
     ttk.Label(window,
               name='prompt',
               text='What would you like to do?'
               ).grid(column=0,row=0)
+    # Button for running all analysis.
     ttk.Button(window,
               name='all',
               text='Run entire analysis',
               command=lambda: raSplit('raAll')
               ).grid(column=0,row=1)
+    # Button for calculating time differences.
     ttk.Button(window,
               name='time_dif',
               text='Calculate time differences',
               command=lambda: raSplit('createTimeDifs')
               ).grid(column=0,row=2)
+    # Button for creating a histogram.
     ttk.Button(window,
               name='histogram',
               text='Create histogram',
               command=lambda: raSplit('plotSplit')
               ).grid(column=0,row=3)
+    # Button for creating a line fit + residual.
     ttk.Button(window,
               name='fit',
               text='Fit data',
               command=lambda: raSplit('createBestFit')
               ).grid(column=0,row=4)
+    # Button to view the program settings.
     ttk.Button(window,
               name='settings',
               text='Program settings',
               command=lambda: setMenu(raMenu)
               ).grid(column=0,row=5)
+    # Button to return to the main menu.
     ttk.Button(window,
               name='return',
               text='Return to main menu',
@@ -584,24 +726,33 @@ def raMenu():
               ).grid(column=0,row=6)
 
 def psdMenu():
+
+    '''The GUI for the Power Spectral Density menu.'''
+
     global window
+    # Clear the window of all previous entries, labels, and buttons.
     for item in window.winfo_children():
         item.destroy()
+    # Properly name the window.
     window.title('Power Spectral Density Analysis')
+    # Prompt the user.
     ttk.Label(window,
               name='prompt',
               text='What would you like to do?'
               ).grid(column=0,row=0)
+    # Button to run analysis.
     ttk.Button(window,
               name='run',
               text='Run analysis',
               command=conduct_PSD
               ).grid(column=0,row=1)
+    # Button to view the program settings.
     ttk.Button(window,
               name='settings',
               text='Program settings',
               command=lambda: setMenu(psdMenu)
               ).grid(column=0,row=2)
+    # Button to return to the main menu.
     ttk.Button(window,
               name='return',
               text='Return to main menu',
@@ -609,20 +760,68 @@ def psdMenu():
               ).grid(column=0,row=3)
 
 def default():
+
+    '''Import the default settings 
+    at the beginning of runtime.'''
+
     global parameters
+    # Create the absolute path for the 
+    # default settings and read them in.
     path = os.path.abspath('default.json')
     parameters.read(path)
+    # Run the main menu.
     main()
 
+def download(append: bool, prev):
+
+    '''Download the file given in the global response variable.
+    
+    Requires:
+    - append: a boolean that represents whether this download is 
+    meant for appending or overwriting the entire settings.
+    - prev: the menu to return to after downloading.'''
+
+    global window, response, parameters
+    # Get the response, add the .json extension, 
+    # and convert it to an absolute path.
+    file = os.path.abspath(response.get() + '.json')
+    # If file exists.
+    if os.path.isfile(file):
+        # If in append mode.
+        if append:
+            # If settings have not been initialized, read in the defualt.
+            if parameters.origin == 'None':
+                parameters.read(os.path.abspath('default.json'))
+            # Append the file to the current settings.
+            parameters.append(file)
+        # If in overwrite mode, read in the settings.
+        else:
+            parameters.read(file)
+        # Return to the previous menu.
+        prev()
+    # If not, throw an error.
+    else:
+        error(file + ' is not a correct path or references an invalid settings '
+              + 'file.\n\nMake sure that your settings file is named correctly, '
+              + 'the correct absolute/relative path to it is given, and '
+              + 'you did not include the .json extenstion in your input.')
+
 def download_menu(prev, to):
+
+    '''The GUI for the settings download menu.'''
+
     global window
+    # Clear the window of all previous entries, labels, and buttons.
     for item in window.winfo_children():
         item.destroy()
+    # Properly name the window.
     window.title('Download Settings')
+    # Notify the user of the different import options.
     ttk.Label(window,
               name='choice',
               text='You have two import options:'
               ).grid(column=0,row=0)
+    # Button for overwriting the entire settings.
     ttk.Button(window,
                name='overwrite',
                text='Overwrite entire settings',
@@ -631,60 +830,56 @@ def download_menu(prev, to):
                                       'Enter a settings file (no .json extension):',
                                       'Overwrite Settings')
                ).grid(column=0,row=1)
+    # Button for appending settings to the current settings.
     ttk.Button(window,
                name='append',
-               text='Append settings to default',
+               text='Append settings',
                command=lambda: prompt(lambda: download_menu(prev, to),
                                       lambda: download(True, to),
                                       'Enter a settings file (no .json extension):',
                                       'Append Settings to Default')
                ).grid(column=0,row=2)
+    # Button for canceling settings import.
     ttk.Button(window,
                name='cancel',
                text='Cancel',
                command=prev
                ).grid(column=0,row=3)
 
-def download(append, prev):
-    global window, response, parameters
-    file = response.get() + '.json'
-    if os.path.isfile(os.path.abspath(file)):
-        if append:
-            parameters.read(os.path.abspath('default.json'))
-            parameters.append(os.path.abspath(file))
-        else:
-            parameters.read(os.path.abspath(file))
-        prev()
-    else:
-        error(file + ' does not exist in the given directory.\n\n'
-            + 'Make sure that your settings file is named correctly, '
-            + 'the correct absolute/relative path to it is given, and '
-            + 'you did not include the .json extenstion in your input.')
-
 def main():
+
+    '''The GUI for the main menu.'''
+
     global window
+    # Clear the window of all previous entries, labels, and buttons.
     for item in window.winfo_children():
         item.destroy()
+    # Properly name the window.
     window.title('Main Menu')
+    # Prompt the user.
     ttk.Label(window,
               name='choice',
               text='You can utilize any of the following functions:'
               ).grid(column=0,row=0)
+    # Button to run Rossi Alpha analysis. 
     ttk.Button(window,
                name='rossi_alpha',
                text='Run Rossi Alpha analysis',
                command=raMenu
                ).grid(column=0,row=1)
+    # Button to run Power Spectral Density analysis. 
     ttk.Button(window,
                name='power_spectral_density',
                text='Run Power Spectral Density analysis',
                command=psdMenu
                ).grid(column=0,row=2)
+    # Button to edit the program settings.
     ttk.Button(window,
                name='settings',
                text='Edit the program settings',
                command=lambda: setMenu(main)
                ).grid(column=0,row=3)
+    # Button to exit the program.
     ttk.Button(window,
                name='quit',
                text='Quit the program',
@@ -694,16 +889,25 @@ def main():
                ).grid(column=0,row=4)
 
 def startup():
+
+    '''The GUI for the startup menu.'''
+
     global window, parameters
+    # If window is not yet defined, create it and grid it.
     if window == None:
         window = Tk()
-        window.title('Welcome!')
+        window.grid()
+    # Otherwise, clear the window of all 
+    # previous entries, labels, and buttons.
     else:
         for item in window.winfo_children():
             item.destroy()
+    # Properly name the window.
+    window.title('Welcome!')
+    # If settings are not yet defined, construct an empty settings object.
     if parameters == None:
         parameters = set.Settings()
-    window.grid()
+    # Welcome information for the user.
     ttk.Label(window,
             name='welcome',
             text='Welcome to the DNNG/PyNoise project.\n\nWith '
@@ -713,10 +917,23 @@ def startup():
             + 'Use this Python suite to analyze a single file or '
             + 'multiple across numerous folders.\n'
             ).grid(column=0, row=0)
+    # Prompt the user.
     ttk.Label(window,
             name='choice',
-            text='Would you like to use the default settings or import another .json file?'
+            text='Would you like to use the default '
+            + 'settings or import another .json file?'
             ).grid(column=0, row=1)
-    ttk.Button(window, name='default', text="Default", command=default).grid(column=0, row=2)
-    ttk.Button(window, name='import', text="Import Settings", command=lambda:download_menu(startup, main)).grid(column=0, row=3)
+    # Button for importing the default settings.
+    ttk.Button(window,
+               name='default',
+               text="Default",
+               command=default
+               ).grid(column=0, row=2)
+    # Button for importing other settings.
+    ttk.Button(window,
+               name='import',
+               text="Import Settings",
+               command=lambda:download_menu(startup, main)
+               ).grid(column=0, row=3)
+    # Run the window.
     window.mainloop()
