@@ -103,7 +103,7 @@ def main():
                 editor.print('')
                 editor.print('Initializing program with default settings...')
                 # Create absolute path for the default settings file and read it in.
-                path = os.path.abspath('default.json')
+                path = os.path.abspath('./settings/default.json')
                 editor.parameters.read(path)
                 editor.changeLog()
                 editor.log('Settings from default.json succesfully imported.\n')
@@ -168,7 +168,7 @@ def main():
                         # Append settings.
                         if opt == 'a':
                             # Read default settings first to append over.
-                            editor.parameters.read(os.path.abspath('default.json'))
+                            editor.parameters.read(os.path.abspath('./settings/default.json'))
                             # Append changed/removed settings.
                             editor.parameters.append(os.path.abspath(file))
                             editor.changeLog()
@@ -321,7 +321,7 @@ def main():
                     if choice == 'y':
                         # Create an absolute path for the default settings
                         # file and write the current settings into it.
-                        path = os.path.abspath('default.json')
+                        path = os.path.abspath('./settings/default.json')
                         editor.print('Overwriting default settings...')
                         editor.parameters.write(path)
                         editor.log('Default settings overwritten.\n')

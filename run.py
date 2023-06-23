@@ -35,7 +35,7 @@ def warningFunction(popup: Tk, to):
     popup.destroy()
     to()
 
-def shutdown(window: Tk, parameters: set.Settings, file: str):
+def shutdown(window: Tk, parameters: set.Settings, file: str, warn: bool):
 
     '''Save settings to the specified file at the end of runtime.
     
@@ -43,18 +43,20 @@ def shutdown(window: Tk, parameters: set.Settings, file: str):
     - window: the main window that will be closed down.
     - file: the absolute path of the file being saved to.
     - parameters: the settings object holding the current settings.
+    - warn: a boolean that determines whether or not 
+    the program should warn the user of the overwrite.
     
     If no file is given, the function assumes the 
     file is in the global response variable.'''
 
     # If the file already exists, warns the user of the overwrite.
-    if os.path.isfile(file):
-        gui.warning(lambda: shutdown(window, parameters, file))
+    if warn and os.path.isfile(file):
+        gui.warning(lambda: shutdown(window, parameters, file, False))
         # Return so the window isn't deleted.
         return
      # Otherwise, save to the new file.
     else:
-        if file == os.path.abspath('default.json'):
+        if file == os.path.abspath('./settings/default.json'):
             parameters.write(file)
         else:
             parameters.save(file)
@@ -394,7 +396,7 @@ def download(parameters: set.Settings, file: str, append: bool, prev):
         if append:
             # If settings have not been initialized, read in the defualt.
             if parameters.origin == 'None':
-                parameters.read(os.path.abspath('default.json'))
+                parameters.read(os.path.abspath('./settings/default.json'))
             # Append the file to the current settings.
             parameters.append(file)
         # If in overwrite mode, read in the settings.

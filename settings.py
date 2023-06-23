@@ -149,7 +149,7 @@ class Settings:
 
         # Create and load a default settings object.
         default = Settings()
-        default.read(os.path.abspath('default.json'))
+        default.read(os.path.abspath('./settings/default.json'))
         # The dictionary to be outputted.
         output = {}
         for group in self.settings:
