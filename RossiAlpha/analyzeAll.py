@@ -12,6 +12,7 @@ from .timeDifs import timeDifCalcs
 from .plots import RossiHistogram
 from .fitting import RossiHistogramFit
 import matplotlib.pyplot as plt
+from lmxReader import *
 # sns.set(rc={"figure.dpi": 350, "savefig.dpi": 350})
 # sns.set_style("ticks")
 # sns.set_context("talk", font_scale=0.8)
@@ -22,15 +23,23 @@ def analyzeAllType1(settings: dict):
   
     
     filePath = settings['Input/Output Settings']['Input file/folder']
-    if settings['Input/Output Settings'].get('Data Column') is not None:
-        listData = np.loadtxt(filePath,delimiter=" ", usecols=(settings['Input/Output Settings']['Data Column']))
-    else:
-        listData = np.loadtxt(filePath)
+
+    if filePath.endswith(".txt"):
+        if settings['Input/Output Settings'].get('Data Column') is not None:
+            listData = np.loadtxt(filePath,delimiter=" ", usecols=(settings['Input/Output Settings']['Data Column']))
+        else:
+            listData = np.loadtxt(filePath)
     # sorting timestamps to be fed into calculate_time_differences()
+    elif filePath.endswith(".lmx"):
+        print("this is an lmx file. we are currently in testing stages for analyzing this file type.")
+        listData = np.array(readLMXFile(filePath))
+
+    
     
     if settings['General Settings']["Sort data"]:
         listDataSorted = np.sort(listData)
-    
+    else:
+        listDataSorted = listData
     # applying time differences function
     thisTimeDifCalc = timeDifCalcs(listDataSorted, settings['RossiAlpha Settings']['Histogram Generation Settings']["Reset time"],  settings['RossiAlpha Settings']["Time difference method"])
 
