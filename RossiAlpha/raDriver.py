@@ -1,8 +1,8 @@
-from RossiAlpha import analyzeAll as mn
-from RossiAlpha import fitting as fit
-from RossiAlpha import plots as plt
-from RossiAlpha import timeDifs as dif
-from RossiAlpha import analyzingFolders as fol
+from . import analyzeAll as mn
+from . import fitting as fit
+from . import plots as plt
+from . import timeDifs as dif
+from . import analyzingFolders as fol
 import editor as edit
 import matplotlib.pyplot as mpl
 import numpy as np
