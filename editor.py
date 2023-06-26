@@ -17,7 +17,7 @@ class Editor:
         self.history = None
         os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
-    def print(self, message):
+    def print(self, message: str):
 
         '''Prints a string if quiet mode 
         is off. Otherwise, does nothng.'''
@@ -25,7 +25,7 @@ class Editor:
         if not self.parameters.settings['General Settings']['Quiet mode']:
             print(message)
 
-    def log(self, output):
+    def log(self, output: str):
 
         '''Prints the output statement to the command line 
         and saves it to the log if logs are enabled.
@@ -112,7 +112,7 @@ class Editor:
                 if self.parameters.settings[group].get(setting) == None:
                     self.log(setting + ' in ' + group + ' removed.\n')
 
-    def edit(self, file):
+    def edit(self, file: str):
 
         '''The function that allows the user to edit settings 
         in a vim and save them to runtime afterwards.
@@ -153,7 +153,7 @@ class Editor:
         # Delete the temporary file.
         os.remove(os.path.abspath(file))
 
-    def driver(self, queue):
+    def driver(self, queue: list[str]):
 
         '''The driver that manages the settings vim for editing/viewing.'''
 
@@ -280,6 +280,3 @@ class Editor:
                     print('ERROR: Unrecognized command ' + choice 
                         + '. Please review the list of appriopriate inputs.\n')
         return queue
-
-if __name__ == "__main__":
-    Editor.driver(Editor(),[])
