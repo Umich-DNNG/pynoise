@@ -3,23 +3,24 @@ from . import fitting as fit
 from . import plots as plt
 from . import timeDifs as dif
 from . import analyzingFolders as fol
+from .. import editor as edit
 import matplotlib.pyplot as mpl
 import numpy as np
 mpl.ioff()
 
 # Where the time differences are stored.
-time_difs = None
-time_difs_file = None
-time_difs_method = None
+time_difs: dif.timeDifCalcs = None
+time_difs_file: str = None
+time_difs_method: str = None
 # Where the histogram plot is stored.
-histogram = None
-hist_file = None
-hist_method = None
+histogram: plt.RossiHistogram = None
+hist_file: str = None
+hist_method: str = None
 # Where the best fit curve is stored.
-best_fit = None
+best_fit: fit.RossiHistogramFit = None
 
 # The editor class that contains the settings and settings editor.
-editor = None
+editor: edit.Editor = None
 
 def createTimeDifs():
 
@@ -123,7 +124,7 @@ def createBestFit():
                               show_plot=editor.parameters.settings['General Settings']['Show plots'])
     editor.log('Created line of best fit with residuals for the current histogram.\n')
 
-def main(editorIn, queue):
+def main(editorIn: edit.Editor, queue: list[str] = []):
     global editor, time_difs, histogram, best_fit
     editor = editorIn
     selection = 'blank'
