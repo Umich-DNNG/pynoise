@@ -50,7 +50,9 @@ class timeDifCalcs:
         while i < len(self.time_vector):
             ch_bank = set()
             # iterate through the rest of the vector starting 1 after i
+
             for j in range(i + 1, n):
+
                 # if we get outside the reset_time range, break to the next iteratiion of i
                 if self.time_vector[j] - self.time_vector[i] > self.reset_time:
                     break
@@ -69,9 +71,8 @@ class timeDifCalcs:
                         ch_bank.add(self.channels[j])
             i = i + 1
 
-        self.time_diffs = time_diffs
-        
-        return self.time_diffs
+        self.timeDifs = time_diffs
+        return self.timeDifs
     
 
     def calculateTimeDifsAndBin(self, bin_width, save_fig: bool, show_plot: bool, save_dir: str, options: dict):
