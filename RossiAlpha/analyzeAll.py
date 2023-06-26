@@ -16,7 +16,7 @@ import matplotlib.pyplot as plt
 # sns.set_style("ticks")
 # sns.set_context("talk", font_scale=0.8)
 
-def analyzeAllType1(settings):
+def analyzeAllType1(settings: dict):
     #current_path = os.path.realpath(__file__)
     #theseSettings = readInput.readInput()
   
@@ -62,7 +62,7 @@ def analyzeAllType1(settings):
         
 
 
-def analyzeAllType2(settings):
+def analyzeAllType2(settings: dict):
     RA_hist_total = analyzingFolders.compile_sample_stdev_RA_dist(settings)
     from .fitting import Fit_With_Weighting
     thisWeightedFit = Fit_With_Weighting(RA_hist_total,settings['RossiAlpha Settings']['Fit Region Settings']['Minimum cutoff'], 
@@ -72,8 +72,3 @@ def analyzeAllType2(settings):
     thisWeightedFit.plot_RA_and_fit(save_fig=settings['General Settings']['Save figures'], 
                                     show_plot=settings['General Settings']['Show plots'], errorBars = settings['RossiAlpha Settings']['Histogram Generation Settings']['Error Bar/Band'])
     plt.close('all')
-
-#
-#if __name__ == "__main__":
-#    main()
-# %%
