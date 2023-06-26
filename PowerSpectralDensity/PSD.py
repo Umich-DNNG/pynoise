@@ -11,7 +11,7 @@ def APSD(f, A, alpha, c):
 # ---------------------------------------------------------------------------------------------------
 
 class PowerSpectralDensity:
-    def __init__(self, list_data_array, leg_label, clean_pulses_switch: bool, dwell_time: float, meas_time_range: list[float]):
+    def __init__(self, list_data_array, leg_label: str, clean_pulses_switch: bool, dwell_time: float, meas_time_range: list[float]):
 
         '''
         Description:
