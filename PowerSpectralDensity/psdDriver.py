@@ -6,13 +6,10 @@ Created on Thu Jun  1 11:42:16 2023
 """
 
 import numpy as np
-import matplotlib.pyplot as plt
-from scipy.optimize import curve_fit
-from scipy import signal
-from PowerSpectralDensity import PSD as psd
+from . import PSD as psd
+import editor as edit
 
-editor = None
-
+editor: edit.Editor = None
 
 def conduct_PSD():
     '''Creates PSD plots based on input data.'''
@@ -32,7 +29,7 @@ def conduct_PSD():
                             save_dir=editor.parameters.settings['Input/Output Settings']['Save directory'])
 
 
-def main(editorIn, queue):
+def main(editorIn: edit.Editor, queue: list[str]):
     global editor
     editor = editorIn
     selection = 'blank'
@@ -61,9 +58,11 @@ def main(editorIn, queue):
                     print('ERROR: You currently have no input file or folder defined. '
                           + 'Please make sure to specify one before running any analysis.\n')
                 else:
-                    editor.print('')
-                    editor.print('Running the entire power spectral density analysis...')
+                    editor.print('\nRunning the entire power spectral density analysis...')
                     conduct_PSD()
+                    editor.log('Ran the entire RossiAlpha method on file ' 
+                                + editor.parameters.settings['Input/Output Settings']['Input file/folder'] 
+                                + '.\n')
                 '''
             case 'p':
                 editor.print('')
@@ -86,9 +85,3 @@ def main(editorIn, queue):
                 print('ERROR: Unrecognized command ' + selection 
                         + '. Please review the list of appriopriate inputs.\n')
     return editor, queue
-
-
-# Tells the program what function to start if this is the main program being ran (TO BE DELETED)
-if __name__ == "__main__":
-    main()
-                

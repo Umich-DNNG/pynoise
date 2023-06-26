@@ -100,7 +100,7 @@ class Settings:
         # Return the list of changes for printing.
         return list
 
-    def append(self, path):
+    def append(self, path: str):
         
         '''Appends settings from a json file into the settings 
         object. Requires an abolsute path to the settings file.
@@ -125,7 +125,7 @@ class Settings:
         if path != os.path.abspath('append.json'):
             self.appended = path
 
-    def read(self, path):
+    def read(self, path: str):
 
         '''Reads in a json file that completely overwrites the 
         exisitng settings. Requiures an absolute path to the file.'''
@@ -138,7 +138,7 @@ class Settings:
             self.origin = path
             self.appended = 'None'
 
-    def write(self, path):
+    def write(self, path: str):
 
         '''Write the current settings to a file.
         Requiures an absolute path to the file.'''
@@ -146,7 +146,7 @@ class Settings:
         with open(path,'w') as file:
             file.write(json.dumps(self.settings, indent=4))
 
-    def save(self, path):
+    def save(self, path: str):
 
         '''Save the current settings to a file, listing 
         only those that overwrite the default.'''
