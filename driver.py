@@ -1,8 +1,8 @@
 '''The main file that should be run each time the user wants to use this Python Suite.'''
 
 import editor as edit
-from RossiAlpha import raDriver as ra
-from PowerSpectralDensity import psdDriver as psd
+import raDriver as ra
+import psdDriver as psd
 import os
 import sys
 

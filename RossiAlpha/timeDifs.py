@@ -5,7 +5,7 @@ from . import plots as plt
 
 class timeDifCalcs:
     
-    def __init__(self, time_data, reset_time, method, digital_delay = None, channels = None):
+    def __init__(self, time_data, reset_time: int, method: str, digital_delay: int = None, channels = None):
         self.time_vector = time_data 
         self.reset_time = float(reset_time)
         self.method = method
@@ -57,7 +57,7 @@ class timeDifCalcs:
         return self.time_diffs
     
 
-    def calculateTimeDifsAndBin(self, bin_width, save_fig,show_plot,save_dir,options):
+    def calculateTimeDifsAndBin(self, bin_width, save_fig: bool, show_plot: bool, save_dir: str, options: dict):
         '''can be called on a timeDifCalcs object and simultaneously calculates the time differences
         and adds them to a histogram.
         

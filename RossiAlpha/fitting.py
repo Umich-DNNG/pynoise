@@ -43,7 +43,7 @@ def exp_decay_2_param(x, a, b):
 #--------------------------------------------------------------------------------    
 
 class RossiHistogramFit:
-    def __init__(self, counts, bin_centers, settings, save_dir = None):
+    def __init__(self, counts, bin_centers, settings: dict, save_dir: str = None):
         
         '''
         Description:
@@ -79,7 +79,7 @@ class RossiHistogramFit:
             self.save_dir = save_dir
 
 
-    def fit(self, save_fig, show_plot):
+    def fit(self, save_fig: bool, show_plot: bool):
 
         '''
         Description:
@@ -148,7 +148,7 @@ class RossiHistogramFit:
 
 #--------------------------------------------------------------------------------
 
-    def fit_and_residual(self, save_every_fig, show_plot, folder_index = None):
+    def fit_and_residual(self, save_every_fig: bool, show_plot: bool, folder_index = None):
 
         '''
         Description:
@@ -236,7 +236,7 @@ class RossiHistogramFit:
 #--------------------------------------------------------------------------------
 
 class Fit_With_Weighting:
-    def __init__(self,RA_hist_totals, min_cutoff, general_settings,saveDir, fitting_opts, residual_opts):
+    def __init__(self,RA_hist_totals, min_cutoff: int, general_settings: dict, saveDir: str, fitting_opts: dict, residual_opts: dict):
 
         '''
         Description:
@@ -317,7 +317,7 @@ class Fit_With_Weighting:
         self.xfit, self.yfit = xfit, yfit
 
        
-    def plot_RA_and_fit(self, save_fig, show_plot, errorBars):
+    def plot_RA_and_fit(self, save_fig: bool, show_plot: bool, errorBars: str):
 
         '''
         Description:
