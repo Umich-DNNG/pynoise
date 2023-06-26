@@ -6,14 +6,10 @@ Created on Thu Jun  1 11:42:16 2023
 """
 
 import numpy as np
-import matplotlib.pyplot as plt
-from scipy.optimize import curve_fit
-from scipy import signal
-from PowerSpectralDensity import PSD as psd
-from .. import editor as edit
+from . import PSD as psd
+import editor as edit
 
 editor: edit.Editor = None
-
 
 def conduct_PSD():
     '''Creates PSD plots based on input data.'''
