@@ -8,11 +8,15 @@ import os
 import run
 
 # The main window that is used for the program.
-window = None
+window: Tk = None
 # The settings used during runtime
-parameters = None
+parameters: set.Settings = None
 
-def prompt(prev, to, message='Enter your choice:', title='User Prompt'):
+def prompt(prev,
+           to,
+           message='Enter your choice:',
+           title='User Prompt',
+           log:str=None):
 
     '''Create a prompt window to get a text input from the user.
     
@@ -22,10 +26,16 @@ def prompt(prev, to, message='Enter your choice:', title='User Prompt'):
     
     Optional:
     - message: the message that the user sees above the entry box.
-    - title: the title of the window'''
+    - title: the title of the window
+    - log: the message logged to the logfile and 
+    window when the prompt is successfully entered.'''
 
     global window
     response = tk.StringVar()
+    if log == None:
+        action = lambda value: to(value)
+    else:
+        action = lambda value: run.log(message=lambda: log(value), window=window, menu=lambda: to(value))
     # Clear the window of all previous entries, labels, and buttons.
     for item in window.winfo_children():
         item.destroy()
@@ -45,7 +55,7 @@ def prompt(prev, to, message='Enter your choice:', title='User Prompt'):
     ttk.Button(window,
               name='continue',
               text='Continue',
-              command=lambda: to(response.get())
+              command=lambda: action(response.get())
               ).grid(column=0,row=2)
     # The cancel button.
     ttk.Button(window,
@@ -184,7 +194,7 @@ def shutdown_menu():
                                                                True),
                                        'Enter a name for the new settings '
                                         + '(not including the .json file extension).',
-                                        'Export Settings',)
+                                        'Export Settings')
                 ).grid(column=0,row=total+3)
         # Button for discarding the current settings.
         ttk.Button(window,
@@ -306,7 +316,7 @@ def editor_menu(prev):
     ttk.Button(window,
                 name='save',
                 text='Save changes',
-                command=lambda: run.edit(inputs, parameters, prev)
+                command=lambda: run.edit(window, inputs, parameters, prev)
                 ).grid(column=0 % 9,row=curTop)
     # Button for canceling changes.
     ttk.Button(window,
@@ -334,25 +344,25 @@ def raMenu():
     ttk.Button(window,
               name='all',
               text='Run entire analysis',
-              command=lambda: run.raSplit('raAll', parameters)
+              command=lambda: run.raSplit(window,'raAll', parameters)
               ).grid(column=0,row=1)
     # Button for calculating time differences.
     ttk.Button(window,
               name='time_dif',
               text='Calculate time differences',
-              command=lambda: run.raSplit('createTimeDifs', parameters)
+              command=lambda: run.raSplit(window,'createTimeDifs', parameters)
               ).grid(column=0,row=2)
     # Button for creating a histogram.
     ttk.Button(window,
               name='histogram',
               text='Create histogram',
-              command=lambda: run.raSplit('plotSplit', parameters)
+              command=lambda: run.raSplit(window,'plotSplit', parameters)
               ).grid(column=0,row=3)
     # Button for creating a line fit + residual.
     ttk.Button(window,
               name='fit',
               text='Fit data',
-              command=lambda: run.raSplit('createBestFit', parameters)
+              command=lambda: run.raSplit(window,'createBestFit', parameters)
               ).grid(column=0,row=4)
     # Button to view the program settings.
     ttk.Button(window,
@@ -423,7 +433,8 @@ def download_menu(prev, to):
                command=lambda: prompt(lambda: download_menu(prev, to),
                                       lambda file: run.download(parameters, os.path.abspath(file + '.json'), False, to),
                                       'Enter a settings file (no .json extension):',
-                                      'Overwrite Settings')
+                                      'Overwrite Settings',
+                                      lambda response: 'Settings successfully overwritten with file:\n' + response + '.json.')
                ).grid(column=0,row=1)
     # Button for appending settings to the current settings.
     ttk.Button(window,
@@ -432,7 +443,8 @@ def download_menu(prev, to):
                command=lambda: prompt(lambda: download_menu(prev, to),
                                       lambda file: run.download(parameters, os.path.abspath(file + '.json'), True, to),
                                       'Enter a settings file (no .json extension):',
-                                      'Append Settings to Default')
+                                      'Append Settings to Default',
+                                      lambda response: 'Settings successfully appended with file:\n' + response + '.json.')
                ).grid(column=0,row=2)
     # Button for canceling settings import.
     ttk.Button(window,

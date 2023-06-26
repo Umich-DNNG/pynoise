@@ -52,13 +52,16 @@ def create_logfile():
         # Open the logfile.
         logfile = open(os.path.abspath(logName),'w')
         # Write an introductory message at the top.
-        logfile.write('# A logfile for the runtime started at the given '
+        logfile.write('# A logfile for the runtime started at the named '
                     + 'timestamp.\n# If keep logs is set to false at the end '
                     + 'of runtime, this file will automatically be deleted.\n')
         # Flush the file so it can be read immediately.
         logfile.flush()
 
-def log(message: str, xor=None, label: ttk.Label=None):
+def log(message: str,
+        xor=None,
+        window: Tk=None,
+        menu=None):
 
     '''Log a message to the current window and the logfile.
     
@@ -71,29 +74,52 @@ def log(message: str, xor=None, label: ttk.Label=None):
         - False: show only in the logfile.
         - not provided: show in both.
     - label: the label within which the notification will be put. 
-    This is required when xor is True or not provided.'''
+    This is required when xor is True or not provided.
+    - menu: if returning to a previous menu, this is that menu 
+    function. If not defined, will assume staying on the same menu.'''
 
     global logfile
-    # When applicable, log the message to the logfile.
-    if xor == None or not xor:
-        # Create a timestamp for the confirmation message.
-        curTime = time.localtime()
-        message = (str(curTime.tm_year) 
-        + '-' + str(curTime.tm_mon) 
-        + '-' + str(curTime.tm_mday) 
-        + ' @ ' + str(curTime.tm_hour) 
-        + (':0' if curTime.tm_min < 10 else ':') + str(curTime.tm_min) 
-        + (':0' if curTime.tm_sec < 10 else ':') + str(curTime.tm_sec) 
-        + ' - ' + message)
-        # Write the confirmation + timestamp to the file and flush 
-        # immediately so user can see log updates in real time.
-        logfile.write(message)
-        logfile.flush()
-    # When applicable, set the label in the window to have the correct message.
-    if xor == None or xor:
-        label.config(text=message)
+    if menu != None:
+        error = menu()
+    else:
+        error = False
+    if not error:
+        if not isinstance(message,str):
+            message = message()
+        # When applicable, log the message to the logfile.
+        if xor == None or not xor:
+            # Create a timestamp for the confirmation message.
+            curTime = time.localtime()
+            message = (str(curTime.tm_year) 
+            + '-' + str(curTime.tm_mon) 
+            + '-' + str(curTime.tm_mday) 
+            + ' @ ' + str(curTime.tm_hour) 
+            + (':0' if curTime.tm_min < 10 else ':') + str(curTime.tm_min) 
+            + (':0' if curTime.tm_sec < 10 else ':') + str(curTime.tm_sec) 
+            + ' - ' + message)
+            # Write the confirmation + timestamp to the file and flush 
+            # immediately so user can see log updates in real time.
+            logfile.write(message)
+            logfile.flush()
+        # When applicable, set the label in the window to have the correct message.
+        if xor == None or xor:
+            if xor == None:
+                message = message[message.find(' - ')+2:]
+            
+            if not error:
+                if window.children.get('log') == None:
+                    ttk.Separator(window,
+                                  orient='horizontal',
+                                  ).grid(column=0,row=window.grid_size()[1], sticky='ew')
+                    ttk.Label(window,
+                            name='log',
+                            text=message,
+                            ).grid(column=0,row=window.grid_size()[1])
+                else:
+                    window.children['log'].config(text=message)
 
-def warningFunction(popup: Tk, to):
+def warningFunction(popup: Tk,
+                    to):
 
     '''The function that is called when the user chooses to ignore a warning.
     
@@ -212,8 +238,12 @@ def changes(parameters: set.Settings):
             if parameters.settings[group].get(setting) == None:
                 log(setting + ' in ' + group + ' removed.\n', xor=False)
                 count += 1
+    return count
 
-def edit(inputs: dict, parameters: set.Settings, prev):
+def edit(window: Tk,
+         inputs: dict,
+         parameters: set.Settings,
+         prev):
 
     '''Save the inputs from the editor menu to the settings.
     
@@ -232,10 +262,20 @@ def edit(inputs: dict, parameters: set.Settings, prev):
             parameters.settings[group][setting] = saveType(inputs[group][setting].get())
     # Compare the modified settings to the previous and save the number of changes.
     total = changes(parameters)
-    # Return to the settings menu.
-    gui.setMenu(prev)
+    # If there were changes made, notify the user.
+    if total > 0:
+        log('Succesfully made ' + str(total) + ' changes to the '
+            + 'settings\n(see logfile for more information).',
+            True,
+            window,
+            lambda: gui.setMenu(prev))
+    else:
+        gui.setMenu(prev)
 
-def download(parameters: set.Settings, file: str, append: bool, prev):
+def download(parameters: set.Settings,
+             file: str,
+             append: bool,
+             prev):
 
     '''Download the file given in the global response variable.
     
@@ -266,8 +306,12 @@ def download(parameters: set.Settings, file: str, append: bool, prev):
               + 'file.\n\nMake sure that your settings file is named correctly, '
               + 'the correct absolute/relative path to it is given, and '
               + 'you did not include the .json extenstion in your input.')
+        return True
 
-def export(window: Tk, parameters: set.Settings, file: str, warn: bool):
+def export(window: Tk,
+           parameters: set.Settings,
+           file: str,
+           warn: bool):
 
     '''Save settings to the specified file at the end of runtime.
     
@@ -294,7 +338,8 @@ def export(window: Tk, parameters: set.Settings, file: str, warn: bool):
             parameters.save(file)
     shutdown(window, parameters)
 
-def shutdown(window: Tk, parameters: set.Settings):
+def shutdown(window: Tk,
+             parameters: set.Settings):
 
     '''Close the program & logfile and delete the logfile is applicable.
     
@@ -430,7 +475,8 @@ def createBestFit(parameters: set.Settings):
     best_fit.fit_and_residual(save_every_fig=parameters.settings['General Settings']['Save figures'], 
                               show_plot=parameters.settings['General Settings']['Show plots'])
 
-def raAll(single: bool, parameters: set.Settings):
+def raAll(single: bool,
+          parameters: set.Settings):
 
     '''Run all of the Rossi Alpha analyis.
     
@@ -445,7 +491,9 @@ def raAll(single: bool, parameters: set.Settings):
     else:
         mn.analyzeAllType2(parameters.settings)
 
-def raSplit(mode: str, parameters: set.Settings):
+def raSplit(window: Tk,
+            mode: str,
+            parameters: set.Settings):
 
     '''The main driver for the Rossi Alpha analysis. 
     Checks for user error and saved data overwriting.
@@ -461,6 +509,7 @@ def raSplit(mode: str, parameters: set.Settings):
     if parameters.settings['Input/Output Settings']['Input file/folder'] == 'none':
         gui.error('You currently have no input file or folder defined.\n\n'
             + 'Please make sure to specify one before running any analysis.\n')
+        return True
     # If user does have an input.
     else:
         # Get name of actual file/folder without entire path.
@@ -472,12 +521,16 @@ def raSplit(mode: str, parameters: set.Settings):
             if parameters.settings['RossiAlpha Settings']['Time difference method'] != 'any_and_all':
                 gui.error('To analyze a single file, you must use '
                     + 'the any_and_all time difference method only.\n')
+                return True
             # Otherwise, split on the analysis type.
             else:
                 match mode:
                     # Run all analysis; no checks needed.
                     case 'raAll':
                         raAll(True, parameters)
+                        log(message='Successfully ran all analysis on file:\n'
+                            +parameters.settings['Input/Output Settings']['Input file/folder'],
+                            window=window)
                     # Create time differences.
                     case 'createTimeDifs':
                         # If time differences already exist, warn user.
@@ -488,6 +541,9 @@ def raSplit(mode: str, parameters: set.Settings):
                         # Otherwise, create with no warning.
                         else:
                             createTimeDifs(parameters)
+                            log(message='Successfully calculated time difference for file:\n'
+                                +parameters.settings['Input/Output Settings']['Input file/folder'],
+                                window=window)
                     # Create a histogram plot.
                     case 'plotSplit':
                         # If histogram already exists, warn user.
@@ -498,6 +554,9 @@ def raSplit(mode: str, parameters: set.Settings):
                         # Otherwise, create with no warning.
                         else:
                             plotSplit(parameters)
+                            log(message='Successfully created a histogram for file:\n'
+                                +parameters.settings['Input/Output Settings']['Input file/folder'],
+                                window=window)
                     # Create a best fit + residual.
                     case 'createBestFit':
                         # If best fit already exists, warn user.
@@ -507,16 +566,24 @@ def raSplit(mode: str, parameters: set.Settings):
                                     + 'in this runtime. Do you want to overwrite it?')
                         # Otherwise, create with no warning.
                         else:
+                            plotSplit(parameters)
                             createBestFit(parameters)
+                            log(message='Successfully created a best fit for file:\n'
+                                +parameters.settings['Input/Output Settings']['Input file/folder'],
+                                window=window)
         # Otherwise, assume folder data.
         else:
             # If modular analysis is attempted, throw and error.
             if mode != 'raAll':
                 gui.error('You can only run full folder analysis.\n\n'
                       + 'These modular options are for single files.')
+                return True
             # Otherwise, run the full analysis.
             else:
                 raAll(False, parameters)
+                log(message='Successfully ran all analysis with folder:\n'
+                            +parameters.settings['Input/Output Settings']['Input file/folder'],
+                            window=window)
 
 #--------------------PowerSpectralDensity Functions--------------------#
 
