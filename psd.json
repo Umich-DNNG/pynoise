@@ -1,0 +1,8 @@
+{
+    "Input/Output Settings": {
+        "Input file/folder": "./PowerSpectralDensity/sample_data/stilbene_2in_CROCUS_20cm_offset_east.txt"
+    },
+    "General Settings": {
+        "Show plots": true
+    }
+}
