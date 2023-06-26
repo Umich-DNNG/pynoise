@@ -5,7 +5,7 @@ import os
 plt.ioff()
 
 class RossiHistogram:
-    def __init__(self, reset_time, bin_width, plot_opts, save_dir= None):
+    def __init__(self, reset_time: int, bin_width: int, plot_opts: dict, save_dir:str= None):
 
         '''
         Description:
@@ -34,7 +34,7 @@ class RossiHistogram:
         # Parameters set once plot(time_diffs) is called
         self.counts, self.bin_edges, self.bin_centers = None, None, None
 
-    def plot(self, time_diffs, save_fig, show_plot):
+    def plot(self, time_diffs, save_fig: bool, show_plot: bool):
         '''
         Creating histogram from an array of time differences and plotting it.
         Saving and showing the plot can be turned on or off.
@@ -94,7 +94,7 @@ class RossiHistogram:
 
         return counts, bin_centers, bin_edges
     
-    def plotFromHist(self, counts, bin_centers, bin_edges, show_plot, save_fig):
+    def plotFromHist(self, counts, bin_centers, bin_edges, show_plot: bool, save_fig: bool):
         if save_fig == True:
 
             # Plotting

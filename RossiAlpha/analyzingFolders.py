@@ -5,7 +5,7 @@ from .plots import RossiHistogram
 from .fitting import RossiHistogramFit
 
 # --------------------------------------------------------------------------------
-def replace_zeroes(lst):
+def replace_zeroes(lst: list):
     non_zero_elements = [x for x in lst if x != 0]
     average = sum(non_zero_elements) / len(non_zero_elements)
 
@@ -15,7 +15,7 @@ def replace_zeroes(lst):
 
     return lst
 
-def compile_sample_stdev_RA_dist(settings):
+def compile_sample_stdev_RA_dist(settings: dict):
     '''
     Goes through folders in the specified folder path and finds the appropriate file to analyze
     calculates the time difference and constructs a histogram and fitting for each file

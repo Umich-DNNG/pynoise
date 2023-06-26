@@ -11,7 +11,7 @@ def APSD(f, A, alpha, c):
 # ---------------------------------------------------------------------------------------------------
 
 class PowerSpectralDensity:
-    def __init__(self, list_data_array, leg_label, clean_pulses_switch, dwell_time, meas_time_range):
+    def __init__(self, list_data_array, leg_label: str, clean_pulses_switch: bool, dwell_time: float, meas_time_range: list[float]):
 
         '''
         Description:
@@ -36,7 +36,7 @@ class PowerSpectralDensity:
         self.meas_time_range = meas_time_range
 
 
-    def conduct_APSD(self, show_plot, save_fig, save_dir):
+    def conduct_APSD(self, show_plot: bool, save_fig: bool, save_dir: str):
 
         '''
         Creating PSD plot from an array of data inputs.
