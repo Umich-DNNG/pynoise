@@ -10,8 +10,9 @@ import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 from scipy import signal
 from PowerSpectralDensity import PSD as psd
+from .. import editor as edit
 
-editor = None
+editor: edit.Editor = None
 
 
 def conduct_PSD():
@@ -32,7 +33,7 @@ def conduct_PSD():
                             save_dir=editor.parameters.settings['Input/Output Settings']['Save directory'])
 
 
-def main(editorIn, queue):
+def main(editorIn: edit.Editor, queue: list[str]):
     global editor
     editor = editorIn
     selection = 'blank'
@@ -88,9 +89,3 @@ def main(editorIn, queue):
                 print('ERROR: Unrecognized command ' + selection 
                         + '. Please review the list of appriopriate inputs.\n')
     return editor, queue
-
-
-# Tells the program what function to start if this is the main program being ran (TO BE DELETED)
-if __name__ == "__main__":
-    main()
-                
