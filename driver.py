@@ -417,7 +417,3 @@ def main():
         editor.history.close()
     # Shutdown message.
     editor.print('Thank you for using the DNNG/PyNoise project.')
-
-# Tells the program what function to start if this is the main program being run.
-if __name__ == "__main__":
-    main()

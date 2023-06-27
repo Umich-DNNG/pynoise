@@ -60,7 +60,7 @@ def main(editorIn: edit.Editor, queue: list[str]):
                 else:
                     editor.print('\nRunning the entire power spectral density analysis...')
                     conduct_PSD()
-                    editor.log('Ran the entire RossiAlpha method on file ' 
+                    editor.log('Ran the entire PowerSpectralDensity method on file ' 
                                 + editor.parameters.settings['Input/Output Settings']['Input file/folder'] 
                                 + '.\n')
                 '''

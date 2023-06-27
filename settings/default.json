@@ -3,7 +3,7 @@
         "Input file/folder": "none",
         "Data Column": 0,
         "Save directory": "./",
-        "Keep logs": false
+        "Keep logs": true
     },
     "General Settings": {
         "Fit range": [

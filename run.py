@@ -90,33 +90,29 @@ def log(message: str,
         if xor == None or not xor:
             # Create a timestamp for the confirmation message.
             curTime = time.localtime()
-            message = (str(curTime.tm_year) 
+            log_message = (str(curTime.tm_year) 
             + '-' + str(curTime.tm_mon) 
             + '-' + str(curTime.tm_mday) 
             + ' @ ' + str(curTime.tm_hour) 
             + (':0' if curTime.tm_min < 10 else ':') + str(curTime.tm_min) 
             + (':0' if curTime.tm_sec < 10 else ':') + str(curTime.tm_sec) 
-            + ' - ' + message)
+            + ' - ' + message.replace('\n',' ') + '\n')
             # Write the confirmation + timestamp to the file and flush 
             # immediately so user can see log updates in real time.
-            logfile.write(message)
+            logfile.write(log_message)
             logfile.flush()
         # When applicable, set the label in the window to have the correct message.
         if xor == None or xor:
-            if xor == None:
-                message = message[message.find(' - ')+2:]
-            
-            if not error:
-                if window.children.get('log') == None:
-                    ttk.Separator(window,
-                                  orient='horizontal',
-                                  ).grid(column=0,row=window.grid_size()[1], sticky='ew')
-                    ttk.Label(window,
-                            name='log',
-                            text=message,
-                            ).grid(column=0,row=window.grid_size()[1])
-                else:
-                    window.children['log'].config(text=message)
+            if window.children.get('log') == None:
+                ttk.Separator(window,
+                              orient='horizontal',
+                              ).grid(column=0,row=window.grid_size()[1], sticky='ew')
+                ttk.Label(window,
+                        name='log',
+                        text=message,
+                        ).grid(column=0,row=window.grid_size()[1])
+            else:
+                window.children['log'].config(text=message)
 
 def warningFunction(popup: Tk,
                     to):
@@ -334,12 +330,15 @@ def export(window: Tk,
     else:
         if file == os.path.abspath('./settings/default.json'):
             parameters.write(file)
+            message = 'Default settings successfully overwritten.'
         else:
             parameters.save(file)
-    shutdown(window, parameters)
+            message = 'Settings successfully saved to file:\n' + file + '.'
+    shutdown(window, parameters, message)
 
 def shutdown(window: Tk,
-             parameters: set.Settings):
+             parameters: set.Settings,
+             message: str = None):
 
     '''Close the program & logfile and delete the logfile is applicable.
     
@@ -348,13 +347,14 @@ def shutdown(window: Tk,
     - parameters: the settings object holding the current settings.'''
 
     global logfile
+    window.destroy()
+    gui.byeMenu(message)
     # Close the logfile.
     logfile.close()
     # If user doesn't want logs, delete the logfile.
     if not parameters.settings['Input/Output Settings']['Keep logs']:
         os.remove(logfile.name)
-    # Close the program.
-    window.destroy()
+
 
 #--------------------RossiAlpha Functions--------------------#
 
@@ -535,20 +535,26 @@ def raSplit(window: Tk,
                     case 'createTimeDifs':
                         # If time differences already exist, warn user.
                         if time_difs is not None:
-                            gui.warning(lambda: createTimeDifs(parameters),
+                            gui.warning(lambda: log(message='Successfully recalculated time differences for file:\n'
+                                                +parameters.settings['Input/Output Settings']['Input file/folder'],
+                                                window=window,
+                                                menu=lambda:createTimeDifs(parameters)),
                                     'There are already stored time differences '
                                     + 'in this runtime. Do you want to overwrite them?')
                         # Otherwise, create with no warning.
                         else:
                             createTimeDifs(parameters)
-                            log(message='Successfully calculated time difference for file:\n'
+                            log(message='Successfully calculated time differences for file:\n'
                                 +parameters.settings['Input/Output Settings']['Input file/folder'],
                                 window=window)
                     # Create a histogram plot.
                     case 'plotSplit':
                         # If histogram already exists, warn user.
                         if histogram is not None:
-                            gui.warning(lambda: plotSplit(parameters),
+                            gui.warning(lambda: log(message='Successfully recreated a histogram for file:\n'
+                                                +parameters.settings['Input/Output Settings']['Input file/folder'],
+                                                window=window,
+                                                menu=lambda:plotSplit(parameters)),
                                     'There is an already stored histogram '
                                     + 'in this runtime. Do you want to overwrite it?')
                         # Otherwise, create with no warning.
@@ -561,7 +567,10 @@ def raSplit(window: Tk,
                     case 'createBestFit':
                         # If best fit already exists, warn user.
                         if best_fit is not None:
-                            gui.warning(lambda: createBestFit(parameters),
+                            gui.warning(lambda: log(message='Successfully recreated a best fit for file:\n'
+                                                +parameters.settings['Input/Output Settings']['Input file/folder'],
+                                                window=window,
+                                                menu=lambda:createBestFit(parameters)),
                                     'There is an already stored best fit line '
                                     + 'in this runtime. Do you want to overwrite it?')
                         # Otherwise, create with no warning.
