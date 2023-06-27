@@ -354,6 +354,15 @@ def shutdown(window: Tk,
     # If user doesn't want logs, delete the logfile.
     if not parameters.settings['Input/Output Settings']['Keep logs']:
         os.remove(logfile.name)
+    else:
+        logfile = open(logfile.name,'r')
+        lines = logfile.readlines()
+        logfile.close()
+        logfile = open(logfile.name,'w')
+        logfile.write(lines[0])
+        for line in lines[2:]:
+            logfile.write(line)
+        logfile.close()
 
 
 #--------------------RossiAlpha Functions--------------------#
