@@ -4,6 +4,7 @@ from tkinter import *
 from tkinter import ttk
 import tkinter as tk
 import settings as set
+import time
 import os
 import run
 
@@ -200,13 +201,30 @@ def shutdown_menu():
         ttk.Button(window,
                 name='discard',
                 text='Discard changes',
-                command=lambda: warning(lambda: run.shutdown(window,parameters),
+                command=lambda: warning(lambda: run.shutdown(window,parameters,'Runtime settings changes discarded.'),
                                         'All your current changes will be lost. '
                                         + 'Are you sure you want to do this?')
                 ).grid(column=0,row=total+4)
     # If no changes, program can just end here.
     else:
         run.shutdown(window,parameters)
+
+def byeMenu(message: str = None):
+    # Clear the window of all previous entries, labels, and buttons.
+    popup = Tk()
+    var = IntVar()
+    # Properly name the window.
+    popup.title('Thank you!')
+    # Goodbye message.
+    ttk.Label(popup,
+              name='goodbye',
+              text='Thank you for using the\nDNNG/PyNoise project.',
+              ).grid(column=0,row=0,padx=10,pady=10)
+    if message != None:
+        run.log(message=message,window=popup)
+    popup.after(2000, var.set, 1)
+    popup.wait_variable(var)
+    popup.destroy()
 
 def setMenu(prev):
 
@@ -444,7 +462,7 @@ def download_menu(prev, to):
                                       lambda file: run.download(parameters, os.path.abspath(file + '.json'), True, to),
                                       'Enter a settings file (no .json extension):',
                                       'Append Settings to Default',
-                                      lambda response: 'Settings successfully appended with file:\n' + response + '.json.')
+                                      lambda response: 'Settings successfully appended from file:\n' + response + '.json.')
                ).grid(column=0,row=2)
     # Button for canceling settings import.
     ttk.Button(window,
@@ -536,7 +554,12 @@ def startup():
     ttk.Button(window,
                name='default',
                text="Default",
-               command=lambda:run.download(parameters,os.path.abspath('./settings/default.json'),False,main)
+               command=lambda:run.log(message='Successfully downloaded the default settings.',
+                                      window=window,
+                                      menu=lambda: run.download(parameters,
+                                                                os.path.abspath('./settings/default.json'),
+                                                                False,
+                                                                main))
                ).grid(column=0, row=2)
     # Button for importing other settings.
     ttk.Button(window,
