@@ -11,7 +11,14 @@ def APSD(f, A, alpha, c):
 # ---------------------------------------------------------------------------------------------------
 
 class PowerSpectralDensity:
-    def __init__(self, list_data_array, leg_label: str, clean_pulses_switch: bool, dwell_time: float, meas_time_range: list[float]):
+    def __init__(self, list_data_array, 
+                 leg_label: str, 
+                 clean_pulses_switch: bool, 
+                 dwell_time: float, 
+                 meas_time_range: list[float],
+                 annotate_font_weight: str,
+                 annotate_color: str,
+                 annotate_background_color: str):
 
         '''
         Description:
@@ -34,6 +41,11 @@ class PowerSpectralDensity:
         self.clean_pulses_switch = clean_pulses_switch
         self.dwell_time = dwell_time
         self.meas_time_range = meas_time_range
+
+        # Annotation Parameters
+        self.annotate_font_weight = annotate_font_weight
+        self.annotate_color = annotate_color
+        self.annotate_background_color = annotate_background_color
 
 
     def conduct_APSD(self, show_plot: bool, save_fig: bool, save_dir: str):
@@ -126,9 +138,9 @@ class PowerSpectralDensity:
                     xy=(1.5, ymin+0.1*dy), 
                     xytext=(1.5, ymin+0.1*dy),
                     fontsize=16, 
-                    fontweight='bold',
-                    color='black', 
-                    backgroundcolor='white')
+                    fontweight=self.annotate_font_weight,
+                    color=self.annotate_color, 
+                    backgroundcolor=self.annotate_background_color)
         
         # Creating title and legend
         ax2.set_title('Power Spectral Density Graph')
