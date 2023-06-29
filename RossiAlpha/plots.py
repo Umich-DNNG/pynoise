@@ -116,7 +116,7 @@ class RossiHistogram:
         self.bin_centers = bin_centers
         self.bin_edges = bin_edges
 
-    def plotFromHist(self, plot_opts: dict = None, save_fig: bool = True, show_plot: bool = True, save_dir:str= None):
+    def plotFromHist(self, plot_opts: dict = None, save_fig: bool = False, show_plot: bool = True, save_dir:str= None):
         self.options = plot_opts
         self.save_dir = save_dir
         self.show_plot = show_plot
