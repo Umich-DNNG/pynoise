@@ -1,16 +1,33 @@
 import numpy as np  # For processing data
 import matplotlib.pyplot as plt
-import os
 from . import plots as plt
 
 class timeDifCalcs:
     
-    def __init__(self, time_data, reset_time: int, method: str, digital_delay: int = None, channels = None):
+    def __init__(self, time_data: list[float], reset_time: float = None, method: str = 'any_and_all', digital_delay: int = None, channels = None):
+        # Store the raw time measurements.
         self.time_vector = time_data 
-        self.reset_time = float(reset_time)
+        # If a reset time is given, use it.
+        if reset_time != None:
+            self.reset_time = float(reset_time)
+        # Otherwise, generate one.
+        else:
+            self.reset_time = max(time_data) - min(time_data)
+        # Store the method of analysis.
         self.method = method
-        self.digital_delay = digital_delay
-        self.channels = channels
+        # For considering digital delay.
+        if self.method == 'any_and_all cross_correlations no_repeat digital_delay':
+            # If no digital delay is given, generate one.
+            if digital_delay == None:
+                #TODO: create a generated default for the data. The line below is a stand-in.
+                self.digital_delay = digital_delay
+            # Otherwise, use the given value.
+            else:
+                self.digital_delay = digital_delay
+        # If using channels, make a variable for it.
+        if self.method != "any_and_all":
+            self.channels = channels
+        # Initialize the blank time differences.
         self.timeDifs = None
     
     def calculate_time_differences(self):
