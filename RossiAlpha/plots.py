@@ -37,8 +37,9 @@ class RossiHistogram:
         # Parameters set once plot(time_diffs) is called
         self.counts, self.bin_edges, self.bin_centers = None, None, None
 
-    def plot(self, plot_opts: dict = None, save_fig: bool = True, show_plot: bool = True, save_dir:str= None ):
+    def plot(self , save_fig: bool = True, show_plot: bool = True, save_dir:str= None,plot_opts: dict = None, **kwargs ):
         
+
         '''
         Creating histogram from an array of time differences and plotting it.
         Saving and showing the plot can be turned on or off.
@@ -52,6 +53,12 @@ class RossiHistogram:
             - bin_centers (adjusted bin centers for visual plotting)
             - bin_edges (The edges of the bins are mentioned as a parameter)
         '''
+
+        if plot_opts is None:
+            plot_opts = {}
+        plot_opts.update(kwargs)
+
+        #TODO: Set defaults for the plot_opts if this dict is empty here.
         self.options = plot_opts
         self.save_dir = save_dir
 
