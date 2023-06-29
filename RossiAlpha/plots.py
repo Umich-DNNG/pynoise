@@ -12,9 +12,9 @@ class RossiHistogram:
             - Creating a Plot() object and its variables.
 
         Inputs:
-            - plotSettings (setting for the plotting)
-            - plotOptions (style setting for different plotting options)
-            - show_plot (boolean to show or not to show plots)
+            - time_diffs: If Histogram is being constructed from time_differences that still need to be binned, this arg should be provided
+            - bin_width: If time_diffs still need to be binned, this arg should be provided
+            - reset_time: If time_diffs still need to be binned, this arg should be provided
 
         Outputs: 
             - Plot() object
@@ -37,7 +37,7 @@ class RossiHistogram:
         # Parameters set once plot(time_diffs) is called
         self.counts, self.bin_edges, self.bin_centers = None, None, None
 
-    def plot(self , save_fig: bool = True, show_plot: bool = True, save_dir:str= None,plot_opts: dict = None, **kwargs ):
+    def plot(self , save_fig: bool = False, show_plot: bool = True, save_dir:str= './',plot_opts: dict = None, **kwargs ):
         
 
         '''
@@ -46,7 +46,11 @@ class RossiHistogram:
 
         Inputs:
             - self (all the private variables in Plot() object)
-            - time_diffs (array of time differences)
+            - save_fig : True/False to save figure
+            - show_plot : True/False to show plot in plot editor
+            - save_dir : If save_fig = True, the save_dir must be provided. Default saves in current working directory
+            - plot_opts: dictionary of histogram visual settings. 
+            -**kwargs: If plot_opts is not inputed, you can input individual plot settings that you want to be applied to the plot 
 
         Outputs: 
             - counts (The set of values of the histogram as a list)
@@ -112,11 +116,32 @@ class RossiHistogram:
     
     #This function is to initialize the RossiHistogram if we used the combined time_diffs and hist function
     def initFromHist(self, counts, bin_centers, bin_edges):
+        '''Description: Used to initialize the plot object if the data has already been processed/binned.
+        
+        Inputs: 
+            - counts: array of histogram counts
+            - bin_centers: bin centers of histogram
+            - bin_edges: bin_edges of histogram
+            
+        Outputs:
+        Nothing, but plotFromHist can now be called.'''
+
         self.counts = counts
         self.bin_centers = bin_centers
         self.bin_edges = bin_edges
 
     def plotFromHist(self, plot_opts: dict = None, save_fig: bool = False, show_plot: bool = True, save_dir:str= None):
+        '''Description: Used to plot the histogram when the time differences were calculated simulatenously while being binned. 
+        
+        Inputs: 
+            - plot_opts: dictionary of visual settings to be applied
+            - save_fig: True/False to save the figure
+            - show_plot: True/False to show figure in plot editor
+            - save_dir: Must be provided if save_fig is on.
+            
+        Outputs:
+        Shows a plot/saves a figure if turned on.'''
+        
         self.options = plot_opts
         self.save_dir = save_dir
         self.show_plot = show_plot
