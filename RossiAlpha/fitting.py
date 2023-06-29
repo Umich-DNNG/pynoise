@@ -52,11 +52,10 @@ class RossiHistogramFit:
         Inputs:
             - counts (The set of values of the histogram as a list)
             - bin_centers (adjusted bin centers for visual plotting)
-            - generating_hist_settings (setting for histogram plotting)
-            - fitting_opts (setting for fitting)
-            - general_settings (general setting)
-            - residual_opts (setting for residuals)
-            - hist_visual_opts (setting for styling histogram plot)
+            - min_cutoff: The minimum cutoff for producing the fit
+            - timeDifMethod: method used to calculate time differences
+            - fit_range: range of values to fit the curve to
+            
 
         Outputs: 
             - Fit() object
@@ -78,12 +77,10 @@ class RossiHistogramFit:
         self.residual_options = None
         self.hist_visual_options = None
 
-    def fit(self, save_fig: bool, save_dir, show_plot: bool, fitting_opts,residual_opts,hist_visual_opts):
-        #self.fitting_options = settings['Line Fitting Settings']
+        #TODO: Set default fit range if none provided 
+
+    def fit(self, save_fig: bool, save_dir, show_plot: bool, fitting_opts,hist_visual_opts):
         self.fitting_options = fitting_opts
-        #self.residual_options = settings['Residual Plot Settings']
-        self.residual_options
-        #self.hist_visual_options = settings['Histogram Visual Settings']
         self.hist_visual_options = hist_visual_opts
         self.save_dir = save_dir
         '''
@@ -92,7 +89,11 @@ class RossiHistogramFit:
             - Saving and showing the plot can be turned on or off.
 
         Inputs:
-            - self (encompasses all private variables)
+            - save_fig: True/False to save the figure or not
+            - save_dir: String with path to where figure should be saved
+            - show_plot: True/False to show the plot
+            - fitting_opts (setting for fitting)
+            - hist_visual_opts (setting for styling histogram plot)
 
         Outputs: 
             - popt (Optimal values for the parameters)
@@ -161,7 +162,14 @@ class RossiHistogramFit:
             - Saving and showing the plot can be turned on or off.
 
         Inputs:
-            - self (encompasses all private variables)
+            Inputs:
+            - save_fig: True/False to save the figure or not
+            - save_dir: String with path to where figure should be saved
+            - show_plot: True/False to show the plot
+            - fitting_opts (setting for fitting)
+            - residual_opts (setting for residuals)
+            - hist_visual_opts (setting for styling histogram plot)
+            - folder_index: 
 
         Outputs: 
             - popt (Optimal values for the parameters)
