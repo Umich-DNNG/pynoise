@@ -158,6 +158,10 @@ def format(value):
     else:
         return str(value)
 
+def add(prev, group: str, blanks: dict):
+    blanks[group] += 1
+    gui.editor_menu(prev, blanks)
+
 def saveType(value: str):
 
     '''Converts the output of a tkinter string variable to 
@@ -238,6 +242,8 @@ def changes(parameters: set.Settings):
 
 def edit(window: Tk,
          inputs: dict,
+         newSet: dict,
+         newVal: dict,
          parameters: set.Settings,
          prev):
 
@@ -250,12 +256,22 @@ def edit(window: Tk,
     - prev: the GUI function for the menu 
     to return to after the settings menu.'''
 
+    for group in newSet:
+        for i in range(0, len(newSet[group])):
+            if newSet[group][i].get() != '' and newVal[group][i].get() != '':
+                inputs[group][newSet[group][i].get()] = newVal[group][i]
+
+
     parameters.write(os.path.abspath('./settings/comp.json'))
     # For each group and setting in the inputs, convert the 
     # string to the correct time and save it accordingly.
     for group in inputs:
         for setting in inputs[group]:
-            parameters.settings[group][setting] = saveType(inputs[group][setting].get())
+            if inputs[group][setting].get() == '':
+                if parameters.settings[group].get(setting) != None:
+                    parameters.settings[group].pop(setting)
+            else:
+                parameters.settings[group][setting] = saveType(inputs[group][setting].get())
     # Compare the modified settings to the previous and save the number of changes.
     total = changes(parameters)
     # If there were changes made, notify the user.
