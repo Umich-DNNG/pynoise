@@ -66,12 +66,9 @@ def compile_sample_stdev_RA_dist(settings: dict):
                 else:
                     RA_hist_array = np.vstack((RA_hist_array, counts))
                 save_dir = data_folder + "/" + str(fol_num)
-                thisFit = RossiHistogramFit(counts,
-                                            bin_centers,settings, save_dir)
+                thisFit = RossiHistogramFit(counts, bin_centers, settings['RossiAlpha Settings']['Fit Region Settings']['Minimum cutoff'], settings['RossiAlpha Settings']['Time difference method'], settings['General Settings']['Fit range'])
 
-                thisFit.fit_and_residual(save_every_fig=settings['General Settings']['Save figures'], 
-                                         show_plot=settings['General Settings']['Show plots'], 
-                                         folder_index=i)
+                thisFit.fit_and_residual(settings['General Settings']['Save figures'], settings['Input/Output Settings']['Save directory'], settings['General Settings']['Show plots'],settings['Line Fitting Settings'], settings['Residual Plot Settings'],settings['Histogram Visual Settings'], folder_index=i)
 
                 i = i + 1
                 break
