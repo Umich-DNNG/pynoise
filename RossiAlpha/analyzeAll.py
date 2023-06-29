@@ -61,11 +61,10 @@ def analyzeAllType1(settings: dict):
     
 
     # creating Fit() object with specified settings
-    thisFit = RossiHistogramFit(counts, bin_centers, settings)
+    thisFit = RossiHistogramFit(counts, bin_centers, settings['RossiAlpha Settings']['Fit Region Settings']['Minimum cutoff'], settings['RossiAlpha Settings']['Time difference method'], settings['General Settings']['Fit range'])
         
         # Fitting curve to the histogram and plotting the residuals
-    thisFit.fit_and_residual(save_every_fig=settings['General Settings']['Save figures'], 
-                                 show_plot=settings['General Settings']['Show plots'])
+    thisFit.fit_and_residual(settings['General Settings']['Save figures'], settings['Input/Output Settings']['Save directory'], settings['General Settings']['Show plots'],settings['Line Fitting Settings'], settings['Residual Plot Settings'],settings['Histogram Visual Settings']  )
     plt.close('all')
     return time_diffs, thisPlot, thisFit
         
