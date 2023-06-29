@@ -114,11 +114,10 @@ def createBestFit():
     counts = histogram.counts
     bin_centers = histogram.bin_centers
 
-    best_fit = fit.RossiHistogramFit(counts, bin_centers, editor.parameters.settings)
+    best_fit = fit.RossiHistogramFit(counts, bin_centers, editor.parameters.settings['RossiAlpha Settings']['Fit Region Settings']['Minimum cutoff'], editor.parameters.settings['RossiAlpha Settings']['Time difference method'], editor.parameters.settings['General Settings']['Fit range'])
         
         # Fitting curve to the histogram and plotting the residuals
-    best_fit.fit_and_residual(save_every_fig=editor.parameters.settings['General Settings']['Save figures'], 
-                              show_plot=editor.parameters.settings['General Settings']['Show plots'])
+    best_fit.fit_and_residual(editor.parameters.settings['General Settings']['Save figures'], editor.parameters.settings['Input/Output Settings']['Save directory'], editor.parameters.settings['General Settings']['Show plots'],editor.parameters.settings['Line Fitting Settings'], editor.parameters.settings['Residual Plot Settings'],editor.parameters.settings['Histogram Visual Settings'] )
     editor.log('Created line of best fit with residuals for the current histogram.\n')
 
 def main(editorIn: edit.Editor, queue: list[str] = []):
