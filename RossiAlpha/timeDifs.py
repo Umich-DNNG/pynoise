@@ -127,7 +127,8 @@ class timeDifCalcs:
         bin_edges = np.linspace(0, self.reset_time, num_bins + 1)
         bin_centers = 0.5 * (bin_edges[1:] + bin_edges[:-1])
          # Saving plot (optional)
-        rossiHistogram = plt.RossiHistogram(self.reset_time, bin_width, options, save_dir)
-        rossiHistogram.plotFromHist(histogram, bin_centers,bin_edges,show_plot,save_fig)
+        rossiHistogram = plt.RossiHistogram(bin_width= bin_width, reset_time=self.reset_time)
+        rossiHistogram.initFromHist(histogram,bin_centers,bin_edges)
+        rossiHistogram.plotFromHist(options,save_fig,show_plot,save_dir)
         
         return rossiHistogram, histogram, bin_centers, bin_edges
