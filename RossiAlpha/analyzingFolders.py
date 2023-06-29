@@ -57,14 +57,9 @@ def compile_sample_stdev_RA_dist(settings: dict):
                 else:
                     time_diffs = thisData.calculate_time_differences()
 
-                    thisPlot = RossiHistogram(settings['RossiAlpha Settings']['Histogram Generation Settings']['Reset time'],
-                                          settings['RossiAlpha Settings']['Histogram Generation Settings']['Bin width'],
-                                          settings['Histogram Visual Settings'], 
-                                          settings['Input/Output Settings']['Save directory'])
+                    thisPlot = RossiHistogram(time_diffs,settings['RossiAlpha Settings']['Histogram Generation Settings']['Bin width'],settings['RossiAlpha Settings']['Histogram Generation Settings']['Reset time'])
 
-                    counts, bin_centers, bin_edges = thisPlot.plot(time_diffs, 
-                                                               save_fig=False, 
-                                                               show_plot=False)
+                    counts, bin_centers, bin_edges = thisPlot.plot(save_fig=settings['General Settings']['Save figures'], show_plot=settings['General Settings']['Show plots'], save_dir = settings['Input/Output Settings']['Save directory'], plot_opts = settings['Histogram Visual Settings'])
 
                 if i == 1:
                     RA_hist_array = counts
