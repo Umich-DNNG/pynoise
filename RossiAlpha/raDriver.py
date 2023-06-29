@@ -64,13 +64,10 @@ def createPlot():
 
     global time_difs, histogram, hist_file, hist_method, editor
     editor.print('Building plot...')
-    histogram = plt.RossiHistogram(editor.parameters.settings['RossiAlpha Settings']['Histogram Generation Settings']['Reset time'],
-                              editor.parameters.settings['RossiAlpha Settings']['Histogram Generation Settings']['Bin width'],
-                              editor.parameters.settings['Histogram Visual Settings'],
-                              editor.parameters.settings['Input/Output Settings']['Save directory'])
-    histogram.plot(time_difs,
-              save_fig=editor.parameters.settings['General Settings']['Save figures'],
-              show_plot=editor.parameters.settings['General Settings']['Show plots'])
+    histogram = plt.RossiHistogram(time_difs,editor.parameters.settings['RossiAlpha Settings']['Histogram Generation Settings']['Bin width'],editor.parameters.settings['RossiAlpha Settings']['Histogram Generation Settings']['Reset time'])
+    
+    histogram.plot(save_fig=editor.parameters.settings['General Settings']['Save figures'], show_plot=editor.parameters.settings['General Settings']['Show plots'], save_dir = editor.parameters.settings['Input/Output Settings']['Save directory'], plot_opts = editor.parameters.settings['Histogram Visual Settings'])
+    
     editor.log('Created a histogram plot using the current settings and time difference data.\n')
     hist_file = editor.parameters.settings['Input/Output Settings']['Input file/folder']
     hist_method = editor.parameters.settings['RossiAlpha Settings']['Time difference method']
