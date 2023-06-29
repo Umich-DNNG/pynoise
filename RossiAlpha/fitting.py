@@ -169,11 +169,11 @@ class RossiHistogramFit:
 
         self.fitting_options = fitting_opts
         #self.residual_options = settings['Residual Plot Settings']
-        self.residual_options
+        self.residual_options = residual_opts
         #self.hist_visual_options = settings['Histogram Visual Settings']
         self.hist_visual_options = hist_visual_opts
         self.save_dir = save_dir
-        
+        self.save_fig = save_fig
         num_bins = np.size(self.counts)
         time_diff_centers = self.bin_centers[1:] - np.diff(self.bin_centers[:2])/2
 
@@ -231,7 +231,7 @@ class RossiHistogramFit:
         fig.suptitle(self.timeDifMethod, fontsize=14)
 
         # Adjusting layout and saving figure (optional)
-        if save_every_fig:
+        if self.save_fig:
             fig.tight_layout()
             if folder_index is not None:
                 save_filename = os.path.join(self.save_dir, 'fitted_and_residual_folder' + str(folder_index)) 
