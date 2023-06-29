@@ -36,7 +36,9 @@ def prompt(prev,
     if log == None:
         action = lambda value: to(value)
     else:
-        action = lambda value: run.log(message=lambda: log(value), window=window, menu=lambda: to(value))
+        action = lambda value: run.log(message=lambda: log(value),
+                                       window=window,
+                                       menu=lambda: to(value))
     # Clear the window of all previous entries, labels, and buttons.
     for item in window.winfo_children():
         item.destroy()
@@ -248,7 +250,9 @@ def setMenu(prev):
     ttk.Button(window,
               name='current',
               text='Current Settings',
-              command=lambda: editor_menu(prev)
+              command=lambda: editor_menu(prev, {'Histogram Visual Settings': 0,
+                                                 'Line Fitting Settings': 0,
+                                                 'Residual Plot Settings': 0})
               ).grid(column=0,row=1)
     # Button to import settings files.
     ttk.Button(window,
@@ -263,7 +267,7 @@ def setMenu(prev):
               command=prev
               ).grid(column=0,row=3)
 
-def editor_menu(prev):
+def editor_menu(prev, blanks: dict):
 
     '''The GUI for the editor menu.
     
@@ -282,7 +286,13 @@ def editor_menu(prev):
             'PSD Settings': {},
             'Histogram Visual Settings': {},
             'Line Fitting Settings': {},
-            'Residual Plot Settings': {},}
+            'Residual Plot Settings': {}}
+    newSet={'Histogram Visual Settings': [],
+            'Line Fitting Settings': [],
+            'Residual Plot Settings': []}
+    newVal={'Histogram Visual Settings': [],
+            'Line Fitting Settings': [],
+            'Residual Plot Settings': []}
     # Clear the window of all previous entries, labels, and buttons.
     for item in window.winfo_children():
         item.destroy()
@@ -292,14 +302,14 @@ def editor_menu(prev):
     for group in parameters.settings:
         # If the start of a new row, add the previous current maximum 
         # to the current top and reset the current maximum variable. 
-        if (groupNum*3) % 9 == 0:
+        if (groupNum*4) % 12 == 0:
             curTop += curMax
             curMax = 0
         # The label for the settings group.
         ttk.Label(window,
                   name=group[0:group.find(' Settings')].lower(),
                   text=group[0:group.find(' Settings')] + ':'
-                  ).grid(column=(groupNum*3) % 9,row=curTop)
+                  ).grid(column=(groupNum*4) % 12,row=curTop)
         # Reset the settings number (1-indexed)
         setNum=1
         # For each setting in the group.
@@ -311,15 +321,51 @@ def editor_menu(prev):
             ttk.Label(window,
                   name=(group + ' ' + setting).lower(),
                   text=setting + ':'
-                  ).grid(column=(groupNum*3+1) % 9,row=curTop+setNum)
+                  ).grid(column=(groupNum*4+1) % 12,row=curTop+setNum)
             # The entry box for inputting/viewing the setting value.
             tk.Entry(window,
                   name=(group + ' ' + setting + ' value').lower(),
                   textvariable=inputs[group][setting]
-                  ).grid(column=(groupNum*3+2) % 9,row=curTop+setNum)
+                  ).grid(column=(groupNum*4+2) % 12,row=curTop+setNum)
             # Insert into the entry box the current value of the setting.
             window.children[(group + ' ' + setting + ' value').lower()].insert(0,run.format(parameters.settings[group][setting]))
             # Increase the setting number.
+            setNum += 1
+        if group == 'Histogram Visual Settings' or group == 'Line Fitting Settings' or group == 'Residual Plot Settings':
+            for i in range(0,blanks[group]):
+                newSet[group].append(tk.StringVar())
+                tk.Entry(window,
+                        name=('new ' + group + ' ' + ' setting ' + str(i)).lower(),
+                        textvariable=newSet[group][i]
+                        ).grid(column=(groupNum*4+1) % 12,row=curTop+setNum)
+                newVal[group].append(tk.StringVar())
+                tk.Entry(window,
+                        name=('new ' + group + ' ' + ' value ' + str(i)).lower(),
+                        textvariable=newVal[group][i]
+                        ).grid(column=(groupNum*4+2) % 12,row=curTop+setNum)
+                setNum += 1
+            match group:
+                case 'Histogram Visual Settings':
+                    ttk.Button(window,
+                            name=group[0:group.find('Settings')].lower()+'add',
+                            text='+',
+                            command=lambda: run.add(prev,'Histogram Visual Settings',blanks),
+                            width=1
+                            ).grid(column=(groupNum*4+1) % 12,row=curTop+setNum)
+                case 'Line Fitting Settings':
+                    ttk.Button(window,
+                            name=group[0:group.find('Settings')].lower()+'add',
+                            text='+',
+                            command=lambda: run.add(prev,'Line Fitting Settings',blanks),
+                            width=1
+                            ).grid(column=(groupNum*4+1) % 12,row=curTop+setNum)
+                case _:
+                    ttk.Button(window,
+                            name=group[0:group.find('Settings')].lower()+'add',
+                            text='+',
+                            command=lambda: run.add(prev,'Residual Plot Settings',blanks),
+                            width=1
+                            ).grid(column=(groupNum*4+1) % 12,row=curTop+setNum)
             setNum += 1
         # If the total settings in this group were the max 
         # in this row, set the current max to this value.
@@ -334,14 +380,14 @@ def editor_menu(prev):
     ttk.Button(window,
                 name='save',
                 text='Save changes',
-                command=lambda: run.edit(window, inputs, parameters, prev)
-                ).grid(column=0 % 9,row=curTop)
+                command=lambda: run.edit(window, inputs, newSet, newVal, parameters, prev)
+                ).grid(column=0,row=curTop)
     # Button for canceling changes.
     ttk.Button(window,
                   name='cancel',
                   text='Cancel changes',
                   command=lambda: setMenu(prev)
-                  ).grid(column=0 % 9,row=curTop+1)
+                  ).grid(column=0,row=curTop+1)
 
 def raMenu():
 
