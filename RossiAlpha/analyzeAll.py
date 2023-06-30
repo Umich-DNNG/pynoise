@@ -12,6 +12,7 @@ from .timeDifs import timeDifCalcs
 from .plots import RossiHistogram
 from .fitting import RossiHistogramFit
 import matplotlib.pyplot as plt
+from lmxReader import *
 # sns.set(rc={"figure.dpi": 350, "savefig.dpi": 350})
 # sns.set_style("ticks")
 # sns.set_context("talk", font_scale=0.8)
@@ -22,15 +23,23 @@ def analyzeAllType1(settings: dict):
   
     
     filePath = settings['Input/Output Settings']['Input file/folder']
-    if settings['Input/Output Settings'].get('Data Column') is not None:
-        listData = np.loadtxt(filePath,delimiter=" ", usecols=(settings['Input/Output Settings']['Data Column']))
-    else:
-        listData = np.loadtxt(filePath)
+
+    if filePath.endswith(".txt"):
+        if settings['Input/Output Settings'].get('Data Column') is not None:
+            listData = np.loadtxt(filePath,delimiter=" ", usecols=(settings['Input/Output Settings']['Data Column']))
+        else:
+            listData = np.loadtxt(filePath)
     # sorting timestamps to be fed into calculate_time_differences()
+    elif filePath.endswith(".lmx"):
+        print("this is an lmx file. we are currently in testing stages for analyzing this file type.")
+        listData = np.array(readLMXFile(filePath))
+
+    
     
     if settings['General Settings']["Sort data"]:
         listDataSorted = np.sort(listData)
-    
+    else:
+        listDataSorted = listData
     # applying time differences function
     thisTimeDifCalc = timeDifCalcs(listDataSorted, settings['RossiAlpha Settings']["Reset time"],  settings['RossiAlpha Settings']["Time difference method"])
 
@@ -38,12 +47,12 @@ def analyzeAllType1(settings: dict):
         time_diffs = thisTimeDifCalc.calculate_time_differences()
 
         # creating RossiHistogram() object with specified settings
-        thisPlot = RossiHistogram(settings['RossiAlpha Settings']['Reset time'], settings['RossiAlpha Settings']['Bin width'], settings['Histogram Visual Settings'], settings['Input/Output Settings']['Save directory'])
+        thisPlot = RossiHistogram(time_diffs,settings['RossiAlpha Settings']['Histogram Generation Settings']['Bin width'],settings['RossiAlpha Settings']['Histogram Generation Settings']['Reset time'])
 
+        counts, bin_centers, bin_edges = thisPlot.plot(save_fig=settings['General Settings']['Save figures'], show_plot=settings['General Settings']['Show plots'], save_dir = settings['Input/Output Settings']['Save directory'], plot_opts = settings['Histogram Visual Settings'])
 
-
-        counts, bin_centers, bin_edges = thisPlot.plot(time_diffs, save_fig=settings['General Settings']['Save figures'], show_plot=settings['General Settings']['Show plots'])
-    
+        '''settings['RossiAlpha Settings']['Histogram Generation Settings']['Reset time'], settings['RossiAlpha Settings']['Histogram Generation Settings']['Bin width'], settings['Histogram Visual Settings'], settings['Input/Output Settings']['Save directory'], time_diffs, save_fig=settings['General Settings']['Save figures'], show_plot=settings['General Settings']['Show plots']'''
+        
     #combined calculating time differences and binning them
     else:
         thisPlot, counts, bin_centers, bin_edges = thisTimeDifCalc.calculateTimeDifsAndBin(settings['RossiAlpha Settings']['Bin width'], settings['General Settings']['Save figures'], settings['General Settings']['Show plots'], settings['Input/Output Settings']['Save directory'], settings['Histogram Visual Settings'])
@@ -52,11 +61,10 @@ def analyzeAllType1(settings: dict):
     
 
     # creating Fit() object with specified settings
-    thisFit = RossiHistogramFit(counts, bin_centers, settings)
+    thisFit = RossiHistogramFit(counts, bin_centers, settings['RossiAlpha Settings']['Fit Region Settings']['Minimum cutoff'], settings['RossiAlpha Settings']['Time difference method'], settings['General Settings']['Fit range'])
         
         # Fitting curve to the histogram and plotting the residuals
-    thisFit.fit_and_residual(save_every_fig=settings['General Settings']['Save figures'], 
-                                 show_plot=settings['General Settings']['Show plots'])
+    thisFit.fit_and_residual(settings['General Settings']['Save figures'], settings['Input/Output Settings']['Save directory'], settings['General Settings']['Show plots'],settings['Line Fitting Settings'], settings['Residual Plot Settings'],settings['Histogram Visual Settings']  )
     plt.close('all')
     return time_diffs, thisPlot, thisFit
         

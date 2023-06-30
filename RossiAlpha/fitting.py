@@ -43,7 +43,7 @@ def exp_decay_2_param(x, a, b):
 #--------------------------------------------------------------------------------    
 
 class RossiHistogramFit:
-    def __init__(self, counts, bin_centers, settings: dict, save_dir: str = None):
+    def __init__(self, counts, bin_centers, min_cutoff,timeDifMethod, fit_range = None  ):
         
         '''
         Description:
@@ -52,42 +52,48 @@ class RossiHistogramFit:
         Inputs:
             - counts (The set of values of the histogram as a list)
             - bin_centers (adjusted bin centers for visual plotting)
-            - generating_hist_settings (setting for histogram plotting)
-            - fitting_opts (setting for fitting)
-            - general_settings (general setting)
-            - residual_opts (setting for residuals)
-            - hist_visual_opts (setting for styling histogram plot)
+            - min_cutoff: The minimum cutoff for producing the fit
+            - timeDifMethod: method used to calculate time differences
+            - fit_range: range of values to fit the curve to
+            
 
         Outputs: 
             - Fit() object
         '''
-
-        # Plotting options
-        self.fitting_options = settings['Line Fitting Settings']
-        self.residual_options = settings['Residual Plot Settings']
-        self.hist_visual_options = settings['Histogram Visual Settings']
-
         # Required parameters
         self.counts = counts
         self.bin_centers = bin_centers
-        self.fit_range = settings['General Settings']['Fit range']
-        self.min_cutoff = settings['RossiAlpha Settings']['Minimum cutoff']
-        self.timeDifMethod = settings['RossiAlpha Settings']['Time difference method']
-        if save_dir is None:
-            self.save_dir = settings['Input/Output Settings']['Save directory']
-        else:
-            self.save_dir = save_dir
+        #self.fit_range = settings['General Settings']['Fit range']
+        self.fit_range = fit_range
+        #self.min_cutoff = settings['RossiAlpha Settings']['Fit Region Settings']['Minimum cutoff']
+        self.min_cutoff = min_cutoff
+        #self.timeDifMethod = settings['RossiAlpha Settings']['Time difference method']
+        self.timeDifMethod = timeDifMethod
 
+        self.save_fig = False
+        self.save_dir = "./"
+        self.show_plot = True
+        self.fitting_options = None
+        self.residual_options = None
+        self.hist_visual_options = None
 
-    def fit(self, save_fig: bool, show_plot: bool):
+        #TODO: Set default fit range if none provided 
 
+    def fit(self, save_fig: bool, save_dir, show_plot: bool, fitting_opts,hist_visual_opts):
+        self.fitting_options = fitting_opts
+        self.hist_visual_options = hist_visual_opts
+        self.save_dir = save_dir
         '''
         Description:
             - Fitting an exponential curve onto the histogram.
             - Saving and showing the plot can be turned on or off.
 
         Inputs:
-            - self (encompasses all private variables)
+            - save_fig: True/False to save the figure or not
+            - save_dir: String with path to where figure should be saved
+            - show_plot: True/False to show the plot
+            - fitting_opts (setting for fitting)
+            - hist_visual_opts (setting for styling histogram plot)
 
         Outputs: 
             - popt (Optimal values for the parameters)
@@ -148,7 +154,7 @@ class RossiHistogramFit:
 
 #--------------------------------------------------------------------------------
 
-    def fit_and_residual(self, save_every_fig: bool, show_plot: bool, folder_index = None):
+    def fit_and_residual(self, save_fig: bool, save_dir, show_plot: bool, fitting_opts,residual_opts,hist_visual_opts, folder_index = None):
 
         '''
         Description:
@@ -156,12 +162,26 @@ class RossiHistogramFit:
             - Saving and showing the plot can be turned on or off.
 
         Inputs:
-            - self (encompasses all private variables)
+            Inputs:
+            - save_fig: True/False to save the figure or not
+            - save_dir: String with path to where figure should be saved
+            - show_plot: True/False to show the plot
+            - fitting_opts (setting for fitting)
+            - residual_opts (setting for residuals)
+            - hist_visual_opts (setting for styling histogram plot)
+            - folder_index: 
 
         Outputs: 
             - popt (Optimal values for the parameters)
         '''
 
+        self.fitting_options = fitting_opts
+        #self.residual_options = settings['Residual Plot Settings']
+        self.residual_options = residual_opts
+        #self.hist_visual_options = settings['Histogram Visual Settings']
+        self.hist_visual_options = hist_visual_opts
+        self.save_dir = save_dir
+        self.save_fig = save_fig
         num_bins = np.size(self.counts)
         time_diff_centers = self.bin_centers[1:] - np.diff(self.bin_centers[:2])/2
 
@@ -219,7 +239,7 @@ class RossiHistogramFit:
         fig.suptitle(self.timeDifMethod, fontsize=14)
 
         # Adjusting layout and saving figure (optional)
-        if save_every_fig:
+        if self.save_fig:
             fig.tight_layout()
             if folder_index is not None:
                 save_filename = os.path.join(self.save_dir, 'fitted_and_residual_folder' + str(folder_index)) 

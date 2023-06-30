@@ -57,26 +57,18 @@ def compile_sample_stdev_RA_dist(settings: dict):
                 else:
                     time_diffs = thisData.calculate_time_differences()
 
-                    thisPlot = RossiHistogram(settings['RossiAlpha Settings']['Reset time'],
-                                          settings['RossiAlpha Settings']['Bin width'],
-                                          settings['Histogram Visual Settings'], 
-                                          settings['Input/Output Settings']['Save directory'])
+                    thisPlot = RossiHistogram(time_diffs,settings['RossiAlpha Settings']['Histogram Generation Settings']['Bin width'],settings['RossiAlpha Settings']['Histogram Generation Settings']['Reset time'])
 
-                    counts, bin_centers, bin_edges = thisPlot.plot(time_diffs, 
-                                                               save_fig=False, 
-                                                               show_plot=False)
+                    counts, bin_centers, bin_edges = thisPlot.plot(save_fig=settings['General Settings']['Save figures'], show_plot=settings['General Settings']['Show plots'], save_dir = settings['Input/Output Settings']['Save directory'], plot_opts = settings['Histogram Visual Settings'])
 
                 if i == 1:
                     RA_hist_array = counts
                 else:
                     RA_hist_array = np.vstack((RA_hist_array, counts))
                 save_dir = data_folder + "/" + str(fol_num)
-                thisFit = RossiHistogramFit(counts,
-                                            bin_centers,settings, save_dir)
+                thisFit = RossiHistogramFit(counts, bin_centers, settings['RossiAlpha Settings']['Fit Region Settings']['Minimum cutoff'], settings['RossiAlpha Settings']['Time difference method'], settings['General Settings']['Fit range'])
 
-                thisFit.fit_and_residual(save_every_fig=settings['General Settings']['Save figures'], 
-                                         show_plot=settings['General Settings']['Show plots'], 
-                                         folder_index=i)
+                thisFit.fit_and_residual(settings['General Settings']['Save figures'], settings['Input/Output Settings']['Save directory'], settings['General Settings']['Show plots'],settings['Line Fitting Settings'], settings['Residual Plot Settings'],settings['Histogram Visual Settings'], folder_index=i)
 
                 i = i + 1
                 break
