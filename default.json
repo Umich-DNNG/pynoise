@@ -1,6 +1,6 @@
 {
     "Input/Output Settings": {
-        "Input file/folder": "none",
+        "Input file/folder": "/Users/vincentweng/Documents/PyNoise/PowerSpectralDensity/sample_data/stilbene_2in_CROCUS_20cm_offset_east.txt",
         "Data Column": 0,
         "Save directory": "./",
         "Keep logs": false
@@ -13,7 +13,7 @@
         "Number of folders": 10,
         "Quiet mode": false,
         "Sort data": true,
-        "Save figures": false,
+        "Save figures": true,
         "Show plots": false
     },
     "RossiAlpha Settings": {
@@ -35,6 +35,7 @@
             1.5e11,
             1.0e12
         ],
+        "Legend Label": "stilbene east",
         "Clean pulses switch": true,
         "Annotation Font Weight": "bold",
         "Annotation Color": "black",
