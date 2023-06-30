@@ -3,7 +3,8 @@ import numpy as np
 from .timeDifs import timeDifCalcs
 from .plots import RossiHistogram
 from .fitting import RossiHistogramFit
-
+from Event import Event
+from Event import createEventsListFromTxtFile
 # --------------------------------------------------------------------------------
 def replace_zeroes(lst: list):
     non_zero_elements = [x for x in lst if x != 0]
@@ -36,30 +37,28 @@ def compile_sample_stdev_RA_dist(settings: dict):
         for filename in os.listdir(data_folder + "/" + str(fol_num)):
             if filename.endswith("n_allch.txt"):
                 path_to_data = data_folder + "/" + str(fol_num) + "/" + filename
-                list_data_n = np.loadtxt(path_to_data, delimiter=" ")
+  
+                events = createEventsListFromTxtFile(path_to_data,settings['Input/Output Settings']['Time Column'], settings['Input/Output Settings']['Channels Column'])
 
                 if settings['General Settings']['Sort data'] == True:
-                    list_data = list_data_n[:, 1]
-                    sorted_indices = np.argsort(list_data)
-                    list_data_n = list_data_n[sorted_indices]
+                    events.sort(key=lambda Event: Event.time)
 
-                list_data = list_data_n[:, 1]
-                channels = list_data_n[:,0]
-
-                thisData = timeDifCalcs(list_data, 
-                                        settings['RossiAlpha Settings']['Histogram Generation Settings']['Reset time'], 
+                thisData = timeDifCalcs(events,settings['RossiAlpha Settings']['Histogram Generation Settings']['Reset time'], 
                                         settings['RossiAlpha Settings']['Time difference method'], 
-                                        settings['RossiAlpha Settings']['Digital delay'], 
-                                        channels)
+                                        settings['RossiAlpha Settings']['Digital delay'])
                 if(settings['RossiAlpha Settings']['Combine Calc and Binning']):
                     thisPlot, counts, bin_centers, bin_edges   = thisData.calculateTimeDifsAndBin( settings['RossiAlpha Settings']['Histogram Generation Settings']['Bin width'], False, False, settings['Input/Output Settings']['Save directory'], settings['Histogram Visual Settings'])
 
                 else:
-                    time_diffs = thisData.calculate_time_differences()
+                    time_diffs = thisData.calculateTimeDifsFromEvents()
 
                     thisPlot = RossiHistogram(time_diffs,settings['RossiAlpha Settings']['Histogram Generation Settings']['Bin width'],settings['RossiAlpha Settings']['Histogram Generation Settings']['Reset time'])
 
+
+
                     counts, bin_centers, bin_edges = thisPlot.plot(save_fig=settings['General Settings']['Save figures'], show_plot=settings['General Settings']['Show plots'], save_dir = settings['Input/Output Settings']['Save directory'], plot_opts = settings['Histogram Visual Settings'])
+
+
 
                 if i == 1:
                     RA_hist_array = counts
@@ -68,7 +67,10 @@ def compile_sample_stdev_RA_dist(settings: dict):
                 save_dir = data_folder + "/" + str(fol_num)
                 thisFit = RossiHistogramFit(counts, bin_centers, settings['RossiAlpha Settings']['Fit Region Settings']['Minimum cutoff'], settings['RossiAlpha Settings']['Time difference method'], settings['General Settings']['Fit range'])
 
-                thisFit.fit_and_residual(settings['General Settings']['Save figures'], settings['Input/Output Settings']['Save directory'], settings['General Settings']['Show plots'],settings['Line Fitting Settings'], settings['Residual Plot Settings'],settings['Histogram Visual Settings'], folder_index=i)
+
+
+
+                thisFit.fit_and_residual(settings['General Settings']['Save figures'], save_dir, settings['General Settings']['Show plots'],settings['Line Fitting Settings'], settings['Residual Plot Settings'],settings['Histogram Visual Settings'], folder_index=i)
 
                 i = i + 1
                 break
