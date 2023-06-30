@@ -31,7 +31,10 @@
             150000000000.0,
             1000000000000.0
         ],
-        "Clean pulses switch": true
+        "Clean pulses switch": true,
+        "Annotation Font Weight": "bold",
+        "Annotation Color": "black",
+        "Annotation Background Color": "white"
     },
     "Histogram Visual Settings": {
         "alpha": 1,
