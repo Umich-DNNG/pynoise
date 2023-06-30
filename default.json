@@ -1,7 +1,8 @@
 {
     "Input/Output Settings": {
         "Input file/folder": "none",
-        "Data Column": 0,
+        "Time Column": 1,
+        "Channels Column": 0,
         "Save directory": "./",
         "Keep logs": false
     },
