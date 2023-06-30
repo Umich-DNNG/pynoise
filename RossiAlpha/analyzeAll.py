@@ -51,7 +51,7 @@ def analyzeAllType1(settings: dict):
 
         counts, bin_centers, bin_edges = thisPlot.plot(save_fig=settings['General Settings']['Save figures'], show_plot=settings['General Settings']['Show plots'], save_dir = settings['Input/Output Settings']['Save directory'], plot_opts = settings['Histogram Visual Settings'])
 
-        '''settings['RossiAlpha Settings']['Histogram Generation Settings']['Reset time'], settings['RossiAlpha Settings']['Histogram Generation Settings']['Bin width'], settings['Histogram Visual Settings'], settings['Input/Output Settings']['Save directory'], time_diffs, save_fig=settings['General Settings']['Save figures'], show_plot=settings['General Settings']['Show plots']'''
+
         
     #combined calculating time differences and binning them
     else:
