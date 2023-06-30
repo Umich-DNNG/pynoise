@@ -48,24 +48,24 @@ def prompt(prev,
     ttk.Label(window,
               name='prompt',
               text=message
-              ).grid(column=0,row=0)
+              ).grid(column=0,row=0,padx=10,pady=10)
     # The text box where the user can type their response.
     ttk.Entry(window,
               name='response',
               textvariable=response,
-              ).grid(column=0,row=1)
+              ).grid(column=0,row=1,padx=10,pady=10)
     # The confirmation button.
     ttk.Button(window,
               name='continue',
               text='Continue',
               command=lambda: action(response.get())
-              ).grid(column=0,row=2)
+              ).grid(column=0,row=2,padx=10)
     # The cancel button.
     ttk.Button(window,
               name='cancel',
               text='Cancel',
               command=prev
-              ).grid(column=0,row=3)
+              ).grid(column=0,row=3,padx=10,pady=10)
     
 def error(message='Something went wrong. Please contact the developers.',
           title='ERROR!'):
@@ -84,13 +84,13 @@ def error(message='Something went wrong. Please contact the developers.',
     ttk.Label(popup,
             name='message',
             text=message
-            ).grid(column=0,row=0)
+            ).grid(column=0,row=0,padx=10,pady=10)
     # The button to confirm the user has seen the error.
     ttk.Button(popup,
                name='return',
                text='OK',
                command=popup.destroy
-               ).grid(column=0,row=1)
+               ).grid(column=0,row=1,padx=10,pady=10)
     # Open the popup.
     popup.mainloop()
 
@@ -114,19 +114,19 @@ def warning(to,
     ttk.Label(popup,
             name='message',
             text=message
-            ).grid(column=0,row=0)
+            ).grid(column=0,row=0,padx=10,pady=10)
     # The yes button.
     ttk.Button(popup,
                name='yes',
                text='Yes',
                command=lambda: run.warningFunction(popup, to)
-               ).grid(column=0,row=1)
+               ).grid(column=0,row=1,padx=10)
     # The no button.
     ttk.Button(popup,
                name='no',
                text='No',
                command=popup.destroy
-               ).grid(column=0,row=2)
+               ).grid(column=0,row=2,padx=10,pady=10)
     # Open the popup.
     popup.mainloop()
 
@@ -152,7 +152,7 @@ def shutdown_menu():
                 text='You have made unsaved changes to the settings:\n\n'
                 + 'Base settings: ' + parameters.origin + '\n\nMost recently '
                 + 'appended settings: ' + parameters.appended + '\n'
-                ).grid(column=0,row=0)
+                ).grid(column=0,row=0,padx=10,pady=10)
         # Keep track of the total listed changes.
         total = 0
         # For up to 5 entries in the list.
@@ -161,7 +161,7 @@ def shutdown_menu():
             ttk.Label(window,
                 name='entry' + str(total),
                 text=list[total]
-                ).grid(column=0,row=total+1)
+                ).grid(column=0,row=total+1,padx=10,pady=10)
             # Increase the count.
             total += 1
         # If there were more than 5 entries,
@@ -170,13 +170,13 @@ def shutdown_menu():
             ttk.Label(window,
                 name='extra',
                 text='\n...plus ' + str(len(list)-5) + ' more change(s).'
-                ).grid(column=0,row=6)
+                ).grid(column=0,row=6,padx=10,pady=10)
             total += 1
         # Ask the user what they want to do.
         ttk.Label(window,
                 name='prompt',
                 text='\nWhat would you like to do with your changes?'
-                ).grid(column=0,row=total+1)
+                ).grid(column=0,row=total+1,padx=10,pady=10)
         # Button for saving current settings to the default.
         ttk.Button(window,
                 name='default',
@@ -185,7 +185,7 @@ def shutdown_menu():
                                            parameters,
                                            os.path.abspath('./settings/default.json'),
                                            True)
-                ).grid(column=0,row=total+2)
+                ).grid(column=0,row=total+2,padx=10)
         # Button for saving current settings to another file.
         ttk.Button(window,
                 name='new',
@@ -198,7 +198,7 @@ def shutdown_menu():
                                        'Enter a name for the new settings '
                                         + '(not including the .json file extension).',
                                         'Export Settings')
-                ).grid(column=0,row=total+3)
+                ).grid(column=0,row=total+3,padx=10)
         # Button for discarding the current settings.
         ttk.Button(window,
                 name='discard',
@@ -206,7 +206,7 @@ def shutdown_menu():
                 command=lambda: warning(lambda: run.shutdown(window,parameters,'Runtime settings changes discarded.'),
                                         'All your current changes will be lost. '
                                         + 'Are you sure you want to do this?')
-                ).grid(column=0,row=total+4)
+                ).grid(column=0,row=total+4,padx=10,pady=10)
     # If no changes, program can just end here.
     else:
         run.shutdown(window,parameters)
@@ -245,7 +245,7 @@ def setMenu(prev):
     ttk.Label(window,
               name='prompt',
               text='What settings do you want to edit/view?',
-              ).grid(column=0,row=0)
+              ).grid(column=0,row=0,padx=10,pady=10)
     # Button to edit/view current settings.
     ttk.Button(window,
               name='current',
@@ -253,19 +253,19 @@ def setMenu(prev):
               command=lambda: editor_menu(prev, {'Histogram Visual Settings': 0,
                                                  'Line Fitting Settings': 0,
                                                  'Residual Plot Settings': 0})
-              ).grid(column=0,row=1)
+              ).grid(column=0,row=1,padx=10)
     # Button to import settings files.
     ttk.Button(window,
               name='import',
               text='Import settings file',
               command=lambda: download_menu(lambda: setMenu(prev), lambda: setMenu(prev))
-              ).grid(column=0,row=2)
+              ).grid(column=0,row=2,padx=10)
     # Button to return to the previous menu.
     ttk.Button(window,
               name='return',
               text='Return to previous menu',
               command=prev
-              ).grid(column=0,row=3)
+              ).grid(column=0,row=3,padx=10,pady=10)
 
 def editor_menu(prev, blanks: dict):
 
@@ -309,7 +309,7 @@ def editor_menu(prev, blanks: dict):
         ttk.Label(window,
                   name=group[0:group.find(' Settings')].lower(),
                   text=group[0:group.find(' Settings')] + ':'
-                  ).grid(column=(groupNum*4) % 12,row=curTop)
+                  ).grid(column=(groupNum*4) % 12,row=curTop,padx=10,pady=10)
         # Reset the settings number (1-indexed)
         setNum=1
         # For each setting in the group.
@@ -321,12 +321,13 @@ def editor_menu(prev, blanks: dict):
             ttk.Label(window,
                   name=(group + ' ' + setting).lower(),
                   text=setting + ':'
-                  ).grid(column=(groupNum*4+1) % 12,row=curTop+setNum)
+                  ).grid(column=(groupNum*4+1) % 12,row=curTop+setNum,padx=10)
             # The entry box for inputting/viewing the setting value.
             tk.Entry(window,
                   name=(group + ' ' + setting + ' value').lower(),
-                  textvariable=inputs[group][setting]
-                  ).grid(column=(groupNum*4+2) % 12,row=curTop+setNum)
+                  textvariable=inputs[group][setting],
+                  width=12
+                  ).grid(column=(groupNum*4+2) % 12,row=curTop+setNum,padx=10)
             # Insert into the entry box the current value of the setting.
             window.children[(group + ' ' + setting + ' value').lower()].insert(0,run.format(parameters.settings[group][setting]))
             # Increase the setting number.
@@ -336,13 +337,15 @@ def editor_menu(prev, blanks: dict):
                 newSet[group].append(tk.StringVar())
                 tk.Entry(window,
                         name=('new ' + group + ' ' + ' setting ' + str(i)).lower(),
-                        textvariable=newSet[group][i]
-                        ).grid(column=(groupNum*4+1) % 12,row=curTop+setNum)
+                        textvariable=newSet[group][i],
+                        width=12
+                        ).grid(column=(groupNum*4+1) % 12,row=curTop+setNum,padx=10)
                 newVal[group].append(tk.StringVar())
                 tk.Entry(window,
                         name=('new ' + group + ' ' + ' value ' + str(i)).lower(),
-                        textvariable=newVal[group][i]
-                        ).grid(column=(groupNum*4+2) % 12,row=curTop+setNum)
+                        textvariable=newVal[group][i],
+                        width=12
+                        ).grid(column=(groupNum*4+2) % 12,row=curTop+setNum,padx=10)
                 setNum += 1
             match group:
                 case 'Histogram Visual Settings':
@@ -351,21 +354,21 @@ def editor_menu(prev, blanks: dict):
                             text='+',
                             command=lambda: run.add(prev,'Histogram Visual Settings',blanks),
                             width=1
-                            ).grid(column=(groupNum*4+1) % 12,row=curTop+setNum)
+                            ).grid(column=(groupNum*4+1) % 12,row=curTop+setNum,padx=10)
                 case 'Line Fitting Settings':
                     ttk.Button(window,
                             name=group[0:group.find('Settings')].lower()+'add',
                             text='+',
                             command=lambda: run.add(prev,'Line Fitting Settings',blanks),
                             width=1
-                            ).grid(column=(groupNum*4+1) % 12,row=curTop+setNum)
+                            ).grid(column=(groupNum*4+1) % 12,row=curTop+setNum,padx=10)
                 case _:
                     ttk.Button(window,
                             name=group[0:group.find('Settings')].lower()+'add',
                             text='+',
                             command=lambda: run.add(prev,'Residual Plot Settings',blanks),
                             width=1
-                            ).grid(column=(groupNum*4+1) % 12,row=curTop+setNum)
+                            ).grid(column=(groupNum*4+1) % 12,row=curTop+setNum,padx=10)
             setNum += 1
         # If the total settings in this group were the max 
         # in this row, set the current max to this value.
@@ -381,13 +384,16 @@ def editor_menu(prev, blanks: dict):
                 name='save',
                 text='Save changes',
                 command=lambda: run.edit(window, inputs, newSet, newVal, parameters, prev)
-                ).grid(column=0,row=curTop)
+                ).grid(column=0,row=curTop,padx=10)
     # Button for canceling changes.
     ttk.Button(window,
                   name='cancel',
                   text='Cancel changes',
                   command=lambda: setMenu(prev)
-                  ).grid(column=0,row=curTop+1)
+                  ).grid(column=0,row=curTop+1,padx=10,pady=10)
+    ttk.Scrollbar(window,
+                  name='scrollbar'
+                  ).grid(column=500,row=0,rowspan=500,sticky='ns')
 
 def raMenu():
 
@@ -403,43 +409,43 @@ def raMenu():
     ttk.Label(window,
               name='prompt',
               text='What would you like to do?'
-              ).grid(column=0,row=0)
+              ).grid(column=0,row=0,padx=10,pady=10)
     # Button for running all analysis.
     ttk.Button(window,
               name='all',
               text='Run entire analysis',
               command=lambda: run.raSplit(window,'raAll', parameters)
-              ).grid(column=0,row=1)
+              ).grid(column=0,row=1,padx=10)
     # Button for calculating time differences.
     ttk.Button(window,
               name='time_dif',
               text='Calculate time differences',
               command=lambda: run.raSplit(window,'createTimeDifs', parameters)
-              ).grid(column=0,row=2)
+              ).grid(column=0,row=2,padx=10)
     # Button for creating a histogram.
     ttk.Button(window,
               name='histogram',
               text='Create histogram',
               command=lambda: run.raSplit(window,'plotSplit', parameters)
-              ).grid(column=0,row=3)
+              ).grid(column=0,row=3,padx=10)
     # Button for creating a line fit + residual.
     ttk.Button(window,
               name='fit',
               text='Fit data',
               command=lambda: run.raSplit(window,'createBestFit', parameters)
-              ).grid(column=0,row=4)
+              ).grid(column=0,row=4,padx=10)
     # Button to view the program settings.
     ttk.Button(window,
               name='settings',
               text='Program settings',
               command=lambda: setMenu(raMenu)
-              ).grid(column=0,row=5)
+              ).grid(column=0,row=5,padx=10)
     # Button to return to the main menu.
     ttk.Button(window,
               name='return',
               text='Return to main menu',
               command=main
-              ).grid(column=0,row=6)
+              ).grid(column=0,row=6,padx=10,pady=10)
 
 def psdMenu():
 
@@ -455,25 +461,25 @@ def psdMenu():
     ttk.Label(window,
               name='prompt',
               text='What would you like to do?'
-              ).grid(column=0,row=0)
+              ).grid(column=0,row=0,padx=10,pady=10)
     # Button to run analysis.
     ttk.Button(window,
               name='run',
               text='Run analysis',
               command=lambda: run.conduct_PSD(parameters)
-              ).grid(column=0,row=1)
+              ).grid(column=0,row=1,padx=10)
     # Button to view the program settings.
     ttk.Button(window,
               name='settings',
               text='Program settings',
               command=lambda: setMenu(psdMenu)
-              ).grid(column=0,row=2)
+              ).grid(column=0,row=2,padx=10)
     # Button to return to the main menu.
     ttk.Button(window,
               name='return',
               text='Return to main menu',
               command=main
-              ).grid(column=0,row=3)
+              ).grid(column=0,row=3,padx=10,pady=10)
 
 def download_menu(prev, to):
 
@@ -489,7 +495,7 @@ def download_menu(prev, to):
     ttk.Label(window,
               name='choice',
               text='You have two import options:'
-              ).grid(column=0,row=0)
+              ).grid(column=0,row=0,padx=10,pady=10)
     # Button for overwriting the entire settings.
     ttk.Button(window,
                name='overwrite',
@@ -499,7 +505,7 @@ def download_menu(prev, to):
                                       'Enter a settings file (no .json extension):',
                                       'Overwrite Settings',
                                       lambda response: 'Settings successfully overwritten with file:\n' + response + '.json.')
-               ).grid(column=0,row=1)
+               ).grid(column=0,row=1,padx=10)
     # Button for appending settings to the current settings.
     ttk.Button(window,
                name='append',
@@ -509,13 +515,13 @@ def download_menu(prev, to):
                                       'Enter a settings file (no .json extension):',
                                       'Append Settings to Default',
                                       lambda response: 'Settings successfully appended from file:\n' + response + '.json.')
-               ).grid(column=0,row=2)
+               ).grid(column=0,row=2,padx=10)
     # Button for canceling settings import.
     ttk.Button(window,
                name='cancel',
                text='Cancel',
                command=prev
-               ).grid(column=0,row=3)
+               ).grid(column=0,row=3,padx=10,pady=10)
 
 def main():
 
@@ -531,25 +537,25 @@ def main():
     ttk.Label(window,
               name='choice',
               text='You can utilize any of the following functions:'
-              ).grid(column=0,row=0)
+              ).grid(column=0,row=0,padx=10,pady=10)
     # Button to run Rossi Alpha analysis. 
     ttk.Button(window,
                name='rossi_alpha',
                text='Run Rossi Alpha analysis',
                command=raMenu
-               ).grid(column=0,row=1)
+               ).grid(column=0,row=1,padx=10)
     # Button to run Power Spectral Density analysis. 
     ttk.Button(window,
                name='power_spectral_density',
                text='Run Power Spectral Density analysis',
                command=psdMenu
-               ).grid(column=0,row=2)
+               ).grid(column=0,row=2,padx=10)
     # Button to edit the program settings.
     ttk.Button(window,
                name='settings',
                text='Edit the program settings',
                command=lambda: setMenu(main)
-               ).grid(column=0,row=3)
+               ).grid(column=0,row=3,padx=10)
     # Button to exit the program.
     ttk.Button(window,
                name='quit',
@@ -557,7 +563,7 @@ def main():
                command=lambda: warning(shutdown_menu,
                                        'Are you sure you want to quit the program?',
                                        'Shutdown Confirmation')
-               ).grid(column=0,row=4)
+               ).grid(column=0,row=4,padx=10,pady=10)
 
 def startup():
 
@@ -568,6 +574,9 @@ def startup():
     if window == None:
         window = Tk()
         window.grid()
+        width= window.winfo_screenwidth()               
+        height= window.winfo_screenheight()               
+        window.geometry("%dx%d" % (width, height))
     # Otherwise, clear the window of all 
     # previous entries, labels, and buttons.
     else:
@@ -589,13 +598,13 @@ def startup():
             + 'and analyzing it using various methods and tools.\n\n'
             + 'Use this Python suite to analyze a single file or '
             + 'multiple across numerous folders.\n'
-            ).grid(column=0, row=0)
+            ).grid(column=0, row=0,padx=10,pady=10)
     # Prompt the user.
     ttk.Label(window,
             name='choice',
             text='Would you like to use the default '
             + 'settings or import another .json file?'
-            ).grid(column=0, row=1)
+            ).grid(column=0, row=1,padx=10,pady=10)
     # Button for importing the default settings.
     ttk.Button(window,
                name='default',
@@ -606,12 +615,12 @@ def startup():
                                                                 os.path.abspath('./settings/default.json'),
                                                                 False,
                                                                 main))
-               ).grid(column=0, row=2)
+               ).grid(column=0, row=2,padx=10)
     # Button for importing other settings.
     ttk.Button(window,
                name='import',
                text="Import Settings",
                command=lambda:download_menu(startup, main)
-               ).grid(column=0, row=3)
+               ).grid(column=0, row=3,padx=10,pady=10)
     # Run the window.
     window.mainloop()
