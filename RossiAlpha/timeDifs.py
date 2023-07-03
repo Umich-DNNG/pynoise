@@ -1,10 +1,29 @@
-import numpy as np  # For processing data
-import matplotlib.pyplot as plt
+'''The class for constructing and calculating time difference objects for RossiAlpha 
+analysis. Supports separated and combined histogram/time difference operations.'''
+
+import numpy as np
 from . import plots as plt
 
 class timeDifCalcs:
     
     def __init__(self, time_data: list[float], reset_time: float = None, method: str = 'any_and_all', digital_delay: int = None, channels = None):
+        
+        '''Initializes a time difference object. Autogenerates variables where necessary.
+    
+        Requires:
+        - time_data: the list of measurement times for each data point.
+        - channels: the list of channels for each data point. The 
+        indeces for each data point should match between time_data 
+        and channels. ONLY required when method is not any_and_all.
+        - digital_delay: the amount of digital delay. OtNLY 
+        required when performing analysis with digital_delay.
+        
+        Optional:
+        - reset_time: the maximum time difference allowed. If 
+        not given, will autogenerate the best reset time.
+        TODO: Actually do this.
+        - method: the method of calculating time differences (assumes any_and_all).'''
+        
         # Store the raw time measurements.
         self.time_vector = time_data 
         # If a reset time is given, use it.
@@ -31,104 +50,133 @@ class timeDifCalcs:
         self.timeDifs = None
     
     def calculate_time_differences(self):
-        '''can be called on a timeDifCalcs object and returns the array of time differences used for constructing a histogram based on the appropriate method
-        
-        inputs:
-        -None
 
-        outputs:
-        -time differences array
+        '''Returns and stores the array of time differences used 
+        for constructing a histogram based on the stored method.
+
+        Returns:
+        - self.timeDifs
         '''
 
-        # time_vector = self.list_data
-
-        # reset_time = float(Rossi_alpha_settings["reset time"])
+        # Construct the empty time differences array.
         time_diffs = np.array([])
         n = len(self.time_vector)
         i = 0
-        # iterate from 0 through the whole time vector
+        # Iterate through the whole time vector.
         while i < len(self.time_vector):
+            # Create an empty channel bank.
             ch_bank = set()
-            # iterate through the rest of the vector starting 1 after i
-
+            # Iterate through the rest of the vector
+            # starting 1 after the current data point.
             for j in range(i + 1, n):
-
-                # if we get outside the reset_time range, break to the next iteratiion of i
+                # If the current time difference exceeds the 
+                # reset time range, break to the next data point.
                 if self.time_vector[j] - self.time_vector[i] > self.reset_time:
                     break
-                # if the method is any and all, there are no additional conditions, but if any other method, check that the channels are diff
+                # If the method is any and all, continue. Otherwise, assure 
+                # that the channels are different between the two data points.
                 if((self.method == 'any_and_all') or self.channels[j] != self.channels[i]):
-                    # if the method checks for repeats, check that it is not in the channels bank, otherwise we can add the time_diff
+                    # If the method is any and all or cross_correlation, continue. Otherwise, 
+                    # check that the current data point's channel is not in the bank.
                     if(self.method == 'any_and_all' or self.method == 'any_and_all cross_correlations' or self.channels[j] not in ch_bank):
+                        # Add the current time difference to the list.
                         time_diffs = np.append(time_diffs,(self.time_vector[j] - self.time_vector[i]))
+                    # If digital delay is on:
+                    # TODO: why is it elif???
                     elif(self.method == 'any_and_all cross_correlations no_repeat digital_delay'):
-                        # add the digital delay if digital delay is on
+                        # Skip to the nearest data point after the
+                        # current one with the digital delay added.
                         stamped_time = self.time_vector[i]
                         while self.time_vector[i] < stamped_time + self.digital_delay:
-                           i = i + 1
-                    # add the current channel to the channels set if considering channels
+                           i += 1
+                    # Add the current channel to the channel bank if considering channels.
                     if(self.method != "any_and_all"):
                         ch_bank.add(self.channels[j])
-            i = i + 1
-
+            # Iterate to the next data point.
+            # TODO: Should we still do this when using digital delay?
+            i += 1
+        # Store the time differences array.
         self.timeDifs = time_diffs
+        # Return the time differences array.
         return self.timeDifs
     
-
-    def calculateTimeDifsAndBin(self, bin_width, save_fig: bool, show_plot: bool, save_dir: str, options: dict):
-        '''can be called on a timeDifCalcs object and simultaneously calculates the time differences
-        and adds them to a histogram.
+    def calculateTimeDifsAndBin(self, bin_width: int = None, save_fig: bool = False, show_plot: bool = True, save_dir:str= './', plot_opts: dict = None):
         
-        inputs:
-        - bin width
-        -save_fig
-        -show_plot
-        -save_dir
-        -options
+        '''Simultaneously calculates the time differences for 
+        the timeDifs object and adds them to a new histogram.
         
-        outputs:
-        RossiHistogram object'''
+        Optional:
+        - bin width: the width of each histogram bin. If 
+        not given, will autogenerate a reasonable width.
+        TODO: Actually do this.
+        - save_fig: whether or not the figures should be saved 
+        to the given directory after creation (assumes False).
+        - show_plot: whether or not the figures should be 
+        shown to the user upon creation (assumes True).
+        - save_dir: if save_fig is True, what directory the figures 
+        will be saved in (assumes the current working directory).
+        - plot_opts: all the matplotlib plot parameters.
         
-        #time_diffs = np.array([])
+        Returns:
+        - RossiHistogram object
+        - histogram: the list of counts for each histogram bin.
+        - bin_centers: the time at the center of each bin.
+        - bin_edges: the time on the edge of each bin.
+        '''
+        
+        # Store the number of data points, the number of bins, 
+        # and initialize the data point index and histogram array.
         n = len(self.time_vector)
         i = 0
         num_bins = int(self.reset_time / bin_width)
         histogram = np.zeros(num_bins)
-        # iterate from 0 through the whole time vector
+        # Iterate through the whole time vector.
         while i < len(self.time_vector):
+            # Create an empty channel bank.
             ch_bank = set()
-            # iterate through the rest of the vector starting 1 after i
+            # Iterate through the rest of the vector
+            # starting 1 after the current data point.
             for j in range(i + 1, n):
-                # if we get outside the reset_time range, break to the next iteratiion of i
+                # If the current time difference exceeds the 
+                # reset time range, break to the next data point.
                 if self.time_vector[j] - self.time_vector[i] > self.reset_time:
                     break
-                # if the method is any and all, there are no additional conditions, but if any other method, check that the channels are diff
+                # If the method is any and all, continue. Otherwise, assure 
+                # that the channels are different between the two data points.
                 if((self.method == 'any_and_all') or self.channels[j] != self.channels[i]):
-                    # if the method checks for repeats, check that it is not in the channels bank, otherwise we can add the time_diff
+                    # If the method is any and all or cross_correlation, continue. Otherwise, 
+                    # check that the current data point's channel is not in the bank.
                     if(self.method == 'any_and_all' or self.method == 'any_and_all cross_correlations' or self.channels[j] not in ch_bank):
+                        # Store the current time difference.
                         thisDif = self.time_vector[j] - self.time_vector[i]
-                        #time_diffs = np.append(time_diffs,(thisDif))
-
+                        # Calculate the bin index for the current time difference.
                         binIndex = int((thisDif) / bin_width)
+                        # If the calculated index is exactly at the end 
+                        # of the time range, put it into the last bin.
                         if(binIndex == num_bins):
                             binIndex -= 1
-                        histogram[binIndex] += 1       
+                        # Increase the histogram count in the appropriate bin.
+                        histogram[binIndex] += 1    
+                    # If digital delay is on:
+                    # TODO: why is it elif???
                     elif(self.method == 'any_and_all cross_correlations no_repeat digital_delay'):
-                        # add the digital delay if digital delay is on
+                        # Skip to the nearest data point after the
+                        # current one with the digital delay added.
                         stamped_time = self.time_vector[i]
                         while self.time_vector[i] < stamped_time + self.digital_delay:
-                           i = i + 1
-                    # add the current channel to the channels set if considering channels
+                           i += 1
+                    # Add the current channel to the channel bank if considering channels.
                     if(self.method != "any_and_all"):
                         ch_bank.add(self.channels[j])
-            i = i + 1
-
-        #Normalize the histogram
+            # Iterate to the next data point.
+            # TODO: Should we still do this when using digital delay?
+            i += 1
+        # Normalize the histogram.
         bin_edges = np.linspace(0, self.reset_time, num_bins + 1)
         bin_centers = 0.5 * (bin_edges[1:] + bin_edges[:-1])
-         # Saving plot (optional)
+        # Constuct the rossiHistogram object and plot accordingly.
         rossiHistogram = plt.RossiHistogram(bin_width= bin_width, reset_time=self.reset_time)
         rossiHistogram.initFromHist(histogram,bin_centers,bin_edges)
-        rossiHistogram.plotFromHist(options,save_fig,show_plot,save_dir)
-        
+        rossiHistogram.plotFromHist(plot_opts,save_fig,show_plot,save_dir)
+        # Return the rossiHistogram object and related NP arrays.
         return rossiHistogram, histogram, bin_centers, bin_edges
