@@ -11,14 +11,12 @@ def APSD(f, A, alpha, c):
 # ---------------------------------------------------------------------------------------------------
 
 class PowerSpectralDensity:
-    def __init__(self, list_data_array, 
+    def __init__(self, 
+                 list_data_array, 
                  leg_label: str, 
                  clean_pulses_switch: bool, 
                  dwell_time: float, 
-                 meas_time_range: list[float],
-                 annotate_font_weight: str,
-                 annotate_color: str,
-                 annotate_background_color: str):
+                 meas_time_range: list[float]):
 
         '''
         Description:
@@ -42,14 +40,15 @@ class PowerSpectralDensity:
         self.dwell_time = dwell_time
         self.meas_time_range = meas_time_range
 
-        # Annotation Parameters
-        self.annotate_font_weight = annotate_font_weight
-        self.annotate_color = annotate_color
-        self.annotate_background_color = annotate_background_color
 
-
-    def conduct_APSD(self, show_plot: bool, save_fig: bool, save_dir: str):
-
+    def conduct_APSD(self, 
+                     show_plot: bool, 
+                     save_fig: bool, 
+                     save_dir: str, 
+                     annotate_font_weight: str = "bold", 
+                     annotate_color: str = "black", 
+                     annotate_background_color: str = "white"):
+        
         '''
         Creating PSD plot from an array of data inputs.
         Saving and showing the plot can be turned on or off.
@@ -63,6 +62,11 @@ class PowerSpectralDensity:
             - popt (Optimal values for the parameters)
             - pcov (DESCRIPTION NEEDED)
         '''
+
+        # Annotation Parameters
+        self.annotate_font_weight = annotate_font_weight
+        self.annotate_color = annotate_color
+        self.annotate_background_color = annotate_background_color
         
         # Making count of bins over time histogram
         count_bins = np.diff(self.meas_time_range) / self.dwell_time
@@ -109,6 +113,7 @@ class PowerSpectralDensity:
                             p0=[Pxx[2], 25, 0.001],
                             bounds=(0, np.inf),
                             maxfev=100000)
+        
         print('alpha = ' + str(np.around(popt[1]*2*np.pi, decimals=2)) + ', uncertainty = '+ 
                     str(np.around(pcov[1,1]*2*np.pi, decimals=2)))
         
