@@ -1,8 +1,9 @@
+'''The command line driver for running Rossi Alpha analysis.'''
+
 from . import analyzeAll as mn
 from . import fitting as fit
 from . import plots as plt
 from . import timeDifs as dif
-from . import analyzingFolders as fol
 import editor as edit
 import matplotlib.pyplot as mpl
 import numpy as np
