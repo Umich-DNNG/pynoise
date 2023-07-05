@@ -20,7 +20,6 @@ def conduct_PSD():
     values = np.loadtxt(file_path, usecols=(0,3), max_rows=2000000, dtype=float)
 
     PSD_Object = psd.PowerSpectralDensity(list_data_array=values, 
-                                          leg_label=editor.parameters.settings['PSD Settings']['Legend Label'], 
                                           clean_pulses_switch=editor.parameters.settings['PSD Settings']['Clean pulses switch'], 
                                           dwell_time=editor.parameters.settings['PSD Settings']['Dwell time'], 
                                           meas_time_range=editor.parameters.settings['PSD Settings']['Meas time range'])
@@ -29,9 +28,10 @@ def conduct_PSD():
     PSD_Object.conduct_APSD(show_plot=editor.parameters.settings['General Settings']['Show plots'], 
                             save_fig=editor.parameters.settings['General Settings']['Save figures'],
                             save_dir=editor.parameters.settings['Input/Output Settings']['Save directory'],
-                            annotate_font_weight=editor.parameters.settings['PSD Settings']['Annotation Font Weight'],
-                            annotate_color=editor.parameters.settings['PSD Settings']['Annotation Color'],
-                            annotate_background_color=editor.parameters.settings['PSD Settings']['Annotation Background Color'])
+                            leg_label=editor.parameters.settings['PSD Visual Settings']['Legend Label'],
+                            annotate_font_weight=editor.parameters.settings['PSD Visual Settings']['Annotation Font Weight'],
+                            annotate_color=editor.parameters.settings['PSD Visual Settings']['Annotation Color'],
+                            annotate_background_color=editor.parameters.settings['PSD Visual Settings']['Annotation Background Color'])
 
 
 def main(editorIn: edit.Editor, queue: list[str]):
