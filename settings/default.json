@@ -1,7 +1,8 @@
 {
     "Input/Output Settings": {
-        "Input file/folder": "/Users/vincentweng/Documents/PyNoise/PowerSpectralDensity/sample_data/stilbene_2in_CROCUS_20cm_offset_east.txt",
-        "Data Column": 0,
+        "Input file/folder": "none",
+        "Time Column": 1,
+        "Channels Column": 0,
         "Save directory": "./",
         "Keep logs": true
     },
