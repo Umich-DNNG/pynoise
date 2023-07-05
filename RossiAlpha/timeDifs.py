@@ -7,7 +7,7 @@ from Event import Event
 
 class timeDifCalcs:
     
-    def __init__(self, events, reset_time: float = None, method: str = 'any_and_all', digital_delay: int = None):
+    def __init__(self, events: list[Event], reset_time: float = None, method: str = 'any_and_all', digital_delay: int = None):
         
         '''Initializes a time difference object. Autogenerates variables where necessary.
     
