@@ -31,7 +31,7 @@ def analyzeAllType1(settings: dict):
     # sorting timestamps to be fed into calculate_time_differences()
     elif filePath.endswith(".lmx"):
         print("this is an lmx file. we are currently in testing stages for analyzing this file type.")
-        listData = np.array(readLMXFile(filePath))
+        listData = readLMXFile(filePath)
 
     
     
