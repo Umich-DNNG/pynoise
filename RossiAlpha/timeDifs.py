@@ -47,7 +47,8 @@ class timeDifCalcs:
         
         # Initialize the blank time differences.
         self.timeDifs = None
-     def calculate_time_differences(self):
+
+    def calculate_time_differences(self):
 
         '''Returns and stores the array of time differences used 
         for constructing a histogram based on the stored method.
@@ -100,18 +101,14 @@ class timeDifCalcs:
 
 
 
-    def calculate_time_differences(self):
-        '''can be called on a timeDifCalcs object and returns the array of time differences used for constructing a histogram based on the appropriate method
-        
-        inputs:
-        -None
+    def calculateTimeDifsFromEvents(self):
+        '''Returns and stores the array of time differences used 
+        for constructing a histogram based on the stored method.
 
-        outputs:
-        -time differences array
+        Returns:
+        - self.timeDifs
         '''
 
-    def calculateTimeDifsFromEvents(self):
-         # reset_time = float(Rossi_alpha_settings["reset time"])
         time_diffs = np.array([])
         n = len(self.events)
         i = 0
@@ -169,12 +166,12 @@ class timeDifCalcs:
         
         # Store the number of data points, the number of bins, 
         # and initialize the data point index and histogram array.
-        n = len(self.time_vector)
+        n = len(self.events)
         i = 0
         num_bins = int(self.reset_time / bin_width)
         histogram = np.zeros(num_bins)
         # Iterate through the whole time vector.
-        while i < len(self.time_vector):
+        while i < len(self.events):
             # Create an empty channel bank.
             ch_bank = set()
             # Iterate through the rest of the vector
@@ -182,16 +179,16 @@ class timeDifCalcs:
             for j in range(i + 1, n):
                 # If the current time difference exceeds the 
                 # reset time range, break to the next data point.
-                if self.time_vector[j] - self.time_vector[i] > self.reset_time:
+                if self.events[j].time - self.events[i].time > self.reset_time:
                     break
                 # If the method is any and all, continue. Otherwise, assure 
                 # that the channels are different between the two data points.
-                if((self.method == 'any_and_all') or self.channels[j] != self.channels[i]):
+                if((self.method == 'any_and_all') or self.events[j].channel != self.events[i].channel):
                     # If the method is any and all or cross_correlation, continue. Otherwise, 
                     # check that the current data point's channel is not in the bank.
-                    if(self.method == 'any_and_all' or self.method == 'any_and_all cross_correlations' or self.channels[j] not in ch_bank):
+                    if(self.method == 'any_and_all' or self.method == 'any_and_all cross_correlations' or self.events[j].channel not in ch_bank):
                         # Store the current time difference.
-                        thisDif = self.time_vector[j] - self.time_vector[i]
+                        thisDif = self.events[j].time - self.events[i].time
                         # Calculate the bin index for the current time difference.
                         binIndex = int((thisDif) / bin_width)
                         # If the calculated index is exactly at the end 
@@ -206,11 +203,11 @@ class timeDifCalcs:
                         # Skip to the nearest data point after the
                         # current one with the digital delay added.
                         stamped_time = self.time_vector[i]
-                        while self.time_vector[i] < stamped_time + self.digital_delay:
+                        while self.events[i].time < stamped_time + self.digital_delay:
                            i += 1
                     # Add the current channel to the channel bank if considering channels.
                     if(self.method != "any_and_all"):
-                        ch_bank.add(self.channels[j])
+                        ch_bank.add(self.events[j].channel)
             # Iterate to the next data point.
             # TODO: Should we still do this when using digital delay?
             i += 1
