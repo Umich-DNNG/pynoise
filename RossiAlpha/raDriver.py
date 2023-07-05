@@ -69,7 +69,7 @@ def createPlot():
 
     global time_difs, histogram, hist_file, hist_method, editor
     editor.print('Building plot...')
-    histogram = plt.RossiHistogram(time_difs,editor.parameters.settings['RossiAlpha Settings']['Histogram Generation Settings']['Bin width'],editor.parameters.settings['RossiAlpha Settings']['Histogram Generation Settings']['Reset time'])
+    histogram = plt.RossiHistogram(time_difs,editor.parameters.settings['RossiAlpha Settings']['Bin width'],editor.parameters.settings['RossiAlpha Settings']['Reset time'])
     
     histogram.plot(save_fig=editor.parameters.settings['General Settings']['Save figures'], show_plot=editor.parameters.settings['General Settings']['Show plots'], save_dir = editor.parameters.settings['Input/Output Settings']['Save directory'], plot_opts = editor.parameters.settings['Histogram Visual Settings'])
     
@@ -121,7 +121,7 @@ def createBestFit():
     counts = histogram.counts
     bin_centers = histogram.bin_centers
 
-    best_fit = fit.RossiHistogramFit(counts, bin_centers, editor.parameters.settings['RossiAlpha Settings']['Fit Region Settings']['Minimum cutoff'], editor.parameters.settings['RossiAlpha Settings']['Time difference method'], editor.parameters.settings['General Settings']['Fit range'])
+    best_fit = fit.RossiHistogramFit(counts, bin_centers, editor.parameters.settings['RossiAlpha Settings']['Minimum cutoff'], editor.parameters.settings['RossiAlpha Settings']['Time difference method'], editor.parameters.settings['General Settings']['Fit range'])
         
         # Fitting curve to the histogram and plotting the residuals
     best_fit.fit_and_residual(editor.parameters.settings['General Settings']['Save figures'], editor.parameters.settings['Input/Output Settings']['Save directory'], editor.parameters.settings['General Settings']['Show plots'],editor.parameters.settings['Line Fitting Settings'], editor.parameters.settings['Residual Plot Settings'],editor.parameters.settings['Histogram Visual Settings'] )
