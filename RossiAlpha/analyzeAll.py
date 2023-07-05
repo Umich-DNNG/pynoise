@@ -37,10 +37,9 @@ def analyzeAllType1(settings: dict):
     
     if settings['General Settings']["Sort data"]:
         listData.sort(key=lambda Event: Event.time)
-    else:
-        listDataSorted = listData
+
     # applying time differences function
-    thisTimeDifCalc = timeDifCalcs(listDataSorted, settings['RossiAlpha Settings']['Histogram Generation Settings']["Reset time"],  settings['RossiAlpha Settings']["Time difference method"])
+    thisTimeDifCalc = timeDifCalcs(listData, settings['RossiAlpha Settings']['Histogram Generation Settings']["Reset time"],  settings['RossiAlpha Settings']["Time difference method"])
 
     if(not settings['RossiAlpha Settings']['Combine Calc and Binning']):
         time_diffs = thisTimeDifCalc.calculateTimeDifsFromEvents()
@@ -55,7 +54,7 @@ def analyzeAllType1(settings: dict):
     #combined calculating time differences and binning them
     else:
         thisPlot, counts, bin_centers, bin_edges = thisTimeDifCalc.calculateTimeDifsAndBin(settings['RossiAlpha Settings']['Histogram Generation Settings']['Bin width'], settings['General Settings']['Save figures'], settings['General Settings']['Show plots'], settings['Input/Output Settings']['Save directory'], settings['Histogram Visual Settings'])
-        
+
         time_diffs = None
 
     
