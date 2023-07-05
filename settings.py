@@ -41,6 +41,11 @@ class Settings:
                          'PSD Settings' : {'Dwell time':2.0e6,
                                            'Meas time range':[1.5e11,1.0e12],
                                            'Clean pulses switch': True},
+                        'PSD Visual Settings': {'Legend Label': 'stilbene east',
+                                                'Annotation Font Weight': 'bold',
+                                                'Annotation Color': 'black',
+                                                'Annotation Background Color': 'white'
+                        },
                          'Histogram Visual Settings': {'alpha': 1,
                                                         'fill': True,
                                                         'color': '#B2CBDE',
