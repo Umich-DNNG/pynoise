@@ -277,7 +277,7 @@ def editor_menu(prev, blanks: dict):
 
     global window, parameters
     groupNum=0
-    curTop=0
+    curTop=1
     curMax = 0
     # Initialize inputs dictionary (assume settings groups are constant).
     inputs={'Input/Output Settings': {},
@@ -298,6 +298,18 @@ def editor_menu(prev, blanks: dict):
         item.destroy()
     # Properly name the window.
     window.title('View/Edit Current Settings')
+    # Button for saving changes.
+    ttk.Button(window,
+                name='save',
+                text='Save changes',
+                command=lambda: run.edit(window, inputs, newSet, newVal, parameters, prev)
+                ).grid(column=0,row=0,padx=10)
+    # Button for canceling changes.
+    ttk.Button(window,
+                  name='cancel',
+                  text='Cancel changes',
+                  command=lambda: setMenu(prev)
+                  ).grid(column=1,row=0,padx=10,pady=10)
     # For each group in the settings.
     for group in parameters.settings:
         # If the start of a new row, add the previous current maximum 
@@ -376,21 +388,6 @@ def editor_menu(prev, blanks: dict):
             curMax = setNum
         # Increase the group number.
         groupNum += 1
-    # Add the previous current maximum to 
-    # the current top for button formatting.
-    curTop += curMax
-    # Button for saving changes.
-    ttk.Button(window,
-                name='save',
-                text='Save changes',
-                command=lambda: run.edit(window, inputs, newSet, newVal, parameters, prev)
-                ).grid(column=0,row=curTop,padx=10)
-    # Button for canceling changes.
-    ttk.Button(window,
-                  name='cancel',
-                  text='Cancel changes',
-                  command=lambda: setMenu(prev)
-                  ).grid(column=0,row=curTop+1,padx=10,pady=10)
     ttk.Scrollbar(window,
                   name='scrollbar'
                   ).grid(column=500,row=0,rowspan=500,sticky='ns')
