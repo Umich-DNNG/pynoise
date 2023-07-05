@@ -9,6 +9,7 @@ import matplotlib.pyplot as mpl
 import numpy as np
 from Event import Event
 from Event import createEventsListFromTxtFile
+from lmxReader import readLMXFile
 mpl.ioff()
 
 # Where the time differences are stored.
@@ -42,8 +43,7 @@ def createTimeDifs():
             data = createEventsListFromTxtFile(editor.parameters.settings['Input/Output Settings']['Input file/folder'],editor.parameters.settings['Input/Output Settings']['Time Column'], editor.parameters.settings['Input/Output Settings']['Channels Column'])
         
         elif editor.parameters.settings['Input/Output Settings']['Input file/folder'].endswith(".lmx"):
-            #TODO: Handle LMX Files
-            data = createEventsListFromTxtFile(editor.parameters.settings['Input/Output Settings']['Input file/folder'],editor.parameters.settings['Input/Output Settings']['Time Column'], editor.parameters.settings['Input/Output Settings']['Channels Column'])
+            data =  readLMXFile(editor.parameters.settings['Input/Output Settings']['Input file/folder'])
 
         if editor.parameters.settings['General Settings']['Sort data']:
             data.sort(key=lambda Event: Event.time)
@@ -93,8 +93,8 @@ def calculateTimeDifsAndPlot():
         data = createEventsListFromTxtFile(editor.parameters.settings['Input/Output Settings']['Input file/folder'],editor.parameters.settings['Input/Output Settings']['Time Column'], editor.parameters.settings['Input/Output Settings']['Channels Column'])
         
     elif editor.parameters.settings['Input/Output Settings']['Input file/folder'].endswith(".lmx"):
-        #TODO: Handle LMX Files
-        data = createEventsListFromTxtFile(editor.parameters.settings['Input/Output Settings']['Input file/folder'],editor.parameters.settings['Input/Output Settings']['Time Column'], editor.parameters.settings['Input/Output Settings']['Channels Column'])
+        
+        data =  readLMXFile(editor.parameters.settings['Input/Output Settings']['Input file/folder'])
 
     if editor.parameters.settings['General Settings']['Sort data']:
         data.sort(key=lambda Event: Event.time)
