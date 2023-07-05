@@ -39,7 +39,7 @@ def analyzeAllType1(settings: dict):
         listData.sort(key=lambda Event: Event.time)
 
     # applying time differences function
-    thisTimeDifCalc = timeDifCalcs(listDataSorted, settings['RossiAlpha Settings']["Reset time"],  settings['RossiAlpha Settings']["Time difference method"])
+    thisTimeDifCalc = timeDifCalcs(listData, settings['RossiAlpha Settings']["Reset time"],  settings['RossiAlpha Settings']["Time difference method"])
 
     if(not settings['RossiAlpha Settings']['Combine Calc and Binning']):
         time_diffs = thisTimeDifCalc.calculateTimeDifsFromEvents()
