@@ -13,6 +13,8 @@ from .plots import RossiHistogram
 from .fitting import RossiHistogramFit
 import matplotlib.pyplot as plt
 from lmxReader import *
+from Event import Event
+from Event import createEventsListFromTxtFile
 # sns.set(rc={"figure.dpi": 350, "savefig.dpi": 350})
 # sns.set_style("ticks")
 # sns.set_context("talk", font_scale=0.8)
@@ -25,10 +27,7 @@ def analyzeAllType1(settings: dict):
     filePath = settings['Input/Output Settings']['Input file/folder']
 
     if filePath.endswith(".txt"):
-        if settings['Input/Output Settings'].get('Data Column') is not None:
-            listData = np.loadtxt(filePath,delimiter=" ", usecols=(settings['Input/Output Settings']['Data Column']))
-        else:
-            listData = np.loadtxt(filePath)
+        listData = createEventsListFromTxtFile(filePath,settings['Input/Output Settings']['Time Column'], settings['Input/Output Settings']['Channels Column'])
     # sorting timestamps to be fed into calculate_time_differences()
     elif filePath.endswith(".lmx"):
         print("this is an lmx file. we are currently in testing stages for analyzing this file type.")
@@ -37,14 +36,14 @@ def analyzeAllType1(settings: dict):
     
     
     if settings['General Settings']["Sort data"]:
-        listDataSorted = np.sort(listData)
+        listData.sort(key=lambda Event: Event.time)
     else:
         listDataSorted = listData
     # applying time differences function
     thisTimeDifCalc = timeDifCalcs(listDataSorted, settings['RossiAlpha Settings']['Histogram Generation Settings']["Reset time"],  settings['RossiAlpha Settings']["Time difference method"])
 
     if(not settings['RossiAlpha Settings']['Combine Calc and Binning']):
-        time_diffs = thisTimeDifCalc.calculate_time_differences()
+        time_diffs = thisTimeDifCalc.calculateTimeDifsFromEvents()
 
         # creating RossiHistogram() object with specified settings
         thisPlot = RossiHistogram(time_diffs,settings['RossiAlpha Settings']['Histogram Generation Settings']['Bin width'],settings['RossiAlpha Settings']['Histogram Generation Settings']['Reset time'])
@@ -56,6 +55,7 @@ def analyzeAllType1(settings: dict):
     #combined calculating time differences and binning them
     else:
         thisPlot, counts, bin_centers, bin_edges = thisTimeDifCalc.calculateTimeDifsAndBin(settings['RossiAlpha Settings']['Histogram Generation Settings']['Bin width'], settings['General Settings']['Save figures'], settings['General Settings']['Show plots'], settings['Input/Output Settings']['Save directory'], settings['Histogram Visual Settings'])
+        
         time_diffs = None
 
     
