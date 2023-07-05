@@ -16,8 +16,12 @@ def createEventsListFromTxtFile(filePath,timeCol,channelCol):
     with open(filePath, 'r') as file:
         for line in file:
             columns = line.strip().split()
-            channel = columns[channelCol]
             time = columns[timeCol]
-            event = Event(float(time), int(channel))
+            if channelCol is None:
+                channel = None
+                event = Event(float(time))
+            else:
+                channel = columns[channelCol]
+                event = Event(float(time), int(channel))
             events.append(event)
     return events
