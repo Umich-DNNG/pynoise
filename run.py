@@ -160,10 +160,6 @@ def format(value):
     else:
         return str(value)
 
-def add(prev, group: str, blanks: dict):
-    blanks[group] += 1
-    gui.editor_menu(prev, blanks)
-
 def saveType(value: str):
 
     '''Converts the output of a tkinter string variable to 
@@ -174,6 +170,8 @@ def saveType(value: str):
     - value: the string to be converted to a value.'''
 
     # If variable is a list:
+    if value == 'None':
+        return None
     if value[0] == '[':
         # Get rid of brackets and make empty list variable.
         value = value[1:len(value)-1]
@@ -237,7 +235,7 @@ def changes(parameters: set.Settings):
     # exist in the current settings, log the removal.
     for group in baseline.settings:
         for setting in baseline.settings[group]:
-            if parameters.settings[group].get(setting) == None:
+            if parameters.settings[group].get(setting) == None and setting != 'Channels Column':
                 log(setting + ' in ' + group + ' removed.\n', xor=False)
                 count += 1
     return count
@@ -259,10 +257,9 @@ def edit(window: Tk,
     to return to after the settings menu.'''
 
     for group in newSet:
-        for i in range(0, len(newSet[group])):
-            if newSet[group][i].get() != '' and newVal[group][i].get() != '':
-                inputs[group][newSet[group][i].get()] = newVal[group][i]
-
+        for key in newSet[group]:
+            if newSet[group][key].get() != '' and newVal[group][key].get() != '':
+                inputs[group][newSet[group][key].get()] = newVal[group][key]
 
     parameters.write(os.path.abspath('./settings/comp.json'))
     # For each group and setting in the inputs, convert the 
