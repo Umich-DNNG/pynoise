@@ -13,6 +13,8 @@ from RossiAlpha import fitting as fit
 from RossiAlpha import plots as plt
 from RossiAlpha import timeDifs as dif
 from PowerSpectralDensity import PSD
+import Event as evt
+import lmxReader as lmx
 
 #--------------------Global Variables--------------------#
 
@@ -393,22 +395,21 @@ def createTimeDifs(parameters: set.Settings):
     See the original for more info.'''
 
     global time_difs, time_difs_file, time_difs_method
-    name = parameters.settings['Input/Output Settings']['Input file/folder']
-    name = name[name.rfind('/')+1:]
-    if name.count('.') > 0:
-        if parameters.settings['Input/Output Settings'].get('Data Column') is not None:
-            data = np.loadtxt(parameters.settings['Input/Output Settings']['Input file/folder'],delimiter=" ", usecols=(parameters.settings['Input/Output Settings']['Data Column']))
-        else:
-            data = np.loadtxt(parameters.settings['Input/Output Settings']['Input file/folder'])
-
-        if parameters.settings['General Settings']['Sort data']:
-            data = np.sort(data)
-        time_difs = dif.timeDifCalcs(data, 
-            parameters.settings['RossiAlpha Settings']['Reset time'], 
-            parameters.settings['RossiAlpha Settings']['Time difference method'])
-        time_difs = time_difs.calculate_time_differences()
-        time_difs_file = parameters.settings['Input/Output Settings']['Input file/folder']
-        time_difs_method = parameters.settings['RossiAlpha Settings']['Time difference method']
+    if parameters.settings['Input/Output Settings']['Input file/folder'].endswith(".txt"):
+        data = evt.createEventsListFromTxtFile(parameters.settings['Input/Output Settings']['Input file/folder'],parameters.settings['Input/Output Settings']['Time Column'], parameters.settings['Input/Output Settings']['Channels Column'])
+    elif parameters.settings['Input/Output Settings']['Input file/folder'].endswith(".lmx"):
+        data = lmx.readLMXFile(parameters.settings['Input/Output Settings']['Input file/folder'])
+    else:
+        gui.error('Your input file for Rossi Alpha analysis must be either a .txt or .lmx file.\n')
+        return True
+    if parameters.settings['General Settings']['Sort data']:
+        data.sort(key=lambda Event: Event.time)
+    time_difs = dif.timeDifCalcs(data,
+                                 parameters.settings['RossiAlpha Settings']['Reset time'],
+                                 parameters.settings['RossiAlpha Settings']['Time difference method'])
+    time_difs = time_difs.calculateTimeDifsFromEvents()
+    time_difs_file = parameters.settings['Input/Output Settings']['Input file/folder']
+    time_difs_method = parameters.settings['RossiAlpha Settings']['Time difference method']
 
 def createPlot(parameters: set.Settings):
 
@@ -420,13 +421,13 @@ def createPlot(parameters: set.Settings):
     See the original for more info.'''
 
     global time_difs, histogram, hist_file, hist_method
-    histogram = plt.RossiHistogram(parameters.settings['RossiAlpha Settings']['Reset time'],
-                              parameters.settings['RossiAlpha Settings']['Bin width'],
-                              parameters.settings['Histogram Visual Settings'],
-                              parameters.settings['Input/Output Settings']['Save directory'])
-    histogram.plot(time_difs,
-              save_fig=parameters.settings['General Settings']['Save figures'],
-              show_plot=parameters.settings['General Settings']['Show plots'])
+    histogram = plt.RossiHistogram(time_diffs=time_difs,
+                                   bin_width=parameters.settings['RossiAlpha Settings']['Bin width'],
+                                   reset_time=parameters.settings['RossiAlpha Settings']['Reset time'])
+    histogram.plot(save_fig=parameters.settings['General Settings']['Save figures'],
+                   show_plot=parameters.settings['General Settings']['Show plots'],
+                   save_dir=parameters.settings['Input/Output Settings']['Save directory'],
+                   plot_opts=parameters.settings['Histogram Visual Settings'])
     hist_file = parameters.settings['Input/Output Settings']['Input file/folder']
     hist_method = parameters.settings['RossiAlpha Settings']['Time difference method']
 
@@ -442,16 +443,13 @@ def calculateTimeDifsAndPlot(parameters: set.Settings):
 
     global histogram, time_difs, hist_file, hist_method
     time_difs = None
-    if parameters.settings['Input/Output Settings'].get('Data Column') is not None:
-        data = np.loadtxt(parameters.settings['Input/Output Settings']['Input file/folder'],delimiter=" ", usecols=(parameters.settings['Input/Output Settings']['Data Column']))
-    else:
-        data = np.loadtxt(parameters.settings['Input/Output Settings']['Input file/folder'])
-
+    if parameters.settings['Input/Output Settings']['Input file/folder'].endswith(".txt"):
+        data = evt.createEventsListFromTxtFile(parameters.settings['Input/Output Settings']['Input file/folder'],parameters.settings['Input/Output Settings']['Time Column'], parameters.settings['Input/Output Settings']['Channels Column'])
+    elif parameters.settings['Input/Output Settings']['Input file/folder'].endswith(".lmx"):
+        data =  lmx.readLMXFile(parameters.settings['Input/Output Settings']['Input file/folder'])
     if parameters.settings['General Settings']['Sort data']:
-        data = np.sort(data)
-
+        data.sort(key=lambda Event: Event.time)
     thisTimeDifCalc = dif.timeDifCalcs(data, parameters.settings['RossiAlpha Settings']['Reset time'], parameters.settings['RossiAlpha Settings']['Time difference method'])
-
     histogram, counts, bin_centers, bin_edges = thisTimeDifCalc.calculateTimeDifsAndBin(parameters.settings['RossiAlpha Settings']['Bin width'], parameters.settings['General Settings']['Save figures'], parameters.settings['General Settings']['Show plots'], parameters.settings['Input/Output Settings']['Save directory'], parameters.settings['Histogram Visual Settings'])
     hist_file = parameters.settings['Input/Output Settings']['Input file/folder']
     hist_method = parameters.settings['RossiAlpha Settings']['Time difference method']
@@ -494,11 +492,9 @@ def createBestFit(parameters: set.Settings):
     global time_difs, histogram, best_fit
     counts = histogram.counts
     bin_centers = histogram.bin_centers
-
-    best_fit = fit.RossiHistogramFit(counts, bin_centers, parameters.settings)
-        
-    best_fit.fit_and_residual(save_every_fig=parameters.settings['General Settings']['Save figures'], 
-                              show_plot=parameters.settings['General Settings']['Show plots'])
+    best_fit = fit.RossiHistogramFit(counts, bin_centers, parameters.settings['RossiAlpha Settings']['Minimum cutoff'], parameters.settings['RossiAlpha Settings']['Time difference method'], parameters.settings['General Settings']['Fit range'])
+    # Fitting curve to the histogram and plotting the residuals
+    best_fit.fit_and_residual(parameters.settings['General Settings']['Save figures'], parameters.settings['Input/Output Settings']['Save directory'], parameters.settings['General Settings']['Show plots'],parameters.settings['Line Fitting Settings'], parameters.settings['Residual Plot Settings'],parameters.settings['Histogram Visual Settings'] )
 
 def raAll(single: bool,
           parameters: set.Settings):

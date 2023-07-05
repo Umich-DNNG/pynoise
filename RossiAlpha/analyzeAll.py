@@ -45,7 +45,7 @@ def analyzeAllType1(settings: dict):
         time_diffs = thisTimeDifCalc.calculateTimeDifsFromEvents()
 
         # creating RossiHistogram() object with specified settings
-        thisPlot = RossiHistogram(time_diffs,settings['RossiAlpha Settings']['Histogram Generation Settings']['Bin width'],settings['RossiAlpha Settings']['Histogram Generation Settings']['Reset time'])
+        thisPlot = RossiHistogram(time_diffs,settings['RossiAlpha Settings']['Bin width'],settings['RossiAlpha Settings']['Reset time'])
 
         counts, bin_centers, bin_edges = thisPlot.plot(save_fig=settings['General Settings']['Save figures'], show_plot=settings['General Settings']['Show plots'], save_dir = settings['Input/Output Settings']['Save directory'], plot_opts = settings['Histogram Visual Settings'])
 
@@ -59,7 +59,7 @@ def analyzeAllType1(settings: dict):
     
 
     # creating Fit() object with specified settings
-    thisFit = RossiHistogramFit(counts, bin_centers, settings['RossiAlpha Settings']['Fit Region Settings']['Minimum cutoff'], settings['RossiAlpha Settings']['Time difference method'], settings['General Settings']['Fit range'])
+    thisFit = RossiHistogramFit(counts, bin_centers, settings['RossiAlpha Settings']['Minimum cutoff'], settings['RossiAlpha Settings']['Time difference method'], settings['General Settings']['Fit range'])
         
         # Fitting curve to the histogram and plotting the residuals
     thisFit.fit_and_residual(settings['General Settings']['Save figures'], settings['Input/Output Settings']['Save directory'], settings['General Settings']['Show plots'],settings['Line Fitting Settings'], settings['Residual Plot Settings'],settings['Histogram Visual Settings']  )
