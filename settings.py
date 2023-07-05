@@ -18,8 +18,8 @@ class Settings:
         # Create a dictionary that stores each group of settings,
         # and set each one to the respective input dictionary.
         self.settings = {'Input/Output Settings': {'Input file/folder': 'none',
-                                                    'Time Column': 1,
-                                                    'Channels Column':0,
+                                                    'Time Column': 0,
+                                                    'Channels Column':None,
                                                     'Save directory': './',
                                                     'Keep logs': False},
                          'General Settings': {'Fit range':[0.0,1000.0],
@@ -96,7 +96,7 @@ class Settings:
         # exist in the current settings, store the removal.
         for group in baseline.settings:
             for setting in baseline.settings[group]:
-                if self.settings[group].get(setting) == None:
+                if self.settings[group].get(setting) == None and baseline.settings[group].get(setting) != self.settings[group][setting]:
                     list.append(setting + ' in ' + group + ' removed')
         # Return the list of changes for printing.
         return list
