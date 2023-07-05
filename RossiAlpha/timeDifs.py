@@ -7,23 +7,22 @@ from Event import Event
 
 class timeDifCalcs:
     
-    def __init__(self, events, reset_time: float = None, method: str = 'any_and_all', digital_delay: int = None):
+    def __init__(self, events: list[Event], reset_time: float = None, method: str = 'any_and_all', digital_delay: int = None):
         
         '''Initializes a time difference object. Autogenerates variables where necessary.
     
         Requires:
-        - time_data: the list of measurement times for each data point.
-        - channels: the list of channels for each data point. The 
-        indeces for each data point should match between time_data 
-        and channels. ONLY required when method is not any_and_all.
-        - digital_delay: the amount of digital delay. OtNLY 
-        required when performing analysis with digital_delay.
+        - events: the list of measurement times for each data point.
         
         Optional:
         - reset_time: the maximum time difference allowed. If 
         not given, will autogenerate the best reset time.
         TODO: Actually do this.
-        - method: the method of calculating time differences (assumes any_and_all).'''
+        - method: the method of calculating time differences (assumes any_and_all).
+        - digital_delay: the amount of digital delay, if applicable. 
+        If digital delay is needed and not given, the initializer 
+        will autogenerate a good digital delay for the data.
+        TODO: Actually do this.'''
         
         # Store events as a list.
         self.events = events
@@ -48,7 +47,7 @@ class timeDifCalcs:
         # Initialize the blank time differences.
         self.timeDifs = None
 
-    def calculate_time_differences(self):
+    def calculateTimeDifsFromEvents(self):
 
         '''Returns and stores the array of time differences used 
         for constructing a histogram based on the stored method.
@@ -57,12 +56,13 @@ class timeDifCalcs:
         - self.timeDifs
         '''
 
-        # Construct the empty time differences array.
+        # Construct the empty time differences array, store the total 
+        # number of data points, and initialize the indexing variable.
         time_diffs = np.array([])
-        n = len(self.time_vector)
+        n = len(self.events)
         i = 0
         # Iterate through the whole time vector.
-        while i < len(self.time_vector):
+        while i < len(self.events):
             # Create an empty channel bank.
             ch_bank = set()
             # Iterate through the rest of the vector
@@ -70,74 +70,33 @@ class timeDifCalcs:
             for j in range(i + 1, n):
                 # If the current time difference exceeds the 
                 # reset time range, break to the next data point.
-                if self.time_vector[j] - self.time_vector[i] > self.reset_time:
+                if self.events[j].time - self.events[i].time > self.reset_time:
                     break
                 # If the method is any and all, continue. Otherwise, assure 
                 # that the channels are different between the two data points.
-                if((self.method == 'any_and_all') or self.channels[j] != self.channels[i]):
+                if((self.method == 'any_and_all') or self.events[j].channel != self.events[i].channel):
                     # If the method is any and all or cross_correlation, continue. Otherwise, 
                     # check that the current data point's channel is not in the bank.
-                    if(self.method == 'any_and_all' or self.method == 'any_and_all cross_correlations' or self.channels[j] not in ch_bank):
+                    if(self.method == 'any_and_all' or self.method == 'any_and_all cross_correlations' or self.events[j].channel not in ch_bank):
                         # Add the current time difference to the list.
-                        time_diffs = np.append(time_diffs,(self.time_vector[j] - self.time_vector[i]))
+                        time_diffs = np.append(time_diffs,(self.events[j].time - self.events[i].time))
                     # If digital delay is on:
                     # TODO: why is it elif???
                     elif(self.method == 'any_and_all cross_correlations no_repeat digital_delay'):
                         # Skip to the nearest data point after the
                         # current one with the digital delay added.
-                        stamped_time = self.time_vector[i]
-                        while self.time_vector[i] < stamped_time + self.digital_delay:
-                           i += 1
-                    # Add the current channel to the channel bank if considering channels.
-                    if(self.method != "any_and_all"):
-                        ch_bank.add(self.channels[j])
-            # Iterate to the next data point.
-            # TODO: Should we still do this when using digital delay?
-            i += 1
-        # Store the time differences array.
-        self.timeDifs = time_diffs
-        # Return the time differences array.
-        return self.timeDifs
-
-
-
-    def calculateTimeDifsFromEvents(self):
-        '''Returns and stores the array of time differences used 
-        for constructing a histogram based on the stored method.
-
-        Returns:
-        - self.timeDifs
-        '''
-
-        time_diffs = np.array([])
-        n = len(self.events)
-        i = 0
-        # iterate from 0 through the whole time vector
-        while i < len(self.events):
-            ch_bank = set()
-            # iterate through the rest of the vector starting 1 after i
-
-            for j in range(i + 1, n):
-
-                # if we get outside the reset_time range, break to the next iteratiion of i
-                if self.events[j].time - self.events[i].time > self.reset_time:
-                    break
-                # if the method is any and all, there are no additional conditions, but if any other method, check that the channels are diff
-                if((self.method == 'any_and_all') or self.events[j].channel != self.events[i].channel):
-                    # if the method checks for repeats, check that it is not in the channels bank, otherwise we can add the time_diff
-                    if(self.method == 'any_and_all' or self.method == 'any_and_all cross_correlations' or self.events[j].channel not in ch_bank):
-                        time_diffs = np.append(time_diffs,(self.events[j].time - self.events[i].time))
-                    elif(self.method == 'any_and_all cross_correlations no_repeat digital_delay'):
-                        # add the digital delay if digital delay is on
                         stamped_time = self.events[i].time
                         while self.events[i].time < stamped_time + self.digital_delay:
                            i = i + 1
-                    # add the current channel to the channels set if considering channels
+                    # Add the current channel to the channel bank if considering channels.
                     if(self.method != "any_and_all"):
                         ch_bank.add(self.events[j].channel)
+            # Iterate to the next data point.
+            # TODO: Should we still do this when using digital delay?
             i = i + 1
-
+        # Store the time differences array.
         self.timeDifs = time_diffs
+        # Return the time differences array.
         return self.timeDifs
     
     def calculateTimeDifsAndBin(self, bin_width: int = None, save_fig: bool = False, show_plot: bool = True, save_dir:str= './', plot_opts: dict = None):
@@ -202,7 +161,7 @@ class timeDifCalcs:
                     elif(self.method == 'any_and_all cross_correlations no_repeat digital_delay'):
                         # Skip to the nearest data point after the
                         # current one with the digital delay added.
-                        stamped_time = self.time_vector[i]
+                        stamped_time = self.events[i]
                         while self.events[i].time < stamped_time + self.digital_delay:
                            i += 1
                     # Add the current channel to the channel bank if considering channels.
