@@ -47,7 +47,9 @@ def compile_sample_stdev_RA_dist(settings: dict):
                                         settings['RossiAlpha Settings']['Time difference method'], 
                                         settings['RossiAlpha Settings']['Digital delay'])
                 if(settings['RossiAlpha Settings']['Combine Calc and Binning']):
-                    thisPlot, counts, bin_centers, bin_edges   = thisData.calculateTimeDifsAndBin( settings['RossiAlpha Settings']['Histogram Generation Settings']['Bin width'], False, False, settings['Input/Output Settings']['Save directory'], settings['Histogram Visual Settings'])
+                    thisPlot, counts, bin_centers, bin_edges   = thisData.calculateTimeDifsAndBin(settings['RossiAlpha Settings']['Histogram Generation Settings']['Bin width'], False, False, settings['Input/Output Settings']['Save directory'], settings['Histogram Visual Settings'])
+                        
+                        
 
                 else:
                     time_diffs = thisData.calculateTimeDifsFromEvents()
@@ -56,7 +58,7 @@ def compile_sample_stdev_RA_dist(settings: dict):
 
 
 
-                    counts, bin_centers, bin_edges = thisPlot.plot(save_fig=settings['General Settings']['Save figures'], show_plot=settings['General Settings']['Show plots'], save_dir = settings['Input/Output Settings']['Save directory'], plot_opts = settings['Histogram Visual Settings'])
+                    counts, bin_centers, bin_edges = thisPlot.plot(save_fig=settings['General Settings']['Save figures'], show_plot=False, save_dir = settings['Input/Output Settings']['Save directory'], plot_opts = settings['Histogram Visual Settings'])
 
 
 
