@@ -18,7 +18,8 @@ class Settings:
         # Create a dictionary that stores each group of settings,
         # and set each one to the respective input dictionary.
         self.settings = {'Input/Output Settings': {'Input file/folder': 'none',
-                                                    'Data Column': 0,
+                                                    'Time Column': 1,
+                                                    'Channels Column':0,
                                                     'Save directory': './',
                                                     'Keep logs': False},
                          'General Settings': {'Fit range':[0.0,1000.0],

@@ -3,7 +3,7 @@ import re
 import numpy
 from tqdm import tqdm
 import math
-
+from Event import Event
 
 
 
@@ -58,7 +58,7 @@ def readData(file, ticklength, counts):
 
             # loop over indices
             for index in getDetectorIndices(number):
-                events.append(time)
+                events.append(Event(time,index))
                 # pbar.update(10)
 
         elif number == 0:
