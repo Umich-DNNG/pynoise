@@ -7,6 +7,8 @@ from . import timeDifs as dif
 import editor as edit
 import matplotlib.pyplot as mpl
 import numpy as np
+from Event import Event
+from Event import createEventsListFromTxtFile
 mpl.ioff()
 
 # Where the time differences are stored.
@@ -35,18 +37,20 @@ def createTimeDifs():
     name = name[name.rfind('/')+1:]
     # For signle file analysis.
     if name.count('.') > 0:
-        # Load data from 
-        if editor.parameters.settings['Input/Output Settings'].get('Data Column') is not None:
-            data = np.loadtxt(editor.parameters.settings['Input/Output Settings']['Input file/folder'],delimiter=" ", usecols=(editor.parameters.settings['Input/Output Settings']['Data Column']))
-        else:
-            data = np.loadtxt(editor.parameters.settings['Input/Output Settings']['Input file/folder'])
+        # Load data from .txt file
+        if editor.parameters.settings['Input/Output Settings']['Input file/folder'].endswith(".txt"):
+            data = createEventsListFromTxtFile(editor.parameters.settings['Input/Output Settings']['Input file/folder'],editor.parameters.settings['Input/Output Settings']['Time Column'], editor.parameters.settings['Input/Output Settings']['Channels Column'])
+        
+        elif editor.parameters.settings['Input/Output Settings']['Input file/folder'].endswith(".lmx"):
+            #TODO: Handle LMX Files
+            data = createEventsListFromTxtFile(editor.parameters.settings['Input/Output Settings']['Input file/folder'],editor.parameters.settings['Input/Output Settings']['Time Column'], editor.parameters.settings['Input/Output Settings']['Channels Column'])
 
         if editor.parameters.settings['General Settings']['Sort data']:
-            data = np.sort(data)
+            data.sort(key=lambda Event: Event.time)
         time_difs = dif.timeDifCalcs(data, 
             editor.parameters.settings['RossiAlpha Settings']['Histogram Generation Settings']['Reset time'], 
             editor.parameters.settings['RossiAlpha Settings']['Time difference method'])
-        time_difs = time_difs.calculate_time_differences()
+        time_difs = time_difs.calculateTimeDifsFromEvents()
         editor.log('Calculated time differences for file ' 
             + editor.parameters.settings['Input/Output Settings']['Input file/folder'] + '.\n')
         time_difs_file = editor.parameters.settings['Input/Output Settings']['Input file/folder']
@@ -85,13 +89,15 @@ def calculateTimeDifsAndPlot():
     global histogram, time_difs, hist_file, hist_method
     time_difs = None
     editor.print('Calculating Time Differences and Building plot...')
-    if editor.parameters.settings['Input/Output Settings'].get('Data Column') is not None:
-        data = np.loadtxt(editor.parameters.settings['Input/Output Settings']['Input file/folder'],delimiter=" ", usecols=(editor.parameters.settings['Input/Output Settings']['Data Column']))
-    else:
-        data = np.loadtxt(editor.parameters.settings['Input/Output Settings']['Input file/folder'])
+    if editor.parameters.settings['Input/Output Settings']['Input file/folder'].endswith(".txt"):
+        data = createEventsListFromTxtFile(editor.parameters.settings['Input/Output Settings']['Input file/folder'],editor.parameters.settings['Input/Output Settings']['Time Column'], editor.parameters.settings['Input/Output Settings']['Channels Column'])
+        
+    elif editor.parameters.settings['Input/Output Settings']['Input file/folder'].endswith(".lmx"):
+        #TODO: Handle LMX Files
+        data = createEventsListFromTxtFile(editor.parameters.settings['Input/Output Settings']['Input file/folder'],editor.parameters.settings['Input/Output Settings']['Time Column'], editor.parameters.settings['Input/Output Settings']['Channels Column'])
 
     if editor.parameters.settings['General Settings']['Sort data']:
-        data = np.sort(data)
+        data.sort(key=lambda Event: Event.time)
 
     thisTimeDifCalc = dif.timeDifCalcs(data, editor.parameters.settings['RossiAlpha Settings']['Histogram Generation Settings']['Reset time'], editor.parameters.settings['RossiAlpha Settings']['Time difference method'])
 
