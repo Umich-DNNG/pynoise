@@ -13,7 +13,6 @@ def APSD(f, A, alpha, c):
 class PowerSpectralDensity:
     def __init__(self, 
                  list_data_array, 
-                 leg_label: str, 
                  clean_pulses_switch: bool, 
                  dwell_time: float, 
                  meas_time_range: list[float]):
@@ -35,7 +34,6 @@ class PowerSpectralDensity:
 
         # Required Parameters
         self.list_data_array = list_data_array
-        self.leg_label = leg_label
         self.clean_pulses_switch = clean_pulses_switch
         self.dwell_time = dwell_time
         self.meas_time_range = meas_time_range
@@ -45,6 +43,7 @@ class PowerSpectralDensity:
                      show_plot: bool, 
                      save_fig: bool, 
                      save_dir: str, 
+                     leg_label: str = "stilbene east",
                      annotate_font_weight: str = "bold", 
                      annotate_color: str = "black", 
                      annotate_background_color: str = "white"):
@@ -64,6 +63,7 @@ class PowerSpectralDensity:
         '''
 
         # Annotation Parameters
+        self.leg_label = leg_label
         self.annotate_font_weight = annotate_font_weight
         self.annotate_color = annotate_color
         self.annotate_background_color = annotate_background_color
