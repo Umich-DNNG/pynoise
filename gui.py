@@ -554,16 +554,6 @@ def download_menu(prev, to):
               name='choice',
               text='You have two import options:'
               ).grid(column=0,row=0,padx=10,pady=10)
-    # Button for overwriting the entire settings.
-    ttk.Button(window,
-               name='overwrite',
-               text='Overwrite entire settings',
-               command=lambda: prompt(lambda: download_menu(prev, to),
-                                      lambda file: run.download(parameters, os.path.abspath(file + '.json'), False, to),
-                                      'Enter a settings file (no .json extension):',
-                                      'Overwrite Settings',
-                                      lambda response: 'Settings successfully overwritten with file:\n' + response + '.json.')
-               ).grid(column=0,row=1,padx=10)
     # Button for appending settings to the current settings.
     ttk.Button(window,
                name='append',
@@ -573,6 +563,17 @@ def download_menu(prev, to):
                                       'Enter a settings file (no .json extension):',
                                       'Append Settings to Default',
                                       lambda response: 'Settings successfully appended from file:\n' + response + '.json.')
+               ).grid(column=0,row=1,padx=10)
+        # Button for overwriting the entire settings.
+    ttk.Button(window,
+               name='restore',
+               text='Restore defaults',
+               command=lambda:run.log(message='Successfully restored the default settings.',
+                                      window=window,
+                                      menu=lambda: run.download(parameters,
+                                                                os.path.abspath('./settings/default.json'),
+                                                                False,
+                                                                to))
                ).grid(column=0,row=2,padx=10)
     # Button for canceling settings import.
     ttk.Button(window,
