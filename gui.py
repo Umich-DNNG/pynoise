@@ -568,12 +568,12 @@ def download_menu(prev, to):
     ttk.Button(window,
                name='restore',
                text='Restore defaults',
-               command=lambda:run.log(message='Successfully restored the default settings.',
-                                      window=window,
-                                      menu=lambda: run.download(parameters,
-                                                                os.path.abspath('./settings/default.json'),
-                                                                False,
-                                                                to))
+               command=lambda: warning(lambda:run.log(message='Successfully restored the default settings.',
+                                                      window=window,
+                                                      menu=lambda: run.download(parameters,
+                                                                                os.path.abspath('./settings/default.json'),
+                                                                                False,
+                                                                                to)))
                ).grid(column=0,row=2,padx=10)
     # Button for canceling settings import.
     ttk.Button(window,
