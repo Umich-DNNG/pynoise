@@ -258,7 +258,7 @@ def edit(window: Tk,
 
     for group in newSet:
         for key in newSet[group]:
-            if newSet[group][key].get() != '' and newVal[group][key].get() != '':
+            if newSet[group][key].get() != 'Cancel' and newSet[group][key].get() != 'select setting...' and newVal[group][key].get() != '':
                 inputs[group][newSet[group][key].get()] = newVal[group][key]
 
     parameters.write(os.path.abspath('./settings/comp.json'))
@@ -269,8 +269,24 @@ def edit(window: Tk,
             if inputs[group][setting].get() == '':
                 if parameters.settings[group].get(setting) != None:
                     parameters.settings[group].pop(setting)
+                    match group:
+                        case 'Histogram Visual Settings':
+                            parameters.hvs_drop.append(setting)
+                        case 'Line Fitting Settings':
+                            parameters.lfs_drop.append(setting)
+                        case 'Residual Plot Settings':
+                            parameters.rps_drop.append(setting)
             else:
+                if parameters.settings[group].get(setting) == None:
+                    match group:
+                        case 'Histogram Visual Settings':
+                            parameters.hvs_drop.remove(setting)
+                        case 'Line Fitting Settings':
+                            parameters.lfs_drop.remove(setting)
+                        case 'Residual Plot Settings':
+                            parameters.rps_drop.remove(setting)
                 parameters.settings[group][setting] = saveType(inputs[group][setting].get())
+    parameters.sort_drops()
     # Compare the modified settings to the previous and save the number of changes.
     total = changes(parameters)
     # If there were changes made, notify the user.

@@ -4,7 +4,6 @@ from tkinter import *
 from tkinter import ttk
 import tkinter as tk
 import settings as set
-import time
 import os
 import run
 
@@ -298,11 +297,10 @@ def add(group: str):
         window.children[group[0:group.find('Settings')].lower()+'add'].grid(row=top+1)
         index = 'hvs' + str(top)
         newSet[group][index] = tk.StringVar()
-        tk.Entry(window,
-                 name=('new hvs setting ' + str(top)).lower(),
-                 textvariable=newSet[group][index],
-                 width=12
-                 ).grid(column=7,row=top,padx=10)
+        ttk.OptionMenu(window,
+                       newSet[group][index],
+                       *parameters.hvs_drop
+                       ).grid(column=7,row=top,padx=10)
         newVal[group][index] = tk.StringVar()
         tk.Entry(window,
                  name=('new hvs value ' + str(top)).lower(),
@@ -314,11 +312,10 @@ def add(group: str):
         if group == 'Residual Plot Settings':
             index = 'rps' + str(top)
             newSet[group][index] = tk.StringVar()
-            tk.Entry(window,
-                    name=('new rps setting ' + str(top)).lower(),
-                    textvariable=newSet[group][index],
-                    width=12
-                    ).grid(column=4,row=top,padx=10)
+            ttk.OptionMenu(window,
+                           newSet[group][index],
+                           *parameters.rps_drop
+                           ).grid(column=4,row=top,padx=10)
             newVal[group][index] = tk.StringVar()
             tk.Entry(window,
                     name=('new rps value ' + str(top)).lower(),
@@ -328,11 +325,11 @@ def add(group: str):
         else:
             index = 'lfs' + str(top)
             newSet[group][index] = tk.StringVar()
-            tk.Entry(window,
-                     name=('new lfs setting ' + str(top)).lower(),
-                     textvariable=newSet[group][index],
-                     width=12
-                     ).grid(column=1,row=top,padx=10)
+            newSet[group][index].set('select setting...')
+            ttk.OptionMenu(window,
+                           newSet[group][index],
+                           *parameters.lfs_drop
+                           ).grid(column=1,row=top,padx=10)
             newVal[group][index] = tk.StringVar()
             tk.Entry(window,
                      name=('new lfs value ' + str(top)).lower(),
