@@ -284,45 +284,47 @@ def add(group: str):
 
     global window, bottom, newSet, newVal
     top = bottom[group]
-    if group == 'Residual Plot Settings':
-        window.children[group[0:group.find('Settings')].lower()+'add'].grid(row=top+1)
-        index = 'rps' + str(top)
-        newSet[group][index] = tk.StringVar()
-        tk.Entry(window,
-                 name=('new rps setting ' + str(top)).lower(),
-                 textvariable=newSet[group][index],
-                 width=12
-                 ).grid(column=1,row=top,padx=10)
-        newVal[group][index] = tk.StringVar()
-        tk.Entry(window,
-                 name=('new rps value ' + str(top)).lower(),
-                 textvariable=newVal[group][index],
-                 width=12
-                 ).grid(column=2,row=top,padx=10)
-    else:
+    if group == 'Histogram Visual Settings':
         cur_row = window.grid_slaves(row=top+1)
-        if len(cur_row) == 1 and cur_row[0].widgetName == 'ttk::label':
-            bot = bottom['Residual Plot Settings']
+        if len(cur_row) == 2 and cur_row[0].widgetName == 'ttk::label' and cur_row[1].widgetName == 'ttk::label':
+            bot = max(bottom['Residual Plot Settings'], bottom['Line Fitting Settings'])
             while bot != top:
                 cur_row = window.grid_slaves(row=bot)
                 for item in cur_row:
                     item.grid(row=bot+1)
                 bot -= 1
+            bottom['Residual Plot Settings'] += 1
+            bottom['Line Fitting Settings'] += 1
         window.children[group[0:group.find('Settings')].lower()+'add'].grid(row=top+1)
-        if group == 'Histogram Visual Settings':
-            index = 'hvs' + str(top)
+        index = 'hvs' + str(top)
+        newSet[group][index] = tk.StringVar()
+        tk.Entry(window,
+                 name=('new hvs setting ' + str(top)).lower(),
+                 textvariable=newSet[group][index],
+                 width=12
+                 ).grid(column=7,row=top,padx=10)
+        newVal[group][index] = tk.StringVar()
+        tk.Entry(window,
+                 name=('new hvs value ' + str(top)).lower(),
+                 textvariable=newVal[group][index],
+                 width=12
+                 ).grid(column=8,row=top,padx=10)
+    else:
+        window.children[group[0:group.find('Settings')].lower()+'add'].grid(row=top+1)
+        if group == 'Residual Plot Settings':
+            index = 'rps' + str(top)
             newSet[group][index] = tk.StringVar()
             tk.Entry(window,
-                     name=('new hvs setting ' + str(top)).lower(),
-                     textvariable=newSet[group][index],
-                     width=12
-                     ).grid(column=5,row=top,padx=10)
+                    name=('new rps setting ' + str(top)).lower(),
+                    textvariable=newSet[group][index],
+                    width=12
+                    ).grid(column=4,row=top,padx=10)
             newVal[group][index] = tk.StringVar()
             tk.Entry(window,
-                     name=('new hvs value ' + str(top)).lower(),
-                     textvariable=newVal[group][index],
-                     width=12
-                     ).grid(column=6,row=top,padx=10)
+                    name=('new rps value ' + str(top)).lower(),
+                    textvariable=newVal[group][index],
+                    width=12
+                    ).grid(column=5,row=top,padx=10)
         else:
             index = 'lfs' + str(top)
             newSet[group][index] = tk.StringVar()
@@ -330,14 +332,13 @@ def add(group: str):
                      name=('new lfs setting ' + str(top)).lower(),
                      textvariable=newSet[group][index],
                      width=12
-                     ).grid(column=9,row=top,padx=10)
+                     ).grid(column=1,row=top,padx=10)
             newVal[group][index] = tk.StringVar()
             tk.Entry(window,
                      name=('new lfs value ' + str(top)).lower(),
                      textvariable=newVal[group][index],
                      width=12
-                     ).grid(column=10,row=top,padx=10)
-        bottom['Residual Plot Settings'] += 1
+                     ).grid(column=2,row=top,padx=10)
     bottom[group] += 1
 
 def editor_menu(prev):
@@ -358,6 +359,7 @@ def editor_menu(prev):
             'General Settings': {},
             'RossiAlpha Settings': {},
             'PSD Settings': {},
+            'PSD Visual Settings': {},
             'Histogram Visual Settings': {},
             'Line Fitting Settings': {},
             'Residual Plot Settings': {}}
@@ -388,14 +390,14 @@ def editor_menu(prev):
     for group in parameters.settings:
         # If the start of a new row, add the previous current maximum 
         # to the current top and reset the current maximum variable. 
-        if (groupNum*4) % 12 == 0:
+        if (groupNum*3) % 9 == 0:
             curTop += curMax
             curMax = 0
         # The label for the settings group.
         ttk.Label(window,
                   name=group[0:group.find(' Settings')].lower(),
                   text=group[0:group.find(' Settings')] + ':'
-                  ).grid(column=(groupNum*4) % 12,row=curTop,padx=10,pady=10)
+                  ).grid(column=(groupNum*3) % 9,row=curTop,padx=10,pady=10)
         # Reset the settings number (1-indexed)
         setNum=1
         # For each setting in the group.
@@ -407,13 +409,13 @@ def editor_menu(prev):
             ttk.Label(window,
                   name=(group + ' ' + setting).lower(),
                   text=setting + ':'
-                  ).grid(column=(groupNum*4+1) % 12,row=curTop+setNum,padx=10)
+                  ).grid(column=(groupNum*3+1) % 9,row=curTop+setNum,padx=10)
             # The entry box for inputting/viewing the setting value.
             tk.Entry(window,
                   name=(group + ' ' + setting + ' value').lower(),
                   textvariable=inputs[group][setting],
                   width=12
-                  ).grid(column=(groupNum*4+2) % 12,row=curTop+setNum,padx=10)
+                  ).grid(column=(groupNum*3+2) % 9,row=curTop+setNum,padx=10)
             # Insert into the entry box the current value of the setting.
             window.children[(group + ' ' + setting + ' value').lower()].insert(0,run.format(parameters.settings[group][setting]))
             # Increase the setting number.
@@ -426,21 +428,21 @@ def editor_menu(prev):
                             text='+',
                             command=lambda: add('Histogram Visual Settings'),
                             width=1
-                            ).grid(column=(groupNum*4+1) % 12,row=curTop+setNum,padx=10)
+                            ).grid(column=(groupNum*3+1) % 9,row=curTop+setNum,padx=10)
                 case 'Line Fitting Settings':
                     ttk.Button(window,
                             name=group[0:group.find('Settings')].lower()+'add',
                             text='+',
                             command=lambda: add('Line Fitting Settings'),
                             width=1
-                            ).grid(column=(groupNum*4+1) % 12,row=curTop+setNum,padx=10)
+                            ).grid(column=(groupNum*3+1) % 9,row=curTop+setNum,padx=10)
                 case _:
                     ttk.Button(window,
                             name=group[0:group.find('Settings')].lower()+'add',
                             text='+',
                             command=lambda: add('Residual Plot Settings'),
                             width=1
-                            ).grid(column=(groupNum*4+1) % 12,row=curTop+setNum,padx=10)
+                            ).grid(column=(groupNum*3+1) % 9,row=curTop+setNum,padx=10)
             bottom[group] = curTop + setNum
             setNum += 1
         # If the total settings in this group were the max 
