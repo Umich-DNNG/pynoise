@@ -158,7 +158,7 @@ def main(editorIn: edit.Editor, queue: list[str] = []):
                     name = editor.parameters.settings['Input/Output Settings']['Input file/folder']
                     name = name[name.rfind('/')+1:]
                     if name.count('.') > 0:
-                        if editor.parameters.settings['RossiAlpha Settings']['Time difference method'] != 'any_and_all':
+                        if editor.parameters.settings['Input/Output Settings']['Input file/folder'].endswith(".txt") and editor.parameters.settings['Input/Output Settings']['Channels Column'] is None:
                             print('ERROR: To analyze a single file, you must use '
                                 + 'the any_and_all time difference method only.\n')
                         else:

@@ -43,7 +43,7 @@ def exp_decay_2_param(x, a, b):
 #--------------------------------------------------------------------------------    
 
 class RossiHistogramFit:
-    def __init__(self, counts, bin_centers, min_cutoff,timeDifMethod, fit_range = None  ):
+    def __init__(self, counts, bin_centers, min_cutoff,timeDifMethod = 'any_and_all', fit_range = None  ):
         
         '''
         Description:
@@ -63,11 +63,8 @@ class RossiHistogramFit:
         # Required parameters
         self.counts = counts
         self.bin_centers = bin_centers
-        #self.fit_range = settings['General Settings']['Fit range']
         self.fit_range = fit_range
-        #self.min_cutoff = settings['RossiAlpha Settings']['Fit Region Settings']['Minimum cutoff']
         self.min_cutoff = min_cutoff
-        #self.timeDifMethod = settings['RossiAlpha Settings']['Time difference method']
         self.timeDifMethod = timeDifMethod
 
         self.save_fig = False
@@ -77,9 +74,11 @@ class RossiHistogramFit:
         self.residual_options = None
         self.hist_visual_options = None
 
-        #TODO: Set default fit range if none provided 
+        if fit_range is None:
+            self.fit_range = [min(bin_centers), max(bin_centers)] 
 
-    def fit(self, save_fig: bool, save_dir, show_plot: bool, fitting_opts,hist_visual_opts):
+
+    def fit(self, save_fig: bool = True, save_dir = './', show_plot: bool = True, fitting_opts = None,hist_visual_opts = None):
         self.fitting_options = fitting_opts
         self.hist_visual_options = hist_visual_opts
         self.save_dir = save_dir
@@ -99,6 +98,24 @@ class RossiHistogramFit:
             - popt (Optimal values for the parameters)
         '''
 
+        #Default Settings for Histogram Visuals
+        if hist_visual_opts is None:
+            hist_visual_opts = {
+                "alpha": 1,
+                "fill": True,
+                "color": "#B2CBDE",
+                "edgecolor": "#162F65",
+                "linewidth": 0.4
+            }
+        #Default Settings for Fitting_Opts
+        if fitting_opts is None:
+            fitting_opts = {
+                "color": "#162F65",
+                "markeredgecolor": "blue",
+                "markerfacecolor": "black",
+                "linestyle": "-",
+                "linewidth": 1
+            }
         num_bins = np.size(self.counts)
         time_diff_centers = self.bin_centers[1:] - np.diff(self.bin_centers[:2])/2
 
