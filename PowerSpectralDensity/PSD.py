@@ -13,9 +13,9 @@ def APSD(f, A, alpha, c):
 class PowerSpectralDensity:
     def __init__(self, 
                  list_data_array, 
-                 clean_pulses_switch: bool, 
-                 dwell_time: float, 
-                 meas_time_range: list[float]):
+                 clean_pulses_switch: bool = True, 
+                 dwell_time: float = 2.0e6, 
+                 meas_time_range: list[float] = [1.5e11, 1.0e12]):
 
         '''
         Description:
@@ -23,7 +23,6 @@ class PowerSpectralDensity:
 
         Inputs:
             - list_data_array (Input script)
-            - leg_label (label setting for legend)
             - clean_pulses_switch (whether to include rows where last column==1)
             - dwell_time (DESCRIPTION NEEDED)
             - meas_time_range (DESCRIPTION NEEDED)
@@ -40,9 +39,9 @@ class PowerSpectralDensity:
 
 
     def conduct_APSD(self, 
-                     show_plot: bool, 
-                     save_fig: bool, 
-                     save_dir: str, 
+                     show_plot: bool = True, 
+                     save_fig: bool = True, 
+                     save_dir: str = './', 
                      leg_label: str = "stilbene east",
                      annotate_font_weight: str = "bold", 
                      annotate_color: str = "black", 
@@ -51,9 +50,17 @@ class PowerSpectralDensity:
         '''
         Creating PSD plot from an array of data inputs.
         Saving and showing the plot can be turned on or off.
+        Visual settings can also be adjusted.
 
         Inputs:
             - self (all the private variables in PowerSpectralDensity() object)
+            - show_plot (whether to show plot) default is True
+            - save_fig (whether to save figure) default is True
+            - save_dir (figure save directory) default if root folder
+            - leg_label (label for the legend)
+            - annotate_font_weight (annotation font weight) default is bold
+            - annotate_color (color of the annotation) default is black
+            - annotate_background_color (color of the annotation background) default is white
 
         Outputs: 
             - f (DESCRIPTION NEEDED)
