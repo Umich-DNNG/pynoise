@@ -6,7 +6,7 @@ Created on Thu Jun  1 11:42:16 2023
 """
 
 import numpy as np
-from . import PSD as psd
+from . import CohnAlpha as psd
 import editor as edit
 
 editor: edit.Editor = None

@@ -2,7 +2,7 @@
 
 import editor as edit
 from RossiAlpha import raDriver as ra
-from PowerSpectralDensity import psdDriver as psd
+from CohnAlpha import CohnAlphaDriver as psd
 import os
 import sys
 
