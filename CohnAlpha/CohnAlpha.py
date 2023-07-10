@@ -6,11 +6,11 @@ import os                              # For saving figures
 
 
 # ------------ Power Spectral Density Fitting Function ----------------------------------------------
-def APSD(f, A, alpha, c):
+def CAFit(f, A, alpha, c):
     return A / (1+(f**2/alpha**2)) + c
 # ---------------------------------------------------------------------------------------------------
 
-class PowerSpectralDensity:
+class CohnAlpha:
     def __init__(self, 
                  list_data_array, 
                  clean_pulses_switch: bool = True, 
@@ -38,7 +38,7 @@ class PowerSpectralDensity:
         self.meas_time_range = meas_time_range
 
 
-    def conduct_APSD(self, 
+    def conductCohnAlpha(self, 
                      show_plot: bool = True, 
                      save_fig: bool = True, 
                      save_dir: str = './', 
@@ -114,7 +114,7 @@ class PowerSpectralDensity:
                             window='boxcar')
         
         # Fitting distribution with expected equation (Ignore start & end points that are incorrect due to welch endpoint assumptions)
-        popt, pcov = curve_fit(APSD, 
+        popt, pcov = curve_fit(CAFit, 
                             f[1:-2], 
                             Pxx[1:-2],
                             p0=[Pxx[2], 25, 0.001],
@@ -129,7 +129,7 @@ class PowerSpectralDensity:
 
         # Creating a plot with semilogarithmic (log-scale) x-axis 
         ax2.semilogx(f[1:-2], Pxx[1:-2], '.', label=self.leg_label)
-        ax2.semilogx(f[1:-2], APSD(f[1:-2], *popt), '--', label='fit')
+        ax2.semilogx(f[1:-2], CAFit(f[1:-2], *popt), '--', label='fit')
         
         # Setting minimum and maximum for y
         ymin, ymax = ax2.get_ylim()
