@@ -2,7 +2,6 @@
 
 import settings as set
 import os
-import json
 import time
 from subprocess import call
 
@@ -95,8 +94,8 @@ class Editor:
         # Create a baseline settings object for comparison.
         baseline = set.Settings()
         # Read in previous settings and delete temp file.
-        baseline.read(os.path.abspath('comp.json'))
-        os.remove(os.path.abspath('comp.json'))
+        baseline.read(os.path.abspath('./settings/comp.json'))
+        os.remove(os.path.abspath('./settings/comp.json'))
         # For every setting in the current settings, compare its
         # value to the source value and log if it is new or changed.
         for group in self.parameters.settings:
@@ -121,13 +120,13 @@ class Editor:
         Requires a filename of the .json file being opened.
         
         The only files that should be edited in the vim are current 
-        and new settings (current.json and new.json respectively).'''
+        and new settings (current.json and append.json respectively).'''
 
         # Create an editor using the os environ function.
         EDITOR = os.environ.get('EDITOR', 'vim')
         # Call the editor with the given file in append mode.
         with open(os.path.abspath(file),'a') as settings:
-            if file == 'append.json':
+            if file == './settings/append.json':
                 settings.write('{\n\t"Input/Output Settings": {\n\t\t\n\t},\n')
                 settings.write('\t"General Settings": {\n\t\t\n\t},\n')
                 settings.write('\t"RossiAlpha Settings": {\n\t\t\n\t},\n')
@@ -138,9 +137,9 @@ class Editor:
                 settings.flush()
             call([EDITOR, settings.name])
         # Create a temp file to compare the edited settings to the previous ones.
-        self.parameters.write(os.path.abspath('comp.json'))
+        self.parameters.write(os.path.abspath('./settings/comp.json'))
         # If in append mode.
-        if file == 'append.json':
+        if file == './settings/append.json':
             self.parameters.append(os.path.abspath(file))
         # If in overwrite mode.
         else:
@@ -184,7 +183,7 @@ class Editor:
                 case 'c':
                     self.print('Opening current settings...')
                     # Create temporary current.json file to edit.
-                    file = 'current.json'
+                    file = './settings/current.json'
                     # Write current settings to temp file.
                     self.parameters.write(os.path.abspath(file))
                     # Open the settings editor.
@@ -268,7 +267,7 @@ class Editor:
                 case 'a':
                     self.print('Opening empty settings...')
                     # Create temporary new.json file to edit.
-                    file = 'append.json'
+                    file = './settings/append.json'
                     # Open the settings editor.
                     self.edit(file)
                 # User is ready to return to the main menu.
