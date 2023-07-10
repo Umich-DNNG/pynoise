@@ -169,7 +169,7 @@ def shutdown_menu():
             ttk.Label(window,
                 name='entry' + str(total),
                 text=list[total]
-                ).grid(column=0,row=total+1,padx=10,pady=10)
+                ).grid(column=0,row=total+1,padx=10)
             # Increase the count.
             total += 1
         # If there were more than 5 entries,
@@ -247,6 +247,8 @@ def setMenu(prev):
     # Clear the window of all previous entries, labels, and buttons.
     for item in window.winfo_children():
         item.destroy()
+    # Unbind the mousewheel from doing anything.
+    window.unbind('<MouseWheel>')
     # Properly name the window.
     window.title('Settings Editor & Viewer')
     # Lable to prompt the user.
@@ -434,6 +436,8 @@ def editor_menu(prev):
     # place it on the left side of the screen.
     scroll = ttk.Scrollbar(window,orient=VERTICAL,command=canvas.yview)
     scroll.pack(side=RIGHT, fill=Y)
+    # Bind the mouse scroll to the scroll of the canvas.
+    window.bind("<MouseWheel>", lambda event: canvas.yview_scroll(int(-1*(event.delta)/2), "units"))
     # Link the canvas scrolling command to scrollbar.
     canvas.configure(yscrollcommand=scroll.set)
     canvas.bind('<Configure>', lambda event: canvas.configure(scrollregion=canvas.bbox(ALL)))
