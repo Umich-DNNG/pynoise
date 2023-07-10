@@ -6,7 +6,6 @@ import tkinter as tk
 import settings as set
 import os
 import run
-import time
 
 # The main window that is used for the program.
 window: Tk = None
