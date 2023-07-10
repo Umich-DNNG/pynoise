@@ -628,12 +628,12 @@ def raSplit(window: Tk,
                             +parameters.settings['Input/Output Settings']['Input file/folder'],
                             window=window)
 
-#--------------------PowerSpectralDensity Functions--------------------#
+#--------------------CohnAlpha Functions--------------------#
 
 def conductCohnAlpha(parameters: set.Settings):
 
     '''Copy and pasted function from CohnAlphaDriver for 
-    running Power Spectral Density analysis.
+    running Cohn Alpha analysis.
 
     Requires:
     - parameters: the settings object holding the current settings.
