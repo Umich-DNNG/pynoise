@@ -6,14 +6,14 @@ This section of the PyNoise suite is for Power Spectral Density Algorithm analys
 
 ### Requirements
 
-Besides those mentioned in the main README file, the following programs must be downloaded to run RossiAlpha analysis:
+Besides those mentioned in the main README file, the following programs must be downloaded to run Power Spectral Density analysis:
 * PSD.py
 * psdDriver.py
 
-Required python libraries:  
-* numpy   
-* matplotlib   
-* scipy
+Required python libraries (can be automated with requirements.txt from the main README.md):  
+* NumPy   
+* Matplotlib   
+* Scipy
 
 Additionally, you will need the following:
 * A single file of data that will be analyzed.
@@ -48,6 +48,37 @@ The editor class for modifying settings is also accessible from the psdDriver. S
 
 
 ### PSD.py
+
+PSD.py will have the following functions:
+* APSD()
+* class PowerSpectralDensity: __init__()
+* class PowerSpectralDensity: conduct_APSD()
+
+The APSD() function represents the Power Spectral Density Fitting Function
+
+The class PowerSpectralDensity: __init__() function will initialize a PowerSpectralDensity object
+Inputs:
+* list_data_array, 
+* clean_pulses_switch (default=True, meaning that this paramter is turned on by default)
+* dwell_time (default=2.0e6, meaning that the default value is 2,000,000)
+* meas_time_range (default=[1.5e11, 1.0e12], meaning that the default range is [1.5e11, 1.0e12])
+
+The class PowerSpectralDensity: conduct_APSD() will perform the Power Spectral Density Analysis and produce the corresponding figures
+Inputs:
+* show_plot (default=True, meaning that showing the plot(s) is the default)
+* save_fig (default=True, meaning that saving the plots(s) is the default)
+* save_dir (default'./', meaning that the root directory of the repository is where it will be saved as a default) 
+* leg_label (default="stilbene east", TODO)
+* annotate_font_weight (default="bold", meaning that the annotation parameter will be bolded as a default)
+* annotate_color (default="black", meaning that the annotation parameter will be the color black as a default)
+* annotate_background_color (default="white", meaning that the annotation parameter will have a white background color as a default)
+
+Outputs:
+* f (TODO-description)
+* Pxx (TODO-description)
+* popt (TODO-description)
+* pcov (TODO-description)
+
 
 Running through all power spectral density analyses will produce an image that is similar to the following: 
 
