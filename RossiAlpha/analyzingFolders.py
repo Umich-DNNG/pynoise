@@ -43,18 +43,18 @@ def compile_sample_stdev_RA_dist(settings: dict):
                 if settings['General Settings']['Sort data'] == True:
                     events.sort(key=lambda Event: Event.time)
 
-                thisData = timeDifCalcs(events,settings['RossiAlpha Settings']['Histogram Generation Settings']['Reset time'], 
+                thisData = timeDifCalcs(events,settings['RossiAlpha Settings']['Reset time'], 
                                         settings['RossiAlpha Settings']['Time difference method'], 
                                         settings['RossiAlpha Settings']['Digital delay'])
                 if(settings['RossiAlpha Settings']['Combine Calc and Binning']):
-                    thisPlot, counts, bin_centers, bin_edges   = thisData.calculateTimeDifsAndBin(settings['RossiAlpha Settings']['Histogram Generation Settings']['Bin width'], False, False, settings['Input/Output Settings']['Save directory'], settings['Histogram Visual Settings'])
+                    thisPlot, counts, bin_centers, bin_edges   = thisData.calculateTimeDifsAndBin(settings['RossiAlpha Settings']['Bin width'], False, False, settings['Input/Output Settings']['Save directory'], settings['Histogram Visual Settings'])
                         
                         
 
                 else:
                     time_diffs = thisData.calculateTimeDifsFromEvents()
 
-                    thisPlot = RossiHistogram(time_diffs,settings['RossiAlpha Settings']['Histogram Generation Settings']['Bin width'],settings['RossiAlpha Settings']['Histogram Generation Settings']['Reset time'])
+                    thisPlot = RossiHistogram(time_diffs,settings['RossiAlpha Settings']['Bin width'],settings['RossiAlpha Settings']['Reset time'])
 
 
 
@@ -67,7 +67,7 @@ def compile_sample_stdev_RA_dist(settings: dict):
                 else:
                     RA_hist_array = np.vstack((RA_hist_array, counts))
                 save_dir = data_folder + "/" + str(fol_num)
-                thisFit = RossiHistogramFit(counts, bin_centers, settings['RossiAlpha Settings']['Fit Region Settings']['Minimum cutoff'], settings['RossiAlpha Settings']['Time difference method'], settings['General Settings']['Fit range'])
+                thisFit = RossiHistogramFit(counts, bin_centers, settings['RossiAlpha Settings']['Minimum cutoff'], settings['RossiAlpha Settings']['Time difference method'], settings['General Settings']['Fit range'])
 
 
 
