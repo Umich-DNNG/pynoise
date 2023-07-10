@@ -411,8 +411,8 @@ def editor_menu(prev):
     inputs={'Input/Output Settings': {},
             'General Settings': {},
             'RossiAlpha Settings': {},
-            'PSD Settings': {},
-            'PSD Visual Settings': {},
+            'CohnAlpha Settings': {},
+            'CohnAlpha Visual Settings': {},
             'Histogram Visual Settings': {},
             'Line Fitting Settings': {},
             'Residual Plot Settings': {}}
@@ -574,16 +574,16 @@ def raMenu():
               command=main
               ).pack(side=TOP,padx=10,pady=10)
 
-def psdMenu():
+def cohnAlphaMenu():
 
-    '''The GUI for the Power Spectral Density menu.'''
+    '''The GUI for the Cohn Alpha menu.'''
 
     global window, parameters
     # Clear the window of all previous entries, labels, and buttons.
     for item in window.winfo_children():
         item.destroy()
     # Properly name the window.
-    window.title('Power Spectral Density Analysis')
+    window.title('Cohn Alpha Analysis')
     # Prompt the user.
     ttk.Label(window,
               name='prompt',
@@ -593,13 +593,13 @@ def psdMenu():
     ttk.Button(window,
               name='run',
               text='Run analysis',
-              command=lambda: run.conduct_PSD(parameters)
+              command=lambda: run.conductCohnAlpha(parameters)
               ).pack(side=TOP,padx=10)
     # Button to view the program settings.
     ttk.Button(window,
               name='settings',
               text='Program settings',
-              command=lambda: setMenu(psdMenu)
+              command=lambda: setMenu(cohnAlphaMenu)
               ).pack(side=TOP,padx=10)
     # Button to return to the main menu.
     ttk.Button(window,
@@ -672,11 +672,11 @@ def main():
                text='Run Rossi Alpha analysis',
                command=raMenu
                ).pack(side=TOP,padx=10)
-    # Button to run Power Spectral Density analysis. 
+    # Button to run Cohn Alpha analysis. 
     ttk.Button(window,
-               name='power_spectral_density',
-               text='Run Power Spectral Density analysis',
-               command=psdMenu
+               name='cohn_alpha',
+               text='Run Cohn Alpha analysis',
+               command=cohnAlphaMenu
                ).pack(side=TOP,padx=10)
     # Button to edit the program settings.
     ttk.Button(window,
