@@ -630,9 +630,9 @@ def raSplit(window: Tk,
 
 #--------------------PowerSpectralDensity Functions--------------------#
 
-def conduct_PSD(parameters: set.Settings):
+def conductCohnAlpha(parameters: set.Settings):
 
-    '''Copy and pasted function from psdDriver for 
+    '''Copy and pasted function from CohnAlphaDriver for 
     running Power Spectral Density analysis.
 
     Requires:
@@ -644,16 +644,16 @@ def conduct_PSD(parameters: set.Settings):
 
     values = np.loadtxt(file_path, usecols=(0,3), max_rows=2000000, dtype=float)
 
-    PSD_Object = ca.PowerSpectralDensity(list_data_array=values, 
-                                          clean_pulses_switch=parameters.settings['PSD Settings']['Clean pulses switch'], 
-                                          dwell_time=parameters.settings['PSD Settings']['Dwell time'], 
-                                          meas_time_range=parameters.settings['PSD Settings']['Meas time range'])
+    CA_Object = ca.CohnAlpha(list_data_array=values, 
+                                          clean_pulses_switch=parameters.settings['CohnAlpha Settings']['Clean pulses switch'], 
+                                          dwell_time=parameters.settings['CohnAlpha Settings']['Dwell time'], 
+                                          meas_time_range=parameters.settings['CohnAlpha Settings']['Meas time range'])
     
     
-    PSD_Object.conduct_APSD(show_plot=parameters.settings['General Settings']['Show plots'], 
+    CA_Object.conductCohnAlpha(show_plot=parameters.settings['General Settings']['Show plots'], 
                             save_fig=parameters.settings['General Settings']['Save figures'],
                             save_dir=parameters.settings['Input/Output Settings']['Save directory'],
-                            leg_label=parameters.settings['PSD Visual Settings']['Legend Label'],
-                            annotate_font_weight=parameters.settings['PSD Visual Settings']['Annotation Font Weight'],
-                            annotate_color=parameters.settings['PSD Visual Settings']['Annotation Color'],
-                            annotate_background_color=parameters.settings['PSD Visual Settings']['Annotation Background Color'])
+                            leg_label=parameters.settings['CohnAlpha Visual Settings']['Legend Label'],
+                            annotate_font_weight=parameters.settings['CohnAlpha Visual Settings']['Annotation Font Weight'],
+                            annotate_color=parameters.settings['CohnAlpha Visual Settings']['Annotation Color'],
+                            annotate_background_color=parameters.settings['CohnAlpha Visual Settings']['Annotation Background Color'])
