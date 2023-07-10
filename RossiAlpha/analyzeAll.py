@@ -39,13 +39,13 @@ def analyzeAllType1(settings: dict):
         listData.sort(key=lambda Event: Event.time)
 
     # applying time differences function
-    thisTimeDifCalc = timeDifCalcs(listData, settings['RossiAlpha Settings']['Histogram Generation Settings']["Reset time"],  settings['RossiAlpha Settings']["Time difference method"])
+    thisTimeDifCalc = timeDifCalcs(listData, settings['RossiAlpha Settings']["Reset time"],  settings['RossiAlpha Settings']["Time difference method"])
 
     if(not settings['RossiAlpha Settings']['Combine Calc and Binning']):
         time_diffs = thisTimeDifCalc.calculateTimeDifsFromEvents()
 
         # creating RossiHistogram() object with specified settings
-        thisPlot = RossiHistogram(time_diffs,settings['RossiAlpha Settings']['Histogram Generation Settings']['Bin width'],settings['RossiAlpha Settings']['Histogram Generation Settings']['Reset time'])
+        thisPlot = RossiHistogram(time_diffs,settings['RossiAlpha Settings']['Bin width'],settings['RossiAlpha Settings']['Reset time'])
 
         counts, bin_centers, bin_edges = thisPlot.plot(save_fig=settings['General Settings']['Save figures'], show_plot=settings['General Settings']['Show plots'], save_dir = settings['Input/Output Settings']['Save directory'], plot_opts = settings['Histogram Visual Settings'])
 
@@ -53,14 +53,13 @@ def analyzeAllType1(settings: dict):
         
     #combined calculating time differences and binning them
     else:
-        thisPlot, counts, bin_centers, bin_edges = thisTimeDifCalc.calculateTimeDifsAndBin(settings['RossiAlpha Settings']['Histogram Generation Settings']['Bin width'], settings['General Settings']['Save figures'], settings['General Settings']['Show plots'], settings['Input/Output Settings']['Save directory'], settings['Histogram Visual Settings'])
-
+        thisPlot, counts, bin_centers, bin_edges = thisTimeDifCalc.calculateTimeDifsAndBin(settings['RossiAlpha Settings']['Bin width'], settings['General Settings']['Save figures'], settings['General Settings']['Show plots'], settings['Input/Output Settings']['Save directory'], settings['Histogram Visual Settings'])
         time_diffs = None
 
     
 
     # creating Fit() object with specified settings
-    thisFit = RossiHistogramFit(counts, bin_centers, settings['RossiAlpha Settings']['Fit Region Settings']['Minimum cutoff'], settings['RossiAlpha Settings']['Time difference method'], settings['General Settings']['Fit range'])
+    thisFit = RossiHistogramFit(counts, bin_centers, settings['RossiAlpha Settings']['Minimum cutoff'], settings['RossiAlpha Settings']['Time difference method'], settings['General Settings']['Fit range'])
         
         # Fitting curve to the histogram and plotting the residuals
     thisFit.fit_and_residual(settings['General Settings']['Save figures'], settings['Input/Output Settings']['Save directory'], settings['General Settings']['Show plots'],settings['Line Fitting Settings'], settings['Residual Plot Settings'],settings['Histogram Visual Settings']  )
@@ -72,10 +71,10 @@ def analyzeAllType1(settings: dict):
 def analyzeAllType2(settings: dict):
     RA_hist_total = analyzingFolders.compile_sample_stdev_RA_dist(settings)
     from .fitting import Fit_With_Weighting
-    thisWeightedFit = Fit_With_Weighting(RA_hist_total,settings['RossiAlpha Settings']['Fit Region Settings']['Minimum cutoff'], 
+    thisWeightedFit = Fit_With_Weighting(RA_hist_total,settings['RossiAlpha Settings']['Minimum cutoff'], 
                                         settings['General Settings'],settings['Input/Output Settings']['Save directory'], settings['Line Fitting Settings'], 
                                         settings['Residual Plot Settings'])
     thisWeightedFit.fit_RA_hist_weighting()
     thisWeightedFit.plot_RA_and_fit(save_fig=settings['General Settings']['Save figures'], 
-                                    show_plot=settings['General Settings']['Show plots'], errorBars = settings['RossiAlpha Settings']['Histogram Generation Settings']['Error Bar/Band'])
+                                    show_plot=settings['General Settings']['Show plots'], errorBars = settings['RossiAlpha Settings']['Error Bar/Band'])
     plt.close('all')
