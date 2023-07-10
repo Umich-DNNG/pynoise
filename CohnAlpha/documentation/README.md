@@ -1,14 +1,14 @@
-# Power Spectral Density
+# Cohn Alpha Method
 
-This section of the PyNoise suite is for Power Spectral Density Algorithm analysis. If you are unfamiliar with the Power Spectral Density method, please familiarize yourself before using this package and reading the README file.
+This section of the PyNoise suite is for Cohn Alpha (aka Power Spectral Density) Algorithm analysis. If you are unfamiliar with the Power Spectral Density method, please familiarize yourself before using this package and reading the README file.
 
 
 
 ### Requirements
 
 Besides those mentioned in the main README file, the following programs must be downloaded to run Power Spectral Density analysis:
-* PSD.py
-* psdDriver.py
+* CohnAlpha.py
+* CohnAlphaDriver.py
 
 Required python libraries (can be automated with requirements.txt from the main README.md):  
 * NumPy   
@@ -36,7 +36,7 @@ The PowerSpectralDensity program can be run with a variety of options that chang
 
 
 ### Driver
-```psdDriver.py``` is used to run all analysis pertaining to the Power Spectral Density method, and is called from the main driver. **Trying to call psdDriver independently will not work**. 
+```CohnAlphaDriver.py``` is used to run all analysis pertaining to the Power Spectral Density method, and is called from the main driver. **Trying to call psdDriver independently will not work**. 
 There are 2 options for this method:  
 * m - run the entire program through the [main driver](#main)
 * s - view or edit the program [settings](#settings-configurations)
@@ -47,7 +47,7 @@ There are 2 options for this method:
 The editor class for modifying settings is also accessible from the psdDriver. See the main README file for more information on its proper use.
 
 
-### PSD.py
+### CohnAlpha.py
 
 PSD.py will have the following functions:
 * APSD()
