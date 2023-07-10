@@ -6,39 +6,39 @@ Created on Thu Jun  1 11:42:16 2023
 """
 
 import numpy as np
-from . import CohnAlpha as psd
+from . import CohnAlpha as CA
 import editor as edit
 
 editor: edit.Editor = None
 
-def conduct_PSD():
+def conductCohnAlpha():
     
-    '''Creates PSD plots based on input data.'''
+    '''Creates CohnAlpha plots based on input data.'''
 
     file_path = editor.parameters.settings['Input/Output Settings']['Input file/folder']
 
     values = np.loadtxt(file_path, usecols=(0,3), max_rows=2000000, dtype=float)
 
-    PSD_Object = psd.PowerSpectralDensity(list_data_array=values, 
-                                          clean_pulses_switch=editor.parameters.settings['PSD Settings']['Clean pulses switch'], 
-                                          dwell_time=editor.parameters.settings['PSD Settings']['Dwell time'], 
-                                          meas_time_range=editor.parameters.settings['PSD Settings']['Meas time range'])
+    CA_Object = CA.CohnAlpha(list_data_array=values, 
+                                          clean_pulses_switch=editor.parameters.settings['CohnAlpha Settings']['Clean pulses switch'], 
+                                          dwell_time=editor.parameters.settings['CohnAlpha Settings']['Dwell time'], 
+                                          meas_time_range=editor.parameters.settings['CohnAlpha Settings']['Meas time range'])
     
     
-    PSD_Object.conduct_APSD(show_plot=editor.parameters.settings['General Settings']['Show plots'], 
+    CA_Object.conductCohnAlpha(show_plot=editor.parameters.settings['General Settings']['Show plots'], 
                             save_fig=editor.parameters.settings['General Settings']['Save figures'],
                             save_dir=editor.parameters.settings['Input/Output Settings']['Save directory'],
-                            leg_label=editor.parameters.settings['PSD Visual Settings']['Legend Label'],
-                            annotate_font_weight=editor.parameters.settings['PSD Visual Settings']['Annotation Font Weight'],
-                            annotate_color=editor.parameters.settings['PSD Visual Settings']['Annotation Color'],
-                            annotate_background_color=editor.parameters.settings['PSD Visual Settings']['Annotation Background Color'])
+                            leg_label=editor.parameters.settings['CohnAlpha Visual Settings']['Legend Label'],
+                            annotate_font_weight=editor.parameters.settings['CohnAlpha Visual Settings']['Annotation Font Weight'],
+                            annotate_color=editor.parameters.settings['CohnAlpha Visual Settings']['Annotation Color'],
+                            annotate_background_color=editor.parameters.settings['CohnAlpha Visual Settings']['Annotation Background Color'])
 
 
 def main(editorIn: edit.Editor, queue: list[str]):
     global editor
     editor = editorIn
     selection = 'blank'
-    editor.print('You are running the Power Spectral Density Method.')
+    editor.print('You are running the Cohn Alpha Method.')
     while selection != '' and selection != 'x':
         editor.print('You can utilize any of the following functions:')
         editor.print('m - run the entire program through the main driver')
@@ -63,9 +63,9 @@ def main(editorIn: edit.Editor, queue: list[str]):
                     print('ERROR: You currently have no input file or folder defined. '
                           + 'Please make sure to specify one before running any analysis.\n')
                 else:
-                    editor.print('\nRunning the entire power spectral density analysis...')
-                    conduct_PSD()
-                    editor.log('Ran the entire PowerSpectralDensity method on file ' 
+                    editor.print('\nRunning the entire Cohn Alpha analysis...')
+                    conductCohnAlpha()
+                    editor.log('Ran the entire Cohn Alpha on file ' 
                                 + editor.parameters.settings['Input/Output Settings']['Input file/folder'] 
                                 + '.\n')
                 '''
