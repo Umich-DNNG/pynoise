@@ -4,7 +4,7 @@
         "Time Column": 0,
         "Channels Column": null,
         "Save directory": "./",
-        "Keep logs": true
+        "Keep logs": false
     },
     "General Settings": {
         "Fit range": [
