@@ -92,7 +92,7 @@ class timeDifCalcs:
                     if(self.method != "any_and_all"):
                         ch_bank.add(self.events[j].channel)
             # Iterate to the next data point.
-            # TODO: Should we still do this when using digital delay?
+            # TODO: Don't do this when doing digital delay.
             i = i + 1
         # Store the time differences array.
         self.timeDifs = time_diffs
