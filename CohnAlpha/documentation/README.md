@@ -49,12 +49,12 @@ The editor class for modifying settings is also accessible from the psdDriver. S
 
 ### CohnAlpha.py
 
-PSD.py will have the following functions:
-* APSD()
-* class PowerSpectralDensity: __init__()
-* class PowerSpectralDensity: conduct_APSD()
+CohnAlpha.py will have the following functions:
+* CAFit()
+* class CohnAlpha: __init__()
+* class CohnAlpha: conductCohnAlpha()
 
-The APSD() function represents the Power Spectral Density Fitting Function
+The CAFit() function represents the Power Spectral Density Fitting Function
 
 The class PowerSpectralDensity: __init__() function will initialize a PowerSpectralDensity object
 Inputs:
@@ -63,7 +63,7 @@ Inputs:
 * dwell_time (default=2.0e6, meaning that the default value is 2,000,000)
 * meas_time_range (default=[1.5e11, 1.0e12], meaning that the default range is [1.5e11, 1.0e12])
 
-The class PowerSpectralDensity: conduct_APSD() will perform the Power Spectral Density Analysis and produce the corresponding figures
+The class CohnAlpha: conductCohnAlpha() will perform the Power Spectral Density Analysis and produce the corresponding figures
 Inputs:
 * show_plot (default=True, meaning that showing the plot(s) is the default)
 * save_fig (default=True, meaning that saving the plots(s) is the default)
