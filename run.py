@@ -108,11 +108,11 @@ def log(message: str,
             if window.children.get('log') == None:
                 ttk.Separator(window,
                               orient='horizontal',
-                              ).grid(column=0,row=window.grid_size()[1], sticky='ew',padx=10)
+                              ).pack(side=TOP,fill=X,padx=10)
                 ttk.Label(window,
                         name='log',
                         text=message,
-                        ).grid(column=0,row=window.grid_size()[1],padx=10,pady=10)
+                        ).pack(side=TOP,padx=10,pady=10)
             else:
                 window.children['log'].config(text=message)
 
