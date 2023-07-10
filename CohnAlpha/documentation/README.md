@@ -82,5 +82,4 @@ Outputs:
 
 Running through all power spectral density analyses will produce an image that is similar to the following: 
 
-<img src="./PSD.png" width="400" >
-
+<img src="./CohnAlpha.png" width="400" >
