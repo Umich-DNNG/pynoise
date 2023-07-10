@@ -2,7 +2,7 @@
 
 import editor as edit
 from RossiAlpha import raDriver as ra
-from CohnAlpha import CohnAlphaDriver as psd
+from CohnAlpha import CohnAlphaDriver as ca
 import os
 import sys
 
@@ -198,7 +198,7 @@ def main():
     while selection != '' and selection != 'x':
         editor.print('You can utitilze any of the following functions:')
         editor.print('r - run Rossi Alpha analysis')
-        editor.print('p - run Power Spectral Density Analysis')
+        editor.print('c - run Cohn Alpha Analysis')
         editor.print('s - view or edit the program settings')
         editor.print('Leave the command blank or enter x to end the program.')
         # If there's currently something in the command queue, 
@@ -218,10 +218,10 @@ def main():
             case 'r':
                 editor.print('')
                 editor, queue = ra.main(editor, queue)
-            # Run PowerSpectralDensity analysis.
-            case 'p':
+            # Run CohnAlpha analysis.
+            case 'c':
                 editor.print('')
-                editor, queue = psd.main(editor, queue)
+                editor, queue = ca.main(editor, queue)
             # View and/or edit program settings.
             case 's':
                 editor.print('')
