@@ -42,7 +42,7 @@ class PowerSpectralDensity:
                      show_plot: bool = True, 
                      save_fig: bool = True, 
                      save_dir: str = './', 
-                     leg_label: str = "stilbene east",
+                     leg_label: str = "frequency intensity",
                      annotate_font_weight: str = "bold", 
                      annotate_color: str = "black", 
                      annotate_background_color: str = "white"):

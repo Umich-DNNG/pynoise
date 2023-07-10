@@ -39,7 +39,7 @@
         "Clean pulses switch": true
     },
     "PSD Visual Settings": {
-        "Legend Label": "stilbene east",
+        "Legend Label": "frequency intensity",
         "Annotation Font Weight": "bold",
         "Annotation Color": "black",
         "Annotation Background Color": "white"
