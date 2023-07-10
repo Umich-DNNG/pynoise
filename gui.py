@@ -6,6 +6,7 @@ import tkinter as tk
 import settings as set
 import os
 import run
+import time
 
 # The main window that is used for the program.
 window: Tk = None
@@ -272,71 +273,126 @@ def setMenu(prev):
               command=prev
               ).grid(column=0,row=3,padx=10,pady=10)
 
-def add(group: str):
+def add(canvas: Canvas, group: str):
 
     '''Adds a blank setting box for the specified group.
     
     Requires:
+    - canvas: the editor canvas that holds all editor menu objects.
     - group: the name of the settings group. Must 
     be exactly the same as stored in the settings 
     object and must be a matplotlib settings group.'''
 
     global window, bottom, newSet, newVal
+    # Get the bottom of the desired group.
     top = bottom[group]
+    # If we're looking at histogram visual settings:
     if group == 'Histogram Visual Settings':
-        cur_row = window.grid_slaves(row=top+1)
+        # Get the widgets in the row beneath the settings group.
+        cur_row = canvas.children['editor'].grid_slaves(row=top+1)
+        # If the row is only two labels, we can assume that this is the Residual 
+        # Plot Settings and Line Fitting Settings titles, meaning Histogram 
+        # Visual Settings are currently the group that goes down the furthest.
         if len(cur_row) == 2 and cur_row[0].widgetName == 'ttk::label' and cur_row[1].widgetName == 'ttk::label':
+            # Get the bottom of both settings groups.
             bot = max(bottom['Residual Plot Settings'], bottom['Line Fitting Settings'])
+            # For the entire settings.
             while bot != top:
-                cur_row = window.grid_slaves(row=bot)
+                # Get the widgets in the current row.
+                cur_row = canvas.children['editor'].grid_slaves(row=bot)
+                # Move each widget down one row.
                 for item in cur_row:
                     item.grid(row=bot+1)
+                # Move up one row.
                 bot -= 1
+            # Increase the bottoms of both groups.
             bottom['Residual Plot Settings'] += 1
             bottom['Line Fitting Settings'] += 1
-        window.children[group[0:group.find('Settings')].lower()+'add'].grid(row=top+1)
+        # Move the add button down one row.
+        canvas.children['editor'].children[group[0:group.find('Settings')].lower()+'add'].grid(row=top+1)
+        # Create a unique dictionary key for the new setting.
         index = 'hvs' + str(top)
+        # Create a string variable linked to 
+        # this setting in the new settings dictionary.
         newSet[group][index] = tk.StringVar()
-        ttk.OptionMenu(window,
+        # The dropdown menu for the new setting.
+        ttk.OptionMenu(canvas.children['editor'],
                        newSet[group][index],
                        *parameters.hvs_drop
                        ).grid(column=7,row=top,padx=10)
+        # Create a string variable linked to this 
+        # setting value in the new values dictionary.
         newVal[group][index] = tk.StringVar()
-        tk.Entry(window,
+        # The entry box for the new setting value.
+        tk.Entry(canvas.children['editor'],
                  name=('new hvs value ' + str(top)).lower(),
                  textvariable=newVal[group][index],
                  width=12
                  ).grid(column=8,row=top,padx=10)
+    # If one of the other settings groups:
     else:
-        window.children[group[0:group.find('Settings')].lower()+'add'].grid(row=top+1)
+        # Move the add button down one row.
+        canvas.children['editor'].children[group[0:group.find('Settings')].lower()+'add'].grid(row=top+1)
+        # If we're looking at residual plot settings:
         if group == 'Residual Plot Settings':
+            # Create a unique dictionary key for the new setting.
             index = 'rps' + str(top)
+            # Create a string variable linked to 
+            # this setting in the new settings dictionary.
             newSet[group][index] = tk.StringVar()
-            ttk.OptionMenu(window,
+            # The dropdown menu for the new setting.
+            ttk.OptionMenu(canvas.children['editor'],
                            newSet[group][index],
                            *parameters.rps_drop
                            ).grid(column=4,row=top,padx=10)
+            # Create a string variable linked to this 
+            # setting value in the new values dictionary.
             newVal[group][index] = tk.StringVar()
-            tk.Entry(window,
+            # The entry box for the new setting value.
+            tk.Entry(canvas.children['editor'],
                     name=('new rps value ' + str(top)).lower(),
                     textvariable=newVal[group][index],
                     width=12
                     ).grid(column=5,row=top,padx=10)
+        # If we're looking at line fitting settings:
         else:
+            # Create a unique dictionary key for the new setting.
             index = 'lfs' + str(top)
+            # Create a string variable linked to 
+            # this setting in the new settings dictionary.
             newSet[group][index] = tk.StringVar()
-            newSet[group][index].set('select setting...')
-            ttk.OptionMenu(window,
+            # The dropdown menu for the new setting.
+            ttk.OptionMenu(canvas.children['editor'],
                            newSet[group][index],
                            *parameters.lfs_drop
                            ).grid(column=1,row=top,padx=10)
+            # Create a string variable linked to this 
+            # setting value in the new values dictionary.
             newVal[group][index] = tk.StringVar()
-            tk.Entry(window,
+            # The entry box for the new setting value.
+            tk.Entry(canvas.children['editor'],
                      name=('new lfs value ' + str(top)).lower(),
                      textvariable=newVal[group][index],
                      width=12
                      ).grid(column=2,row=top,padx=10)
+    # INcrement the bottom of the current group.
     bottom[group] += 1
+    # Create a new updated scrollbar.
+    scroll = ttk.Scrollbar(window,orient=VERTICAL,command=canvas.yview)
+    # Create a boolean dummy variable to stall.
+    wait = BooleanVar()
+    # After 1 ms, set the dummy variable to True.
+    window.after(1, wait.set, True)
+    # Wait for the dummy variable to be set, then correctly place the scrollbar.
+    window.wait_variable(wait)
+    scroll.pack(side=RIGHT, fill=Y)
+    # After 1 ms, set the dummy variable to True.
+    window.after(1, wait.set, True)
+    # Wait for the dummy variable to be set, then reset the canvas command.
+    window.wait_variable(wait)
+    canvas.configure(yscrollcommand=scroll.set)
+    # Delete the old scrollbar.
+    window.winfo_children()[1].destroy()
 
 def editor_menu(prev):
 
@@ -350,7 +406,6 @@ def editor_menu(prev):
     groupNum=0
     curTop=1
     curMax = 0
-    
     # Initialize inputs dictionary (assume num/name of settings groups are constant).
     inputs={'Input/Output Settings': {},
             'General Settings': {},
@@ -371,14 +426,29 @@ def editor_menu(prev):
         item.destroy()
     # Properly name the window.
     window.title('View/Edit Current Settings')
+    # Create a canvas for the scrollbar 
+    # and fill the entire window with it.
+    canvas = Canvas(window, highlightthickness=0)
+    canvas.pack(side=LEFT,fill=BOTH,expand=1)
+    # Create a scrollbar for the canvas and 
+    # place it on the left side of the screen.
+    scroll = ttk.Scrollbar(window,orient=VERTICAL,command=canvas.yview)
+    scroll.pack(side=RIGHT, fill=Y)
+    # Link the canvas scrolling command to scrollbar.
+    canvas.configure(yscrollcommand=scroll.set)
+    canvas.bind('<Configure>', lambda event: canvas.configure(scrollregion=canvas.bbox(ALL)))
+    # Create a frame in which to house all the editor 
+    # menu widgets and place it in the canvas.
+    editor = Frame(canvas, name='editor')
+    canvas.create_window((0,0), window=editor, anchor=NW)
     # Button for saving changes.
-    ttk.Button(window,
+    ttk.Button(editor,
                 name='save',
                 text='Save changes',
                 command=lambda: run.edit(window, inputs, newSet, newVal, parameters, prev)
                 ).grid(column=0,row=0,padx=10)
     # Button for canceling changes.
-    ttk.Button(window,
+    ttk.Button(editor,
                   name='cancel',
                   text='Cancel changes',
                   command=lambda: setMenu(prev)
@@ -391,7 +461,7 @@ def editor_menu(prev):
             curTop += curMax
             curMax = 0
         # The label for the settings group.
-        ttk.Label(window,
+        ttk.Label(editor,
                   name=group[0:group.find(' Settings')].lower(),
                   text=group[0:group.find(' Settings')] + ':'
                   ).grid(column=(groupNum*3) % 9,row=curTop,padx=10,pady=10)
@@ -403,41 +473,41 @@ def editor_menu(prev):
             # this setting in the inputs dictionary.
             inputs[group][setting]=tk.StringVar()
             # The label for the setting name.
-            ttk.Label(window,
+            ttk.Label(editor,
                   name=(group + ' ' + setting).lower(),
                   text=setting + ':'
                   ).grid(column=(groupNum*3+1) % 9,row=curTop+setNum,padx=10)
             # The entry box for inputting/viewing the setting value.
-            tk.Entry(window,
+            tk.Entry(editor,
                   name=(group + ' ' + setting + ' value').lower(),
                   textvariable=inputs[group][setting],
                   width=12
                   ).grid(column=(groupNum*3+2) % 9,row=curTop+setNum,padx=10)
             # Insert into the entry box the current value of the setting.
-            window.children[(group + ' ' + setting + ' value').lower()].insert(0,run.format(parameters.settings[group][setting]))
+            editor.children[(group + ' ' + setting + ' value').lower()].insert(0,run.format(parameters.settings[group][setting]))
             # Increase the setting number.
             setNum += 1
         if group == 'Histogram Visual Settings' or group == 'Line Fitting Settings' or group == 'Residual Plot Settings':
             match group:
                 case 'Histogram Visual Settings':
-                    ttk.Button(window,
+                    ttk.Button(editor,
                             name=group[0:group.find('Settings')].lower()+'add',
                             text='+',
-                            command=lambda: add('Histogram Visual Settings'),
+                            command=lambda: add(canvas, 'Histogram Visual Settings'),
                             width=1
                             ).grid(column=(groupNum*3+1) % 9,row=curTop+setNum,padx=10)
                 case 'Line Fitting Settings':
-                    ttk.Button(window,
+                    ttk.Button(editor,
                             name=group[0:group.find('Settings')].lower()+'add',
                             text='+',
-                            command=lambda: add('Line Fitting Settings'),
+                            command=lambda: add(canvas, 'Line Fitting Settings'),
                             width=1
                             ).grid(column=(groupNum*3+1) % 9,row=curTop+setNum,padx=10)
                 case _:
-                    ttk.Button(window,
+                    ttk.Button(editor,
                             name=group[0:group.find('Settings')].lower()+'add',
                             text='+',
-                            command=lambda: add('Residual Plot Settings'),
+                            command=lambda: add(canvas, 'Residual Plot Settings'),
                             width=1
                             ).grid(column=(groupNum*3+1) % 9,row=curTop+setNum,padx=10)
             bottom[group] = curTop + setNum
@@ -448,10 +518,6 @@ def editor_menu(prev):
             curMax = setNum
         # Increase the group number.
         groupNum += 1
-    #TODO: Figure out the scrollbar.
-    '''ttk.Scrollbar(window,
-                  name='scrollbar'
-                  ).grid(column=500,row=0,rowspan=500,sticky='ns')'''
 
 def raMenu():
 
@@ -632,7 +698,7 @@ def startup():
     # If window is not yet defined, create it and grid it.
     if window == None:
         window = Tk()
-        window.grid()
+        #window.grid()
         width= window.winfo_screenwidth()               
         height= window.winfo_screenheight()               
         window.geometry("%dx%d" % (width, height))
