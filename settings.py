@@ -20,8 +20,8 @@ class Settings:
         self.settings = {'Input/Output Settings': {},
                          'General Settings': {},
                          'RossiAlpha Settings': {},
-                         'PSD Settings' : {},
-                         'PSD Visual Settings': {},
+                         'CohnAlpha Settings' : {},
+                         'CohnAlpha Visual Settings': {},
                          'Histogram Visual Settings': {},
                          'Line Fitting Settings': {},
                          'Residual Plot Settings': {}
