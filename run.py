@@ -12,7 +12,7 @@ from RossiAlpha import analyzeAll as mn
 from RossiAlpha import fitting as fit
 from RossiAlpha import plots as plt
 from RossiAlpha import timeDifs as dif
-from PowerSpectralDensity import PSD as psd
+from CohnAlpha import CohnAlpha as ca
 import Event as evt
 import lmxReader as lmx
 
@@ -644,7 +644,7 @@ def conduct_PSD(parameters: set.Settings):
 
     values = np.loadtxt(file_path, usecols=(0,3), max_rows=2000000, dtype=float)
 
-    PSD_Object = psd.PowerSpectralDensity(list_data_array=values, 
+    PSD_Object = ca.PowerSpectralDensity(list_data_array=values, 
                                           clean_pulses_switch=parameters.settings['PSD Settings']['Clean pulses switch'], 
                                           dwell_time=parameters.settings['PSD Settings']['Dwell time'], 
                                           meas_time_range=parameters.settings['PSD Settings']['Meas time range'])
