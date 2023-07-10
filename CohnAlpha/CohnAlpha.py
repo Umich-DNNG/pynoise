@@ -138,7 +138,7 @@ class PowerSpectralDensity:
         # Creating axis titles
         ax2.set_xlim([1, 200])
         ax2.set_xlabel('Frequency (Hz)')
-        ax2.set_ylabel('PSD (V$^2$/Hz)')
+        ax2.set_ylabel('CohnAlpha (V$^2$/Hz)')
 
         # Constructing alpha string
         alph_str = (r'$\alpha$ = (' +
@@ -155,7 +155,7 @@ class PowerSpectralDensity:
                     backgroundcolor=self.annotate_background_color)
         
         # Creating title and legend
-        ax2.set_title('Power Spectral Density Graph')
+        ax2.set_title('Cohn Alpha Graph')
         ax2.legend(loc='upper right')
         
 
@@ -163,11 +163,11 @@ class PowerSpectralDensity:
         if save_fig:
 
             fig1.tight_layout()
-            save_filename = os.path.join(save_dir, 'PSD1')
+            save_filename = os.path.join(save_dir, 'CohnAlpha1')
             fig1.savefig(save_filename, dpi=300, bbox_inches='tight')
 
             fig2.tight_layout()
-            save_filename = os.path.join(save_dir, 'PSD2')
+            save_filename = os.path.join(save_dir, 'CohnAlpha2')
             fig2.savefig(save_filename, dpi=300, bbox_inches='tight')
 
 
