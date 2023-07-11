@@ -24,6 +24,7 @@ def prompt(prev,
            to,
            message='Enter your choice:',
            title='User Prompt',
+           prefill:str=None,
            log:str=None):
 
     '''Create a prompt window to get a text input from the user.
@@ -61,6 +62,8 @@ def prompt(prev,
               name='response',
               textvariable=response,
               ).pack(side=TOP,padx=10,pady=10)
+    if prefill is not None:
+        window.children['response'].insert(0,prefill)
     # The confirmation button.
     ttk.Button(window,
               name='continue',
@@ -204,7 +207,8 @@ def shutdown_menu():
                                                                True),
                                        'Enter a name for the new settings '
                                         + '(not including the .json file extension).',
-                                        'Export Settings')
+                                        'Export Settings',
+                                        'settings/')
                 ).pack(side=TOP,padx=10)
         # Button for discarding the current settings.
         ttk.Button(window,
@@ -593,7 +597,7 @@ def cohnAlphaMenu():
     ttk.Button(window,
               name='run',
               text='Run analysis',
-              command=lambda: run.conductCohnAlpha(parameters)
+              command=lambda: run.caSplit(window, parameters)
               ).pack(side=TOP,padx=10)
     # Button to view the program settings.
     ttk.Button(window,
@@ -631,6 +635,7 @@ def download_menu(prev, to):
                                       lambda file: run.download(parameters, os.path.abspath(file + '.json'), True, to),
                                       'Enter a settings file (no .json extension):',
                                       'Append Settings to Default',
+                                      'settings/',
                                       lambda response: 'Settings successfully appended from file:\n' + response + '.json.')
                ).pack(side=TOP,padx=10)
         # Button for overwriting the entire settings.
