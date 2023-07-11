@@ -3,31 +3,16 @@
 import os
 import io
 import time
-import numpy as np
 from tkinter import *
 from tkinter import ttk
 import gui
 import settings as set
-from RossiAlpha import analyzeAll as mn
-from RossiAlpha import fitting as fit
-from RossiAlpha import plots as plt
-from RossiAlpha import timeDifs as dif
-from CohnAlpha import CohnAlpha as ca
-import Event as evt
-import lmxReader as lmx
+import analyze as alz
 
 #--------------------Global Variables--------------------#
 
-# Where the time difference data us stored.
-time_difs: dif.timeDifCalcs = None
-time_difs_file: str = None
-time_difs_method: str = None
-# Where the histogram plot data is stored.
-histogram: plt.RossiHistogram = None
-hist_file: str = None
-hist_method: str = None
-# Where the best fit curve data is stored.
-best_fit: fit.RossiHistogramFit = None
+# The analysis object
+analyzer = alz.Analyzer()
 
 # The file that will have logs written to it.
 logfile: io.TextIOWrapper = None
@@ -395,136 +380,6 @@ def shutdown(window: Tk,
             logfile.write(line)
         logfile.close()
 
-
-#--------------------RossiAlpha Functions--------------------#
-
-def createTimeDifs(parameters: set.Settings):
-
-    '''Copy and pasted function from raDriver for creating time differences.
-
-    Requires:
-    - parameters: the settings object holding the current settings.
-    
-    See the original for more info.'''
-
-    global time_difs, time_difs_file, time_difs_method
-    if parameters.settings['Input/Output Settings']['Input file/folder'].endswith(".txt"):
-        data = evt.createEventsListFromTxtFile(parameters.settings['Input/Output Settings']['Input file/folder'],parameters.settings['Input/Output Settings']['Time Column'], parameters.settings['Input/Output Settings']['Channels Column'])
-    elif parameters.settings['Input/Output Settings']['Input file/folder'].endswith(".lmx"):
-        data = lmx.readLMXFile(parameters.settings['Input/Output Settings']['Input file/folder'])
-    else:
-        gui.error('Your input file for Rossi Alpha analysis must be either a .txt or .lmx file.\n')
-        return True
-    if parameters.settings['General Settings']['Sort data']:
-        data.sort(key=lambda Event: Event.time)
-    time_difs = dif.timeDifCalcs(data,
-                                 parameters.settings['RossiAlpha Settings']['Reset time'],
-                                 parameters.settings['RossiAlpha Settings']['Time difference method'])
-    time_difs = time_difs.calculateTimeDifsFromEvents()
-    time_difs_file = parameters.settings['Input/Output Settings']['Input file/folder']
-    time_difs_method = parameters.settings['RossiAlpha Settings']['Time difference method']
-
-def createPlot(parameters: set.Settings):
-
-    '''Copy and pasted function from raDriver for creating the histogram.
-
-    Requires:
-    - parameters: the settings object holding the current settings.
-    
-    See the original for more info.'''
-
-    global time_difs, histogram, hist_file, hist_method
-    histogram = plt.RossiHistogram(time_diffs=time_difs,
-                                   bin_width=parameters.settings['RossiAlpha Settings']['Bin width'],
-                                   reset_time=parameters.settings['RossiAlpha Settings']['Reset time'])
-    histogram.plot(save_fig=parameters.settings['General Settings']['Save figures'],
-                   show_plot=parameters.settings['General Settings']['Show plots'],
-                   save_dir=parameters.settings['Input/Output Settings']['Save directory'],
-                   plot_opts=parameters.settings['Histogram Visual Settings'])
-    hist_file = parameters.settings['Input/Output Settings']['Input file/folder']
-    hist_method = parameters.settings['RossiAlpha Settings']['Time difference method']
-
-def calculateTimeDifsAndPlot(parameters: set.Settings):
-
-    '''Copy and pasted function from raDriver for creating the 
-    time differences and histogram plot in parallel.
-
-    Requires:
-    - parameters: the settings object holding the current settings.
-    
-    See the original for more info.'''
-
-    global histogram, time_difs, hist_file, hist_method
-    time_difs = None
-    if parameters.settings['Input/Output Settings']['Input file/folder'].endswith(".txt"):
-        data = evt.createEventsListFromTxtFile(parameters.settings['Input/Output Settings']['Input file/folder'],parameters.settings['Input/Output Settings']['Time Column'], parameters.settings['Input/Output Settings']['Channels Column'])
-    elif parameters.settings['Input/Output Settings']['Input file/folder'].endswith(".lmx"):
-        data =  lmx.readLMXFile(parameters.settings['Input/Output Settings']['Input file/folder'])
-    if parameters.settings['General Settings']['Sort data']:
-        data.sort(key=lambda Event: Event.time)
-    thisTimeDifCalc = dif.timeDifCalcs(data, parameters.settings['RossiAlpha Settings']['Reset time'], parameters.settings['RossiAlpha Settings']['Time difference method'])
-    histogram, counts, bin_centers, bin_edges = thisTimeDifCalc.calculateTimeDifsAndBin(parameters.settings['RossiAlpha Settings']['Bin width'], parameters.settings['General Settings']['Save figures'], parameters.settings['General Settings']['Show plots'], parameters.settings['Input/Output Settings']['Save directory'], parameters.settings['Histogram Visual Settings'])
-    hist_file = parameters.settings['Input/Output Settings']['Input file/folder']
-    hist_method = parameters.settings['RossiAlpha Settings']['Time difference method']
-
-def plotSplit(parameters: set.Settings):
-
-    '''The split for plotting the histogram to determine 
-    whether it is generated in series or parallel with 
-    creating the time differences.
-    
-    Requires:
-    - parameters: the settings object holding the current settings.'''
-
-    global time_difs, time_difs_method, time_difs_file
-    # If no time difs have been made or the input file/
-    # method of time difference calculation has changed.
-    if time_difs is None or (not 
-                             (time_difs_method == parameters.settings['RossiAlpha Settings']['Time difference method'] 
-                          and time_difs_file == parameters.settings['Input/Output Settings']['Input file/folder'])):
-        # Combine time difference calculation and plot generation if applicable.
-        if (parameters.settings['RossiAlpha Settings']['Combine Calc and Binning']):
-            calculateTimeDifsAndPlot(parameters)
-        # Otherwise, do them separately.
-        else:
-            createTimeDifs(parameters)
-            createPlot(parameters)
-    # Otherwise, just create the plot.
-    else:
-        createPlot(parameters)
-
-def createBestFit(parameters: set.Settings):
-
-    '''Copy and pasted function from raDriver for creating a line of best fit.
-    
-    Requires:
-    - parameters: the settings object holding the current settings.
-
-    See the original for more info.'''
-
-    global time_difs, histogram, best_fit
-    counts = histogram.counts
-    bin_centers = histogram.bin_centers
-    best_fit = fit.RossiHistogramFit(counts, bin_centers, parameters.settings['RossiAlpha Settings']['Minimum cutoff'], parameters.settings['RossiAlpha Settings']['Time difference method'], parameters.settings['General Settings']['Fit range'])
-    # Fitting curve to the histogram and plotting the residuals
-    best_fit.fit_and_residual(parameters.settings['General Settings']['Save figures'], parameters.settings['Input/Output Settings']['Save directory'], parameters.settings['General Settings']['Show plots'],parameters.settings['Line Fitting Settings'], parameters.settings['Residual Plot Settings'],parameters.settings['Histogram Visual Settings'] )
-
-def raAll(single: bool,
-          parameters: set.Settings):
-
-    '''Run all of the Rossi Alpha analyis.
-    
-    Reqires:
-    - single: a boolean that marks whether the input is a single file or folder.
-    - parameters: the settings object holding the current settings.'''
-
-    global time_difs, histogram, best_fit
-    # Run and save accordingly based on the input type.
-    if single:
-        time_difs, histogram, best_fit = mn.analyzeAllType1(parameters.settings)
-    else:
-        mn.analyzeAllType2(parameters.settings)
-
 def raSplit(window: Tk,
             mode: str,
             parameters: set.Settings):
@@ -536,8 +391,6 @@ def raSplit(window: Tk,
     - mode: a string of the analysis that is desired. It should 
     exactly match the name of the function to be called.
     - parameters: the settings object holding the current settings.'''
-
-    global time_difs, histogram, best_fit
 
     # If no input defined, throw error.
     if parameters.settings['Input/Output Settings']['Input file/folder'] == 'none':
@@ -561,56 +414,76 @@ def raSplit(window: Tk,
                 match mode:
                     # Run all analysis; no checks needed.
                     case 'raAll':
-                        raAll(True, parameters)
+                        analyzer.raAll(True, parameters.settings)
                         log(message='Successfully ran all analysis on file:\n'
                             +parameters.settings['Input/Output Settings']['Input file/folder'],
                             window=window)
                     # Create time differences.
                     case 'createTimeDifs':
                         # If time differences already exist, warn user.
-                        if time_difs is not None:
+                        if analyzer.time_difs is not None:
                             gui.warning(lambda: log(message='Successfully recalculated time differences for file:\n'
                                                 +parameters.settings['Input/Output Settings']['Input file/folder'],
                                                 window=window,
-                                                menu=lambda:createTimeDifs(parameters)),
+                                                menu=lambda:analyzer.createTimeDifs(parameters.settings['Input/Output Settings'],
+                                                                                    parameters.settings['General Settings']['Sort data'],
+                                                                                    parameters.settings['RossiAlpha Settings']['Reset time'],
+                                                                                    parameters.settings['RossiAlpha Settings']['Time difference method'],
+                                                                                    parameters.settings['RossiAlpha Settings']['Digital delay'])),
                                     'There are already stored time differences '
                                     + 'in this runtime. Do you want to overwrite them?')
                         # Otherwise, create with no warning.
                         else:
-                            createTimeDifs(parameters)
+                            analyzer.createTimeDifs(parameters.settings['Input/Output Settings'],
+                                                    parameters.settings['General Settings']['Sort data'],
+                                                    parameters.settings['RossiAlpha Settings']['Reset time'],
+                                                    parameters.settings['RossiAlpha Settings']['Time difference method'],
+                                                    parameters.settings['RossiAlpha Settings']['Digital delay'])
                             log(message='Successfully calculated time differences for file:\n'
                                 +parameters.settings['Input/Output Settings']['Input file/folder'],
                                 window=window)
                     # Create a histogram plot.
                     case 'plotSplit':
                         # If histogram already exists, warn user.
-                        if histogram is not None:
+                        if analyzer.histogram is not None:
                             gui.warning(lambda: log(message='Successfully recreated a histogram for file:\n'
                                                 +parameters.settings['Input/Output Settings']['Input file/folder'],
                                                 window=window,
-                                                menu=lambda:plotSplit(parameters)),
+                                                menu=lambda:analyzer.plotSplit(parameters.settings)),
                                     'There is an already stored histogram '
                                     + 'in this runtime. Do you want to overwrite it?')
                         # Otherwise, create with no warning.
                         else:
-                            plotSplit(parameters)
+                            analyzer.plotSplit(parameters.settings)
                             log(message='Successfully created a histogram for file:\n'
                                 +parameters.settings['Input/Output Settings']['Input file/folder'],
                                 window=window)
                     # Create a best fit + residual.
                     case 'createBestFit':
                         # If best fit already exists, warn user.
-                        if best_fit is not None:
+                        if analyzer.best_fit is not None:
                             gui.warning(lambda: log(message='Successfully recreated a best fit for file:\n'
                                                 +parameters.settings['Input/Output Settings']['Input file/folder'],
                                                 window=window,
-                                                menu=lambda:createBestFit(parameters)),
+                                                menu=lambda:analyzer.createBestFit(parameters.settings['RossiAlpha Settings']['Minimum cutoff'],
+                                                                                   parameters.settings['RossiAlpha Settings']['Time difference method'],
+                                                                                   parameters.settings['General Settings'],
+                                                                                   parameters.settings['Input/Output Settings']['Save directory'],
+                                                                                   parameters.settings['Line Fitting Settings'],
+                                                                                   parameters.settings['Residual Plot Settings'],
+                                                                                   parameters.settings['Histogram Visual Settings'])),
                                     'There is an already stored best fit line '
                                     + 'in this runtime. Do you want to overwrite it?')
                         # Otherwise, create with no warning.
                         else:
-                            plotSplit(parameters)
-                            createBestFit(parameters)
+                            analyzer.plotSplit(parameters.settings)
+                            analyzer.createBestFit(parameters.settings['RossiAlpha Settings']['Minimum cutoff'],
+                                                   parameters.settings['RossiAlpha Settings']['Time difference method'],
+                                                   parameters.settings['General Settings'],
+                                                   parameters.settings['Input/Output Settings']['Save directory'],
+                                                   parameters.settings['Line Fitting Settings'],
+                                                   parameters.settings['Residual Plot Settings'],
+                                                   parameters.settings['Histogram Visual Settings'])
                             log(message='Successfully created a best fit for file:\n'
                                 +parameters.settings['Input/Output Settings']['Input file/folder'],
                                 window=window)
@@ -623,37 +496,18 @@ def raSplit(window: Tk,
                 return True
             # Otherwise, run the full analysis.
             else:
-                raAll(False, parameters)
+                analyzer.raAll(False, parameters.settings)
                 log(message='Successfully ran all analysis with folder:\n'
                             +parameters.settings['Input/Output Settings']['Input file/folder'],
                             window=window)
-
-#--------------------CohnAlpha Functions--------------------#
-
-def conductCohnAlpha(parameters: set.Settings):
-
-    '''Copy and pasted function from CohnAlphaDriver for 
-    running Cohn Alpha analysis.
-
-    Requires:
-    - parameters: the settings object holding the current settings.
-    
-    See the original for more info.'''
-
-    file_path = parameters.settings['Input/Output Settings']['Input file/folder']
-
-    values = np.loadtxt(file_path, usecols=(0,3), max_rows=2000000, dtype=float)
-
-    CA_Object = ca.CohnAlpha(list_data_array=values, 
-                                          clean_pulses_switch=parameters.settings['CohnAlpha Settings']['Clean pulses switch'], 
-                                          dwell_time=parameters.settings['CohnAlpha Settings']['Dwell time'], 
-                                          meas_time_range=parameters.settings['CohnAlpha Settings']['Meas time range'])
-    
-    
-    CA_Object.conductCohnAlpha(show_plot=parameters.settings['General Settings']['Show plots'], 
-                            save_fig=parameters.settings['General Settings']['Save figures'],
-                            save_dir=parameters.settings['Input/Output Settings']['Save directory'],
-                            leg_label=parameters.settings['CohnAlpha Visual Settings']['Legend Label'],
-                            annotate_font_weight=parameters.settings['CohnAlpha Visual Settings']['Annotation Font Weight'],
-                            annotate_color=parameters.settings['CohnAlpha Visual Settings']['Annotation Color'],
-                            annotate_background_color=parameters.settings['CohnAlpha Visual Settings']['Annotation Background Color'])
+                
+def caSplit(window: Tk, parameters: set.Settings):
+    analyzer.conductCohnAlpha(parameters.settings['Input/Output Settings']['Input file/folder'],
+                              parameters.settings['Input/Output Settings']['Save directory'],
+                              parameters.settings['General Settings']['Show plots'],
+                              parameters.settings['General Settings']['Save figures'],
+                              parameters.settings['CohnAlpha Settings'],
+                              parameters.settings['CohnAlpha Visual Settings'])
+    log(message='Successfully ran Cohn Alpha analysis on file:\n'
+        +parameters.settings['Input/Output Settings']['Input file/folder'],
+        window=window)
