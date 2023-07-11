@@ -1,6 +1,7 @@
 {
     "Input/Output Settings": {
-        "Input file/folder": "./CohnAlpha/sample_data/stilbene_2in_CROCUS_20cm_offset_east.txt"
+        "Input file/folder": "./CohnAlpha/sample_data/stilbene_2in_CROCUS_20cm_offset_east.txt",
+        "Save directory": "./CohnAlpha/sample_data"
     },
     "General Settings": {
         "Show plots": true
