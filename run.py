@@ -414,7 +414,7 @@ def raSplit(window: Tk,
                 match mode:
                     # Run all analysis; no checks needed.
                     case 'raAll':
-                        analyzer.raAll(True, parameters.settings)
+                        analyzer.fullFile(parameters.settings)
                         log(message='Successfully ran all analysis on file:\n'
                             +parameters.settings['Input/Output Settings']['Input file/folder'],
                             window=window)
@@ -496,7 +496,7 @@ def raSplit(window: Tk,
                 return True
             # Otherwise, run the full analysis.
             else:
-                analyzer.raAll(False, parameters.settings)
+                analyzer.fullFolder(parameters.settings)
                 log(message='Successfully ran all analysis with folder:\n'
                             +parameters.settings['Input/Output Settings']['Input file/folder'],
                             window=window)
