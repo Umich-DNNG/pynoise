@@ -1,16 +1,23 @@
+'''The object used for analyzing data.'''
+
+import os
+import numpy as np
+import matplotlib.pyplot as pyplot
+import Event as evt
+import lmxReader as lmx
 from RossiAlpha import fitting as fit
 from RossiAlpha import plots as plt
 from RossiAlpha import timeDifs as dif
-import Event as evt
-import lmxReader as lmx
 from CohnAlpha import CohnAlpha as ca
-import numpy as np
-import matplotlib.pyplot as pyplot
-import os
 
 class Analyzer:
 
     def __init__(self):
+
+        '''The initializer for the Analyzer object.'''
+
+        # Initialize the variables used to determine whether 
+        # or not RossiAlpha elements have to be recreated.
         self.time_difs: dif.timeDifCalcs = None
         self.histogram: plt.RossiHistogram = None
         self.best_fit: fit.RossiHistogramFit = None
@@ -18,11 +25,25 @@ class Analyzer:
         self.method: str = None
 
     def conductCohnAlpha(self, input: str, output: str, show: bool, save: bool, caGen: dict, caVis: dict):
+
+        '''Runs Cohn Alpha analysis.
+        
+        Requires:
+        - input: the file path.
+        - output: the save directory.
+        - show: whether or not to show plots.
+        - save: whether or not to save plots.
+        - caGen: the CohnAlpha Settings dictionary.
+        - caVis: the CohnAlpha Visual Settings dictionary.'''
+
+        # Load the values from the specified file into an NP array.
         values = np.loadtxt(input, usecols=(0,3), max_rows=2000000, dtype=float)
+        # Create a Cohn Alpha object with the given settings.
         CA_Object = ca.CohnAlpha(values,
                                  caGen['Clean pulses switch'], 
                                  caGen['Dwell time'],
                                  caGen['Meas time range'])
+        # Conduct Cohn Alpha analysis with the given settings.
         CA_Object.conductCohnAlpha(show,
                                    save,
                                    output,
@@ -32,53 +53,107 @@ class Analyzer:
                                    caVis['Annotation Background Color'])
 
     def createTimeDifs(self, io: dict, sort: bool, reset: float, method: str, delay: int):
+        
+        '''Create Rossi Alpha time differences.
+        
+        Requires:
+        - io: the Input/Output Settings dictionary.
+        - sort: whether or not to sort the data.
+        - reset: the reset time.
+        - method: the time difference method.
+        - delay: the digital delay.'''
+        
+        # Load the data according to its file type.
         if io['Input file/folder'].endswith(".txt"):
             data = evt.createEventsListFromTxtFile(io['Input file/folder'], io['Time column'], io['Channels column'])
         elif io['Input file/folder'].endswith(".lmx"):
             data = lmx.readLMXFile(io['Input file/folder'])
+        # If file type isn't valid, throw an error.
         else:
             return ValueError
+        # Sort the data if applicable.
         if sort:
             data.sort(key=lambda Event: Event.time)
+        # Create the time difference object and calculate 
+        # the time differences with the given settings.
         self.time_difs = dif.timeDifCalcs(data, reset, method, delay)
         self.time_difs = self.time_difs.calculateTimeDifsFromEvents()
+        # Save the input and method of analysis.
         self.input = io['Input file/folder']
         self.method = method
 
     def createPlot(self, width: int, reset: float, save: bool, show: bool, output: str, vis: dict):
+        
+        '''Create a Rossi Alpha histogram. Assumes 
+        that time differences are already calculated.
+        
+        Requires:
+        - width: the bin width.
+        - reset: the reset time.
+        - save: whether or not to save plots.
+        - show: whether or not to show plots.
+        - output: the save directory.
+        - vis: the Histogram Visual Settings dictionary.'''
+        
+        # Create a RossiHistogram object and plot the data with the given settings.
         self.histogram = plt.RossiHistogram(self.time_difs, width, reset)
         self.histogram.plot(save, show, output, vis)
 
     def calculateTimeDifsAndPlot(self, io: dict, gen: dict, raGen: dict, raVis: dict):
+
+        '''Simultaneously calculate the time 
+        differences and construct a Rossi Histogram.
+        
+        Requires:
+        - io: the Input/Output Settings dictionary.
+        - gen: the General Settings dictionary.
+        - raGen: the RossiAlpha Settings dictionary.
+        - raVis: the Histogram Visual Settings dictionary.'''
+
+        # Reset the time differences.
         self.time_difs = None
+        # Load the data according to its file type.
         if io['Input file/folder'].endswith(".txt"):
             data = evt.createEventsListFromTxtFile(io['Input file/folder'], io['Time column'], io['Channels column'])
         elif io['Input file/folder'].endswith(".lmx"):
             data =  lmx.readLMXFile(io['Input file/folder'])
+        # If file type isn't valid, throw an error.
         else:
             return ValueError
+        # Sort the data if applicable.
         if gen['Sort data']:
             data.sort(key=lambda Event: Event.time)
-        thisTimeDifCalc = dif.timeDifCalcs(data, 
-                                           raGen['Reset time'], 
-                                           raGen['Time difference method'],
-                                           raGen['Digital delay'])
+        # Construct a time differences object with the given settings.
+        thisTimeDifCalc = dif.timeDifCalcs(data, raGen['Reset time'], raGen['Time difference method'], raGen['Digital delay'])
+        # Simulatenously calculate the time differences and bin them.
         self.histogram, counts, bin_centers, bin_edges = thisTimeDifCalc.calculateTimeDifsAndBin(raGen['Bin width'],
                                                                                                  gen['Save figures'],
                                                                                                  gen['Show plots'],
                                                                                                  io['Save directory'],
                                                                                                  raVis)
+        # Save the input and method of analysis.
         self.input = io['Input file/folder']
         self.method = raGen['Time difference method']
 
     def plotSplit(self, settings: dict):
+
+        '''Determines what combination of time difference 
+        calculation and Rossi Histogram constructing to do.
+        
+        Requires:
+        - settings: the current runtime settings.'''
+
+        # If time differences have not yet been calculated or the 
+        # current method/input file do not match those previously used:
         if self.time_difs is None or (not (self.method == settings['RossiAlpha Settings']['Time difference method']
                                       and self.input == settings['Input/Output Settings']['Input file/folder'])):
+            # If applicable, combine the time difference calculation and binning.
             if (settings['RossiAlpha Settings']['Combine Calc and Binning']):
                 self.calculateTimeDifsAndPlot(settings['Input/Output Settings'],
                                               settings['General Settings'],
                                               settings['RossiAlpha Settings'],
                                               settings['Histogram Visual Settings'])
+            # Otherwise, create the time differences and histogram separately.
             else:
                 self.createTimeDifs(settings['Input/Output Settings'],
                                     settings['General Settings']['Sort data'],
@@ -91,6 +166,7 @@ class Analyzer:
                                 settings['General Settings']['Show plots'],
                                 settings['Input/Output Settings']['Save directory'],
                                 settings['Histogram Visual Settings'])
+        # Otherwise, just create a Rossi Histogram plot. 
         else:
             self.createPlot(settings['RossiAlpha Settings']['Bin width'],
                             settings['RossiAlpha Settings']['Reset time'],
@@ -100,6 +176,22 @@ class Analyzer:
                             settings['Histogram Visual Settings'])
             
     def createBestFit(self, cutoff: int, method: str, gen: dict, output: str, line: dict, res: dict, hist: dict, index = None):
+        
+        '''Create a Rossi Histogram line of best fit and residual plot.
+        
+        Requires:
+        - cutoff: the minimum cutoff.
+        - method: the time difference method.
+        - gen: the General Settings dictionary.
+        - output: the save directory.
+        - line: the Line Fitting Settings dictionary.
+        - res: the Residual Plot Settings dictionary.
+        - hist: the Histogram Visual Settings dictionary.
+        
+        Optional:
+        - index: the folder index, if applicable.'''
+        
+        # Construct a RossiHistogramFit object and plot it with the given settings.
         self.best_fit = fit.RossiHistogramFit(self.histogram.counts,
                                               self.histogram.bin_centers,
                                               cutoff,
@@ -114,7 +206,15 @@ class Analyzer:
                                        index)
 
     def fullFile(self, settings: dict):
+
+        '''Run full Rossi Alpha analysis on a single file.
+        
+        Requires:
+        - settings: the current runtime settings.'''
+
+        # Run the plot split.
         self.plotSplit(settings)
+        # Create a best fit for the data.
         self.createBestFit(settings['RossiAlpha Settings']['Minimum cutoff'],
                            settings['RossiAlpha Settings']['Time difference method'],
                            settings['General Settings'],
@@ -122,14 +222,25 @@ class Analyzer:
                            settings['Line Fitting Settings'],
                            settings['Residual Plot Settings'],
                            settings['Histogram Visual Settings'])
+        # Close all currently open plots.
         pyplot.close()
 
     def replace_zeroes(self, lst: list):
+
+        '''Replace all zeroes in a list with 
+        the average of the non-zero elements.
+        
+        Requires:
+        - lst: the list to be edited.'''
+
+        # Create a list of all the non-zero elements and compute their average.
         non_zero_elements = [x for x in lst if x != 0]
         average = sum(non_zero_elements) / len(non_zero_elements)
+        # For each zero in the list, replace it with the average.
         for i in range(len(lst)):
             if lst[i] == 0:
                 lst[i] = average
+        # Return the edited list.
         return lst
 
     def fullFolder(self, settings: dict):
@@ -194,4 +305,5 @@ class Analyzer:
         thisWeightedFit.plot_RA_and_fit(settings['General Settings']['Save figures'], 
                                         settings['General Settings']['Show plots'],
                                         settings['RossiAlpha Settings']['Error Bar/Band'])
+        # Close all open plots.
         pyplot.close()
