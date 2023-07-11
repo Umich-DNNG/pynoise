@@ -5,34 +5,11 @@ Created on Thu Jun  1 11:42:16 2023
 @author: 357375
 """
 
-import numpy as np
-from . import CohnAlpha as CA
 import editor as edit
+import analyze as alz
 
 editor: edit.Editor = None
-
-def conductCohnAlpha():
-    
-    '''Creates CohnAlpha plots based on input data.'''
-
-    file_path = editor.parameters.settings['Input/Output Settings']['Input file/folder']
-
-    values = np.loadtxt(file_path, usecols=(0,3), max_rows=2000000, dtype=float)
-
-    CA_Object = CA.CohnAlpha(list_data_array=values, 
-                                          clean_pulses_switch=editor.parameters.settings['CohnAlpha Settings']['Clean pulses switch'], 
-                                          dwell_time=editor.parameters.settings['CohnAlpha Settings']['Dwell time'], 
-                                          meas_time_range=editor.parameters.settings['CohnAlpha Settings']['Meas time range'])
-    
-    
-    CA_Object.conductCohnAlpha(show_plot=editor.parameters.settings['General Settings']['Show plots'], 
-                            save_fig=editor.parameters.settings['General Settings']['Save figures'],
-                            save_dir=editor.parameters.settings['Input/Output Settings']['Save directory'],
-                            leg_label=editor.parameters.settings['CohnAlpha Visual Settings']['Legend Label'],
-                            annotate_font_weight=editor.parameters.settings['CohnAlpha Visual Settings']['Annotation Font Weight'],
-                            annotate_color=editor.parameters.settings['CohnAlpha Visual Settings']['Annotation Color'],
-                            annotate_background_color=editor.parameters.settings['CohnAlpha Visual Settings']['Annotation Background Color'])
-
+analyzer = alz.Analyzer()
 
 def main(editorIn: edit.Editor, queue: list[str]):
     global editor
@@ -42,10 +19,6 @@ def main(editorIn: edit.Editor, queue: list[str]):
     while selection != '' and selection != 'x':
         editor.print('You can utilize any of the following functions:')
         editor.print('m - run the entire program through the main driver')
-        '''
-        editor.print('p - plot the data')
-        editor.print('f - fit the data to a curve')
-        '''
         editor.print('s - view or edit the program settings')
         editor.print('Leave the command blank or enter x to return to the main menu.')
         if len(queue) != 0:
@@ -64,18 +37,15 @@ def main(editorIn: edit.Editor, queue: list[str]):
                           + 'Please make sure to specify one before running any analysis.\n')
                 else:
                     editor.print('\nRunning the entire Cohn Alpha analysis...')
-                    conductCohnAlpha()
+                    analyzer.conductCohnAlpha(editor.parameters.settings['Input/Output Settings']['Input file/folder'],
+                                              editor.parameters.settings['Input/Output Settings']['Save directory'],
+                                              editor.parameters.settings['General Settings']['Show plots'],
+                                              editor.parameters.settings['General Settings']['Save figures'],
+                                              editor.parameters.settings['CohnAlpha Settings'],
+                                              editor.parameters.settings['CohnAlpha Visual Settings'])
                     editor.log('Ran the entire Cohn Alpha on file ' 
                                 + editor.parameters.settings['Input/Output Settings']['Input file/folder'] 
                                 + '.\n')
-                '''
-            case 'p':
-                editor.print('')
-                editor.print('Plotting the data...')
-            case 'f':
-                editor.print('')
-                editor.print('Fitting the data...')
-                '''
             # View and/or edit program settings.
             case 's':
                 editor.print('')

@@ -500,3 +500,14 @@ def raSplit(window: Tk,
                 log(message='Successfully ran all analysis with folder:\n'
                             +parameters.settings['Input/Output Settings']['Input file/folder'],
                             window=window)
+                
+def caSplit(window: Tk, parameters: set.Settings):
+    analyzer.conductCohnAlpha(parameters.settings['Input/Output Settings']['Input file/folder'],
+                              parameters.settings['Input/Output Settings']['Save directory'],
+                              parameters.settings['General Settings']['Show plots'],
+                              parameters.settings['General Settings']['Save figures'],
+                              parameters.settings['CohnAlpha Settings'],
+                              parameters.settings['CohnAlpha Visual Settings'])
+    log(message='Successfully ran Cohn Alpha analysis on file:\n'
+        +parameters.settings['Input/Output Settings']['Input file/folder'],
+        window=window)
