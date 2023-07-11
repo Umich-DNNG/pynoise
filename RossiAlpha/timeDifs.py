@@ -13,16 +13,13 @@ class timeDifCalcs:
     
         Requires:
         - events: the list of measurement times for each data point.
+        - digital_delay: the amount of digital delay, if applicable. Only required 
+        when using the any_and_all cross_correlations no_repeat digital_delay method.
         
         Optional:
         - reset_time: the maximum time difference allowed. If 
         not given, will autogenerate the best reset time.
-        TODO: Actually do this.
-        - method: the method of calculating time differences (assumes any_and_all).
-        - digital_delay: the amount of digital delay, if applicable. 
-        If digital delay is needed and not given, the initializer 
-        will autogenerate a good digital delay for the data.
-        TODO: Actually do this.'''
+        - method: the method of calculating time differences (assumes any_and_all).'''
         
         # Store events as a list.
         self.events = events
@@ -34,16 +31,9 @@ class timeDifCalcs:
             self.reset_time = events[-1].time - events[0].time
         # Store the method of analysis.
         self.method = method
-        # For considering digital delay.
+        # When considering digital delay, store given digital delay.
         if self.method == 'any_and_all cross_correlations no_repeat digital_delay':
-            # If no digital delay is given, generate one.
-            if digital_delay == None:
-                #TODO: create a generated default for the data. The line below is a stand-in.
-                self.digital_delay = digital_delay
-            # Otherwise, use the given value.
-            else:
-                self.digital_delay = digital_delay
-        
+            self.digital_delay = digital_delay
         # Initialize the blank time differences.
         self.timeDifs = None
 
@@ -81,19 +71,18 @@ class timeDifCalcs:
                         # Add the current time difference to the list.
                         time_diffs = np.append(time_diffs,(self.events[j].time - self.events[i].time))
                     # If digital delay is on:
-                    # TODO: why is it elif???
                     elif(self.method == 'any_and_all cross_correlations no_repeat digital_delay'):
                         # Skip to the nearest data point after the
                         # current one with the digital delay added.
                         stamped_time = self.events[i].time
                         while self.events[i].time < stamped_time + self.digital_delay:
-                           i = i + 1
+                           i += 1
                     # Add the current channel to the channel bank if considering channels.
                     if(self.method != "any_and_all"):
                         ch_bank.add(self.events[j].channel)
-            # Iterate to the next data point.
-            # TODO: Don't do this when doing digital delay.
-            i = i + 1
+            # Iterate to the next data point without double counting for digital delay.
+            if self.method != 'any_and_all cross_correlations no_repeat digital_delay':
+                i += 1
         # Store the time differences array.
         self.timeDifs = time_diffs
         # Return the time differences array.
@@ -157,7 +146,6 @@ class timeDifCalcs:
                         # Increase the histogram count in the appropriate bin.
                         histogram[binIndex] += 1    
                     # If digital delay is on:
-                    # TODO: why is it elif???
                     elif(self.method == 'any_and_all cross_correlations no_repeat digital_delay'):
                         # Skip to the nearest data point after the
                         # current one with the digital delay added.
@@ -168,8 +156,8 @@ class timeDifCalcs:
                     if(self.method != "any_and_all"):
                         ch_bank.add(self.events[j].channel)
             # Iterate to the next data point.
-            # TODO: Should we still do this when using digital delay?
-            i += 1
+            if self.method != 'any_and_all cross_correlations no_repeat digital_delay':
+                i += 1
         # Normalize the histogram.
         bin_edges = np.linspace(0, self.reset_time, num_bins + 1)
         bin_centers = 0.5 * (bin_edges[1:] + bin_edges[:-1])
