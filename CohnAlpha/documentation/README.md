@@ -29,7 +29,7 @@ The format of the file you want to analyze should be a .txt file with a list of 
 
 ### Settings Configurations
 
-The PowerSpectralDensity program can be run with a variety of options that change the visual output and type of analysis being run. In the settings file, this is listed as the PSD Settings. The settings are as follows: 
+The CohnAlpha program can be run with a variety of options that change the visual output and type of analysis being run. In the settings file, this is listed as the PSD Settings. The settings are as follows: 
 * Dwell time (*float*): Description  (TODO).
 * Meas time range (*list of type float (size=2)*): The meas time range set by two float values in a list that denotes start and end.
 * Clean pulses switch (*float*): Description  (TODO).
@@ -44,7 +44,7 @@ There are 2 options for this method:
 
 
 ### Editor
-The editor class for modifying settings is also accessible from the psdDriver. See the main README file for more information on its proper use.
+The editor class for modifying settings is also accessible from the CohnAlphaDriver. See the main README file for more information on its proper use.
 
 
 ### CohnAlpha.py
@@ -54,16 +54,16 @@ CohnAlpha.py will have the following functions:
 * class CohnAlpha: __init__()
 * class CohnAlpha: conductCohnAlpha()
 
-The CAFit() function represents the Power Spectral Density Fitting Function
+The CAFit() function represents the Cohn Alpha Fitting Function
 
-The class PowerSpectralDensity: __init__() function will initialize a PowerSpectralDensity object
+The class PowerSpectralDensity: __init__() function will initialize a CohnAlpha object
 Inputs:
 * list_data_array, 
 * clean_pulses_switch (default=True, meaning that this paramter is turned on by default)
 * dwell_time (default=2.0e6, meaning that the default value is 2,000,000)
 * meas_time_range (default=[1.5e11, 1.0e12], meaning that the default range is [1.5e11, 1.0e12])
 
-The class CohnAlpha: conductCohnAlpha() will perform the Power Spectral Density Analysis and produce the corresponding figures
+The class CohnAlpha: conductCohnAlpha() will perform the Cohn Alpha Analysis and produce the corresponding figures
 Inputs:
 * show_plot (default=True, meaning that showing the plot(s) is the default)
 * save_fig (default=True, meaning that saving the plots(s) is the default)
