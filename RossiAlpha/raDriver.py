@@ -42,13 +42,13 @@ def main(editorIn: edit.Editor, queue: list[str] = []):
                             print('ERROR: When using methods other than any_and_all, you must specify a column.\n')
                         else:
                             editor.print('Running the entire RossiAlpha method...')
-                            analyzer.raAll(True, editor.parameters.settings)
+                            analyzer.fullFile(editor.parameters.settings)
                             editor.log('Ran the entire RossiAlpha method on file ' 
                                 + editor.parameters.settings['Input/Output Settings']['Input file/folder'] 
                                 + '.\n')
                     else:
                         editor.print('Running the entire RossiAlpha method...')
-                        analyzer.raAll(False, editor.parameters.settings)
+                        analyzer.fullFolder(editor.parameters.settings)
                         editor.log('Ran the entire RossiAlpha method on folder ' 
                             + editor.parameters.settings['Input/Output Settings']['Input file/folder'] 
                             + '.\n')
