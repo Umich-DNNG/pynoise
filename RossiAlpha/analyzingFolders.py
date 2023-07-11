@@ -38,7 +38,7 @@ def compile_sample_stdev_RA_dist(settings: dict):
             if filename.endswith("n_allch.txt"):
                 path_to_data = data_folder + "/" + str(fol_num) + "/" + filename
   
-                events = createEventsListFromTxtFile(path_to_data,settings['Input/Output Settings']['Time Column'], settings['Input/Output Settings']['Channels Column'])
+                events = createEventsListFromTxtFile(path_to_data,settings['Input/Output Settings']['Time column'], settings['Input/Output Settings']['Channels column'])
 
                 if settings['General Settings']['Sort data'] == True:
                     events.sort(key=lambda Event: Event.time)

@@ -27,7 +27,7 @@ def analyzeAllType1(settings: dict):
     filePath = settings['Input/Output Settings']['Input file/folder']
 
     if filePath.endswith(".txt"):
-        listData = createEventsListFromTxtFile(filePath,settings['Input/Output Settings']['Time Column'], settings['Input/Output Settings']['Channels Column'])
+        listData = createEventsListFromTxtFile(filePath,settings['Input/Output Settings']['Time column'], settings['Input/Output Settings']['Channels column'])
     # sorting timestamps to be fed into calculate_time_differences()
     elif filePath.endswith(".lmx"):
         print("this is an lmx file. we are currently in testing stages for analyzing this file type.")
