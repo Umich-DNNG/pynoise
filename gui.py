@@ -597,12 +597,7 @@ def cohnAlphaMenu():
     ttk.Button(window,
               name='run',
               text='Run analysis',
-              command=lambda: run.analyzer.conductCohnAlpha(parameters.settings['Input/Output Settings']['Input file/folder'],
-                                                            parameters.settings['Input/Output Settings']['Save directory'],
-                                                            parameters.settings['General Settings']['Show plots'],
-                                                            parameters.settings['General Settings']['Save figures'],
-                                                            parameters.settings['CohnAlpha Settings'],
-                                                            parameters.settings['CohnAlpha Visual Settings'])
+              command=lambda: run.caSplit(window, parameters)
               ).pack(side=TOP,padx=10)
     # Button to view the program settings.
     ttk.Button(window,

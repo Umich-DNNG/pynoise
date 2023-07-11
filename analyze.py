@@ -107,5 +107,5 @@ class Analyzer:
                             settings['Histogram Visual Settings'])
             
     def createBestFit(self, cutoff: int, method: str, gen: dict, output: str, line: dict, res: dict, hist: dict):
-        best_fit = fit.RossiHistogramFit(self.histogram.counts, self.histogram.bin_centers, cutoff, method, gen['Fit range'])
-        best_fit.fit_and_residual(gen['Save figures'], output, gen['Show plots'], line, res, hist)
+        self.best_fit = fit.RossiHistogramFit(self.histogram.counts, self.histogram.bin_centers, cutoff, method, gen['Fit range'])
+        self.best_fit.fit_and_residual(gen['Save figures'], output, gen['Show plots'], line, res, hist)
