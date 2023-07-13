@@ -725,12 +725,15 @@ def startup():
     # Welcome information for the user.
     ttk.Label(window,
             name='welcome',
-            text='Welcome to the DNNG/PyNoise project.\n\nWith '
-            + 'this software we are taking radiation data from '
-            + 'fission reactions \n(recorded by organic scintillators) '
-            + 'and analyzing it using various methods and tools.\n\n'
-            + 'Use this Python suite to analyze a single file or '
-            + 'multiple across numerous folders.\n'
+            text='Welcome to the DNNG/PyNoise project.'
+            ).pack(side=TOP,padx=10,pady=10)
+    ttk.Label(window,
+            name='info',
+            text='With this software we are taking radiation data '
+            + 'from fission reactions \n(recorded by organic '
+            + 'scintillators) and analyzing it using various methods '
+            + 'and tools.\n\nUse this Python suite to analyze a single '
+            + 'file or multiple across numerous folders.\n'
             ).pack(side=TOP,padx=10,pady=10)
     # Prompt the user.
     ttk.Label(window,
