@@ -4,12 +4,20 @@ import Event as evt
 def randomCounts(triggers: list[evt.Event], tau: int):
     # Get the smallest time measurement to mark as the beginning.
     min_time = triggers[0].time
-    num_gates = int(np.ceil((triggers[len(triggers)-1].time-min_time)/tau))
     # Convert the list of times into which gate each measurement is in.
-    counts = (np.array([(event.time - min_time)/tau for event in triggers])).astype(int)
-    # Count the number of measurements in each gate and then count the frequency of each size.
-    counts = np.bincount(np.bincount(counts))
-    # Converts the counts into probabilities.
-    counts = (np.array([frequency/num_gates for frequency in counts]))
-    # Return the list.
-    return counts
+    triggers = (np.array([(event.time - min_time)/tau for event in triggers])).astype(int)
+    frequencies = []
+    count = 1
+    prev = triggers[0]
+    for measurement in triggers[1:]:
+        if measurement == prev:
+            count += 1
+        else:
+            while count > len(frequencies):
+                frequencies.append(0)
+            frequencies[count-1] += 1
+            count = 1
+        prev = measurement
+    num_gates = sum(frequencies)
+    frequencies = [freq/num_gates for freq in frequencies]
+    return frequencies

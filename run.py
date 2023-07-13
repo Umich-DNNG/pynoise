@@ -511,3 +511,9 @@ def caSplit(window: Tk, parameters: set.Settings):
     log(message='Successfully ran Cohn Alpha analysis on file:\n'
         +parameters.settings['Input/Output Settings']['Input file/folder'],
         window=window)
+
+def fySplit(window: Tk, parameters: set.Settings):
+    analyzer.runFeynmanY(parameters.settings['Input/Output Settings'])
+    log(message='Successfully ran Feynman Y analysis on file:\n'
+        +parameters.settings['Input/Output Settings']['Input file/folder'],
+        window=window)
