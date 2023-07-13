@@ -6,15 +6,13 @@ Created on Thu Jun  1 11:42:16 2023
 """
 
 import numpy as np
-import matplotlib.pyplot as plt
-from scipy.optimize import curve_fit
-from scipy import signal
-from PowerSpectralDensity import PSD as psd
+from . import PSD as psd
+import editor as edit
 
-editor = None
-
+editor: edit.Editor = None
 
 def conduct_PSD():
+    
     '''Creates PSD plots based on input data.'''
 
     file_path = editor.parameters.settings['Input/Output Settings']['Input file/folder']
@@ -22,17 +20,21 @@ def conduct_PSD():
     values = np.loadtxt(file_path, usecols=(0,3), max_rows=2000000, dtype=float)
 
     PSD_Object = psd.PowerSpectralDensity(list_data_array=values, 
-                                        leg_label="TEST", 
-                                        clean_pulses_switch=editor.parameters.settings['PSD Settings']['Clean pulses switch'], 
-                                        dwell_time=editor.parameters.settings['PSD Settings']['Dwell time'], 
-                                        meas_time_range=editor.parameters.settings['PSD Settings']['Meas time range'])
+                                          leg_label=editor.parameters.settings['PSD Settings']['Legend Label'], 
+                                          clean_pulses_switch=editor.parameters.settings['PSD Settings']['Clean pulses switch'], 
+                                          dwell_time=editor.parameters.settings['PSD Settings']['Dwell time'], 
+                                          meas_time_range=editor.parameters.settings['PSD Settings']['Meas time range'])
+    
     
     PSD_Object.conduct_APSD(show_plot=editor.parameters.settings['General Settings']['Show plots'], 
                             save_fig=editor.parameters.settings['General Settings']['Save figures'],
-                            save_dir=editor.parameters.settings['Input/Output Settings']['Save directory'])
+                            save_dir=editor.parameters.settings['Input/Output Settings']['Save directory'],
+                            annotate_font_weight=editor.parameters.settings['PSD Settings']['Annotation Font Weight'],
+                            annotate_color=editor.parameters.settings['PSD Settings']['Annotation Color'],
+                            annotate_background_color=editor.parameters.settings['PSD Settings']['Annotation Background Color'])
 
 
-def main(editorIn, queue):
+def main(editorIn: edit.Editor, queue: list[str]):
     global editor
     editor = editorIn
     selection = 'blank'
@@ -61,9 +63,11 @@ def main(editorIn, queue):
                     print('ERROR: You currently have no input file or folder defined. '
                           + 'Please make sure to specify one before running any analysis.\n')
                 else:
-                    editor.print('')
-                    editor.print('Running the entire power spectral density analysis...')
+                    editor.print('\nRunning the entire power spectral density analysis...')
                     conduct_PSD()
+                    editor.log('Ran the entire RossiAlpha method on file ' 
+                                + editor.parameters.settings['Input/Output Settings']['Input file/folder'] 
+                                + '.\n')
                 '''
             case 'p':
                 editor.print('')
@@ -86,9 +90,3 @@ def main(editorIn, queue):
                 print('ERROR: Unrecognized command ' + selection 
                         + '. Please review the list of appriopriate inputs.\n')
     return editor, queue
-
-
-# Tells the program what function to start if this is the main program being ran (TO BE DELETED)
-if __name__ == "__main__":
-    main()
-                

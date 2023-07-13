@@ -11,7 +11,12 @@ def APSD(f, A, alpha, c):
 # ---------------------------------------------------------------------------------------------------
 
 class PowerSpectralDensity:
-    def __init__(self, list_data_array, leg_label, clean_pulses_switch, dwell_time, meas_time_range):
+    def __init__(self, 
+                 list_data_array, 
+                 leg_label: str, 
+                 clean_pulses_switch: bool, 
+                 dwell_time: float, 
+                 meas_time_range: list[float]):
 
         '''
         Description:
@@ -36,8 +41,14 @@ class PowerSpectralDensity:
         self.meas_time_range = meas_time_range
 
 
-    def conduct_APSD(self, show_plot, save_fig, save_dir):
-
+    def conduct_APSD(self, 
+                     show_plot: bool, 
+                     save_fig: bool, 
+                     save_dir: str, 
+                     annotate_font_weight: str = "bold", 
+                     annotate_color: str = "black", 
+                     annotate_background_color: str = "white"):
+        
         '''
         Creating PSD plot from an array of data inputs.
         Saving and showing the plot can be turned on or off.
@@ -51,6 +62,11 @@ class PowerSpectralDensity:
             - popt (Optimal values for the parameters)
             - pcov (DESCRIPTION NEEDED)
         '''
+
+        # Annotation Parameters
+        self.annotate_font_weight = annotate_font_weight
+        self.annotate_color = annotate_color
+        self.annotate_background_color = annotate_background_color
         
         # Making count of bins over time histogram
         count_bins = np.diff(self.meas_time_range) / self.dwell_time
@@ -98,6 +114,9 @@ class PowerSpectralDensity:
                             bounds=(0, np.inf),
                             maxfev=100000)
         
+        print('alpha = ' + str(np.around(popt[1]*2*np.pi, decimals=2)) + ', uncertainty = '+ 
+                    str(np.around(pcov[1,1]*2*np.pi, decimals=2)))
+        
         # Plotting the auto-power-spectral-density distribution and fit
         fig2, ax2 = plt.subplots()
 
@@ -124,9 +143,9 @@ class PowerSpectralDensity:
                     xy=(1.5, ymin+0.1*dy), 
                     xytext=(1.5, ymin+0.1*dy),
                     fontsize=16, 
-                    fontweight='bold',
-                    color='black', 
-                    backgroundcolor='white')
+                    fontweight=self.annotate_font_weight,
+                    color=self.annotate_color, 
+                    backgroundcolor=self.annotate_background_color)
         
         # Creating title and legend
         ax2.set_title('Power Spectral Density Graph')
@@ -147,7 +166,6 @@ class PowerSpectralDensity:
 
         # Showing plot (optional)
         if show_plot:
-            print("entered")
             plt.show()
         
         # Outputting the PSD distribution and fit
