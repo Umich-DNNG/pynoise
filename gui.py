@@ -612,6 +612,40 @@ def cohnAlphaMenu():
               command=main
               ).pack(side=TOP,padx=10,pady=10)
 
+def feynmanYMenu():
+
+    '''The GUI for the Feynman Y menu.'''
+
+    global window, parameters
+    # Clear the window of all previous entries, labels, and buttons.
+    for item in window.winfo_children():
+        item.destroy()
+    # Properly name the window.
+    window.title('Feynman Y Analysis')
+    # Prompt the user.
+    ttk.Label(window,
+              name='prompt',
+              text='What would you like to do?'
+              ).pack(side=TOP,padx=10,pady=10)
+    # Button to run analysis.
+    ttk.Button(window,
+              name='run',
+              text='Run analysis',
+              command=lambda: run.fySplit(window, parameters)
+              ).pack(side=TOP,padx=10)
+    # Button to view the program settings.
+    ttk.Button(window,
+              name='settings',
+              text='Program settings',
+              command=lambda: setMenu(feynmanYMenu)
+              ).pack(side=TOP,padx=10)
+    # Button to return to the main menu.
+    ttk.Button(window,
+              name='return',
+              text='Return to main menu',
+              command=main
+              ).pack(side=TOP,padx=10,pady=10)
+
 def download_menu(prev, to):
 
     '''The GUI for the settings download menu.'''
@@ -682,6 +716,12 @@ def main():
                name='cohn_alpha',
                text='Run Cohn Alpha analysis',
                command=cohnAlphaMenu
+               ).pack(side=TOP,padx=10)
+    # Button to run Cohn Alpha analysis. 
+    ttk.Button(window,
+               name='feynman_y',
+               text='Run Feynman Y analysis',
+               command=feynmanYMenu
                ).pack(side=TOP,padx=10)
     # Button to edit the program settings.
     ttk.Button(window,
