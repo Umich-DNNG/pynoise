@@ -9,6 +9,7 @@ from RossiAlpha import fitting as fit
 from RossiAlpha import plots as plt
 from RossiAlpha import timeDifs as dif
 from CohnAlpha import CohnAlpha as ca
+from FeynmanY import randomCounts as rc
 
 class Analyzer:
 
@@ -23,6 +24,14 @@ class Analyzer:
         self.best_fit: fit.RossiHistogramFit = None
         self.input: str = None
         self.method: str = None
+
+    def runFeynmanY(self, io: dict):
+        print('WARNING: This is not fully implemented yet. This is currently for debugging.')
+        data = evt.createEventsListFromTxtFile(io['Input file/folder'], io['Time column'], io['Channels column'])
+        data.sort(key=lambda Event: Event.time)
+        points = rc.randomCounts(data, 1000000)
+        for probability in points:
+            print(probability)
 
     def conductCohnAlpha(self, input: str, output: str, show: bool, save: bool, caGen: dict, caVis: dict):
 
