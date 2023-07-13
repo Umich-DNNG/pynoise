@@ -6,25 +6,23 @@ import os                              # For saving figures
 
 
 # ------------ Power Spectral Density Fitting Function ----------------------------------------------
-def APSD(f, A, alpha, c):
+def CAFit(f, A, alpha, c):
     return A / (1+(f**2/alpha**2)) + c
 # ---------------------------------------------------------------------------------------------------
 
-class PowerSpectralDensity:
+class CohnAlpha:
     def __init__(self, 
                  list_data_array, 
-                 leg_label: str, 
-                 clean_pulses_switch: bool, 
-                 dwell_time: float, 
-                 meas_time_range: list[float]):
-
+                 clean_pulses_switch: bool = True, 
+                 dwell_time: float = 2.0e6, 
+                 meas_time_range: list[float] = [1.5e11, 1.0e12]):
+        
         '''
         Description:
             - Creating a PowerSpectralDensity() object and its variables.
 
         Inputs:
             - list_data_array (Input script)
-            - leg_label (label setting for legend)
             - clean_pulses_switch (whether to include rows where last column==1)
             - dwell_time (DESCRIPTION NEEDED)
             - meas_time_range (DESCRIPTION NEEDED)
@@ -35,16 +33,15 @@ class PowerSpectralDensity:
 
         # Required Parameters
         self.list_data_array = list_data_array
-        self.leg_label = leg_label
         self.clean_pulses_switch = clean_pulses_switch
         self.dwell_time = dwell_time
         self.meas_time_range = meas_time_range
 
-
-    def conduct_APSD(self, 
-                     show_plot: bool, 
-                     save_fig: bool, 
-                     save_dir: str, 
+    def conductCohnAlpha(self, 
+                     show_plot: bool = True, 
+                     save_fig: bool = True, 
+                     save_dir: str = './', 
+                     leg_label: str = "frequency intensity",
                      annotate_font_weight: str = "bold", 
                      annotate_color: str = "black", 
                      annotate_background_color: str = "white"):
@@ -52,9 +49,17 @@ class PowerSpectralDensity:
         '''
         Creating PSD plot from an array of data inputs.
         Saving and showing the plot can be turned on or off.
+        Visual settings can also be adjusted.
 
         Inputs:
             - self (all the private variables in PowerSpectralDensity() object)
+            - show_plot (whether to show plot) default is True
+            - save_fig (whether to save figure) default is True
+            - save_dir (figure save directory) default if root folder
+            - leg_label (label for the legend)
+            - annotate_font_weight (annotation font weight) default is bold
+            - annotate_color (color of the annotation) default is black
+            - annotate_background_color (color of the annotation background) default is white
 
         Outputs: 
             - f (DESCRIPTION NEEDED)
@@ -64,6 +69,8 @@ class PowerSpectralDensity:
         '''
 
         # Annotation Parameters
+
+        self.leg_label = leg_label
         self.annotate_font_weight = annotate_font_weight
         self.annotate_color = annotate_color
         self.annotate_background_color = annotate_background_color
@@ -107,7 +114,7 @@ class PowerSpectralDensity:
                             window='boxcar')
         
         # Fitting distribution with expected equation (Ignore start & end points that are incorrect due to welch endpoint assumptions)
-        popt, pcov = curve_fit(APSD, 
+        popt, pcov = curve_fit(CAFit, 
                             f[1:-2], 
                             Pxx[1:-2],
                             p0=[Pxx[2], 25, 0.001],
@@ -122,7 +129,7 @@ class PowerSpectralDensity:
 
         # Creating a plot with semilogarithmic (log-scale) x-axis 
         ax2.semilogx(f[1:-2], Pxx[1:-2], '.', label=self.leg_label)
-        ax2.semilogx(f[1:-2], APSD(f[1:-2], *popt), '--', label='fit')
+        ax2.semilogx(f[1:-2], CAFit(f[1:-2], *popt), '--', label='fit')
         
         # Setting minimum and maximum for y
         ymin, ymax = ax2.get_ylim()
@@ -131,7 +138,7 @@ class PowerSpectralDensity:
         # Creating axis titles
         ax2.set_xlim([1, 200])
         ax2.set_xlabel('Frequency (Hz)')
-        ax2.set_ylabel('PSD (V$^2$/Hz)')
+        ax2.set_ylabel('CohnAlpha (V$^2$/Hz)')
 
         # Constructing alpha string
         alph_str = (r'$\alpha$ = (' +
@@ -148,7 +155,7 @@ class PowerSpectralDensity:
                     backgroundcolor=self.annotate_background_color)
         
         # Creating title and legend
-        ax2.set_title('Power Spectral Density Graph')
+        ax2.set_title('Cohn Alpha Graph')
         ax2.legend(loc='upper right')
         
 
@@ -156,11 +163,11 @@ class PowerSpectralDensity:
         if save_fig:
 
             fig1.tight_layout()
-            save_filename = os.path.join(save_dir, 'PSD1')
+            save_filename = os.path.join(save_dir, 'CohnAlpha1')
             fig1.savefig(save_filename, dpi=300, bbox_inches='tight')
 
             fig2.tight_layout()
-            save_filename = os.path.join(save_dir, 'PSD2')
+            save_filename = os.path.join(save_dir, 'CohnAlpha2')
             fig2.savefig(save_filename, dpi=300, bbox_inches='tight')
 
 

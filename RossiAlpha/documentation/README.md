@@ -77,10 +77,15 @@ In the plots.py file, there is a class called ```RossiHistogram``` which is a cl
 **Using RossiHistogram**
 ```python
 from RossiAlpha.plots import * #imports all classes from file
-thisPlot = RossiHistogram(reset_time = 2e3, bin_width = 2, histogram_visual_settings, save_dir = '/path/to/save/plot.png') #construct a RossiHistogram object specifying the reset time, bin width, visual settings, and (optional) path to where you want plot to save
-counts, bin_centers, bin_edges = thisPlot.plot(time_diffs, save_fig="yes", show_plot="no") #constructs the histogram with the time differences and saves it to the save_dir
+thisPlot = RossiHistogram(time_diffs, bin_width = 9, reset_time = 1300)
+#construct a RossiHistogram object the time_diffs, the bin_width, and reset_time
+
+counts, bin_centers, bin_edges = thisPlot.plot(save_fig=True, show_plot=True, save_dir = './path/to/savedir', plot_opts = settings['Histogram Visual Settings'])
+#constructs the histogram and saves it to the given save_dir, shows it, and uses the plot options
+#If you dont have a dictionary constructed of 
 #Returns the counts,bin_centers, and bin_edges for later use
 ```
+
 <img src="./histogram.png" width="400" >
 
 ### Fitting
@@ -92,11 +97,13 @@ fit_and_residual() function will do the same thing as Fit.fit(), execept that it
 
 
 ```python
-thisFit = RossiHistogramFit(counts, bin_centers, settings) #construct the fit object
+thisFit = RossiHistogramFit(counts, bin_centers, min_cutoff = 30, timeDifMethod = 'any_and_all', fit_range = [0,3000])
+#construct the fit object
 # Fitting curve to the histogram and plotting the residuals
-#saves the plot with a fit on top and residuals on bottonm but does not show it
-thisFit.fit_and_residual(save_every_fig=True, show_plot=False)
+#saves the plot with a fit on top and residuals on bottom but does not show it
+thisFit.fit_and_residual(save_fig = True, save_dir = './path/to/save/dir', show_plot = False,fitting_opts= fitting_opts, residual_opts = residual_opts, hist_visual_opts = hist_visual_settings)
 ```
+
 <img src="./fitted_and_residual.png" width="400" >
 
 ```python

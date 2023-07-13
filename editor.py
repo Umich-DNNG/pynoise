@@ -2,7 +2,6 @@
 
 import settings as set
 import os
-import json
 import time
 from subprocess import call
 
@@ -18,7 +17,7 @@ class Editor:
         self.history = None
         os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
-    def print(self, message):
+    def print(self, message: str):
 
         '''Prints a string if quiet mode 
         is off. Otherwise, does nothng.'''
@@ -26,7 +25,7 @@ class Editor:
         if not self.parameters.settings['General Settings']['Quiet mode']:
             print(message)
 
-    def log(self, output):
+    def log(self, output: str):
 
         '''Prints the output statement to the command line 
         and saves it to the log if logs are enabled.
@@ -67,7 +66,7 @@ class Editor:
             # Get local time.
             curTime = time.localtime()
             # Create log file name with relative path and timestamp.
-            logName = ('./.logs/' + str(curTime.tm_year) 
+            logName = ('./logs/' + str(curTime.tm_year) 
                         + '-' + str(curTime.tm_mon) 
                         + '-' + str(curTime.tm_mday) 
                         + '@' + str(curTime.tm_hour) 
@@ -95,8 +94,8 @@ class Editor:
         # Create a baseline settings object for comparison.
         baseline = set.Settings()
         # Read in previous settings and delete temp file.
-        baseline.read(os.path.abspath('comp.json'))
-        os.remove(os.path.abspath('comp.json'))
+        baseline.read(os.path.abspath('./settings/comp.json'))
+        os.remove(os.path.abspath('./settings/comp.json'))
         # For every setting in the current settings, compare its
         # value to the source value and log if it is new or changed.
         for group in self.parameters.settings:
@@ -113,7 +112,7 @@ class Editor:
                 if self.parameters.settings[group].get(setting) == None:
                     self.log(setting + ' in ' + group + ' removed.\n')
 
-    def edit(self, file):
+    def edit(self, file: str):
 
         '''The function that allows the user to edit settings 
         in a vim and save them to runtime afterwards.
@@ -121,26 +120,27 @@ class Editor:
         Requires a filename of the .json file being opened.
         
         The only files that should be edited in the vim are current 
-        and new settings (current.json and new.json respectively).'''
+        and new settings (current.json and append.json respectively).'''
 
         # Create an editor using the os environ function.
         EDITOR = os.environ.get('EDITOR', 'vim')
         # Call the editor with the given file in append mode.
         with open(os.path.abspath(file),'a') as settings:
-            if file == 'append.json':
+            if file == './settings/append.json':
                 settings.write('{\n\t"Input/Output Settings": {\n\t\t\n\t},\n')
                 settings.write('\t"General Settings": {\n\t\t\n\t},\n')
                 settings.write('\t"RossiAlpha Settings": {\n\t\t\n\t},\n')
-                settings.write('\t"PSD Settings": {\n\t\t\n\t},\n')
+                settings.write('\t"CohnAlpha Settings": {\n\t\t\n\t},\n')
+                settings.write('\t"CohnAlpha Visual Settings": {\n\t\t\n\t},\n')
                 settings.write('\t"Histogram Visual Settings": {\n\t\t\n\t},\n')
                 settings.write('\t"Line Fitting Settings": {\n\t\t\n\t},\n')
                 settings.write('\t"Residual Plot Settings": {\n\t\t\n\t}\n}')
                 settings.flush()
             call([EDITOR, settings.name])
         # Create a temp file to compare the edited settings to the previous ones.
-        self.parameters.write(os.path.abspath('comp.json'))
+        self.parameters.write(os.path.abspath('./settings/comp.json'))
         # If in append mode.
-        if file == 'append.json':
+        if file == './settings/append.json':
             self.parameters.append(os.path.abspath(file))
         # If in overwrite mode.
         else:
@@ -154,7 +154,7 @@ class Editor:
         # Delete the temporary file.
         os.remove(os.path.abspath(file))
 
-    def driver(self, queue):
+    def driver(self, queue: list[str]):
 
         '''The driver that manages the settings vim for editing/viewing.'''
 
@@ -184,7 +184,7 @@ class Editor:
                 case 'c':
                     self.print('Opening current settings...')
                     # Create temporary current.json file to edit.
-                    file = 'current.json'
+                    file = './settings/current.json'
                     # Write current settings to temp file.
                     self.parameters.write(os.path.abspath(file))
                     # Open the settings editor.
@@ -268,7 +268,7 @@ class Editor:
                 case 'a':
                     self.print('Opening empty settings...')
                     # Create temporary new.json file to edit.
-                    file = 'append.json'
+                    file = './settings/append.json'
                     # Open the settings editor.
                     self.edit(file)
                 # User is ready to return to the main menu.
@@ -281,6 +281,3 @@ class Editor:
                     print('ERROR: Unrecognized command ' + choice 
                         + '. Please review the list of appriopriate inputs.\n')
         return queue
-
-if __name__ == "__main__":
-    Editor.driver(Editor(),[])

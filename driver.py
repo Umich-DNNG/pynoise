@@ -2,7 +2,7 @@
 
 import editor as edit
 from RossiAlpha import raDriver as ra
-from PowerSpectralDensity import psdDriver as psd
+from CohnAlpha import CohnAlphaDriver as ca
 import os
 import sys
 
@@ -103,7 +103,7 @@ def main():
                 editor.print('')
                 editor.print('Initializing program with default settings...')
                 # Create absolute path for the default settings file and read it in.
-                path = os.path.abspath('default.json')
+                path = os.path.abspath('./settings/default.json')
                 editor.parameters.read(path)
                 editor.changeLog()
                 editor.log('Settings from default.json succesfully imported.\n')
@@ -168,7 +168,7 @@ def main():
                         # Append settings.
                         if opt == 'a':
                             # Read default settings first to append over.
-                            editor.parameters.read(os.path.abspath('default.json'))
+                            editor.parameters.read(os.path.abspath('./settings/default.json'))
                             # Append changed/removed settings.
                             editor.parameters.append(os.path.abspath(file))
                             editor.changeLog()
@@ -198,7 +198,7 @@ def main():
     while selection != '' and selection != 'x':
         editor.print('You can utitilze any of the following functions:')
         editor.print('r - run Rossi Alpha analysis')
-        editor.print('p - run Power Spectral Density Analysis')
+        editor.print('c - run Cohn Alpha Analysis')
         editor.print('s - view or edit the program settings')
         editor.print('Leave the command blank or enter x to end the program.')
         # If there's currently something in the command queue, 
@@ -218,10 +218,10 @@ def main():
             case 'r':
                 editor.print('')
                 editor, queue = ra.main(editor, queue)
-            # Run PowerSpectralDensity analysis.
-            case 'p':
+            # Run CohnAlpha analysis.
+            case 'c':
                 editor.print('')
-                editor, queue = psd.main(editor, queue)
+                editor, queue = ca.main(editor, queue)
             # View and/or edit program settings.
             case 's':
                 editor.print('')
@@ -321,7 +321,7 @@ def main():
                     if choice == 'y':
                         # Create an absolute path for the default settings
                         # file and write the current settings into it.
-                        path = os.path.abspath('default.json')
+                        path = os.path.abspath('./settings/default.json')
                         editor.print('Overwriting default settings...')
                         editor.parameters.write(path)
                         editor.log('Default settings overwritten.\n')
@@ -417,7 +417,3 @@ def main():
         editor.history.close()
     # Shutdown message.
     editor.print('Thank you for using the DNNG/PyNoise project.')
-
-# Tells the program what function to start if this is the main program being run.
-if __name__ == "__main__":
-    main()
