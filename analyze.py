@@ -26,12 +26,10 @@ class Analyzer:
         self.method: str = None
 
     def runFeynmanY(self, io: dict):
-        print('WARNING: This is not fully implemented yet. This is currently for debugging.')
         data = evt.createEventsListFromTxtFile(io['Input file/folder'], io['Time column'], io['Channels column'])
         data.sort(key=lambda Event: Event.time)
-        points = rc.randomCounts(data, 1000000)
-        for probability in points:
-            print(probability)
+        points = rc.randomCounts(data, 1000)
+        rc.FeynmanY_histogram(points)
 
     def conductCohnAlpha(self, input: str, output: str, show: bool, save: bool, caGen: dict, caVis: dict):
 
