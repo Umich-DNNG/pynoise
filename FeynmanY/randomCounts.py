@@ -46,7 +46,7 @@ def FeynmanY_histogram(probabilities):
 
     # Plot histogram using plt.bar
     plt.bar(bins, values, align='center', width=0.8)
-
+    plt.yscale('log')
     # Customize plot if needed
     plt.xlabel('r')
     plt.ylabel('Pn*')
