@@ -25,11 +25,11 @@ class Analyzer:
         self.input: str = None
         self.method: str = None
 
-    def runFeynmanY(self, io: dict):
+    def runFeynmanY(self, io: dict, fy: dict):
         data = evt.createEventsListFromTxtFile(io['Input file/folder'], io['Time column'], io['Channels column'])
         data.sort(key=lambda Event: Event.time)
-        points = rc.randomCounts(data, 1000)
-        rc.FeynmanY_histogram(points)
+        points = rc.randomCounts(data, fy['Tau'])
+        rc.FeynmanY_histogram(points, fy['Plot scale'])
 
     def conductCohnAlpha(self, input: str, output: str, show: bool, save: bool, caGen: dict, caVis: dict):
 
