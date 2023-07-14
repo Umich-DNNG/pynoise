@@ -30,7 +30,7 @@ class Analyzer:
         data.sort(key=lambda Event: Event.time)
         points = fey.randomCounts(data, fy['Tau'])
         fey.FeynmanY_histogram(points, fy['Plot scale'], show, save, io['Save directory'], hvs)
-        fey.computeMoment(points)
+        fey.computeMoment(points, fy['Tau'])
 
     def conductCohnAlpha(self, input: str, output: str, show: bool, save: bool, caGen: dict, caVis: dict):
 
