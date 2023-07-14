@@ -3,6 +3,9 @@ import Event as evt
 import matplotlib.pyplot as plt
 import os
 
+def YFit(gamma, alpha, tau):
+    return gamma*(1-(1-np.exp(alpha*tau))/(alpha*tau))
+
 def randomCounts(triggers: list[evt.Event], tau: int):
 
     '''Converts a list of Events into random trigger gate frequencies.
@@ -83,7 +86,7 @@ def computeMoment(probabilities, tau: int):
         moment1 += (i+1)*probabilities[i]
         moment2 += (i+1)*(i)*probabilities[i]
     moment2 /= 2
-    y2 = (moment2 - moment1*moment1/2)/float(tau)
+    varToMean = (2*moment2 + moment1 + moment1*moment1)/moment1 - 1
     print(moment1)
     print(moment2)
-    print(y2)
+    print(varToMean)
