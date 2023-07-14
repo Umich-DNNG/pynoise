@@ -31,7 +31,9 @@ def main(editorIn: edit.Editor, queue: list[str]):
                 else:
                     editor.print('\nRunning the entire Feynman Y analysis...')
                     analyzer.runFeynmanY(editor.parameters.settings['Input/Output Settings'],
-                                         editor.parameters.settings['FeynmanY Settings'])
+                                         editor.parameters.settings['FeynmanY Settings'],
+                                         editor.parameters.settings['General Settings']['Show plots'],
+                                         editor.parameters.settings['General Settings']['Save figures'])
                     editor.log('Ran the entire Feynman Y analysis on file ' 
                                 + editor.parameters.settings['Input/Output Settings']['Input file/folder'] 
                                 + '.\n')

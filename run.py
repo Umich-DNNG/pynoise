@@ -514,7 +514,9 @@ def caSplit(window: Tk, parameters: set.Settings):
 
 def fySplit(window: Tk, parameters: set.Settings):
     analyzer.runFeynmanY(parameters.settings['Input/Output Settings'],
-                         parameters.settings['FeynmanY Settings'])
+                         parameters.settings['FeynmanY Settings'],
+                         parameters.settings['General Settings']['Show plots'],
+                         parameters.settings['General Settings']['Save figures'])
     log(message='Successfully ran Feynman Y analysis on file:\n'
         +parameters.settings['Input/Output Settings']['Input file/folder'],
         window=window)

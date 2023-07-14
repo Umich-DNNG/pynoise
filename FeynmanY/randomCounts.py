@@ -41,7 +41,7 @@ def randomCounts(triggers: list[evt.Event], tau: int):
     return frequencies
 
 
-def FeynmanY_histogram(probabilities, show_plot, save_fig, save_dir):
+def FeynmanY_histogram(probabilities, scale: str, show_plot: bool, save_fig: bool, save_dir: str):
 
     '''Creates a histogram from a numpy array of random trigger probabilities .
     
@@ -68,17 +68,3 @@ def FeynmanY_histogram(probabilities, show_plot, save_fig, save_dir):
     # Displaying the plot (optional)
     if show_plot:
         plt.show()
-
-
-
-#------- HARD CODE SECTION (TESTING) ------------------#
-
-test = evt.createEventsListFromTxtFile(filePath='/Users/vincentweng/Documents/PyNoise/RossiAlpha/sample_data/RF3-40_59min.txt', timeCol = 0, channelCol = None)
-
-test.sort(key=lambda Event: Event.time)
-
-counts = randomCounts(triggers=test, tau=1000)
-
-FeynmanY_histogram(counts, show_plot = False, save_fig = True, save_dir="./")
-
-#------------------------------------------------------#
