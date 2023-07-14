@@ -10,6 +10,8 @@ from RossiAlpha import plots as plt
 from RossiAlpha import timeDifs as dif
 from CohnAlpha import CohnAlpha as ca
 from FeynmanY import feynman as fey
+from tkinter import ttk
+from tkinter import *
 
 class Analyzer:
 
@@ -25,7 +27,7 @@ class Analyzer:
         self.input: str = None
         self.method: str = None
 
-    def runFeynmanY(self, io: dict, fy: dict, show: bool, save: bool, hvs: dict):
+    def runFeynmanY(self, io: dict, fy: dict, show: bool, save: bool, hvs: dict, window: Tk = None):
         
         '''Run FeynmanY analysis for varying tau values.
         Plots each tau value and estimates alpha.
@@ -50,6 +52,13 @@ class Analyzer:
             entry.time -= min
         # DEBUG LINE
         print('Tau\tY')
+        if window is not None:
+            window.children['progress']['value'] += 1
+            wait = BooleanVar()
+            # After 1 ms, set the dummy variable to True.
+            window.after(1, wait.set, True)
+            # Wait for the dummy variable to be set, then continue.
+            window.wait_variable(wait)
         # For each tau:
         for tau in tValues:
             # Convert the data into bin frequency counts.
@@ -63,6 +72,13 @@ class Analyzer:
             yValues.append(y)
             # DEBUG LINE
             print(str(tau) + '\t' + str(y))   
+            if window is not None:
+                window.children['progress']['value'] += 1
+                wait = BooleanVar()
+                # After 1 ms, set the dummy variable to True.
+                window.after(1, wait.set, True)
+                # Wait for the dummy variable to be set, then continue.
+                window.wait_variable(wait)
 
     def conductCohnAlpha(self, input: str, output: str, show: bool, save: bool, caGen: dict, caVis: dict):
 
