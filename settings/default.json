@@ -40,6 +40,10 @@
         "Annotation Color": "black",
         "Annotation Background Color": "white"
     },
+    "FeynmanY Settings": {
+        "Tau": 1000,
+        "Plot scale": "log"
+    },
     "Histogram Visual Settings": {
         "alpha": 1,
         "fill": true,
