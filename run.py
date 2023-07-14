@@ -220,7 +220,7 @@ def changes(parameters: set.Settings):
     # exist in the current settings, log the removal.
     for group in baseline.settings:
         for setting in baseline.settings[group]:
-            if parameters.settings[group].get(setting) == None and setting != 'Channels Column':
+            if parameters.settings[group].get(setting) == None and setting != 'Channels column':
                 log(setting + ' in ' + group + ' removed.\n', xor=False)
                 count += 1
     return count
@@ -516,7 +516,8 @@ def fySplit(window: Tk, parameters: set.Settings):
     analyzer.runFeynmanY(parameters.settings['Input/Output Settings'],
                          parameters.settings['FeynmanY Settings'],
                          parameters.settings['General Settings']['Show plots'],
-                         parameters.settings['General Settings']['Save figures'])
+                         parameters.settings['General Settings']['Save figures'],
+                         parameters.settings['Histogram Visual Settings'])
     log(message='Successfully ran Feynman Y analysis on file:\n'
         +parameters.settings['Input/Output Settings']['Input file/folder'],
         window=window)

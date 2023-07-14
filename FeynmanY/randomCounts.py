@@ -41,7 +41,11 @@ def randomCounts(triggers: list[evt.Event], tau: int):
     return frequencies
 
 
-def FeynmanY_histogram(probabilities, scale: str, show_plot: bool, save_fig: bool, save_dir: str):
+def FeynmanY_histogram(probabilities, scale: str, 
+                       show_plot: bool, 
+                       save_fig: bool, 
+                       save_dir: str,
+                       hvs: dict):
 
     '''Creates a histogram from a numpy array of random trigger probabilities .
     
@@ -54,7 +58,7 @@ def FeynmanY_histogram(probabilities, scale: str, show_plot: bool, save_fig: boo
     values = probabilities
 
     # Plot histogram using plt.bar
-    plt.bar(bins, values, align='center', width=0.8)
+    plt.bar(bins, values, align='center', width=0.8,**hvs)
     plt.yscale(scale)
     # Customize plot if needed
     plt.xlabel('r')
@@ -63,8 +67,11 @@ def FeynmanY_histogram(probabilities, scale: str, show_plot: bool, save_fig: boo
 
     # Saving the figure (optional)
     if save_fig:
-        os.path.join(save_dir, 'FeynmanY.png') 
+        save_filename = os.path.join(save_dir, 'FeynmanY.png') 
+        plt.savefig(save_filename, dpi=300, bbox_inches='tight')
         
     # Displaying the plot (optional)
     if show_plot:
         plt.show()
+
+    plt.close('all')
