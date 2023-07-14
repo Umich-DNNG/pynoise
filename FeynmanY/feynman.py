@@ -86,7 +86,4 @@ def computeVarToMean(probabilities):
         moment1 += (i+1)*probabilities[i]
         moment2 += (i+1)*(i)*probabilities[i]
     moment2 /= 2
-    varToMean = (2*moment2 + moment1 + moment1*moment1)/moment1 - 1
-    print(moment1)
-    print(moment2)
-    print(varToMean)
+    return (2*moment2 + moment1 + moment1*moment1)/moment1 - 1

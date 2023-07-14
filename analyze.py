@@ -26,11 +26,22 @@ class Analyzer:
         self.method: str = None
 
     def runFeynmanY(self, io: dict, fy: dict, show: bool, save: bool, hvs: dict):
-        data = evt.createEventsListFromTxtFile(io['Input file/folder'], io['Time column'], io['Channels column'])
-        data.sort(key=lambda Event: Event.time)
-        points = fey.randomCounts(data, fy['Tau'])
-        fey.FeynmanY_histogram(points, fy['Plot scale'], show, save, io['Save directory'], hvs)
-        fey.computeMoment(points, fy['Tau'])
+        yValues = []
+        tValues = []
+        tau = fy['Tau range'][0]
+        while tau <= fy['Tau range'][1]:
+            tValues.append(tau)
+            tau += fy['Increment amount']
+        print('Tau\tY')
+        for tau in tValues:
+            data = evt.createEventsListFromTxtFile(io['Input file/folder'], io['Time column'], io['Channels column'])
+            data.sort(key=lambda Event: Event.time)
+            points = fey.randomCounts(data, tau)
+            if show or save:
+                fey.FeynmanY_histogram(points, fy['Plot scale'], show, save, io['Save directory'], hvs)
+            y = fey.computeVarToMean(points)
+            yValues.append(y)
+            print(str(tau) + '\t' + str(y))   
 
     def conductCohnAlpha(self, input: str, output: str, show: bool, save: bool, caGen: dict, caVis: dict):
 
