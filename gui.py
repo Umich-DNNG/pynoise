@@ -633,6 +633,34 @@ def cohnAlphaMenu():
               command=main
               ).pack(side=TOP,padx=10,pady=10)
 
+def feynmanProgress():
+    global window, parameters
+    # Clear the window of all previous entries, labels, and buttons.
+    for item in window.winfo_children():
+        item.destroy()
+    window.title('Analysis Progress')
+    length = int((parameters.settings['FeynmanY Settings']['Tau range'][1] - parameters.settings['FeynmanY Settings']['Tau range'][0])/parameters.settings['FeynmanY Settings']['Increment amount']+1)
+    ttk.Label(master=window,
+              name='info',
+              text='Currently running Feynman Y analysis...'
+              ).pack(side=TOP,padx=10,pady=10)
+    ttk.Progressbar(master=window,
+                    orient=HORIZONTAL,
+                    length=length,
+                    mode = 'determinate',
+                    name='progress',
+                    ).pack(side=TOP,padx=10)
+    ttk.Label(master=window,
+              name='disclaimer',
+              text='This process may take a couple minutes.'
+              ).pack(side=TOP,padx=10,pady=10)
+    wait = BooleanVar()
+    # After 1 ms, set the dummy variable to True.
+    window.after(1, wait.set, True)
+    # Wait for the dummy variable to be set, then continue.
+    window.wait_variable(wait)
+    run.fySplit(window, parameters)
+
 def feynmanYMenu():
 
     '''The GUI for the Feynman Y menu.'''
@@ -652,7 +680,7 @@ def feynmanYMenu():
     ttk.Button(window,
               name='run',
               text='Run analysis',
-              command=lambda: run.fySplit(window, parameters)
+              command=feynmanProgress
               ).pack(side=TOP,padx=10)
     # Button to view the program settings.
     ttk.Button(window,
