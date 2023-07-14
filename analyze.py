@@ -38,7 +38,8 @@ class Analyzer:
         - hvs: the Histogram Visual Settings dictionary.'''
         
         yValues = []
-        tValues = range(fy['Tau range'][0], fy['Tau range'][1], fy['Increment amount'])
+        tValues = []
+        tValues.extend(range(fy['Tau range'][0], fy['Tau range'][1]+1, fy['Increment amount']))
         # Load in the data and sort it.
         data = evt.createEventsListFromTxtFile(io['Input file/folder'], io['Time column'], io['Channels column'])
         data.sort(key=lambda Event: Event.time)
