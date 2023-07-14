@@ -2,8 +2,10 @@
     "Input/Output Settings": {
         "Input file/folder": "./RossiAlpha/sample_data/RF3-40_59min.txt"
     },
+    "FeynmanY Settings": {
+        "Tau range": [30, 300]
+    },
     "General Settings": {
-        "Save figures": true,
-        "Show plots": true
+        "Quiet mode": true
     }
 }
