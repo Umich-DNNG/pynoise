@@ -3,7 +3,7 @@
         "Input file/folder": "./RossiAlpha/sample_data/RF3-40_59min.txt"
     },
     "FeynmanY Settings": {
-        "Tau range": [30, 300]
+        "Tau range": [30, 3000]
     },
     "General Settings": {
         "Quiet mode": true
