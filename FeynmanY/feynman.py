@@ -76,9 +76,14 @@ def FeynmanY_histogram(probabilities, scale: str,
 
     plt.close('all')
 
-def computeMoment(probabilities):
-    moment = 0
+def computeMoment(probabilities, tau: int):
+    moment1 = 0
+    moment2 = 0
     for i in range(len(probabilities)):
-        moment += (i+1)*(i)*probabilities[i]
-    moment /= 2
-    print(moment)
+        moment1 += (i+1)*probabilities[i]
+        moment2 += (i+1)*(i)*probabilities[i]
+    moment2 /= 2
+    y2 = (moment2 - moment1*moment1/2)/str(tau)
+    print(moment1)
+    print(moment2)
+    print(y2)
