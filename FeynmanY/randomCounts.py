@@ -40,13 +40,13 @@ def randomCounts(triggers: list[evt.Event], tau: int):
     return frequencies
 
 
-def FeynmanY_histogram(probabilities):
+def FeynmanY_histogram(probabilities, scale: str):
     bins = np.arange(len(probabilities))
     values = probabilities
 
     # Plot histogram using plt.bar
     plt.bar(bins, values, align='center', width=0.8)
-    plt.yscale('log')
+    plt.yscale(scale)
     # Customize plot if needed
     plt.xlabel('r')
     plt.ylabel('Pn*')
