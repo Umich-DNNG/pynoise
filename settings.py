@@ -22,6 +22,7 @@ class Settings:
                          'RossiAlpha Settings': {},
                          'CohnAlpha Settings' : {},
                          'CohnAlpha Visual Settings': {},
+                         'FeynmanY Settings' : {},
                          'Histogram Visual Settings': {},
                          'Line Fitting Settings': {},
                          'Residual Plot Settings': {}
