@@ -65,7 +65,7 @@ def FeynmanY_histogram(probabilities, scale: str,
     plt.yscale(scale)
     # Customize plot if needed
     plt.xlabel('r')
-    plt.ylabel('Pn*')
+    plt.ylabel('$P_n^*$')
     plt.title('FeynmanY Random Trigger')
 
     # Saving the figure (optional)
@@ -79,7 +79,7 @@ def FeynmanY_histogram(probabilities, scale: str,
 
     plt.close('all')
 
-def computeMoment(probabilities, tau: int):
+def computeVarToMean(probabilities):
     moment1 = 0
     moment2 = 0
     for i in range(len(probabilities)):
