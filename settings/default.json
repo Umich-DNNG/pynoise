@@ -41,7 +41,8 @@
         "Annotation Background Color": "white"
     },
     "FeynmanY Settings": {
-        "Tau": 1000,
+        "Tau range": [30, 3000],
+        "Increment amount": 30,
         "Plot scale": "log"
     },
     "Histogram Visual Settings": {
