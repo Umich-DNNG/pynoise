@@ -1,6 +1,7 @@
 import numpy as np
 import Event as evt
 import matplotlib.pyplot as plt
+import os
 
 def randomCounts(triggers: list[evt.Event], tau: int):
 
@@ -40,7 +41,15 @@ def randomCounts(triggers: list[evt.Event], tau: int):
     return frequencies
 
 
-def FeynmanY_histogram(probabilities, scale: str):
+def FeynmanY_histogram(probabilities, show_plot, save_fig, save_dir):
+
+    '''Creates a histogram from a numpy array of random trigger probabilities .
+    
+    Requires:
+    - triggers: the list of Events. Assumes the 
+    list is sorted from least to greatest time.
+    - tau: the gate width.'''
+
     bins = np.arange(len(probabilities))
     values = probabilities
 
@@ -52,22 +61,24 @@ def FeynmanY_histogram(probabilities, scale: str):
     plt.ylabel('Pn*')
     plt.title('FeynmanY Random Trigger')
 
-    plt.show()
-
+    # Saving the figure (optional)
+    if save_fig:
+        os.path.join(save_dir, 'FeynmanY.png') 
+        
+    # Displaying the plot (optional)
+    if show_plot:
+        plt.show()
 
 
 
 #------- HARD CODE SECTION (TESTING) ------------------#
 
-# test = evt.createEventsListFromTxtFile(filePath='/Users/vincentweng/Documents/PyNoise/RossiAlpha/sample_data/RF3-40_59min.txt', timeCol = 0, channelCol = None)
+test = evt.createEventsListFromTxtFile(filePath='/Users/vincentweng/Documents/PyNoise/RossiAlpha/sample_data/RF3-40_59min.txt', timeCol = 0, channelCol = None)
 
-# test.sort(key=lambda Event: Event.time)
+test.sort(key=lambda Event: Event.time)
 
-# counts = randomCounts(triggers=test, tau=1000000)
+counts = randomCounts(triggers=test, tau=1000)
 
-# print(counts)
-
-# FeynmanY_histogram(counts)
-
+FeynmanY_histogram(counts, show_plot = False, save_fig = True, save_dir="./")
 
 #------------------------------------------------------#
