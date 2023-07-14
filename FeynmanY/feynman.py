@@ -15,10 +15,8 @@ def randomCounts(triggers: list[evt.Event], tau: int):
     list is sorted from least to greatest time.
     - tau: the gate width.'''
 
-    # Get the smallest time measurement to mark as the beginning.
-    min_time = triggers[0].time
     # Convert the list of times into gate indices.
-    triggers = (np.array([(event.time - min_time)/tau for event in triggers])).astype(int)
+    triggers = (np.array([event.time/tau for event in triggers])).astype(int)
     frequencies = []
     count = 1
     prev = triggers[0]

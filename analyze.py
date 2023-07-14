@@ -38,15 +38,15 @@ class Analyzer:
         - hvs: the Histogram Visual Settings dictionary.'''
         
         yValues = []
-        tValues = []
-        tau = fy['Tau range'][0]
-        # Add all tau values to the list.
-        while tau <= fy['Tau range'][1]:
-            tValues.append(tau)
-            tau += fy['Increment amount']
+        tValues = range(fy['Tau range'][0], fy['Tau range'][1], fy['Increment amount'])
         # Load in the data and sort it.
         data = evt.createEventsListFromTxtFile(io['Input file/folder'], io['Time column'], io['Channels column'])
         data.sort(key=lambda Event: Event.time)
+        # Adjust each measurement by making
+        # the earliest measurement time 0.
+        min = data[0].time
+        for entry in data:
+            entry.time -= min
         # DEBUG LINE
         print('Tau\tY')
         # For each tau:
