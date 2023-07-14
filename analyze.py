@@ -26,21 +26,41 @@ class Analyzer:
         self.method: str = None
 
     def runFeynmanY(self, io: dict, fy: dict, show: bool, save: bool, hvs: dict):
+        
+        '''Run FeynmanY analysis for varying tau values.
+        Plots each tau value and estimates alpha.
+        
+        Requires:
+        - io: the Input/Output Settings dictionary.
+        - fy: the FeynmanY Settings dictionary.
+        - show: whether or not to show plots.
+        - save: whether or not to save plots.
+        - hvs: the Histogram Visual Settings dictionary.'''
+        
         yValues = []
         tValues = []
         tau = fy['Tau range'][0]
+        # Add all tau values to the list.
         while tau <= fy['Tau range'][1]:
             tValues.append(tau)
             tau += fy['Increment amount']
+        # Load in the data and sort it.
+        data = evt.createEventsListFromTxtFile(io['Input file/folder'], io['Time column'], io['Channels column'])
+        data.sort(key=lambda Event: Event.time)
+        # DEBUG LINE
         print('Tau\tY')
+        # For each tau:
         for tau in tValues:
-            data = evt.createEventsListFromTxtFile(io['Input file/folder'], io['Time column'], io['Channels column'])
-            data.sort(key=lambda Event: Event.time)
-            points = fey.randomCounts(data, tau)
+            # Convert the data into bin frequency counts.
+            counts = fey.randomCounts(data, tau)
+            # If using graphs, graph the data.
             if show or save:
-                fey.FeynmanY_histogram(points, fy['Plot scale'], show, save, io['Save directory'], hvs)
-            y = fey.computeVarToMean(points)
+                fey.FeynmanY_histogram(counts, fy['Plot scale'], show, save, io['Save directory'], hvs)
+            # Compute the variance to mean for this 
+            # tau value and add it to the list.
+            y = fey.computeVarToMean(counts)
             yValues.append(y)
+            # DEBUG LINE
             print(str(tau) + '\t' + str(y))   
 
     def conductCohnAlpha(self, input: str, output: str, show: bool, save: bool, caGen: dict, caVis: dict):
