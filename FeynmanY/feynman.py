@@ -78,6 +78,13 @@ def FeynmanY_histogram(probabilities, scale: str,
     plt.close('all')
 
 def computeVarToMean(probabilities):
+
+    '''Creates the two moments from probabilities.
+    
+    Requires:
+    - probabilities (numpy array): index representing the bin count, and value representing frequency
+    '''
+
     moment1 = 0
     moment2 = 0
     for i in range(len(probabilities)):
