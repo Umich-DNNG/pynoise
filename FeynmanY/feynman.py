@@ -85,3 +85,19 @@ def computeVarToMean(probabilities):
         moment2 += (i+1)*(i)*probabilities[i]
     moment2 /= 2
     return (2*moment2 + moment1 + moment1*moment1)/moment1 - 1
+
+def plot(taus, ys, save_fig, show_plot, save_dir):
+    
+    plt.plot(taus,ys)
+    plt.yscale('log')
+
+    # Saving the figure (optional)
+    if save_fig:
+        save_filename = os.path.join(save_dir, 'FeynmanY.png') 
+        plt.savefig(save_filename, dpi=300, bbox_inches='tight')
+        
+    # Displaying the plot (optional)
+    if show_plot:
+        plt.show()
+
+    plt.show()
