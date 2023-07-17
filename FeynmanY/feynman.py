@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import os
 
 def YFit(gamma, alpha, tau):
-    return gamma*(1-(1-np.exp(alpha*tau))/(alpha*tau))
+    return gamma*(1+(1-np.exp(alpha*tau))/(alpha*tau))
 
 def randomCounts(triggers: list[evt.Event], tau: int):
 
