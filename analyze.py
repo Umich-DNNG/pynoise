@@ -65,7 +65,7 @@ class Analyzer:
             counts = fey.randomCounts(data, tau)
             # Compute the variance to mean for this 
             # tau value and add it to the list.
-            y = fey.computeVarToMean(counts)
+            y = fey.computeVarToMean(counts, tau)
             yValues.append(y)
             # DEBUG LINE
             print(str(tau) + '\t' + str(y))   
