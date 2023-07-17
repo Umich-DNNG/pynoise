@@ -40,6 +40,7 @@ class Analyzer:
         - hvs: the Histogram Visual Settings dictionary.'''
         
         yValues = []
+        y2Values = []
         tValues = []
         tValues.extend(range(fy['Tau range'][0], fy['Tau range'][1]+1, fy['Increment amount']))
         # Load in the data and sort it.
@@ -51,7 +52,7 @@ class Analyzer:
         for entry in data:
             entry.time -= min
         # DEBUG LINE
-        print('Tau\tY')
+        print('Tau\tY\tY2')
         if window is not None:
             window.children['progress']['value'] += 1
             wait = BooleanVar()
@@ -65,10 +66,11 @@ class Analyzer:
             counts = fey.randomCounts(data, tau)
             # Compute the variance to mean for this 
             # tau value and add it to the list.
-            y = fey.computeVarToMean(counts, tau)
+            y, y2 = fey.computeVarToMean(counts, tau)
             yValues.append(y)
+            y2Values.append(y2)
             # DEBUG LINE
-            print(str(tau) + '\t' + str(y))   
+            print(str(tau) + '\t' + str(y) + '\t' + str(y2))   
             if window is not None:
                 window.children['progress']['value'] += 1
                 wait = BooleanVar()
@@ -77,6 +79,7 @@ class Analyzer:
                 # Wait for the dummy variable to be set, then continue.
                 window.wait_variable(wait)
         fey.plot(tValues,yValues, save, show, io['Save directory'])
+        fey.plot(tValues,y2Values, save, show, io['Save directory'])
 
     def conductCohnAlpha(self, input: str, output: str, show: bool, save: bool, caGen: dict, caVis: dict):
 
