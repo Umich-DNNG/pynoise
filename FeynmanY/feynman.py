@@ -77,7 +77,7 @@ def FeynmanY_histogram(probabilities, scale: str,
 
     plt.close('all')
 
-def computeVarToMean(probabilities):
+def computeVarToMean(probabilities, tau):
 
     '''Creates the two moments from probabilities.
     
@@ -91,12 +91,12 @@ def computeVarToMean(probabilities):
         moment1 += (i+1)*probabilities[i]
         moment2 += (i+1)*(i)*probabilities[i]
     moment2 /= 2
-    return (2*moment2 + moment1 + moment1*moment1)/moment1 - 1
+    #return (2*moment2 + moment1 - moment1*moment1)/moment1 - 1
+    return (moment2 - moment1*moment1/2)/tau
 
 def plot(taus, ys, save_fig, show_plot, save_dir):
     
     plt.plot(taus,ys)
-    plt.yscale('log')
 
     # Saving the figure (optional)
     if save_fig:
