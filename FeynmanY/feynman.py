@@ -91,8 +91,7 @@ def computeVarToMean(probabilities, tau):
         moment1 += (i+1)*probabilities[i]
         moment2 += (i+1)*(i)*probabilities[i]
     moment2 /= 2
-    #return (2*moment2 + moment1 - moment1*moment1)/moment1 - 1
-    return (moment2 - moment1*moment1/2)/tau
+    return (2*moment2 + moment1 - moment1*moment1)/moment1 - 1, (moment2 - moment1*moment1/2)/tau
 
 def plot(taus, ys, save_fig, show_plot, save_dir):
     
