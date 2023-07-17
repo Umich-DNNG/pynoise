@@ -63,9 +63,6 @@ class Analyzer:
         for tau in tValues:
             # Convert the data into bin frequency counts.
             counts = fey.randomCounts(data, tau)
-            # If using graphs, graph the data.
-            if show or save:
-                fey.FeynmanY_histogram(counts, fy['Plot scale'], show, save, io['Save directory'], hvs)
             # Compute the variance to mean for this 
             # tau value and add it to the list.
             y = fey.computeVarToMean(counts)
@@ -79,6 +76,7 @@ class Analyzer:
                 window.after(1, wait.set, True)
                 # Wait for the dummy variable to be set, then continue.
                 window.wait_variable(wait)
+        fey.plot(tValues,yValues, save, show, io['Save directory'])
 
     def conductCohnAlpha(self, input: str, output: str, show: bool, save: bool, caGen: dict, caVis: dict):
 
