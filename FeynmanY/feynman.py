@@ -1,5 +1,6 @@
 import numpy as np
 import Event as evt
+from scipy.optimize import curve_fit
 import matplotlib.pyplot as plt
 import os
 
@@ -106,4 +107,38 @@ def plot(taus, ys, save_fig, show_plot, save_dir):
     if show_plot:
         plt.show()
 
+    plt.show()
+
+
+def fitting(x_data, y_data, gamma_guess, alpha_guess):
+
+    # Convert the lists to NumPy arrays
+    x = np.array(x_data)
+    y = np.array(y_data)
+
+    # Define the initial guesses as a tuple
+    initial_guesses = (gamma_guess, alpha_guess)
+
+    # Perform the curve fitting using curve_fit
+    popt, pcov = curve_fit(YFit, x, y, p0=initial_guesses)
+
+    # Retrieve the optimized parameters
+    gamma_opt, alpha_opt = popt
+
+    # Display the optimized parameters
+    print("Optimized gamma:", gamma_opt)
+    print("Optimized alpha:", alpha_opt)
+
+    # Generate x values for plotting the fitted curve
+    x_fit = np.linspace(min(x), max(x), 100)
+
+    # Generate y values using the fitted parameters
+    y_fit = YFit(x_fit, gamma_opt, alpha_opt)
+
+    # Plot the original data points and the fitted curve
+    plt.scatter(x, y, label='Data')
+    plt.plot(x_fit, y_fit, color='red', label='Fitted Curve')
+    plt.xlabel('x')
+    plt.ylabel('y')
+    plt.legend()
     plt.show()
