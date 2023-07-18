@@ -37,13 +37,13 @@ def create_logfile():
                     + (':0' if curTime.tm_sec < 10 else ':') + str(curTime.tm_sec)
                     + '.log')
         # Open the logfile.
-        logfile = open(os.path.abspath(logName),'w')
+        # logfile = open(os.path.abspath(logName),'w')
         # Write an introductory message at the top.
-        logfile.write('# A logfile for the runtime started at the named '
-                    + 'timestamp.\n# If keep logs is set to false at the end '
-                    + 'of runtime, this file will automatically be deleted.\n')
+        # logfile.write('# A logfile for the runtime started at the named '
+                    # + 'timestamp.\n# If keep logs is set to false at the end '
+                    # + 'of runtime, this file will automatically be deleted.\n')
         # Flush the file so it can be read immediately.
-        logfile.flush()
+        # logfile.flush()
 
 def log(message: str,
         xor=None,
@@ -86,8 +86,8 @@ def log(message: str,
             + ' - ' + message.replace('\n',' ') + '\n')
             # Write the confirmation + timestamp to the file and flush 
             # immediately so user can see log updates in real time.
-            logfile.write(log_message)
-            logfile.flush()
+            # logfile.write(log_message)
+            # logfile.flush()
         # When applicable, set the label in the window to have the correct message.
         if xor == None or xor:
             if window.children.get('log') == None:
