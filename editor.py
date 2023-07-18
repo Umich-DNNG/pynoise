@@ -132,6 +132,7 @@ class Editor:
                 settings.write('\t"RossiAlpha Settings": {\n\t\t\n\t},\n')
                 settings.write('\t"CohnAlpha Settings": {\n\t\t\n\t},\n')
                 settings.write('\t"CohnAlpha Visual Settings": {\n\t\t\n\t},\n')
+                settings.write('\t"FeynmanY Settings": {\n\t\t\n\t},\n')
                 settings.write('\t"Histogram Visual Settings": {\n\t\t\n\t},\n')
                 settings.write('\t"Line Fitting Settings": {\n\t\t\n\t},\n')
                 settings.write('\t"Residual Plot Settings": {\n\t\t\n\t}\n}')

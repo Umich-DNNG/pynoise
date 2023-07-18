@@ -3,6 +3,7 @@
 import editor as edit
 from RossiAlpha import raDriver as ra
 from CohnAlpha import CohnAlphaDriver as ca
+from FeynmanY import fyDriver as fy
 import os
 import sys
 
@@ -199,6 +200,7 @@ def main():
         editor.print('You can utitilze any of the following functions:')
         editor.print('r - run Rossi Alpha analysis')
         editor.print('c - run Cohn Alpha Analysis')
+        editor.print('f - run Feynman Y Analysis')
         editor.print('s - view or edit the program settings')
         editor.print('Leave the command blank or enter x to end the program.')
         # If there's currently something in the command queue, 
@@ -222,6 +224,10 @@ def main():
             case 'c':
                 editor.print('')
                 editor, queue = ca.main(editor, queue)
+            # Run Feynman Y analysis.
+            case 'f':
+                editor.print('')
+                editor, queue = fy.main(editor, queue)
             # View and/or edit program settings.
             case 's':
                 editor.print('')

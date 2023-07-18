@@ -291,8 +291,7 @@ def add(canvas: Canvas, group: str):
     global window, bottom, newSet, newVal
     # Get the bottom of the desired group.
     top = bottom[group]
-    # If we're looking at histogram visual settings:
-    if group == 'Histogram Visual Settings':
+    '''if group == 'Histogram Visual Settings':
         # Get the widgets in the row beneath the settings group.
         cur_row = canvas.children['editor'].grid_slaves(row=top+1)
         # If the row is only two labels, we can assume that this is the Residual 
@@ -335,52 +334,73 @@ def add(canvas: Canvas, group: str):
                  width=12
                  ).grid(column=8,row=top,padx=10)
     # If one of the other settings groups:
+    else:'''
+    # Move the add button down one row.
+    canvas.children['editor'].children[group[0:group.find('Settings')].lower()+'add'].grid(row=top+1)
+    # If we're looking at residual plot settings:
+    if group == 'Residual Plot Settings':
+        # Create a unique dictionary key for the new setting.
+        index = 'rps' + str(top)
+        # Create a string variable linked to 
+        # this setting in the new settings dictionary.
+        newSet[group][index] = tk.StringVar()
+        # The dropdown menu for the new setting.
+        ttk.OptionMenu(canvas.children['editor'],
+                       newSet[group][index],
+                       *parameters.rps_drop
+                       ).grid(column=7,row=top,padx=10)
+        # Create a string variable linked to this 
+        # setting value in the new values dictionary.
+        newVal[group][index] = tk.StringVar()
+        # The entry box for the new setting value.
+        tk.Entry(canvas.children['editor'],
+                name=('new rps value ' + str(top)).lower(),
+                textvariable=newVal[group][index],
+                width=12
+                ).grid(column=8,row=top,padx=10)
+    # If we're looking at histogram visual settings:
+    elif group == 'Histogram Visual Settings':
+        # Create a unique dictionary key for the new setting.
+        index = 'hvs' + str(top)
+        # Create a string variable linked to 
+        # this setting in the new settings dictionary.
+        newSet[group][index] = tk.StringVar()
+        # The dropdown menu for the new setting.
+        ttk.OptionMenu(canvas.children['editor'],
+                       newSet[group][index],
+                       *parameters.hvs_drop
+                       ).grid(column=1,row=top,padx=10)
+        # Create a string variable linked to this 
+        # setting value in the new values dictionary.
+        newVal[group][index] = tk.StringVar()
+        # The entry box for the new setting value.
+        tk.Entry(canvas.children['editor'],
+                name=('new hvs value ' + str(top)).lower(),
+                textvariable=newVal[group][index],
+                width=12
+                ).grid(column=2,row=top,padx=10)
+    # If we're looking at line fitting settings:
     else:
-        # Move the add button down one row.
-        canvas.children['editor'].children[group[0:group.find('Settings')].lower()+'add'].grid(row=top+1)
-        # If we're looking at residual plot settings:
-        if group == 'Residual Plot Settings':
-            # Create a unique dictionary key for the new setting.
-            index = 'rps' + str(top)
-            # Create a string variable linked to 
-            # this setting in the new settings dictionary.
-            newSet[group][index] = tk.StringVar()
-            # The dropdown menu for the new setting.
-            ttk.OptionMenu(canvas.children['editor'],
-                           newSet[group][index],
-                           *parameters.rps_drop
-                           ).grid(column=4,row=top,padx=10)
-            # Create a string variable linked to this 
-            # setting value in the new values dictionary.
-            newVal[group][index] = tk.StringVar()
-            # The entry box for the new setting value.
-            tk.Entry(canvas.children['editor'],
-                    name=('new rps value ' + str(top)).lower(),
-                    textvariable=newVal[group][index],
-                    width=12
-                    ).grid(column=5,row=top,padx=10)
-        # If we're looking at line fitting settings:
-        else:
-            # Create a unique dictionary key for the new setting.
-            index = 'lfs' + str(top)
-            # Create a string variable linked to 
-            # this setting in the new settings dictionary.
-            newSet[group][index] = tk.StringVar()
-            # The dropdown menu for the new setting.
-            ttk.OptionMenu(canvas.children['editor'],
-                           newSet[group][index],
-                           *parameters.lfs_drop
-                           ).grid(column=1,row=top,padx=10)
-            # Create a string variable linked to this 
-            # setting value in the new values dictionary.
-            newVal[group][index] = tk.StringVar()
-            # The entry box for the new setting value.
-            tk.Entry(canvas.children['editor'],
-                     name=('new lfs value ' + str(top)).lower(),
-                     textvariable=newVal[group][index],
-                     width=12
-                     ).grid(column=2,row=top,padx=10)
-    # INcrement the bottom of the current group.
+        # Create a unique dictionary key for the new setting.
+        index = 'lfs' + str(top)
+        # Create a string variable linked to 
+        # this setting in the new settings dictionary.
+        newSet[group][index] = tk.StringVar()
+        # The dropdown menu for the new setting.
+        ttk.OptionMenu(canvas.children['editor'],
+                       newSet[group][index],
+                       *parameters.lfs_drop
+                       ).grid(column=4,row=top,padx=10)
+        # Create a string variable linked to this 
+        # setting value in the new values dictionary.
+        newVal[group][index] = tk.StringVar()
+        # The entry box for the new setting value.
+        tk.Entry(canvas.children['editor'],
+                 name=('new lfs value ' + str(top)).lower(),
+                 textvariable=newVal[group][index],
+                 width=12
+                 ).grid(column=5,row=top,padx=10)
+    # Increment the bottom of the current group.
     bottom[group] += 1
     # Create a new updated scrollbar.
     scroll = ttk.Scrollbar(window,orient=VERTICAL,command=canvas.yview)
@@ -417,6 +437,7 @@ def editor_menu(prev):
             'RossiAlpha Settings': {},
             'CohnAlpha Settings': {},
             'CohnAlpha Visual Settings': {},
+            'FeynmanY Settings' : {},
             'Histogram Visual Settings': {},
             'Line Fitting Settings': {},
             'Residual Plot Settings': {}}
@@ -612,6 +633,68 @@ def cohnAlphaMenu():
               command=main
               ).pack(side=TOP,padx=10,pady=10)
 
+def feynmanProgress():
+    global window, parameters
+    # Clear the window of all previous entries, labels, and buttons.
+    for item in window.winfo_children():
+        item.destroy()
+    window.title('Analysis Progress')
+    length = int((parameters.settings['FeynmanY Settings']['Tau range'][1] - parameters.settings['FeynmanY Settings']['Tau range'][0])/parameters.settings['FeynmanY Settings']['Increment amount']+1)
+    ttk.Label(master=window,
+              name='info',
+              text='Currently running Feynman Y analysis...'
+              ).pack(side=TOP,padx=10,pady=10)
+    ttk.Progressbar(master=window,
+                    orient=HORIZONTAL,
+                    length=length,
+                    mode = 'determinate',
+                    name='progress',
+                    ).pack(side=TOP,padx=10)
+    ttk.Label(master=window,
+              name='disclaimer',
+              text='This process may take a couple minutes.'
+              ).pack(side=TOP,padx=10,pady=10)
+    wait = BooleanVar()
+    # After 1 ms, set the dummy variable to True.
+    window.after(1, wait.set, True)
+    # Wait for the dummy variable to be set, then continue.
+    window.wait_variable(wait)
+    run.fySplit(window, parameters)
+
+def feynmanYMenu():
+
+    '''The GUI for the Feynman Y menu.'''
+
+    global window, parameters
+    # Clear the window of all previous entries, labels, and buttons.
+    for item in window.winfo_children():
+        item.destroy()
+    # Properly name the window.
+    window.title('Feynman Y Analysis')
+    # Prompt the user.
+    ttk.Label(window,
+              name='prompt',
+              text='What would you like to do?'
+              ).pack(side=TOP,padx=10,pady=10)
+    # Button to run analysis.
+    ttk.Button(window,
+              name='run',
+              text='Run analysis',
+              command=feynmanProgress
+              ).pack(side=TOP,padx=10)
+    # Button to view the program settings.
+    ttk.Button(window,
+              name='settings',
+              text='Program settings',
+              command=lambda: setMenu(feynmanYMenu)
+              ).pack(side=TOP,padx=10)
+    # Button to return to the main menu.
+    ttk.Button(window,
+              name='return',
+              text='Return to main menu',
+              command=main
+              ).pack(side=TOP,padx=10,pady=10)
+
 def download_menu(prev, to):
 
     '''The GUI for the settings download menu.'''
@@ -682,6 +765,12 @@ def main():
                name='cohn_alpha',
                text='Run Cohn Alpha analysis',
                command=cohnAlphaMenu
+               ).pack(side=TOP,padx=10)
+    # Button to run Cohn Alpha analysis. 
+    ttk.Button(window,
+               name='feynman_y',
+               text='Run Feynman Y analysis',
+               command=feynmanYMenu
                ).pack(side=TOP,padx=10)
     # Button to edit the program settings.
     ttk.Button(window,

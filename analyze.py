@@ -9,6 +9,9 @@ from RossiAlpha import fitting as fit
 from RossiAlpha import plots as plt
 from RossiAlpha import timeDifs as dif
 from CohnAlpha import CohnAlpha as ca
+from FeynmanY import feynman as fey
+from tkinter import ttk
+from tkinter import *
 
 class Analyzer:
 
@@ -23,6 +26,61 @@ class Analyzer:
         self.best_fit: fit.RossiHistogramFit = None
         self.input: str = None
         self.method: str = None
+
+    def runFeynmanY(self, io: dict, fy: dict, show: bool, save: bool, hvs: dict, window: Tk = None):
+        
+        '''Run FeynmanY analysis for varying tau values.
+        Plots each tau value and estimates alpha.
+        
+        Requires:
+        - io: the Input/Output Settings dictionary.
+        - fy: the FeynmanY Settings dictionary.
+        - show: whether or not to show plots.
+        - save: whether or not to save plots.
+        - hvs: the Histogram Visual Settings dictionary.'''
+        
+        yValues = []
+        y2Values = []
+        tValues = []
+        tValues.extend(range(fy['Tau range'][0], fy['Tau range'][1]+1, fy['Increment amount']))
+        # Load in the data and sort it.
+        data = evt.createEventsListFromTxtFile(io['Input file/folder'], io['Time column'], io['Channels column'])
+        data.sort(key=lambda Event: Event.time)
+        # Adjust each measurement by making
+        # the earliest measurement time 0.
+        min = data[0].time
+        for entry in data:
+            entry.time -= min
+        # DEBUG LINE
+        print('Tau\tY\tY2')
+        if window is not None:
+            window.children['progress']['value'] += 1
+            wait = BooleanVar()
+            # After 1 ms, set the dummy variable to True.
+            window.after(1, wait.set, True)
+            # Wait for the dummy variable to be set, then continue.
+            window.wait_variable(wait)
+        # For each tau:
+        for tau in tValues:
+            # Convert the data into bin frequency counts.
+            counts = fey.randomCounts(data, tau)
+            # Compute the variance to mean for this 
+            # tau value and add it to the list.
+            y, y2 = fey.computeVarToMean(counts, tau)
+            yValues.append(y)
+            y2Values.append(y2)
+            # DEBUG LINE
+            print(str(tau) + '\t' + str(y) + '\t' + str(y2))   
+            if window is not None:
+                window.children['progress']['value'] += 1
+                wait = BooleanVar()
+                # After 1 ms, set the dummy variable to True.
+                window.after(1, wait.set, True)
+                # Wait for the dummy variable to be set, then continue.
+                window.wait_variable(wait)
+        fey.plot(tValues,yValues, save, show, io['Save directory'])
+        fey.plot(tValues,y2Values, save, show, io['Save directory'])
+        fey.fitting(tValues, y2Values, gamma_guess=tValues[-1], alpha_guess=0.01)
 
     def conductCohnAlpha(self, input: str, output: str, show: bool, save: bool, caGen: dict, caVis: dict):
 
