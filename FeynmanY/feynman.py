@@ -4,7 +4,7 @@ from scipy.optimize import curve_fit
 import matplotlib.pyplot as plt
 import os
 
-def YFit(gamma, alpha, tau):
+def YFit(tau, gamma, alpha):
     return gamma*(1+(1-np.exp(alpha*tau))/(alpha*tau))
 
 def randomCounts(triggers: list[evt.Event], tau: int):
@@ -29,17 +29,20 @@ def randomCounts(triggers: list[evt.Event], tau: int):
         else:
             # If count index doesn't currently 
             # exist, append zeros until it does.
-            while count > len(frequencies):
+            while count > len(frequencies)-1:
                 frequencies.append(0)
             # Increase the frequency for the count index.
-            frequencies[count-1] += 1
+            frequencies[count] += 1
+            frequencies[0] += cur - prev - 1
             # Reset variables.
             count = 1
             prev = cur
-    while count > len(frequencies):
+    while count > len(frequencies)-1:
         frequencies.append(0)
     # Increase the frequency for the count index.
-    frequencies[count-1] += 1
+    frequencies[count] += 1
+    if cur != prev:
+        frequencies[0] += cur - prev - 1
     # Get number of non-empty gates and convert frequencies into probabilities.
     num_gates = sum(frequencies)
     frequencies = [freq/num_gates for freq in frequencies]
@@ -93,8 +96,8 @@ def computeVarToMean(probabilities, tau):
     moment1 = 0
     moment2 = 0
     for i in range(len(probabilities)):
-        moment1 += (i+1)*probabilities[i]
-        moment2 += (i+1)*(i)*probabilities[i]
+        moment1 += (i)*probabilities[i]
+        moment2 += (i)*(i-1)*probabilities[i]
     moment2 /= 2
     return (2*moment2 + moment1 - moment1*moment1)/moment1 - 1, (moment2 - moment1*moment1/2)/tau
 
@@ -125,6 +128,7 @@ def fitting(x_data, y_data, tau_interval, gamma_guess, alpha_guess):
 
     # Perform the curve fitting using curve_fit
     popt, pcov = curve_fit(YFit, x, y, p0=initial_guesses)
+    # popt, pcov = curve_fit(YFit, x, y, p0=initial_guesses)
 
     # Retrieve the optimized parameters
     gamma_opt, alpha_opt = popt
@@ -137,6 +141,7 @@ def fitting(x_data, y_data, tau_interval, gamma_guess, alpha_guess):
     x_fit = np.linspace(min(x), max(x), tau_interval)
 
     # Generate y values using the fitted parameters
+    # y_fit = YFit(gamma_opt, alpha_opt, x_fit)
     y_fit = YFit(x_fit, gamma_opt, alpha_opt)
 
     # Plot the original data points and the fitted curve
@@ -153,7 +158,7 @@ def testing():
                                            None)
     data.sort(key=lambda Event: Event.time)
     print('Tau\tY\t\t\tY2')
-    for i in range(1, 21):
-        frequencies = randomCounts(data, i/2.0)
-        y, y2 = computeVarToMean(frequencies, i/2.0)
+    for i in range(1,2):
+        frequencies = randomCounts(data, i)
+        y, y2 = computeVarToMean(frequencies, i)
         print(str(i/2.0) + '\t' + str(y) + '\t' + str(y2))

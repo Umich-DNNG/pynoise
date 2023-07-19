@@ -37,7 +37,9 @@ class Analyzer:
         - fy: the FeynmanY Settings dictionary.
         - show: whether or not to show plots.
         - save: whether or not to save plots.
-        - hvs: the Histogram Visual Settings dictionary.'''
+
+        Optional:
+        - window: the window object, if being run in GUI mode.'''
         
         yValues = []
         y2Values = []
@@ -81,7 +83,7 @@ class Analyzer:
                 window.wait_variable(wait)
         fey.plot(tValues,yValues, save, show, io['Save directory'])
         fey.plot(tValues,y2Values, save, show, io['Save directory'])
-        fey.fitting(tValues, y2Values, tau_interval = 30, gamma_guess=tValues[-1], alpha_guess= -0.0001)
+        fey.fitting(tValues, yValues, tau_interval = 30, gamma_guess=yValues[-1], alpha_guess=-0.01)
 
     def conductCohnAlpha(self, input: str, output: str, show: bool, save: bool, caGen: dict, caVis: dict):
 
