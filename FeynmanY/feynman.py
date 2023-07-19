@@ -17,14 +17,14 @@ def randomCounts(triggers: list[evt.Event], tau: int):
     - tau: the gate width.'''
 
     # Convert the list of times into gate indices.
-    triggers = (np.array([int(event.time/tau) for event in triggers]))
     frequencies = []
     count = 1
-    prev = triggers[0]
+    prev = int(triggers[0].time/tau)
     # For all measurements:
     for measurement in triggers[1:]:
+        cur = int(measurement.time/tau)
         # If still in the same gate, increment the count.
-        if measurement == prev:
+        if cur == prev:
             count += 1
         else:
             # If count index doesn't currently 
@@ -35,7 +35,7 @@ def randomCounts(triggers: list[evt.Event], tau: int):
             frequencies[count-1] += 1
             # Reset variables.
             count = 1
-            prev = measurement
+            prev = cur
     while count > len(frequencies):
         frequencies.append(0)
     # Increase the frequency for the count index.
