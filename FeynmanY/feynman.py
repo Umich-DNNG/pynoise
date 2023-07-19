@@ -7,6 +7,11 @@ import os
 def YFit(gamma, alpha, tau):
     return gamma*(1+(1-np.exp(alpha*tau))/(alpha*tau))
 
+
+def log_one(tau, a, b):
+    return a * (1 - ((1 - np.exp(-b * tau)) / (b * tau)))
+
+
 def randomCounts(triggers: list[evt.Event], tau: int):
 
     '''Converts a list of Events into random trigger gate frequencies.
@@ -127,7 +132,8 @@ def fitting(x_data, y_data, tau_interval, gamma_guess, alpha_guess):
     initial_guesses = (gamma_guess, alpha_guess)
 
     # Perform the curve fitting using curve_fit
-    popt, pcov = curve_fit(YFit, x, y, p0=initial_guesses)
+    popt, pcov = curve_fit(log_one, x, y, p0=initial_guesses)
+    # popt, pcov = curve_fit(YFit, x, y, p0=initial_guesses)
 
     # Retrieve the optimized parameters
     gamma_opt, alpha_opt = popt
@@ -140,7 +146,8 @@ def fitting(x_data, y_data, tau_interval, gamma_guess, alpha_guess):
     x_fit = np.linspace(min(x), max(x), tau_interval)
 
     # Generate y values using the fitted parameters
-    y_fit = YFit(x_fit, gamma_opt, alpha_opt)
+    # y_fit = YFit(gamma_opt, alpha_opt, x_fit)
+    y_fit = log_one(x_fit, alpha_opt, gamma_opt)
 
     # Plot the original data points and the fitted curve
     plt.scatter(x, y, label='Data')
