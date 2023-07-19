@@ -43,7 +43,7 @@ def exp_decay_2_param(x, a, b):
 #--------------------------------------------------------------------------------    
 
 class RossiHistogramFit:
-    def __init__(self, counts, bin_centers, settings):
+    def __init__(self, counts, bin_centers, min_cutoff,timeDifMethod = 'any_and_all', fit_range = None  ):
         
         '''
         Description:
@@ -52,44 +52,70 @@ class RossiHistogramFit:
         Inputs:
             - counts (The set of values of the histogram as a list)
             - bin_centers (adjusted bin centers for visual plotting)
-            - generating_hist_settings (setting for histogram plotting)
-            - fitting_opts (setting for fitting)
-            - general_settings (general setting)
-            - residual_opts (setting for residuals)
-            - hist_visual_opts (setting for styling histogram plot)
+            - min_cutoff: The minimum cutoff for producing the fit
+            - timeDifMethod: method used to calculate time differences
+            - fit_range: range of values to fit the curve to
+            
 
         Outputs: 
             - Fit() object
         '''
-
-        # Plotting options
-        self.fitting_options = settings['Line Fitting Settings']
-        self.residual_options = settings['Residual Plot Settings']
-        self.hist_visual_options = settings['Histogram Visual Settings']
-
         # Required parameters
         self.counts = counts
         self.bin_centers = bin_centers
-        self.fit_range = settings['General Settings']['Fit range']
-        self.min_cutoff = settings['Histogram Generation Settings']['Minimum cutoff']
-        self.timeDifMethod = settings['General Settings']['Time difference method']
-        self.save_dir = settings['Input/Output Settings']['Save directory']
+        self.fit_range = fit_range
+        self.min_cutoff = min_cutoff
+        self.timeDifMethod = timeDifMethod
+
+        self.save_fig = False
+        self.save_dir = "./"
+        self.show_plot = True
+        self.fitting_options = None
+        self.residual_options = None
+        self.hist_visual_options = None
+
+        if fit_range is None:
+            self.fit_range = [min(bin_centers), max(bin_centers)] 
 
 
-    def fit(self, save_fig, show_plot):
-
+    def fit(self, save_fig: bool = True, save_dir = './', show_plot: bool = True, fitting_opts = None,hist_visual_opts = None):
+        self.fitting_options = fitting_opts
+        self.hist_visual_options = hist_visual_opts
+        self.save_dir = save_dir
         '''
         Description:
             - Fitting an exponential curve onto the histogram.
             - Saving and showing the plot can be turned on or off.
 
         Inputs:
-            - self (encompasses all private variables)
+            - save_fig: True/False to save the figure or not
+            - save_dir: String with path to where figure should be saved
+            - show_plot: True/False to show the plot
+            - fitting_opts (setting for fitting)
+            - hist_visual_opts (setting for styling histogram plot)
 
         Outputs: 
             - popt (Optimal values for the parameters)
         '''
 
+        #Default Settings for Histogram Visuals
+        if hist_visual_opts is None:
+            hist_visual_opts = {
+                "alpha": 1,
+                "fill": True,
+                "color": "#B2CBDE",
+                "edgecolor": "#162F65",
+                "linewidth": 0.4
+            }
+        #Default Settings for Fitting_Opts
+        if fitting_opts is None:
+            fitting_opts = {
+                "color": "#162F65",
+                "markeredgecolor": "blue",
+                "markerfacecolor": "black",
+                "linestyle": "-",
+                "linewidth": 1
+            }
         num_bins = np.size(self.counts)
         time_diff_centers = self.bin_centers[1:] - np.diff(self.bin_centers[:2])/2
 
@@ -145,7 +171,7 @@ class RossiHistogramFit:
 
 #--------------------------------------------------------------------------------
 
-    def fit_and_residual(self, save_every_fig, show_plot, folder_index = None):
+    def fit_and_residual(self, save_fig: bool, save_dir, show_plot: bool, fitting_opts,residual_opts,hist_visual_opts, folder_index = None):
 
         '''
         Description:
@@ -153,12 +179,26 @@ class RossiHistogramFit:
             - Saving and showing the plot can be turned on or off.
 
         Inputs:
-            - self (encompasses all private variables)
+            Inputs:
+            - save_fig: True/False to save the figure or not
+            - save_dir: String with path to where figure should be saved
+            - show_plot: True/False to show the plot
+            - fitting_opts (setting for fitting)
+            - residual_opts (setting for residuals)
+            - hist_visual_opts (setting for styling histogram plot)
+            - folder_index: 
 
         Outputs: 
             - popt (Optimal values for the parameters)
         '''
 
+        self.fitting_options = fitting_opts
+        #self.residual_options = settings['Residual Plot Settings']
+        self.residual_options = residual_opts
+        #self.hist_visual_options = settings['Histogram Visual Settings']
+        self.hist_visual_options = hist_visual_opts
+        self.save_dir = save_dir
+        self.save_fig = save_fig
         num_bins = np.size(self.counts)
         time_diff_centers = self.bin_centers[1:] - np.diff(self.bin_centers[:2])/2
 
@@ -195,8 +235,7 @@ class RossiHistogramFit:
         fig, (ax1, ax2) = plt.subplots(nrows=2, sharex=True, figsize=(8, 6), gridspec_kw={'height_ratios': [2, 1]})
 
         # Plotting histogram and fitting curve in top subplot
-        ax1.bar(self.bin_centers, self.counts, width=0.8*(self.bin_centers[1]-self.bin_centers[0]), 
-            alpha=0.6, color="b", align="center", edgecolor="k", linewidth=0.5, fill=True)
+        ax1.bar(self.bin_centers, self.counts, width=0.8*(self.bin_centers[1]-self.bin_centers[0]), **self.hist_visual_options)
         ax1.plot(line_x, line_y, label='Fit: A=%5.3f, alpha=%5.3f, B=%5.3f' % tuple(popt), **self.fitting_options)
         ax1.legend()
         ax1.set_ylabel("Coincidence rate (s^-1)")
@@ -208,7 +247,7 @@ class RossiHistogramFit:
         index = (time_diff_centers >= xfit[0]) & (time_diff_centers <= xfit[-1])
 
         ax2.scatter(time_diff_centers[index], residuals_norm, **self.residual_options)
-        ax2.axhline(y=0, color='r', linestyle='--')
+        ax2.axhline(y=0, color='#162F65', linestyle='--')
         ax2.set_ylim([-1, 1])
         ax2.set_xlabel("Time Differences(ns)")
         ax2.set_ylabel('Relative residuals')
@@ -217,7 +256,7 @@ class RossiHistogramFit:
         fig.suptitle(self.timeDifMethod, fontsize=14)
 
         # Adjusting layout and saving figure (optional)
-        if save_every_fig:
+        if self.save_fig:
             fig.tight_layout()
             if folder_index is not None:
                 save_filename = os.path.join(self.save_dir, 'fitted_and_residual_folder' + str(folder_index)) 
@@ -234,7 +273,7 @@ class RossiHistogramFit:
 #--------------------------------------------------------------------------------
 
 class Fit_With_Weighting:
-    def __init__(self,RA_hist_totals, min_cutoff, general_settings,saveDir, fitting_opts, residual_opts):
+    def __init__(self,RA_hist_totals, min_cutoff: int, general_settings: dict, saveDir: str, fitting_opts: dict, residual_opts: dict):
 
         '''
         Description:
@@ -262,7 +301,6 @@ class Fit_With_Weighting:
         self.uncertainties = RA_hist_totals[2]
         self.fit_range = general_settings['Fit range']
         self.min_cutoff = min_cutoff
-        self.plot_scale = general_settings['Plot scale']
         self.save_dir = saveDir
 
         # Line fitting variables
@@ -316,7 +354,7 @@ class Fit_With_Weighting:
         self.xfit, self.yfit = xfit, yfit
 
        
-    def plot_RA_and_fit(self, save_fig, show_plot):
+    def plot_RA_and_fit(self, save_fig: bool, show_plot: bool, errorBars: str):
 
         '''
         Description:
@@ -337,13 +375,20 @@ class Fit_With_Weighting:
         # Creating a scatter plot with the data
         ax.scatter(time_diff_centers, self.hist[:-1], **self.residual_options)
         
+        if errorBars == "bar":
+            ax.errorbar(time_diff_centers, self.hist[:-1], yerr=self.uncertainties[:-1], fmt='o', ecolor='black',capsize=5)
+        #ax.fill_between(time_diff_centers, self.hist[:-1] - self.uncertainties[:-1], self.hist[:-1] + self.uncertainties[:-1], alpha=0.3, color='gray')
+        elif errorBars == "band":
+            lower_bound = self.hist[:-1] - self.uncertainties[:-1]
+            upper_bound = self.hist[:-1] + self.uncertainties[:-1]
+            ax.fill_between(time_diff_centers, lower_bound, upper_bound, alpha=0.3, color='gray')
+
         # Adding the fit to the data
         ax.plot(self.xfit, self.yfit, label='Fit', **self.fitting_options)
         
         # Setting the axis labels
         ax.set_xlabel('Time difference (ns)')
         ax.set_ylabel('Counts')
-        ax.set_yscale(self.plot_scale)
 
         # Adjusting layout and saving figure (optional)
         if save_fig:
@@ -352,5 +397,7 @@ class Fit_With_Weighting:
             fig.savefig(save_filename, dpi=300, bbox_inches='tight')
         
         # Displaying the plot (optional)
+        if show_plot:
+            plt.show()
        
 
