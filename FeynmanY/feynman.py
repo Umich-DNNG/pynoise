@@ -4,13 +4,8 @@ from scipy.optimize import curve_fit
 import matplotlib.pyplot as plt
 import os
 
-def YFit(gamma, alpha, tau):
+def YFit(tau, gamma, alpha):
     return gamma*(1+(1-np.exp(alpha*tau))/(alpha*tau))
-
-
-def log_one(tau, a, b):
-    return a * (1 - ((1 - np.exp(-b * tau)) / (b * tau)))
-
 
 def randomCounts(triggers: list[evt.Event], tau: int):
 
@@ -132,7 +127,7 @@ def fitting(x_data, y_data, tau_interval, gamma_guess, alpha_guess):
     initial_guesses = (gamma_guess, alpha_guess)
 
     # Perform the curve fitting using curve_fit
-    popt, pcov = curve_fit(log_one, x, y, p0=initial_guesses)
+    popt, pcov = curve_fit(YFit, x, y, p0=initial_guesses)
     # popt, pcov = curve_fit(YFit, x, y, p0=initial_guesses)
 
     # Retrieve the optimized parameters
@@ -147,7 +142,7 @@ def fitting(x_data, y_data, tau_interval, gamma_guess, alpha_guess):
 
     # Generate y values using the fitted parameters
     # y_fit = YFit(gamma_opt, alpha_opt, x_fit)
-    y_fit = log_one(x_fit, alpha_opt, gamma_opt)
+    y_fit = YFit(x_fit, gamma_opt, alpha_opt)
 
     # Plot the original data points and the fitted curve
     plt.scatter(x, y, label='Data')
@@ -163,7 +158,7 @@ def testing():
                                            None)
     data.sort(key=lambda Event: Event.time)
     print('Tau\tY\t\t\tY2')
-    for i in range(1, 21):
-        frequencies = randomCounts(data, i/2.0)
-        y, y2 = computeVarToMean(frequencies, i/2.0)
+    for i in range(1,2):
+        frequencies = randomCounts(data, i)
+        y, y2 = computeVarToMean(frequencies, i)
         print(str(i/2.0) + '\t' + str(y) + '\t' + str(y2))
