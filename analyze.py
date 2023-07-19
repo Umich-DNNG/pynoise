@@ -83,7 +83,7 @@ class Analyzer:
                 window.wait_variable(wait)
         fey.plot(tValues,yValues, save, show, io['Save directory'])
         fey.plot(tValues,y2Values, save, show, io['Save directory'])
-        fey.fitting(tValues, yValues, tau_interval = 30, gamma_guess=yValues[-1], alpha_guess= 0.01)
+        fey.fitting(tValues, yValues, tau_interval = 30, gamma_guess=yValues[-1], alpha_guess=-0.01)
 
     def conductCohnAlpha(self, input: str, output: str, show: bool, save: bool, caGen: dict, caVis: dict):
 
