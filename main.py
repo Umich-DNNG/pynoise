@@ -1,6 +1,7 @@
 import sys
 import driver as drv
 import gui
+from FeynmanY import feynman as fey
 
 def main():
     try:
@@ -15,3 +16,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+    #fey.testing()
