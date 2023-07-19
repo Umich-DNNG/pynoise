@@ -8,7 +8,13 @@
 
 # vscode configuration files
 *.vscode
-.DS_Store
+*.DS_Store
 
 # No need to include logs
 *.log
+
+# Settings files should be user independent
+*.json
+
+# Input files are usually user independent
+*.txt
