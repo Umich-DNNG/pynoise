@@ -49,8 +49,9 @@ class Analyzer:
         # Adjust each measurement by making
         # the earliest measurement time 0.
         min = data[0].time
-        for entry in data:
-            entry.time -= min
+        if min != 0:
+            for entry in data:
+                entry.time -= min
         # DEBUG LINE
         print('Tau\tY\tY2')
         if window is not None:
