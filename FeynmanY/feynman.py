@@ -156,7 +156,7 @@ def testing():
                                            None)
     data.sort(key=lambda Event: Event.time)
     print('Tau\tY\t\t\tY2')
-    for i in range(1, 21):
-        frequencies = randomCounts(data, i/2.0)
-        y, y2 = computeVarToMean(frequencies, i/2.0)
+    for i in range(1,2):
+        frequencies = randomCounts(data, i)
+        y, y2 = computeVarToMean(frequencies, i)
         print(str(i/2.0) + '\t' + str(y) + '\t' + str(y2))
