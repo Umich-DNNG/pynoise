@@ -17,7 +17,7 @@ def randomCounts(triggers: list[evt.Event], tau: int):
     - tau: the gate width.'''
 
     # Convert the list of times into gate indices.
-    triggers = (np.array([event.time/tau for event in triggers])).astype(int)
+    triggers = (np.array([int(event.time/tau) for event in triggers]))
     frequencies = []
     count = 1
     prev = triggers[0]
@@ -36,6 +36,10 @@ def randomCounts(triggers: list[evt.Event], tau: int):
             # Reset variables.
             count = 1
             prev = measurement
+    while count > len(frequencies):
+        frequencies.append(0)
+    # Increase the frequency for the count index.
+    frequencies[count-1] += 1
     # Get number of non-empty gates and convert frequencies into probabilities.
     num_gates = sum(frequencies)
     frequencies = [freq/num_gates for freq in frequencies]
@@ -142,3 +146,14 @@ def fitting(x_data, y_data, gamma_guess, alpha_guess):
     plt.ylabel('y')
     plt.legend()
     plt.show()
+
+def testing():
+    data = evt.createEventsListFromTxtFile('/Users/maxtennant/Downloads/internship/pynoise/testing.txt',
+                                           0,
+                                           None)
+    data.sort(key=lambda Event: Event.time)
+    print('Tau\tY\t\t\tY2')
+    for i in range(1, 21):
+        frequencies = randomCounts(data, i/2.0)
+        y, y2 = computeVarToMean(frequencies, i/2.0)
+        print(str(i/2.0) + '\t' + str(y) + '\t' + str(y2))
