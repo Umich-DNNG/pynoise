@@ -37,7 +37,9 @@ class Analyzer:
         - fy: the FeynmanY Settings dictionary.
         - show: whether or not to show plots.
         - save: whether or not to save plots.
-        - hvs: the Histogram Visual Settings dictionary.'''
+
+        Optional:
+        - window: the window object, if being run in GUI mode.'''
         
         yValues = []
         y2Values = []
