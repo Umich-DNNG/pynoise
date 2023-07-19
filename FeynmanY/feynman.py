@@ -114,7 +114,7 @@ def plot(taus, ys, save_fig, show_plot, save_dir):
     plt.show()
 
 
-def fitting(x_data, y_data, gamma_guess, alpha_guess):
+def fitting(x_data, y_data, tau_interval, gamma_guess, alpha_guess):
 
     # Convert the lists to NumPy arrays
     x = np.array(x_data)
@@ -134,7 +134,7 @@ def fitting(x_data, y_data, gamma_guess, alpha_guess):
     print("Optimized alpha:", alpha_opt)
 
     # Generate x values for plotting the fitted curve
-    x_fit = np.linspace(min(x), max(x), 100)
+    x_fit = np.linspace(min(x), max(x), tau_interval)
 
     # Generate y values using the fitted parameters
     y_fit = YFit(x_fit, gamma_opt, alpha_opt)
