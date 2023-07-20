@@ -4,7 +4,10 @@
         "Time column": 0,
         "Channels column": null,
         "Save directory": "./",
-        "Keep logs": false
+        "Save figures": false,
+        "Save raw data": false,
+        "Keep logs": false,
+        "Quiet mode": false
     },
     "General Settings": {
         "Fit range": [
@@ -12,9 +15,7 @@
             1000.0
         ],
         "Number of folders": 10,
-        "Quiet mode": false,
         "Sort data": true,
-        "Save figures": false,
         "Show plots": false
     },
     "RossiAlpha Settings": {

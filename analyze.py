@@ -4,13 +4,13 @@ import os
 import numpy as np
 import matplotlib.pyplot as pyplot
 import Event as evt
+import time
 import lmxReader as lmx
 from RossiAlpha import fitting as fit
 from RossiAlpha import plots as plt
 from RossiAlpha import timeDifs as dif
 from CohnAlpha import CohnAlpha as ca
 from FeynmanY import feynman as fey
-from tkinter import ttk
 from tkinter import *
 from tqdm import tqdm
 
@@ -27,6 +27,56 @@ class Analyzer:
         self.best_fit: fit.RossiHistogramFit = None
         self.input: str = None
         self.method: str = None
+
+    def export(self, data: dict[str:tuple], singles: list[tuple], method: str):
+
+        '''Export data from analysis to a csv file. The file 
+        will be stored in the data folder and will be named 
+        based on the give analysis method and current time.
+        
+        Requires:
+        - dict: a dictionary that contains all the 
+        list data to be outputted to the csv file. 
+        Each key will be the name of the column, and 
+        the value stored will be a tuple. The first 
+        value is the list of data, and the second is 
+        the row to start displaying the list at.
+        - single: a list of single values to display on the top row. 
+        Each list value will contain a tuple, whose first entry is 
+        the name of the value and whose second entry is the value.
+        - method: the name of the method of analysis.'''
+
+        curTime = time.localtime()
+        fileName = ('./data/' + method + '_' +
+                     str(curTime.tm_year) + '-' + str(curTime.tm_mon) + 
+                     '-' + str(curTime.tm_mday) + '@' + str(curTime.tm_hour) + 
+                     (':0' if curTime.tm_min < 10 else ':') + str(curTime.tm_min) +
+                     (':0' if curTime.tm_sec < 10 else ':') + str(curTime.tm_sec) + 
+                     '.csv')
+        file = open(os.path.abspath(fileName),'w')
+        labels = ''
+        line = ''
+        first = None
+        for key in data:
+            if first is None:
+                first = key
+            labels += key + ','
+            if data[key][1] == 0:
+                line += str(data[key][0][0]) + ','
+            else:
+                line += ','
+        for item in singles:
+            labels += str(item[0]) + ','
+            line += str(item[1]) + ','
+        file.write(labels[:-1] + '\n' + line[:-1] + '\n')
+        for i in range(1,len(data[first][0])):
+            line = ''
+            for key in data:
+                if i >= data[key][1] and i-data[key][1] < len(data[key][0]):
+                    line += str(data[key][0][i-data[key][1]]) + ','
+            file.write(line[:-1]+'\n')
+        file.flush()
+        file.close()
 
     def runFeynmanY(self, io: dict, fy: dict, show: bool, save: bool, quiet: bool, window: Tk = None):
         
@@ -182,7 +232,7 @@ class Analyzer:
             data = evt.createEventsListFromTxtFile(io['Input file/folder'],
                                                    io['Time column'],
                                                    io['Channels column'],
-                                                   gen['Quiet mode'])
+                                                   io['Quiet mode'])
         elif io['Input file/folder'].endswith(".lmx"):
             data =  lmx.readLMXFile(io['Input file/folder'])
         # If file type isn't valid, throw an error.
@@ -195,7 +245,7 @@ class Analyzer:
         thisTimeDifCalc = dif.timeDifCalcs(data, raGen['Reset time'], raGen['Time difference method'], raGen['Digital delay'])
         # Simulatenously calculate the time differences and bin them.
         self.histogram, counts, bin_centers, bin_edges = thisTimeDifCalc.calculateTimeDifsAndBin(raGen['Bin width'],
-                                                                                                 gen['Save figures'],
+                                                                                                 io['Save figures'],
                                                                                                  gen['Show plots'],
                                                                                                  io['Save directory'],
                                                                                                  raVis)
@@ -228,10 +278,10 @@ class Analyzer:
                                     settings['RossiAlpha Settings']['Reset time'],
                                     settings['RossiAlpha Settings']['Time difference method'],
                                     settings['RossiAlpha Settings']['Digital delay'],
-                                    settings['General Settings']['Quiet mode'])
+                                    settings['Input/Output Settings']['Quiet mode'])
                 self.createPlot(settings['RossiAlpha Settings']['Bin width'],
                                 settings['RossiAlpha Settings']['Reset time'],
-                                settings['General Settings']['Save figures'],
+                                settings['Input/Output Settings']['Save figures'],
                                 settings['General Settings']['Show plots'],
                                 settings['Input/Output Settings']['Save directory'],
                                 settings['Histogram Visual Settings'])
@@ -239,12 +289,12 @@ class Analyzer:
         else:
             self.createPlot(settings['RossiAlpha Settings']['Bin width'],
                             settings['RossiAlpha Settings']['Reset time'],
-                            settings['General Settings']['Save figures'],
+                            settings['Input/Output Settings']['Save figures'],
                             settings['General Settings']['Show plots'],
                             settings['Input/Output Settings']['Save directory'],
                             settings['Histogram Visual Settings'])
             
-    def createBestFit(self, cutoff: int, method: str, gen: dict, output: str, line: dict, res: dict, hist: dict, index = None):
+    def createBestFit(self, cutoff: int, method: str, gen: dict, save: str, output: str, line: dict, res: dict, hist: dict, index = None):
         
         '''Create a Rossi Histogram line of best fit and residual plot.
         
@@ -252,6 +302,7 @@ class Analyzer:
         - cutoff: the minimum cutoff.
         - method: the time difference method.
         - gen: the General Settings dictionary.
+        - save: whether or not to save figures.
         - output: the save directory.
         - line: the Line Fitting Settings dictionary.
         - res: the Residual Plot Settings dictionary.
@@ -266,7 +317,7 @@ class Analyzer:
                                               cutoff,
                                               method,
                                               gen['Fit range'])
-        self.best_fit.fit_and_residual(gen['Save figures'],
+        self.best_fit.fit_and_residual(save,
                                        output,
                                        gen['Show plots'],
                                        line,
@@ -287,12 +338,32 @@ class Analyzer:
         self.createBestFit(settings['RossiAlpha Settings']['Minimum cutoff'],
                            settings['RossiAlpha Settings']['Time difference method'],
                            settings['General Settings'],
+                           settings['Input/Output Settings']['Save figures'],
                            settings['Input/Output Settings']['Save directory'],
                            settings['Line Fitting Settings'],
                            settings['Residual Plot Settings'],
                            settings['Histogram Visual Settings'])
         # Close all currently open plots.
         pyplot.close()
+        if settings['Input/Output Settings']['Save raw data'] == True:
+            begin = []
+            end = []
+            resStart = 0
+            while settings['RossiAlpha Settings']['Minimum cutoff'] > self.histogram.bin_centers[resStart]:
+                resStart += 1
+            for i in range(len(self.histogram.bin_edges)-1):
+                begin.append(self.histogram.bin_edges[i])
+                end.append(self.histogram.bin_edges[i+1])
+            self.export({'Bin beginning': (begin,0),
+                        'Bin ending': (end,0),
+                        'Measured Count': (self.histogram.counts,0),
+                        'Predicted Count': (self.best_fit.pred,resStart),
+                        'Residual': (self.best_fit.residuals,resStart)},
+                        [('A', self.best_fit.a),
+                        ('B', self.best_fit.b),
+                        ('Alpha', self.best_fit.alpha),
+                        ('Input file/folder', settings['Input/Output Settings']['Input file/folder'])],
+                        'RossiAlphaFile')
 
     def replace_zeroes(self, lst: list):
 
@@ -341,6 +412,7 @@ class Analyzer:
                     self.createBestFit(settings['RossiAlpha Settings']['Minimum cutoff'],
                                        settings['RossiAlpha Settings']['Time difference method'],
                                        settings['General Settings'],
+                                       settings['Input/Output Settings']['Save figures'],
                                        settings['Input/Output Settings']['Save directory'],
                                        settings['Line Fitting Settings'],
                                        settings['Residual Plot Settings'],
@@ -371,7 +443,7 @@ class Analyzer:
         # Fit the total histogram with weighting.
         thisWeightedFit.fit_RA_hist_weighting()
         # Plot the total histogram fit.
-        thisWeightedFit.plot_RA_and_fit(settings['General Settings']['Save figures'], 
+        thisWeightedFit.plot_RA_and_fit(settings['Input/Output Settings']['Save figures'], 
                                         settings['General Settings']['Show plots'],
                                         settings['RossiAlpha Settings']['Error Bar/Band'])
         # Close all open plots.

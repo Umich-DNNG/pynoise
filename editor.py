@@ -22,7 +22,7 @@ class Editor:
         '''Prints a string if quiet mode 
         is off. Otherwise, does nothng.'''
 
-        if not self.parameters.settings['General Settings']['Quiet mode']:
+        if not self.parameters.settings['Input/Output Settings']['Quiet mode']:
             print(message)
 
     def log(self, output: str):
