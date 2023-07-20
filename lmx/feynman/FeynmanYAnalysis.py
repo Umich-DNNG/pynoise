@@ -391,9 +391,9 @@ class FeynmanYAnalysis:
                   if residuals is True: figure and axis for residuals
         """
         figure, axis = plt.subplots()
-        axis.plot(self.gatewidths(), self.Y2Distribution()[0], color='#00aaffff', label="Raw Calculation",
+        plt.plot(self.gatewidths(), self.Y2Distribution()[0], color='#00aaffff', label="Raw Calculation",
                   drawstyle='steps-mid', linewidth=2)
-        axis.set_xlabel('Gate Width [ns]', fontsize=16)
+        '''axis.set_xlabel('Gate Width [ns]', fontsize=16)
         axis.set_ylabel('Counts', fontsize=16)
         axis.set_yscale("log")
         axis.set_xscale("log")
@@ -419,14 +419,14 @@ class FeynmanYAnalysis:
                 print("Poor 2-log fit prevents the calculation from occurring \n")
 
         axis.legend()
-        figure.tight_layout()
+        figure.tight_layout()'''
         if show:
-            figure.show()
+            plt.show()
         
         if save != False and type(save) == str:
             plt.savefig(save+'.png',dpi=500,bbox_inches='tight',pad_inches=0.1)
             plt.savefig(save+'.pdf',dpi=500,bbox_inches='tight',pad_inches=0.1)
 
-        figure.clear()
+        #figure.clear()
         
         return (figure, axis, self.plotResiduals(gaussianBins, show=show)) if residuals else (figure, axis, None, None)
