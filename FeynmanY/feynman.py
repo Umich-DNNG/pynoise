@@ -97,7 +97,7 @@ def computeVarToMean(probabilities, tau):
         moment1 += (i)*probabilities[i]
         moment2 += (i)*(i-1)*probabilities[i]
     moment2 /= 2
-    return (2*moment2 + moment1 - moment1*moment1)/moment1 - 1, (moment2 - moment1*moment1/2)/tau
+    return (2*moment2 + moment1 - moment1*moment1)/moment1 - 1, (moment2 - moment1*moment1/2)/(tau*1e-9)
 
 def plot(taus, ys, save_fig, show_plot, save_dir):
     
@@ -149,14 +149,3 @@ def fitting(x_data, y_data, tau_interval, gamma_guess, alpha_guess):
     plt.ylabel('y')
     plt.legend()
     plt.show()
-
-def testing():
-    data = evt.createEventsListFromTxtFile('/Users/maxtennant/Downloads/internship/pynoise/testing.txt',
-                                           0,
-                                           None)
-    data.sort(key=lambda Event: Event.time)
-    print('Tau\tY\t\t\tY2')
-    for i in range(1,2):
-        frequencies = randomCounts(data, i)
-        y, y2 = computeVarToMean(frequencies, i)
-        print(str(i/2.0) + '\t' + str(y) + '\t' + str(y2))

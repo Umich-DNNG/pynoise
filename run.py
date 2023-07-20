@@ -429,7 +429,8 @@ def raSplit(window: Tk,
                                                                                     parameters.settings['General Settings']['Sort data'],
                                                                                     parameters.settings['RossiAlpha Settings']['Reset time'],
                                                                                     parameters.settings['RossiAlpha Settings']['Time difference method'],
-                                                                                    parameters.settings['RossiAlpha Settings']['Digital delay'])),
+                                                                                    parameters.settings['RossiAlpha Settings']['Digital delay'],
+                                                                                    parameters.settings['General Settings']['Quiet mode'])),
                                     'There are already stored time differences '
                                     + 'in this runtime. Do you want to overwrite them?')
                         # Otherwise, create with no warning.
@@ -438,7 +439,8 @@ def raSplit(window: Tk,
                                                     parameters.settings['General Settings']['Sort data'],
                                                     parameters.settings['RossiAlpha Settings']['Reset time'],
                                                     parameters.settings['RossiAlpha Settings']['Time difference method'],
-                                                    parameters.settings['RossiAlpha Settings']['Digital delay'])
+                                                    parameters.settings['RossiAlpha Settings']['Digital delay'],
+                                                    parameters.settings['General Settings']['Quiet mode'])
                             log(message='Successfully calculated time differences for file:\n'
                                 +parameters.settings['Input/Output Settings']['Input file/folder'],
                                 window=window)
@@ -517,7 +519,7 @@ def fySplit(window: Tk, parameters: set.Settings):
                          parameters.settings['FeynmanY Settings'],
                          parameters.settings['General Settings']['Show plots'],
                          parameters.settings['General Settings']['Save figures'],
-                         parameters.settings['Histogram Visual Settings'],
+                         parameters.settings['General Settings']['Quiet mode'],
                          window)
     gui.feynmanYMenu()
     log(message='Successfully ran Feynman Y analysis on file:\n'
