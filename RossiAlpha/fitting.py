@@ -73,6 +73,11 @@ class RossiHistogramFit:
         self.fitting_options = None
         self.residual_options = None
         self.hist_visual_options = None
+        self.a = None
+        self.b = None
+        self.alpha = None
+        self.pred = None
+        self.residuals = None
 
         if fit_range is None:
             self.fit_range = [min(bin_centers), max(bin_centers)] 
@@ -142,10 +147,13 @@ class RossiHistogramFit:
 
         # Deriving line x and line y
         line_x = xfit
-        line_y = exp_decay_3_param(xfit, *popt, c0)
+        self.pred = exp_decay_3_param(xfit, *popt, c0)
 
         # Displaying fitting parameters
         popt = np.hstack((popt, c0))
+        self.a = popt[0]
+        self.alpha = popt[1]
+        self.b = popt[2]
         print('Fit parameters: A =', popt[0], ', alpha =', popt[1], ', B =', popt[2])
 
         # Create figure and axes
@@ -155,7 +163,7 @@ class RossiHistogramFit:
         ax1.bar(self.bin_centers, self.counts, width=0.8*(self.bin_centers[1]-self.bin_centers[0]), 
                 alpha=0.6, color="b", align="center", edgecolor="k", linewidth=0.5, fill=True)
         
-        ax1.plot(line_x, line_y, 'r--', label='Fit: A=%5.3f, alpha=%5.3f, B=%5.3f' % tuple(popt), **self.fitting_options)
+        ax1.plot(line_x, self.pred, 'r--', label='Fit: A=%5.3f, alpha=%5.3f, B=%5.3f' % tuple(popt), **self.fitting_options)
         ax1.legend()
         ax1.set_ylabel(self.y_axis)
 
@@ -225,10 +233,13 @@ class RossiHistogramFit:
 
         # Deriving line x and line y
         line_x = xfit
-        line_y = exp_decay_3_param(xfit, *popt, c0)
+        self.pred = exp_decay_3_param(xfit, *popt, c0)
 
         # Displaying fitting parameters
         popt = np.hstack((popt, c0))
+        self.a = popt[0]
+        self.alpha = popt[1]
+        self.b = popt[2]
         print('Fit parameters: A =', popt[0], ', alpha =', popt[1], ', B =', popt[2])
 
         # Create figure and axes
@@ -236,13 +247,13 @@ class RossiHistogramFit:
 
         # Plotting histogram and fitting curve in top subplot
         ax1.bar(self.bin_centers, self.counts, width=0.8*(self.bin_centers[1]-self.bin_centers[0]), **self.hist_visual_options)
-        ax1.plot(line_x, line_y, label='Fit: A=%5.3f, alpha=%5.3f, B=%5.3f' % tuple(popt), **self.fitting_options)
+        ax1.plot(line_x, self.pred, label='Fit: A=%5.3f, alpha=%5.3f, B=%5.3f' % tuple(popt), **self.fitting_options)
         ax1.legend()
         ax1.set_ylabel("Coincidence rate (s^-1)")
 
         # Computing residuals and plot in bottom subplot
-        residuals = self.counts[fit_index] - line_y
-        residuals_norm = residuals / np.max(np.abs(residuals))
+        self.residuals = self.counts[fit_index] - self.pred
+        residuals_norm = self.residuals / np.max(np.abs(self.residuals))
 
         index = (time_diff_centers >= xfit[0]) & (time_diff_centers <= xfit[-1])
 
@@ -342,6 +353,9 @@ class Fit_With_Weighting:
         
 
         # Printing out optimization parameters
+        self.a = popt[0]
+        self.alpha = popt[1]
+        self.b = c0
         print('Fit parameters: A =', popt[0], ', alpha =', popt[1], ', B =', c0)
 
         yfit = exp_decay_3_param(xfit, *popt, c0)
