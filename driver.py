@@ -37,16 +37,16 @@ def main():
     try:
         sys.argv.index('-q')
         # If found, set quiet mode to true.
-        editor.parameters.settings['General Settings']['Quiet mode'] = True
+        editor.parameters.settings['Input/Output Settings']['Quiet mode'] = True
     # If not, try to find the --quiet command line argument.
     except ValueError:
         try:
             sys.argv.index('--quiet')
             # If found, set quiet mode to true.
-            editor.parameters.settings['General Settings']['Quiet mode'] = True
+            editor.parameters.settings['Input/Output Settings']['Quiet mode'] = True
         # If not, set quiet mode to false.
         except ValueError:
-            editor.parameters.settings['General Settings']['Quiet mode'] = False
+            editor.parameters.settings['Input/Output Settings']['Quiet mode'] = False
     # If there are program commands, loop through them.
     if start != -1:
         # Skip over --commands/-c.
