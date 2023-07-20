@@ -1,3 +1,5 @@
+from tqdm import tqdm
+
 class Event:
     def __init__(self, time, channel = None):
         self.time = time
@@ -11,10 +13,12 @@ class Event:
 
 
 
-def createEventsListFromTxtFile(filePath,timeCol,channelCol):
+def createEventsListFromTxtFile(filePath,timeCol,channelCol,quiet=False):
     events = []
+    if not quiet:
+        print('Loading data...')
     with open(filePath, 'r') as file:
-        for line in file:
+        for line in tqdm(file):
             columns = line.strip().split()
             time = columns[timeCol]
             if channelCol is None:
