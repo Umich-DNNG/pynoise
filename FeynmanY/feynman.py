@@ -37,12 +37,10 @@ def randomCounts(triggers: list[evt.Event], tau: int):
             # Reset variables.
             count = 1
             prev = cur
-    while count > len(frequencies)-1:
-        frequencies.append(0)
-    # Increase the frequency for the count index.
-    frequencies[count] += 1
-    if cur != prev:
-        frequencies[0] += cur - prev - 1
+    if count != 1:
+        while count > len(frequencies)-1:
+            frequencies.append(0)
+        frequencies[count] += 1    
     # Get number of non-empty gates and convert frequencies into probabilities.
     num_gates = sum(frequencies)
     frequencies = [freq/num_gates for freq in frequencies]
