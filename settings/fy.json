@@ -7,6 +7,7 @@
         "Show plots": true
     },
     "FeynmanY Settings": {
-        "Tau range": [30, 3000]
+        "Tau range": [30, 6000],
+        "Increment amount": 30
     }
 }
