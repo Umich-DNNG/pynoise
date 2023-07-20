@@ -12,6 +12,7 @@ from CohnAlpha import CohnAlpha as ca
 from FeynmanY import feynman as fey
 from tkinter import ttk
 from tkinter import *
+from tqdm import tqdm
 
 class Analyzer:
 
@@ -27,7 +28,7 @@ class Analyzer:
         self.input: str = None
         self.method: str = None
 
-    def runFeynmanY(self, io: dict, fy: dict, show: bool, save: bool, hvs: dict, window: Tk = None):
+    def runFeynmanY(self, io: dict, fy: dict, show: bool, save: bool, quiet: bool, window: Tk = None):
         
         '''Run FeynmanY analysis for varying tau values.
         Plots each tau value and estimates alpha.
@@ -46,7 +47,10 @@ class Analyzer:
         tValues = []
         tValues.extend(range(fy['Tau range'][0], fy['Tau range'][1]+1, fy['Increment amount']))
         # Load in the data and sort it.
-        data = evt.createEventsListFromTxtFile(io['Input file/folder'], io['Time column'], io['Channels column'])
+        data = evt.createEventsListFromTxtFile(io['Input file/folder'],
+                                               io['Time column'],
+                                               io['Channels column'],
+                                               quiet)
         data.sort(key=lambda Event: Event.time)
         # Adjust each measurement by making
         # the earliest measurement time 0.
@@ -54,8 +58,6 @@ class Analyzer:
         if min != 0:
             for entry in data:
                 entry.time -= min
-        # DEBUG LINE
-        print('Tau\tY\tY2')
         if window is not None:
             window.children['progress']['value'] += 1
             wait = BooleanVar()
@@ -63,8 +65,9 @@ class Analyzer:
             window.after(1, wait.set, True)
             # Wait for the dummy variable to be set, then continue.
             window.wait_variable(wait)
-        # For each tau:
-        for tau in tValues:
+        if not quiet:
+            print('Running each tau value...')
+        for tau in tqdm(tValues):
             # Convert the data into bin frequency counts.
             counts = fey.randomCounts(data, tau)
             # Compute the variance to mean for this 
@@ -72,8 +75,6 @@ class Analyzer:
             y, y2 = fey.computeVarToMean(counts, tau)
             yValues.append(y)
             y2Values.append(y2)
-            # DEBUG LINE
-            print(str(tau) + '\t' + str(y) + '\t' + str(y2))   
             if window is not None:
                 window.children['progress']['value'] += 1
                 wait = BooleanVar()
@@ -113,7 +114,7 @@ class Analyzer:
                                    caVis['Annotation Color'],
                                    caVis['Annotation Background Color'])
 
-    def createTimeDifs(self, io: dict, sort: bool, reset: float, method: str, delay: int):
+    def createTimeDifs(self, io: dict, sort: bool, reset: float, method: str, delay: int, quiet: bool):
         
         '''Create Rossi Alpha time differences.
         
@@ -126,7 +127,10 @@ class Analyzer:
         
         # Load the data according to its file type.
         if io['Input file/folder'].endswith(".txt"):
-            data = evt.createEventsListFromTxtFile(io['Input file/folder'], io['Time column'], io['Channels column'])
+            data = evt.createEventsListFromTxtFile(io['Input file/folder'],
+                                                   io['Time column'],
+                                                   io['Channels column'],
+                                                   quiet)
         elif io['Input file/folder'].endswith(".lmx"):
             data = lmx.readLMXFile(io['Input file/folder'])
         # If file type isn't valid, throw an error.
@@ -175,7 +179,10 @@ class Analyzer:
         self.time_difs = None
         # Load the data according to its file type.
         if io['Input file/folder'].endswith(".txt"):
-            data = evt.createEventsListFromTxtFile(io['Input file/folder'], io['Time column'], io['Channels column'])
+            data = evt.createEventsListFromTxtFile(io['Input file/folder'],
+                                                   io['Time column'],
+                                                   io['Channels column'],
+                                                   gen['Quiet mode'])
         elif io['Input file/folder'].endswith(".lmx"):
             data =  lmx.readLMXFile(io['Input file/folder'])
         # If file type isn't valid, throw an error.
@@ -220,7 +227,8 @@ class Analyzer:
                                     settings['General Settings']['Sort data'],
                                     settings['RossiAlpha Settings']['Reset time'],
                                     settings['RossiAlpha Settings']['Time difference method'],
-                                    settings['RossiAlpha Settings']['Digital delay'])
+                                    settings['RossiAlpha Settings']['Digital delay'],
+                                    settings['General Settings']['Quiet mode'])
                 self.createPlot(settings['RossiAlpha Settings']['Bin width'],
                                 settings['RossiAlpha Settings']['Reset time'],
                                 settings['General Settings']['Save figures'],
