@@ -164,6 +164,15 @@ class Analyzer:
         FeynmanYObject.plot(tValues,yValues, save, show, io['Save directory'])
         FeynmanYObject.plot(tValues,y2Values, save, show, io['Save directory'])
         FeynmanYObject.fitting(tValues, yValues, gamma_guess=yValues[-1], alpha_guess=-0.01)
+        if io['Save raw data']:
+            self.export({'Tau':(tValues,0),
+                         'Experimental Y':(yValues,0),
+                         'Experimental Y2':(y2Values,0),
+                         'Predicted Y2': (FeynmanYObject.pred,0)},
+                        [('Gamma',FeynmanYObject.gamma),
+                         ('Alpha',FeynmanYObject.alpha),
+                         ('Input file/folder', io['Input file/folder'])],
+                        'FY')
 
     def conductCohnAlpha(self, input: str, output: str, show: bool, save: bool, caGen: dict, caVis: dict):
 
