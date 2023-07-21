@@ -314,9 +314,13 @@ class Fit_With_Weighting:
         self.fit_range = general_settings['Fit range']
         self.min_cutoff = min_cutoff
         self.save_dir = saveDir
+        self.a = None
+        self.b = None
+        self.alpha = None
+        self.pred = None
 
         # Line fitting variables
-        self.xfit, self.yfit = None, None
+        self.xfit = None
 
 
     def fit_RA_hist_weighting(self):
@@ -359,14 +363,14 @@ class Fit_With_Weighting:
         self.b = c0
         print('Fit parameters: A =', popt[0], ', alpha =', popt[1], ', B =', c0)
 
-        yfit = exp_decay_3_param(xfit, *popt, c0)
+        self.pred = exp_decay_3_param(xfit, *popt, c0)
         
         cerr = np.std(self.hist[-int(self.num_bins*0.05):], axis=0, ddof=1)
         
         perr = np.sqrt(np.diag(pcov)) 
         perr = np.hstack((perr, cerr))
         
-        self.xfit, self.yfit = xfit, yfit
+        self.xfit = xfit
 
        
     def plot_RA_and_fit(self, save_fig: bool, show_plot: bool, errorBars: str):
@@ -399,7 +403,7 @@ class Fit_With_Weighting:
             ax.fill_between(time_diff_centers, lower_bound, upper_bound, alpha=0.3, color='gray')
 
         # Adding the fit to the data
-        ax.plot(self.xfit, self.yfit, label='Fit', **self.fitting_options)
+        ax.plot(self.xfit, self.pred, label='Fit', **self.fitting_options)
         
         # Setting the axis labels
         ax.set_xlabel('Time difference (ns)')
