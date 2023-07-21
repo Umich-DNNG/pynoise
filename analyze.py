@@ -49,12 +49,14 @@ class Analyzer:
         # Get the current time for file naming.
         curTime = time.localtime()
         # Name the file appropriately with the method name and current time.
-        fileName = ('./data/' + method + '_' +
-                     str(curTime.tm_year) + '-' + str(curTime.tm_mon) + 
-                     '-' + str(curTime.tm_mday) + '@' + str(curTime.tm_hour) + 
-                     (':0' if curTime.tm_min < 10 else ':') + str(curTime.tm_min) +
-                     (':0' if curTime.tm_sec < 10 else ':') + str(curTime.tm_sec) + 
-                     '.csv')
+        fileName = ('./data/' + method +
+                    ('0' if curTime.tm_mon < 10 else '') + str(curTime.tm_mon) +
+                    ('-0' if curTime.tm_mday < 10 else '-') + str(curTime.tm_mday) +
+                    ('-0' if curTime.tm_year%100 < 10 else '-') + str(curTime.tm_year%100) +
+                    ('@0' if curTime.tm_hour < 10 else '@') + str(curTime.tm_hour) +
+                    (':0' if curTime.tm_min < 10 else ':') + str(curTime.tm_min) +
+                    (':0' if curTime.tm_sec < 10 else ':') + str(curTime.tm_sec) +
+                    '.csv')
         # Open the new file.
         file = open(os.path.abspath(fileName),'w')
         # Initialize variables.
@@ -400,7 +402,7 @@ class Analyzer:
                         ('B', self.best_fit.b),
                         ('Alpha', self.best_fit.alpha),
                         ('Input file/folder', settings['Input/Output Settings']['Input file/folder'])],
-                        'RossiAlphaFile')
+                        'RAFile')
 
     def replace_zeroes(self, lst: list):
 
@@ -503,4 +505,4 @@ class Analyzer:
                          ('Alpha', thisWeightedFit.alpha),
                          ('Input file/folder', settings['Input/Output Settings']['Input file/folder']),
                          ('Number of folders', settings['General Settings']['Number of folders'])],
-                        'RossiAlphaFolder')
+                        'RAFolder')
