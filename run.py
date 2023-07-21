@@ -430,7 +430,8 @@ def raSplit(window: Tk,
                                                                                     parameters.settings['RossiAlpha Settings']['Reset time'],
                                                                                     parameters.settings['RossiAlpha Settings']['Time difference method'],
                                                                                     parameters.settings['RossiAlpha Settings']['Digital delay'],
-                                                                                    parameters.settings['Input/Output Settings']['Quiet mode'])),
+                                                                                    parameters.settings['Input/Output Settings']['Quiet mode'],
+                                                                                    False)),
                                     'There are already stored time differences '
                                     + 'in this runtime. Do you want to overwrite them?')
                         # Otherwise, create with no warning.
@@ -440,7 +441,8 @@ def raSplit(window: Tk,
                                                     parameters.settings['RossiAlpha Settings']['Reset time'],
                                                     parameters.settings['RossiAlpha Settings']['Time difference method'],
                                                     parameters.settings['RossiAlpha Settings']['Digital delay'],
-                                                    parameters.settings['Input/Output Settings']['Quiet mode'])
+                                                    parameters.settings['Input/Output Settings']['Quiet mode'],
+                                                    False)
                             log(message='Successfully calculated time differences for file:\n'
                                 +parameters.settings['Input/Output Settings']['Input file/folder'],
                                 window=window)

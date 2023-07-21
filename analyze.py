@@ -164,7 +164,7 @@ class Analyzer:
                                    caVis['Annotation Color'],
                                    caVis['Annotation Background Color'])
 
-    def createTimeDifs(self, io: dict, sort: bool, reset: float, method: str, delay: int, quiet: bool):
+    def createTimeDifs(self, io: dict, sort: bool, reset: float, method: str, delay: int, quiet: bool, folder: bool = False):
         
         '''Create Rossi Alpha time differences.
         
@@ -180,7 +180,8 @@ class Analyzer:
             data = evt.createEventsListFromTxtFile(io['Input file/folder'],
                                                    io['Time column'],
                                                    io['Channels column'],
-                                                   quiet)
+                                                   quiet,
+                                                   folder)
         elif io['Input file/folder'].endswith(".lmx"):
             data = lmx.readLMXFile(io['Input file/folder'])
         # If file type isn't valid, throw an error.
@@ -214,7 +215,7 @@ class Analyzer:
         self.histogram = plt.RossiHistogram(self.time_difs, width, reset)
         self.histogram.plot(save, show, output, vis)
 
-    def calculateTimeDifsAndPlot(self, io: dict, gen: dict, raGen: dict, raVis: dict):
+    def calculateTimeDifsAndPlot(self, io: dict, gen: dict, raGen: dict, raVis: dict, folder: bool = False):
 
         '''Simultaneously calculate the time 
         differences and construct a Rossi Histogram.
@@ -232,7 +233,8 @@ class Analyzer:
             data = evt.createEventsListFromTxtFile(io['Input file/folder'],
                                                    io['Time column'],
                                                    io['Channels column'],
-                                                   io['Quiet mode'])
+                                                   io['Quiet mode'],
+                                                   folder)
         elif io['Input file/folder'].endswith(".lmx"):
             data =  lmx.readLMXFile(io['Input file/folder'])
         # If file type isn't valid, throw an error.
@@ -253,7 +255,7 @@ class Analyzer:
         self.input = io['Input file/folder']
         self.method = raGen['Time difference method']
 
-    def plotSplit(self, settings: dict):
+    def plotSplit(self, settings: dict, folder: bool = False):
 
         '''Determines what combination of time difference 
         calculation and Rossi Histogram constructing to do.
@@ -270,7 +272,8 @@ class Analyzer:
                 self.calculateTimeDifsAndPlot(settings['Input/Output Settings'],
                                               settings['General Settings'],
                                               settings['RossiAlpha Settings'],
-                                              settings['Histogram Visual Settings'])
+                                              settings['Histogram Visual Settings'],
+                                              folder)
             # Otherwise, create the time differences and histogram separately.
             else:
                 self.createTimeDifs(settings['Input/Output Settings'],
@@ -278,7 +281,8 @@ class Analyzer:
                                     settings['RossiAlpha Settings']['Reset time'],
                                     settings['RossiAlpha Settings']['Time difference method'],
                                     settings['RossiAlpha Settings']['Digital delay'],
-                                    settings['Input/Output Settings']['Quiet mode'])
+                                    settings['Input/Output Settings']['Quiet mode'],
+                                    folder)
                 self.createPlot(settings['RossiAlpha Settings']['Bin width'],
                                 settings['RossiAlpha Settings']['Reset time'],
                                 settings['Input/Output Settings']['Save figures'],
@@ -393,7 +397,7 @@ class Analyzer:
         # Store the original folder pathway.
         original = settings['Input/Output Settings']['Input file/folder']
         # Loop for the number of folders specified.
-        for folder in range(1, settings['General Settings']['Number of folders'] + 1):
+        for folder in tqdm(range(1, settings['General Settings']['Number of folders'] + 1)):
             # For each file in the specified folder:
             for filename in os.listdir(original + "/" + str(folder)):
                 # If this is the desired file:
@@ -401,7 +405,7 @@ class Analyzer:
                     # Change the input file to this file.
                     settings['Input/Output Settings']['Input file/folder'] = original + "/" + str(folder) + "/" + filename
                     # Conduct the plot split.
-                    self.plotSplit(settings)
+                    self.plotSplit(settings, True)
                     # If this is the first folder, initialize the histogram array.
                     if folder == 1:
                         RA_hist_array = self.histogram.counts
@@ -448,3 +452,22 @@ class Analyzer:
                                         settings['RossiAlpha Settings']['Error Bar/Band'])
         # Close all open plots.
         pyplot.close()
+        '''if settings['Input/Output Settings']['Save raw data'] == True:
+            begin = []
+            end = []
+            resStart = 0
+            while settings['RossiAlpha Settings']['Minimum cutoff'] > self.histogram.bin_centers[resStart]:
+                resStart += 1
+            for i in range(len(self.histogram.bin_edges)-1):
+                begin.append(self.histogram.bin_edges[i])
+                end.append(self.histogram.bin_edges[i+1])
+            self.export({'Bin beginning': (begin,0),
+                        'Bin ending': (end,0),
+                        'Measured Count': (self.histogram.counts,0),
+                        'Predicted Count': (self.best_fit.pred,resStart),
+                        'Residual': (self.best_fit.residuals,resStart)},
+                        [('A', self.best_fit.a),
+                        ('B', self.best_fit.b),
+                        ('Alpha', self.best_fit.alpha),
+                        ('Input file/folder', settings['Input/Output Settings']['Input file/folder'])],
+                        'RossiAlphaFile')'''

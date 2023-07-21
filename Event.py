@@ -13,12 +13,14 @@ class Event:
 
 
 
-def createEventsListFromTxtFile(filePath,timeCol,channelCol,quiet=False):
+def createEventsListFromTxtFile(filePath,timeCol=0,channelCol=None,quiet=False,folder=False):
     events = []
-    if not quiet:
+    if not quiet and not folder:
         print('Loading data...')
     with open(filePath, 'r') as file:
-        for line in tqdm(file):
+        if not folder:
+            file = tqdm(file)
+        for line in file:
             columns = line.strip().split()
             time = columns[timeCol]
             if channelCol is None:
