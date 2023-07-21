@@ -46,35 +46,61 @@ class Analyzer:
         the name of the value and whose second entry is the value.
         - method: the name of the method of analysis.'''
 
+        # Get the current time for file naming.
         curTime = time.localtime()
+        # Name the file appropriately with the method name and current time.
         fileName = ('./data/' + method + '_' +
                      str(curTime.tm_year) + '-' + str(curTime.tm_mon) + 
                      '-' + str(curTime.tm_mday) + '@' + str(curTime.tm_hour) + 
                      (':0' if curTime.tm_min < 10 else ':') + str(curTime.tm_min) +
                      (':0' if curTime.tm_sec < 10 else ':') + str(curTime.tm_sec) + 
                      '.csv')
+        # Open the new file.
         file = open(os.path.abspath(fileName),'w')
+        # Initialize variables.
         labels = ''
         line = ''
-        first = None
+        max = 0
+        # For each dataset:
         for key in data:
-            if first is None:
-                first = key
+            # If this is the longest dataset, store its length.
+            if len(data[key][0]) + data[key][1] > max:
+                max = len(data[key][0]) + data[key][1]
+            # Add the dataset name to the labels string.
             labels += key + ','
+            # If the dataset is starting at first 
+            # row, add the first value to the row.
             if data[key][1] == 0:
                 line += str(data[key][0][0]) + ','
+            # Otherwise, leave an empty space.
             else:
                 line += ','
+        # For each single datapoint:
         for item in singles:
+            # Add the data name to the labels string.
             labels += str(item[0]) + ','
+            # Add the data value to the first row.
             line += str(item[1]) + ','
+        # Write the columns row and first data row 
+        # to the file (excluding tailing commas).
         file.write(labels[:-1] + '\n' + line[:-1] + '\n')
-        for i in range(1,len(data[first][0])):
+        # For each possible dataset index:
+        for i in range(1,max):
+            # Reset the line string.
             line = ''
+            # For each dataset:
             for key in data:
+                # If the desired beginning row for the dataset has 
+                # been reached and there's still data left to print, 
+                # add the proper data value to the current row.
                 if i >= data[key][1] and i-data[key][1] < len(data[key][0]):
                     line += str(data[key][0][i-data[key][1]]) + ','
+                # Otherwise, leave an empty space.
+                else:
+                    line += ','
+            # Write the whole row to the file (excluding tailing comma).
             file.write(line[:-1]+'\n')
+        # Flush the output to the file and close it.
         file.flush()
         file.close()
 
@@ -349,15 +375,22 @@ class Analyzer:
                            settings['Histogram Visual Settings'])
         # Close all currently open plots.
         pyplot.close()
+        # If exporting raw data:
         if settings['Input/Output Settings']['Save raw data'] == True:
+            # Initialize variables/
             begin = []
             end = []
             resStart = 0
+            # Continue increasing the residual/prediction starting index 
+            # while the minimum cutoff is greater than the current bin center.
             while settings['RossiAlpha Settings']['Minimum cutoff'] > self.histogram.bin_centers[resStart]:
                 resStart += 1
+            # Construct the beginning and ending bin edges lists.
             for i in range(len(self.histogram.bin_edges)-1):
                 begin.append(self.histogram.bin_edges[i])
                 end.append(self.histogram.bin_edges[i+1])
+            # Export the beginning and ends of bins, measured counts, 
+            # predicted counts, residual, fit parameters, and file name.
             self.export({'Bin beginning': (begin,0),
                         'Bin ending': (end,0),
                         'Measured Count': (self.histogram.counts,0),
@@ -452,22 +485,22 @@ class Analyzer:
                                         settings['RossiAlpha Settings']['Error Bar/Band'])
         # Close all open plots.
         pyplot.close()
-        '''if settings['Input/Output Settings']['Save raw data'] == True:
+        if settings['Input/Output Settings']['Save raw data'] == True:
             begin = []
             end = []
-            resStart = 0
-            while settings['RossiAlpha Settings']['Minimum cutoff'] > self.histogram.bin_centers[resStart]:
-                resStart += 1
+            predStart = 0
+            while settings['RossiAlpha Settings']['Minimum cutoff'] > time_diff_centers[predStart]:
+                predStart += 1
             for i in range(len(self.histogram.bin_edges)-1):
                 begin.append(self.histogram.bin_edges[i])
                 end.append(self.histogram.bin_edges[i+1])
-            self.export({'Bin beginning': (begin,0),
-                        'Bin ending': (end,0),
-                        'Measured Count': (self.histogram.counts,0),
-                        'Predicted Count': (self.best_fit.pred,resStart),
-                        'Residual': (self.best_fit.residuals,resStart)},
-                        [('A', self.best_fit.a),
-                        ('B', self.best_fit.b),
-                        ('Alpha', self.best_fit.alpha),
-                        ('Input file/folder', settings['Input/Output Settings']['Input file/folder'])],
-                        'RossiAlphaFile')'''
+            self.export({'Time difference': (time_diff_centers,0),
+                         'Weighted Count': (thisWeightedFit.hist,0),
+                         'Uncertainty': (uncertainties,0),
+                         'Predicted Count': (thisWeightedFit.pred,predStart)},
+                        [('A', thisWeightedFit.a),
+                         ('B', thisWeightedFit.b),
+                         ('Alpha', thisWeightedFit.alpha),
+                         ('Input file/folder', settings['Input/Output Settings']['Input file/folder']),
+                         ('Number of folders', settings['General Settings']['Number of folders'])],
+                        'RossiAlphaFolder')
