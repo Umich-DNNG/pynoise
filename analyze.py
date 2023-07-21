@@ -50,13 +50,13 @@ class Analyzer:
         curTime = time.localtime()
         # Name the file appropriately with the method name and current time.
         fileName = ('./data/' + method +
-                    ('0' if curTime.tm_mon < 10 else '') + str(curTime.tm_mon) +
+                    ('(0' if curTime.tm_mon < 10 else '(') + str(curTime.tm_mon) +
                     ('-0' if curTime.tm_mday < 10 else '-') + str(curTime.tm_mday) +
                     ('-0' if curTime.tm_year%100 < 10 else '-') + str(curTime.tm_year%100) +
                     ('@0' if curTime.tm_hour < 10 else '@') + str(curTime.tm_hour) +
                     (':0' if curTime.tm_min < 10 else ':') + str(curTime.tm_min) +
                     (':0' if curTime.tm_sec < 10 else ':') + str(curTime.tm_sec) +
-                    '.csv')
+                    ').csv')
         # Open the new file.
         file = open(os.path.abspath(fileName),'w')
         # Initialize variables.
