@@ -86,7 +86,8 @@ def main(editorIn: edit.Editor, queue: list[str] = []):
                                                 editor.parameters.settings['RossiAlpha Settings']['Reset time'],
                                                 editor.parameters.settings['RossiAlpha Settings']['Time difference method'],
                                                 editor.parameters.settings['RossiAlpha Settings']['Digital delay'],
-                                                editor.parameters.settings['Input/Output Settings']['Quiet mode'])
+                                                editor.parameters.settings['Input/Output Settings']['Quiet mode'],
+                                                False)
                         editor.log('New time differences created.\n')
             # Plot the time difference data.
             # TODO: Have some method of detection for when the input has changed.
