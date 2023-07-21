@@ -240,7 +240,8 @@ class RossiHistogramFit:
         self.a = popt[0]
         self.alpha = popt[1]
         self.b = popt[2]
-        print('Fit parameters: A =', popt[0], ', alpha =', popt[1], ', B =', popt[2])
+        if folder_index is None:
+            print('Fit parameters: A =', popt[0], ', alpha =', popt[1], ', B =', popt[2])
 
         # Create figure and axes
         fig, (ax1, ax2) = plt.subplots(nrows=2, sharex=True, figsize=(8, 6), gridspec_kw={'height_ratios': [2, 1]})
