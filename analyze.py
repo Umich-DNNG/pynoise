@@ -122,7 +122,7 @@ class Analyzer:
         y2Values = []
         tValues = []
         tValues.extend(range(fy['Tau range'][0], fy['Tau range'][1]+1, fy['Increment amount']))
-        FeynmanYObject = fey.FeynmanY(fy['Tau range'], fy['Increment amount'], fy['Plots Scale'])
+        FeynmanYObject = fey.FeynmanY(fy['Tau range'], fy['Increment amount'], fy['Plots scale'])
         # Load in the data and sort it.
         data = evt.createEventsListFromTxtFile(io['Input file/folder'],
                                                io['Time column'],
