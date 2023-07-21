@@ -124,6 +124,7 @@ class Analyzer:
         y2Values = []
         tValues = []
         tValues.extend(range(fy['Tau range'][0], fy['Tau range'][1]+1, fy['Increment amount']))
+        FeynmanYObject = fey.FeynmanY(fy['Tau range'], fy['Increment amount'], fy['Plots scale'])
         # Load in the data and sort it.
         data = evt.createEventsListFromTxtFile(io['Input file/folder'],
                                                io['Time column'],
@@ -147,10 +148,10 @@ class Analyzer:
             print('Running each tau value...')
         for tau in tqdm(tValues):
             # Convert the data into bin frequency counts.
-            counts = fey.randomCounts(data, tau)
+            counts = FeynmanYObject.randomCounts(data, tau)
             # Compute the variance to mean for this 
             # tau value and add it to the list.
-            y, y2 = fey.computeVarToMean(counts, tau)
+            y, y2 = FeynmanYObject.computeVarToMean(counts, tau)
             yValues.append(y)
             y2Values.append(y2)
             if window is not None:
@@ -160,9 +161,9 @@ class Analyzer:
                 window.after(1, wait.set, True)
                 # Wait for the dummy variable to be set, then continue.
                 window.wait_variable(wait)
-        fey.plot(tValues,yValues, save, show, io['Save directory'])
-        fey.plot(tValues,y2Values, save, show, io['Save directory'])
-        fey.fitting(tValues, yValues, tau_interval = 30, gamma_guess=yValues[-1], alpha_guess=-0.01)
+        FeynmanYObject.plot(tValues,yValues, save, show, io['Save directory'])
+        FeynmanYObject.plot(tValues,y2Values, save, show, io['Save directory'])
+        FeynmanYObject.fitting(tValues, yValues, gamma_guess=yValues[-1], alpha_guess=-0.01)
 
     def conductCohnAlpha(self, input: str, output: str, show: bool, save: bool, caGen: dict, caVis: dict):
 
