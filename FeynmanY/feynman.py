@@ -34,6 +34,9 @@ class FeynmanY:
         self.tau_range = tau_range
         self.increment_amount = increment_amount
         self.plots_scale = plots_scale
+        self.gamma = None
+        self.alpha = None
+        self.pred = None
 
 
 
@@ -163,22 +166,21 @@ class FeynmanY:
         # popt, pcov = curve_fit(YFit, x, y, p0=initial_guesses)
 
         # Retrieve the optimized parameters
-        gamma_opt, alpha_opt = popt
+        self.gamma, self.alpha = popt
 
         # Display the optimized parameters
-        print("Optimized gamma:", gamma_opt)
-        print("Optimized alpha:", alpha_opt)
+        print("Optimized gamma:", self.gamma)
+        print("Optimized alpha:", self.alpha)
 
         # Generate x values for plotting the fitted curve
         x_fit = np.linspace(min(x), max(x), self.increment_amount)
 
         # Generate y values using the fitted parameters
-        # y_fit = YFit(gamma_opt, alpha_opt, x_fit)
-        y_fit = YFit(x_fit, gamma_opt, alpha_opt)
+        self.pred = YFit(x_fit, self.gamma, self.alpha)
 
         # Plot the original data points and the fitted curve
         plt.scatter(x, y, label='Data')
-        plt.plot(x_fit, y_fit, color='red', label='Fitted Curve')
+        plt.plot(x_fit, self.pred, color='red', label='Fitted Curve')
         plt.xlabel('x')
         plt.ylabel('y')
         plt.legend()
