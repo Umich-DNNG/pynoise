@@ -155,17 +155,19 @@ class Analyzer:
             y, y2 = FeynmanYObject.computeYY2(tau)
             yValues.append(y)
             y2Values.append(y2)
-            if verbose and (show or save):
-                FeynmanYObject.FeynmanY_histogram(counts,
-                                                  fy['Plot scale'],
-                                                  show,
-                                                  save,
-                                                  io['Save directory'],
-                                                  hvs)
-                self.export({'Count': (range(0,len(counts)), 0),
-                             'Frequency': (counts,0)},
-                            [('Tau',tau)],
-                            'FY' + str(tau))
+            if verbose:
+                if io['Save raw data']:
+                    self.export({'Count': (range(0,len(counts)), 0),
+                                 'Frequency': (counts,0)},
+                                 [('Tau',tau)],
+                                 'FY' + str(tau))
+                if show or save:
+                    FeynmanYObject.FeynmanY_histogram(counts,
+                                                    fy['Plot scale'],
+                                                    show,
+                                                    save,
+                                                    io['Save directory'],
+                                                    hvs)
             if window is not None:
                 window.children['progress']['value'] += 1
                 wait = BooleanVar()
