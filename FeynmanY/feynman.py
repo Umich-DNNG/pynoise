@@ -126,8 +126,7 @@ class FeynmanY:
         - probabilities (numpy array): index representing the bin count, and value representing frequency
         '''
 
-        moment1 = 0
-        moment2 = 0
+        moment1, moment2 = 0, 0
         for i in range(len(probabilities)):
             moment1 += (i)*probabilities[i]
             moment2 += (i)*(i-1)*probabilities[i]
@@ -135,7 +134,7 @@ class FeynmanY:
         return (2*moment2 + moment1 - moment1*moment1)/moment1 - 1, (moment2 - moment1*moment1/2)/(tau*1e-9)
 
 
-    def plot(self, taus, ys, save_fig, show_plot, save_dir):
+    def plot(self, taus, ys, save_fig: bool = False, show_plot: bool = False, save_dir: str = './'):
         
         plt.plot(taus,ys)
 
@@ -148,10 +147,9 @@ class FeynmanY:
         if show_plot:
             plt.show()
 
-        plt.show()
 
 
-    def fitting(self, x_data, y_data, gamma_guess, alpha_guess):
+    def fitting(self, x_data, y_data, gamma_guess, alpha_guess, save_fig: bool = False, show_plot: bool = False, save_dir: str = './'):
 
         # Convert the lists to NumPy arrays
         x = np.array(x_data)
@@ -183,4 +181,12 @@ class FeynmanY:
         plt.xlabel('x')
         plt.ylabel('y')
         plt.legend()
-        plt.show()
+
+        # Saving the figure (optional)
+        if save_fig:
+            save_filename = os.path.join(save_dir, 'FeynmanY_fitting.png') 
+            plt.savefig(save_filename, dpi=300, bbox_inches='tight')
+
+        # Displaying the plot (optional)
+        if show_plot:
+            plt.show()
