@@ -83,11 +83,10 @@ class FeynmanY:
 
     def FeynmanY_histogram(self,
                            probabilities, 
-                           scale: str, 
-                           show_plot: bool, 
-                           save_fig: bool, 
-                           save_dir: str,
-                           hvs: dict):
+                           show_plot: bool = False,  
+                           save_fig: bool = False, 
+                           save_dir: str = './',
+                           hvs: dict = None):
 
         '''Creates a histogram from a numpy array of random trigger probabilities .
         
@@ -101,7 +100,7 @@ class FeynmanY:
 
         # Plot histogram using plt.bar
         plt.bar(bins, values, align='center', width=0.8,**hvs)
-        plt.yscale(scale)
+        plt.yscale(self.plots_scale)
         # Customize plot if needed
         plt.xlabel('r')
         plt.ylabel('$P_n^*$')
