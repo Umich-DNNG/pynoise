@@ -35,7 +35,7 @@ def main(editorIn: edit.Editor, queue: list[str]):
                                          editor.parameters.settings['General Settings']['Show plots'],
                                          editor.parameters.settings['Input/Output Settings']['Save figures'],
                                          editor.parameters.settings['Input/Output Settings']['Quiet mode'],
-                                         editor.parameters.settings['General Settings']['Verbose folders'],
+                                         editor.parameters.settings['General Settings']['Verbose iterations'],
                                          editor.parameters.settings['Histogram Visual Settings'])
                     editor.log('Ran the entire Feynman Y analysis on file ' 
                                 + editor.parameters.settings['Input/Output Settings']['Input file/folder'] 
