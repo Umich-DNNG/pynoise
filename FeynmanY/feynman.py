@@ -37,6 +37,8 @@ class FeynmanY:
         self.gamma = None
         self.alpha = None
         self.pred = None
+        self.m1 = {}
+        self.m2 = {}
 
 
 
@@ -118,7 +120,7 @@ class FeynmanY:
         plt.close('all')
 
 
-    def computeVarToMean(self, probabilities, tau):
+    def computeMoments(self, probabilities: list, tau: int):
 
         '''Creates the two moments from probabilities.
         
@@ -131,7 +133,15 @@ class FeynmanY:
             moment1 += (i)*probabilities[i]
             moment2 += (i)*(i-1)*probabilities[i]
         moment2 /= 2
-        return (2*moment2 + moment1 - moment1*moment1)/moment1 - 1, (moment2 - moment1*moment1/2)/(tau*1e-9)
+        self.m1[tau] = moment1
+        self.m2[tau] = moment2
+    
+    def computeYY2(self, tau: int):
+        # If moments 1 or 2 are not defined for this tau, throw an error.
+        if self.m1.get(tau) is None or self.m2.get(tau) is None:
+            raise ValueError()
+        # Otherwise, return Y and Y2.
+        return (2*self.m2[tau] + self.m1[tau] - self.m1[tau]*self.m1[tau])/self.m1[tau] - 1, (self.m2[tau] - self.m1[tau]*self.m1[tau]/2)/(tau*1e-9)
 
 
     def plot(self, taus, ys, save_fig: bool = False, show_plot: bool = False, save_dir: str = './'):
