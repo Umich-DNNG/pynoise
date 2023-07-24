@@ -4,11 +4,11 @@
         "Time column": 1,
         "Channels column": 0,
         "Save directory": "./RossiAlpha/sample_data",
-        "Save figures": true
+        "Save raw data": false
     },
     "General Settings": {
-        "Show plots": false,
-        "Verbose folders": false
+        "Show plots": true,
+        "Verbose iterations": false
     },
     "RossiAlpha Settings": {
         "Time difference method": "any_and_all cross_correlations"
