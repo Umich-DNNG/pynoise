@@ -106,7 +106,7 @@ class Analyzer:
         file.flush()
         file.close()
 
-    def runFeynmanY(self, io: dict, fy: dict, show: bool, save: bool, quiet: bool, window: Tk = None):
+    def runFeynmanY(self, io: dict, fy: dict, show: bool, save: bool, quiet: bool, verbose: bool = False, hvs: dict = None, window: Tk = None):
         
         '''Run FeynmanY analysis for varying tau values.
         Plots each tau value and estimates alpha.
@@ -154,6 +154,17 @@ class Analyzer:
             y, y2 = FeynmanYObject.computeVarToMean(counts, tau)
             yValues.append(y)
             y2Values.append(y2)
+            if verbose and (show or save):
+                FeynmanYObject.FeynmanY_histogram(counts,
+                                                  fy['Plot scale'],
+                                                  show,
+                                                  save,
+                                                  io['Save directory'],
+                                                  hvs)
+                self.export({'Count': (range(0,len(counts)), 0),
+                             'Frequency': (counts,0)},
+                            [('Tau',tau)],
+                            'FY' + str(tau))
             if window is not None:
                 window.children['progress']['value'] += 1
                 wait = BooleanVar()
@@ -171,6 +182,10 @@ class Analyzer:
                                show_plot=show, 
                                save_dir=io['Save directory'])
         if io['Save raw data']:
+            if verbose:
+                filename = 'FYFull'
+            else:
+                filename = 'FY'
             self.export({'Tau':(tValues,0),
                          'Experimental Y':(yValues,0),
                          'Experimental Y2':(y2Values,0),
@@ -178,7 +193,7 @@ class Analyzer:
                         [('Gamma',FeynmanYObject.gamma),
                          ('Alpha',FeynmanYObject.alpha),
                          ('Input file/folder', io['Input file/folder'])],
-                        'FY')
+                        filename)
 
     def conductCohnAlpha(self, input: str, output: str, show: bool, save: bool, caGen: dict, caVis: dict):
 
@@ -296,7 +311,7 @@ class Analyzer:
                                                                                                  io['Save directory'],
                                                                                                  raVis,
                                                                                                  folder,
-                                                                                                 gen['Verbose folders'])
+                                                                                                 gen['Verbose iterations'])
         # Save the input and method of analysis.
         self.input = io['Input file/folder']
         self.method = raGen['Time difference method']
@@ -336,7 +351,7 @@ class Analyzer:
                                 settings['Input/Output Settings']['Save directory'],
                                 settings['Histogram Visual Settings'],
                                 folder,
-                                settings['General Settings']['Verbose folders'])
+                                settings['General Settings']['Verbose iterations'])
         # Otherwise, just create a Rossi Histogram plot. 
         else:
             self.createPlot(settings['RossiAlpha Settings']['Bin width'],
@@ -346,7 +361,7 @@ class Analyzer:
                             settings['Input/Output Settings']['Save directory'],
                             settings['Histogram Visual Settings'],
                             folder,
-                            settings['General Settings']['Verbose folders'])
+                            settings['General Settings']['Verbose iterations'])
             
     def createBestFit(self, cutoff: int, method: str, gen: dict, save: str, output: str, line: dict, res: dict, hist: dict, index = None):
         
@@ -378,7 +393,7 @@ class Analyzer:
                                        res,
                                        hist,
                                        index,
-                                       gen['Verbose folders'])
+                                       gen['Verbose iterations'])
 
     def fullFile(self, settings: dict):
 
@@ -482,7 +497,7 @@ class Analyzer:
                                        folder)
                     pyplot.close()
                     # If exporting raw data:
-                    if settings['Input/Output Settings']['Save raw data'] == True and settings['General Settings']['Verbose folders'] == True:
+                    if settings['Input/Output Settings']['Save raw data'] == True and settings['General Settings']['Verbose iterations'] == True:
                         # Initialize variables.
                         begin = []
                         end = []
@@ -545,7 +560,7 @@ class Analyzer:
             for i in range(len(self.histogram.bin_edges)-1):
                 begin.append(self.histogram.bin_edges[i])
                 end.append(self.histogram.bin_edges[i+1])
-            if settings['General Settings']['Verbose folders'] == True:
+            if settings['General Settings']['Verbose iterations'] == True:
                 filename = 'RAFolderFull'
             else:
                 filename = 'RAFolder'

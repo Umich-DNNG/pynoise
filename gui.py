@@ -639,7 +639,7 @@ def feynmanProgress():
     for item in window.winfo_children():
         item.destroy()
     window.title('Analysis Progress')
-    length = int((parameters.settings['FeynmanY Settings']['Tau range'][1] - parameters.settings['FeynmanY Settings']['Tau range'][0])/parameters.settings['FeynmanY Settings']['Increment amount']+1)
+    length = int(((parameters.settings['FeynmanY Settings']['Tau range'][1] - parameters.settings['FeynmanY Settings']['Tau range'][0])/parameters.settings['FeynmanY Settings']['Increment amount']+2)*2)
     ttk.Label(master=window,
               name='info',
               text='Currently running Feynman Y analysis...'
