@@ -15,7 +15,7 @@
             1000.0
         ],
         "Number of folders": 10,
-        "Verbose folders": false,
+        "Verbose iterations": false,
         "Sort data": true,
         "Show plots": false
     },
