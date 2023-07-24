@@ -37,7 +37,7 @@ class RossiHistogram:
         # Parameters set once plot(time_diffs) is called
         self.counts, self.bin_edges, self.bin_centers = None, None, None
 
-    def plot(self , save_fig: bool = False, show_plot: bool = True, save_dir:str= './',plot_opts: dict = None, **kwargs ):
+    def plot(self , save_fig: bool = False, show_plot: bool = True, save_dir:str= './',plot_opts: dict = None, folder: bool = False, verbose: bool = False, **kwargs ):
         
 
         '''
@@ -79,7 +79,7 @@ class RossiHistogram:
         bin_centers = 0.5 * (bin_edges[1:] + bin_edges[:-1])
 
         # Saving plot (optional)
-        if save_fig == True:
+        if save_fig and (not folder or verbose):
 
             # Plotting
             plt.figure()
@@ -94,7 +94,7 @@ class RossiHistogram:
             plt.savefig(save_filename, dpi=300, bbox_inches='tight')
         
         # Showing plot (optional)
-        if show_plot == True:
+        if show_plot and (not folder or verbose):
 
             # Plotting
             if not save_fig:
@@ -130,7 +130,7 @@ class RossiHistogram:
         self.bin_centers = bin_centers
         self.bin_edges = bin_edges
 
-    def plotFromHist(self, plot_opts: dict = None, save_fig: bool = False, show_plot: bool = True, save_dir:str= None):
+    def plotFromHist(self, plot_opts: dict = None, save_fig: bool = False, show_plot: bool = True, save_dir:str= None, folder: bool = False, verbose: bool = False):
         '''Description: Used to plot the histogram when the time differences were calculated simulatenously while being binned. 
         
         Inputs: 
@@ -147,7 +147,7 @@ class RossiHistogram:
         self.show_plot = show_plot
 
         
-        if save_fig == True:
+        if save_fig and (not folder or verbose):
 
             # Plotting
             plt.figure()
@@ -162,7 +162,7 @@ class RossiHistogram:
             plt.savefig(save_filename, dpi=300, bbox_inches='tight')
         
         # Showing plot (optional)
-        if show_plot == True:
+        if show_plot and (not folder or verbose):
 
             # Plotting
             if not save_fig:
