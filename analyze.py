@@ -172,9 +172,15 @@ class Analyzer:
                 window.after(1, wait.set, True)
                 # Wait for the dummy variable to be set, then continue.
                 window.wait_variable(wait)
-        FeynmanYObject.plot(tValues,yValues, save, show, io['Save directory'])
-        FeynmanYObject.plot(tValues,y2Values, save, show, io['Save directory'])
-        FeynmanYObject.fitting(tValues, yValues, gamma_guess=yValues[-1], alpha_guess=-0.01)
+        FeynmanYObject.plot(tValues, yValues, save, show, io['Save directory'])
+        FeynmanYObject.plot(tValues, y2Values, save, show, io['Save directory'])
+        FeynmanYObject.fitting(tValues, 
+                               yValues, 
+                               gamma_guess=yValues[-1], 
+                               alpha_guess=-0.01, 
+                               save_fig=save, 
+                               show_plot=show, 
+                               save_dir=io['Save directory'])
         if io['Save raw data']:
             if verbose:
                 filename = 'FYFull'
