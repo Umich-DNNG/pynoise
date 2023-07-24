@@ -42,7 +42,7 @@ class CohnAlpha:
                      show_plot: bool = True, 
                      save_fig: bool = True, 
                      save_dir: str = './', 
-                     leg_label: str = "frequency intensity",
+                     leg_label: str = "Measurement",
                      annotate_font_weight: str = "bold", 
                      annotate_color: str = "black", 
                      annotate_background_color: str = "white"):
@@ -129,7 +129,7 @@ class CohnAlpha:
 
         # Creating a plot with semilogarithmic (log-scale) x-axis 
         ax2.semilogx(f[1:-2], Pxx[1:-2], '.', label=self.leg_label)
-        ax2.semilogx(f[1:-2], CAFit(f[1:-2], *popt), '--', label='fit')
+        ax2.semilogx(f[1:-2], CAFit(f[1:-2], *popt), '--', label='Fit')
         
         # Setting minimum and maximum for y
         ymin, ymax = ax2.get_ylim()
