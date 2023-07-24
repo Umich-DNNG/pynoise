@@ -236,7 +236,7 @@ class Analyzer:
         self.input = io['Input file/folder']
         self.method = method
 
-    def createPlot(self, width: int, reset: float, save: bool, show: bool, output: str, vis: dict):
+    def createPlot(self, width: int, reset: float, save: bool, show: bool, output: str, vis: dict, folder: bool = False, verbose: bool = False):
         
         '''Create a Rossi Alpha histogram. Assumes 
         that time differences are already calculated.
@@ -251,7 +251,7 @@ class Analyzer:
         
         # Create a RossiHistogram object and plot the data with the given settings.
         self.histogram = plt.RossiHistogram(self.time_difs, width, reset)
-        self.histogram.plot(save, show, output, vis)
+        self.histogram.plot(save, show, output, vis, folder, verbose)
 
     def calculateTimeDifsAndPlot(self, io: dict, gen: dict, raGen: dict, raVis: dict, folder: bool = False):
 
@@ -288,7 +288,9 @@ class Analyzer:
                                                                                                  io['Save figures'],
                                                                                                  gen['Show plots'],
                                                                                                  io['Save directory'],
-                                                                                                 raVis)
+                                                                                                 raVis,
+                                                                                                 folder,
+                                                                                                 gen['Verbose folders'])
         # Save the input and method of analysis.
         self.input = io['Input file/folder']
         self.method = raGen['Time difference method']
@@ -326,7 +328,9 @@ class Analyzer:
                                 settings['Input/Output Settings']['Save figures'],
                                 settings['General Settings']['Show plots'],
                                 settings['Input/Output Settings']['Save directory'],
-                                settings['Histogram Visual Settings'])
+                                settings['Histogram Visual Settings'],
+                                folder,
+                                settings['General Settings']['Verbose folders'])
         # Otherwise, just create a Rossi Histogram plot. 
         else:
             self.createPlot(settings['RossiAlpha Settings']['Bin width'],
@@ -334,7 +338,9 @@ class Analyzer:
                             settings['Input/Output Settings']['Save figures'],
                             settings['General Settings']['Show plots'],
                             settings['Input/Output Settings']['Save directory'],
-                            settings['Histogram Visual Settings'])
+                            settings['Histogram Visual Settings'],
+                            folder,
+                            settings['General Settings']['Verbose folders'])
             
     def createBestFit(self, cutoff: int, method: str, gen: dict, save: str, output: str, line: dict, res: dict, hist: dict, index = None):
         
@@ -365,7 +371,8 @@ class Analyzer:
                                        line,
                                        res,
                                        hist,
-                                       index)
+                                       index,
+                                       gen['Verbose folders'])
 
     def fullFile(self, settings: dict):
 
@@ -389,7 +396,7 @@ class Analyzer:
         pyplot.close()
         # If exporting raw data:
         if settings['Input/Output Settings']['Save raw data'] == True:
-            # Initialize variables/
+            # Initialize variables.
             begin = []
             end = []
             resStart = 0
@@ -468,6 +475,32 @@ class Analyzer:
                                        settings['Histogram Visual Settings'],
                                        folder)
                     pyplot.close()
+                    # If exporting raw data:
+                    if settings['Input/Output Settings']['Save raw data'] == True and settings['General Settings']['Verbose folders'] == True:
+                        # Initialize variables.
+                        begin = []
+                        end = []
+                        resStart = 0
+                        # Continue increasing the residual/prediction starting index 
+                        # while the minimum cutoff is greater than the current bin center.
+                        while settings['RossiAlpha Settings']['Minimum cutoff'] > self.histogram.bin_centers[resStart]:
+                            resStart += 1
+                        # Construct the beginning and ending bin edges lists.
+                        for i in range(len(self.histogram.bin_edges)-1):
+                            begin.append(self.histogram.bin_edges[i])
+                            end.append(self.histogram.bin_edges[i+1])
+                        # Export the beginning and ends of bins, measured counts, 
+                        # predicted counts, residual, fit parameters, and file name.
+                        self.export({'Bin beginning': (begin,0),
+                                    'Bin ending': (end,0),
+                                    'Measured Count': (self.histogram.counts,0),
+                                    'Predicted Count': (self.best_fit.pred,resStart),
+                                    'Residual': (self.best_fit.residuals,resStart)},
+                                    [('A', self.best_fit.a),
+                                    ('B', self.best_fit.b),
+                                    ('Alpha', self.best_fit.alpha),
+                                    ('Input file/folder', settings['Input/Output Settings']['Input file/folder'])],
+                                    'RAFolder' + str(folder))
                     # Break to the next folder.
                     break
         # Restore the original folder pathway.
@@ -506,6 +539,10 @@ class Analyzer:
             for i in range(len(self.histogram.bin_edges)-1):
                 begin.append(self.histogram.bin_edges[i])
                 end.append(self.histogram.bin_edges[i+1])
+            if settings['General Settings']['Verbose folders'] == True:
+                filename = 'RAFolderFull'
+            else:
+                filename = 'RAFolder'
             self.export({'Time difference': (time_diff_centers,0),
                          'Weighted Count': (thisWeightedFit.hist,0),
                          'Uncertainty': (uncertainties,0),
@@ -515,4 +552,4 @@ class Analyzer:
                          ('Alpha', thisWeightedFit.alpha),
                          ('Input file/folder', settings['Input/Output Settings']['Input file/folder']),
                          ('Number of folders', settings['General Settings']['Number of folders'])],
-                        'RAFolder')
+                        filename)
