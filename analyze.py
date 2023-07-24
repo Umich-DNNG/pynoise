@@ -151,7 +151,8 @@ class Analyzer:
             counts = FeynmanYObject.randomCounts(data, tau)
             # Compute the variance to mean for this 
             # tau value and add it to the list.
-            y, y2 = FeynmanYObject.computeVarToMean(counts, tau)
+            FeynmanYObject.computeMoments(counts, tau)
+            y, y2 = FeynmanYObject.computeYY2(tau)
             yValues.append(y)
             y2Values.append(y2)
             if verbose and (show or save):
@@ -192,7 +193,7 @@ class Analyzer:
                          'Predicted Y2': (FeynmanYObject.pred,0)},
                         [('Gamma',FeynmanYObject.gamma),
                          ('Alpha',FeynmanYObject.alpha),
-                         ('Input file/folder', io['Input file/folder'])],
+                         ('Input file', io['Input file/folder'])],
                         filename)
 
     def conductCohnAlpha(self, input: str, output: str, show: bool, save: bool, caGen: dict, caVis: dict):
@@ -439,7 +440,7 @@ class Analyzer:
                         [('A', self.best_fit.a),
                         ('B', self.best_fit.b),
                         ('Alpha', self.best_fit.alpha),
-                        ('Input file/folder', settings['Input/Output Settings']['Input file/folder'])],
+                        ('Input file', settings['Input/Output Settings']['Input file/folder'])],
                         'RAFile')
 
     def replace_zeroes(self, lst: list):
@@ -496,7 +497,7 @@ class Analyzer:
                                        settings['Histogram Visual Settings'],
                                        folder)
                     pyplot.close()
-                    # If exporting raw data:
+                    # If exporting raw data for individual folders:
                     if settings['Input/Output Settings']['Save raw data'] == True and settings['General Settings']['Verbose iterations'] == True:
                         # Initialize variables.
                         begin = []
@@ -520,7 +521,7 @@ class Analyzer:
                                     [('A', self.best_fit.a),
                                     ('B', self.best_fit.b),
                                     ('Alpha', self.best_fit.alpha),
-                                    ('Input file/folder', settings['Input/Output Settings']['Input file/folder'])],
+                                    ('Input file', settings['Input/Output Settings']['Input file/folder'])],
                                     'RAFolder' + str(folder))
                     # Break to the next folder.
                     break
@@ -551,19 +552,28 @@ class Analyzer:
                                         settings['RossiAlpha Settings']['Error Bar/Band'])
         # Close all open plots.
         pyplot.close()
+        # If saving raw data:
         if settings['Input/Output Settings']['Save raw data'] == True:
             begin = []
             end = []
             predStart = 0
+            # Find the starting index of the prediction data.
             while settings['RossiAlpha Settings']['Minimum cutoff'] > time_diff_centers[predStart]:
                 predStart += 1
+            # Fill out the beginning and ending of each bin.
+            # TODO: May be able to delete this.
             for i in range(len(self.histogram.bin_edges)-1):
                 begin.append(self.histogram.bin_edges[i])
                 end.append(self.histogram.bin_edges[i+1])
+            # If using verbose mode, mark this as the final file.
             if settings['General Settings']['Verbose iterations'] == True:
                 filename = 'RAFolderFull'
+            # Otherwise, keep the shortened name.
             else:
                 filename = 'RAFolder'
+            # Export the time differences, weighted counts, 
+            # uncertainties, predicted counts, number of folders, 
+            # folder name, and fit parameters to a .csv.
             self.export({'Time difference': (time_diff_centers,0),
                          'Weighted Count': (thisWeightedFit.hist,0),
                          'Uncertainty': (uncertainties,0),
@@ -571,6 +581,6 @@ class Analyzer:
                         [('A', thisWeightedFit.a),
                          ('B', thisWeightedFit.b),
                          ('Alpha', thisWeightedFit.alpha),
-                         ('Input file/folder', settings['Input/Output Settings']['Input file/folder']),
+                         ('Input folder', settings['Input/Output Settings']['Input file/folder']),
                          ('Number of folders', settings['General Settings']['Number of folders'])],
                         filename)
