@@ -1,7 +1,7 @@
 {
     "Input/Output Settings": {
         "Input file/folder": "./RossiAlpha/sample_data/RF3-40_59min.txt",
-        "Quiet mode": true
+        "Save raw data": true
     },
     "General Settings": {
         "Show plots": true
