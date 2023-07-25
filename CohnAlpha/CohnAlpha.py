@@ -138,7 +138,7 @@ class CohnAlpha:
         # Creating axis titles
         ax2.set_xlim([1, 200])
         ax2.set_xlabel('Frequency (Hz)')
-        ax2.set_ylabel('CohnAlpha (V$^2$/Hz)')
+        ax2.set_ylabel('Intensity (V$^2$/Hz)')
 
         # Constructing alpha string
         alph_str = (r'$\alpha$ = (' +
