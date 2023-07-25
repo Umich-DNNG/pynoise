@@ -502,7 +502,9 @@ def raSplit(window: Tk,
                 return True
             # Otherwise, run the full analysis.
             else:
-                analyzer.fullFolder(parameters.settings)
+                gui.folderProgress()
+                analyzer.fullFolder(parameters.settings, window)
+                gui.raMenu()
                 log(message='Successfully ran all analysis with folder:\n'
                             +parameters.settings['Input/Output Settings']['Input file/folder'],
                             window=window)
