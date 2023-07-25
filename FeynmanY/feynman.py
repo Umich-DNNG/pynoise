@@ -42,7 +42,7 @@ class FeynmanY:
 
 
 
-    def randomCounts(self, triggers: list[evt.Event], tau: int):
+    def randomCounts(self, triggers: list[evt.Event], tau: int, meas_time: float = -1):
 
         '''Converts a list of Events into random trigger gate frequencies.
         
@@ -52,15 +52,17 @@ class FeynmanY:
         - tau: the gate width.'''
 
         # Convert the list of times into gate indices.
+        if meas_time == -1:
+            meas_time = triggers[-1]
+        num_gates = int(meas_time/tau)
         frequencies = []
         count = 1
-        prevTime = triggers[0].time
-        prevGate = int(prevTime/tau)
+        prev = int(triggers[0].time/tau)
         # For all measurements:
         for measurement in triggers[1:]:
             cur = int(measurement.time/tau)
             # If still in the same gate, increment the count.
-            if cur == prevGate:
+            if cur == prev:
                 count += 1
             else:
                 # If count index doesn't currently 
@@ -69,20 +71,14 @@ class FeynmanY:
                     frequencies.append(0)
                 # Increase the frequency for the count index.
                 frequencies[count] += 1
-                # Add the blank gates in between,
-                # accounting for concatenated files.
-                if measurement.time - prevTime < 1e13:
-                    frequencies[0] += cur - prevGate - 1
                 # Reset variables.
                 count = 1
-                prevTime = measurement.time
-                prevGate = int(prevTime/tau)
+                prev = int(measurement.time/tau)
         if count != 1:
             while count > len(frequencies)-1:
                 frequencies.append(0)
             frequencies[count] += 1    
-        # Get number of non-empty gates and convert frequencies into probabilities.
-        num_gates = sum(frequencies)
+        frequencies[0] += num_gates - sum(frequencies)
         frequencies = [freq/num_gates for freq in frequencies]
         # Return probability list.
         return frequencies
