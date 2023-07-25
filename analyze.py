@@ -131,12 +131,25 @@ class Analyzer:
                                                io['Channels column'],
                                                quiet)
         data.sort(key=lambda Event: Event.time)
-        # Adjust each measurement by making
-        # the earliest measurement time 0.
-        min = data[0].time
-        if min != 0:
-            for entry in data:
-                entry.time -= min
+        # Initialize variables for counting
+        # the total real measurement time.
+        meas_time = 0
+        begin = data[0].time
+        end = data[0].time
+        # Iterate through the data.
+        for entry in data:
+            # If we have reached a jump:
+            if entry.time - end > 1e13:
+                # Add the previous measurement 
+                # time range to the total.
+                meas_time += end - begin
+                # Reset the beginning time
+                begin = entry.time
+            # Move the ending time up.
+            end = entry.time
+        # Add the remaining time range.
+        meas_time += end - begin
+        # For GUI mode.
         if window is not None:
             window.children['progress']['value'] += 1
             wait = BooleanVar()
@@ -148,7 +161,7 @@ class Analyzer:
             print('Running each tau value...')
         for tau in tqdm(tValues):
             # Convert the data into bin frequency counts.
-            counts = FeynmanYObject.randomCounts(data, tau)
+            counts = FeynmanYObject.randomCounts(data, tau, meas_time)
             # Compute the variance to mean for this 
             # tau value and add it to the list.
             FeynmanYObject.computeMoments(counts, tau)
