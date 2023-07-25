@@ -547,6 +547,33 @@ def editor_menu(prev):
         # Increase the group number.
         groupNum += 1
 
+def folderProgress():
+    global window, parameters
+    # Clear the window of all previous entries, labels, and buttons.
+    for item in window.winfo_children():
+        item.destroy()
+    window.title('Analysis Progress')
+    length = parameters.settings['General Settings']['Number of folders'] * 20
+    ttk.Label(master=window,
+              name='info',
+              text='Currently running Rossi Alpha folder analysis...'
+              ).pack(side=TOP,padx=10,pady=10)
+    ttk.Progressbar(master=window,
+                    orient=HORIZONTAL,
+                    length=length,
+                    mode = 'determinate',
+                    name='progress',
+                    ).pack(side=TOP,padx=10)
+    ttk.Label(master=window,
+              name='disclaimer',
+              text='This process may take a couple minutes.'
+              ).pack(side=TOP,padx=10,pady=10)
+    wait = BooleanVar()
+    # After 1 ms, set the dummy variable to True.
+    window.after(1, wait.set, True)
+    # Wait for the dummy variable to be set, then continue.
+    window.wait_variable(wait)
+
 def raMenu():
 
     '''The GUI for the Rossi Alpha menu.'''
