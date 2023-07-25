@@ -54,12 +54,13 @@ class FeynmanY:
         # Convert the list of times into gate indices.
         frequencies = []
         count = 1
-        prev = int(triggers[0].time/tau)
+        prevTime = triggers[0].time
+        prevGate = int(prevTime/tau)
         # For all measurements:
         for measurement in triggers[1:]:
             cur = int(measurement.time/tau)
             # If still in the same gate, increment the count.
-            if cur == prev:
+            if cur == prevGate:
                 count += 1
             else:
                 # If count index doesn't currently 
@@ -68,10 +69,14 @@ class FeynmanY:
                     frequencies.append(0)
                 # Increase the frequency for the count index.
                 frequencies[count] += 1
-                frequencies[0] += cur - prev - 1
+                # Add the blank gates in between,
+                # accounting for concatenated files.
+                if measurement.time - prevTime < 1e13:
+                    frequencies[0] += cur - prevGate - 1
                 # Reset variables.
                 count = 1
-                prev = cur
+                prevTime = measurement.time
+                prevGate = int(prevTime/tau)
         if count != 1:
             while count > len(frequencies)-1:
                 frequencies.append(0)
