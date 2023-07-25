@@ -476,7 +476,7 @@ class Analyzer:
         # Return the edited list.
         return lst
 
-    def fullFolder(self, settings: dict):
+    def fullFolder(self, settings: dict, window: Tk = None):
 
         '''Conduct RossiAlpha analysis on a folder of files.
         
@@ -538,6 +538,13 @@ class Analyzer:
                                     ('Alpha', self.best_fit.alpha),
                                     ('Input file', settings['Input/Output Settings']['Input file/folder'])],
                                     'RAFolder' + str(folder))
+                    if window != None:
+                        window.children['progress']['value'] += 10
+                        wait = BooleanVar()
+                        # After 1 ms, set the dummy variable to True.
+                        window.after(1, wait.set, True)
+                        # Wait for the dummy variable to be set, then continue.
+                        window.wait_variable(wait)
                     # Break to the next folder.
                     break
         # Restore the original folder pathway.
