@@ -33,8 +33,12 @@ def main(editorIn: edit.Editor, queue: list[str]):
                     analyzer.runFeynmanY(editor.parameters.settings['Input/Output Settings'],
                                          editor.parameters.settings['FeynmanY Settings'],
                                          editor.parameters.settings['General Settings']['Show plots'],
-                                         editor.parameters.settings['General Settings']['Save figures'],
-                                         editor.parameters.settings['Histogram Visual Settings'])
+                                         editor.parameters.settings['Input/Output Settings']['Save figures'],
+                                         editor.parameters.settings['Input/Output Settings']['Quiet mode'],
+                                         editor.parameters.settings['General Settings']['Verbose iterations'],
+                                         editor.parameters.settings['Histogram Visual Settings'],
+                                         editor.parameters.settings['Line Fitting Settings'],
+                                         editor.parameters.settings['Scatter Plot Settings'])
                     editor.log('Ran the entire Feynman Y analysis on file ' 
                                 + editor.parameters.settings['Input/Output Settings']['Input file/folder'] 
                                 + '.\n')

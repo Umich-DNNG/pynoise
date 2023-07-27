@@ -3,11 +3,11 @@
         "Input file/folder": "/Users/maxtennant/Dropbox (University of Michigan)/20210322_06_RF3-42_CF_OS_run1_60min_0947",
         "Time column": 1,
         "Channels column": 0,
-        "Save directory": "./RossiAlpha/sample_data"
+        "Save raw data": false
     },
     "General Settings": {
-        "Save figures": true,
-        "Show plots": false
+        "Show plots": true,
+        "Verbose iterations": false
     },
     "RossiAlpha Settings": {
         "Time difference method": "any_and_all cross_correlations"

@@ -40,9 +40,10 @@ def main(editorIn: edit.Editor, queue: list[str]):
                     analyzer.conductCohnAlpha(editor.parameters.settings['Input/Output Settings']['Input file/folder'],
                                               editor.parameters.settings['Input/Output Settings']['Save directory'],
                                               editor.parameters.settings['General Settings']['Show plots'],
-                                              editor.parameters.settings['General Settings']['Save figures'],
+                                              editor.parameters.settings['Input/Output Settings']['Save figures'],
                                               editor.parameters.settings['CohnAlpha Settings'],
-                                              editor.parameters.settings['CohnAlpha Visual Settings'])
+                                              editor.parameters.settings['Semilog Plot Settings'],
+                                              editor.parameters.settings['Line Fitting Settings'])
                     editor.log('Ran the entire Cohn Alpha on file ' 
                                 + editor.parameters.settings['Input/Output Settings']['Input file/folder'] 
                                 + '.\n')

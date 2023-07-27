@@ -1,10 +1,9 @@
 {
     "Input/Output Settings": {
         "Input file/folder": "./RossiAlpha/sample_data/RF3-40_59min.txt",
-        "Save directory": "./RossiAlpha/sample_data"
+        "Save figures": true
     },
     "General Settings": {
-        "Save figures": true,
         "Show plots": true
     },
     "Histogram Visual Settings": {

@@ -21,11 +21,11 @@ class Settings:
                          'General Settings': {},
                          'RossiAlpha Settings': {},
                          'CohnAlpha Settings' : {},
-                         'CohnAlpha Visual Settings': {},
+                         'Semilog Plot Settings': {},
                          'FeynmanY Settings' : {},
                          'Histogram Visual Settings': {},
                          'Line Fitting Settings': {},
-                         'Residual Plot Settings': {}
+                         'Scatter Plot Settings': {}
         }
         # The variable that stores the path of the 
         # .json file that was most recently imported.
@@ -35,7 +35,8 @@ class Settings:
         self.appended = 'None'
         self.hvs_drop = ['select setting...','alpha','angle','animated','antialiased','bounds','capsize','capstyle','clip_on','clip_path','color','ecolor','edgecolor','error_kw','facecolor','fill','grid','hatch','height','in_layout','joinstyle','label','linestyle','linewidth','log','mouseover','picker','rasterized','sketch_params','snap','tick_label','url','visible','width','xerr','yerr','zorder','Cancel']
         self.lfs_drop = ['select setting...','alpha','angle','animated','antialiased','clip_on','clip_path','color','dash_capstyle','dash_joinstyle','dashes','drawstyle','fillstyle','gapcolor','grid','in_layout','label','linestyle','linewidth','marker','markeredgecolor','markeredgewidth','markerfacecolor','markerfacecoloralt','markersize','markevery','mouseover','path_effects','picker','pickradius','rasterized','scalex','scaley','sketch_params','snap','solid_capstyle','solid_joinstyle','transform','url','visible','zorder','Cancel']
-        self.rps_drop = ['select setting...','alpha','antialiased','color','capstyle','cmap','edgecolor','facecolor','hatch','joinstyle','linestyle','linewidth','marker','norm','offset_transform','offsets','pickradius','plotnonfinite','s','urls','vmin','vmax','zorder','Cancel']
+        self.sps_drop = ['select setting...','alpha','antialiased','color','capstyle','cmap','edgecolor','facecolor','hatch','joinstyle','linestyle','linewidth','marker','norm','offset_transform','offsets','pickradius','plotnonfinite','s','urls','vmin','vmax','zorder','Cancel']
+        self.sls_drop = ['select setting...','alpha','angle','animated','antialiased','clip_on','clip_path','color','dash_capstyle','dash_joinstyle','dashes','drawstyle','fillstyle','gapcolor','grid','in_layout','label','linestyle','linewidth','marker','markeredgecolor','markeredgewidth','markerfacecolor','markerfacecoloralt','markersize','markevery','mouseover','path_effects','picker','pickradius','rasterized','scalex','scaley','sketch_params','snap','solid_capstyle','solid_joinstyle','transform','url','visible','zorder','Cancel']
     
     def sort_drops(self):
         self.hvs_drop.remove('Cancel')
@@ -48,11 +49,16 @@ class Settings:
         self.lfs_drop.sort()
         self.lfs_drop.append('Cancel')
         self.lfs_drop.insert(0,'select setting...')
-        self.rps_drop.remove('Cancel')
-        self.rps_drop.remove('select setting...')
-        self.rps_drop.sort()
-        self.rps_drop.append('Cancel')
-        self.rps_drop.insert(0,'select setting...')
+        self.sps_drop.remove('Cancel')
+        self.sps_drop.remove('select setting...')
+        self.sps_drop.sort()
+        self.sps_drop.append('Cancel')
+        self.sps_drop.insert(0,'select setting...')
+        self.sls_drop.remove('Cancel')
+        self.sls_drop.remove('select setting...')
+        self.sls_drop.sort()
+        self.sls_drop.append('Cancel')
+        self.sls_drop.insert(0,'select setting...')
 
     def format(self, value):
 
@@ -136,8 +142,10 @@ class Settings:
                                 self.hvs_drop.append(setting)
                             case 'Line Fitting Settings':
                                 self.lfs_drop.append(setting)
-                            case 'Residual Plot Settings':
-                                self.rps_drop.append(setting)
+                            case 'Scatter Plot Settings':
+                                self.sps_drop.append(setting)
+                            case 'Semilog Plot Settings':
+                                self.sls_drop.append(setting)
                 # Otherwise, add/modify the specified setting.
                 else:
                     if self.settings[group].get(setting) == None:
@@ -146,8 +154,10 @@ class Settings:
                                 self.hvs_drop.remove(setting)
                             case 'Line Fitting Settings':
                                 self.lfs_drop.remove(setting)
-                            case 'Residual Plot Settings':
-                                self.rps_drop.remove(setting)
+                            case 'Scatter Plot Settings':
+                                self.sps_drop.remove(setting)
+                            case 'Semilog Plot Settings':
+                                self.sls_drop.remove(setting)
                     self.settings[group][setting] = parameters[group][setting]
         self.sort_drops()
         # If the append is from a permanent file, mark that 
@@ -164,16 +174,20 @@ class Settings:
             self.hvs_drop.append(setting)
         for setting in self.settings['Line Fitting Settings']:
             self.lfs_drop.append(setting)
-        for setting in self.settings['Residual Plot Settings']:
-            self.rps_drop.append(setting)
+        for setting in self.settings['Scatter Plot Settings']:
+            self.sps_drop.append(setting)
+        for setting in self.settings['Semilog Plot Settings']:
+            self.sls_drop.append(setting)
         # Load the new parameters from the json file.
         self.settings = json.load(open(path))
         for setting in self.settings['Histogram Visual Settings']:
             self.hvs_drop.remove(setting)
         for setting in self.settings['Line Fitting Settings']:
             self.lfs_drop.remove(setting)
-        for setting in self.settings['Residual Plot Settings']:
-            self.rps_drop.remove(setting)
+        for setting in self.settings['Scatter Plot Settings']:
+            self.sps_drop.remove(setting)
+        for setting in self.settings['Semilog Plot Settings']:
+            self.sls_drop.remove(setting)
         self.sort_drops()
         # If the JSON file being loaded is a permanent file, change the 
         # settings origin and clear the most recently appended variable.

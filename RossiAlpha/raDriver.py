@@ -85,7 +85,9 @@ def main(editorIn: edit.Editor, queue: list[str] = []):
                                                 editor.parameters.settings['General Settings']['Sort data'],
                                                 editor.parameters.settings['RossiAlpha Settings']['Reset time'],
                                                 editor.parameters.settings['RossiAlpha Settings']['Time difference method'],
-                                                editor.parameters.settings['RossiAlpha Settings']['Digital delay'])
+                                                editor.parameters.settings['RossiAlpha Settings']['Digital delay'],
+                                                editor.parameters.settings['Input/Output Settings']['Quiet mode'],
+                                                False)
                         editor.log('New time differences created.\n')
             # Plot the time difference data.
             # TODO: Have some method of detection for when the input has changed.
@@ -158,9 +160,10 @@ def main(editorIn: edit.Editor, queue: list[str] = []):
                         analyzer.createBestFit(editor.parameters.settings['RossiAlpha Settings']['Minimum cutoff'],
                                                editor.parameters.settings['RossiAlpha Settings']['Time difference method'],
                                                editor.parameters.settings['General Settings'],
+                                               editor.parameters.settings['Input/Output Settings']['Save figures'],
                                                editor.parameters.settings['Input/Output Settings']['Save directory'],
                                                editor.parameters.settings['Line Fitting Settings'],
-                                               editor.parameters.settings['Residual Plot Settings'],
+                                               editor.parameters.settings['Scatter Plot Settings'],
                                                editor.parameters.settings['Histogram Visual Settings'])
                         editor.log('New best fit and residual created.\n')
             # View and/or edit program settings.

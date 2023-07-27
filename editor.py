@@ -22,7 +22,7 @@ class Editor:
         '''Prints a string if quiet mode 
         is off. Otherwise, does nothng.'''
 
-        if not self.parameters.settings['General Settings']['Quiet mode']:
+        if not self.parameters.settings['Input/Output Settings']['Quiet mode']:
             print(message)
 
     def log(self, output: str):
@@ -131,11 +131,11 @@ class Editor:
                 settings.write('\t"General Settings": {\n\t\t\n\t},\n')
                 settings.write('\t"RossiAlpha Settings": {\n\t\t\n\t},\n')
                 settings.write('\t"CohnAlpha Settings": {\n\t\t\n\t},\n')
-                settings.write('\t"CohnAlpha Visual Settings": {\n\t\t\n\t},\n')
+                settings.write('\t"Semilog Plot Settings": {\n\t\t\n\t},\n')
                 settings.write('\t"FeynmanY Settings": {\n\t\t\n\t},\n')
                 settings.write('\t"Histogram Visual Settings": {\n\t\t\n\t},\n')
                 settings.write('\t"Line Fitting Settings": {\n\t\t\n\t},\n')
-                settings.write('\t"Residual Plot Settings": {\n\t\t\n\t}\n}')
+                settings.write('\t"Scatter Plot Settings": {\n\t\t\n\t}\n}')
                 settings.flush()
             call([EDITOR, settings.name])
         # Create a temp file to compare the edited settings to the previous ones.

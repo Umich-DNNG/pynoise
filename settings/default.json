@@ -3,8 +3,11 @@
         "Input file/folder": "none",
         "Time column": 0,
         "Channels column": null,
-        "Save directory": "./",
-        "Keep logs": false
+        "Save directory": "./data",
+        "Save figures": false,
+        "Save raw data": false,
+        "Keep logs": false,
+        "Quiet mode": false
     },
     "General Settings": {
         "Fit range": [
@@ -12,9 +15,8 @@
             1000.0
         ],
         "Number of folders": 10,
-        "Quiet mode": false,
+        "Verbose iterations": false,
         "Sort data": true,
-        "Save figures": false,
         "Show plots": false
     },
     "RossiAlpha Settings": {
@@ -27,15 +29,12 @@
         "Minimum cutoff": 30
     },
     "CohnAlpha Settings": {
-        "Dwell time": 2000000.0,
+        "Dwell time": 2e6,
         "Meas time range": [
-            150000000000.0,
-            1000000000000.0
+            1.5e11,
+            1e12
         ],
-        "Clean pulses switch": true
-    },
-    "CohnAlpha Visual Settings": {
-        "Legend Label": "frequency intensity",
+        "Clean pulses switch": true,
         "Annotation Font Weight": "bold",
         "Annotation Color": "black",
         "Annotation Background Color": "white"
@@ -44,6 +43,12 @@
         "Tau range": [30, 3000],
         "Increment amount": 30,
         "Plot scale": "log"
+    },
+    "Semilog Plot Settings": {
+        "label": "Frequency Intensity",
+        "markeredgecolor": "#162F65",
+        "markeredgewidth": 0.2,
+        "markerfacecolor": "#B2CBDE"
     },
     "Histogram Visual Settings": {
         "alpha": 1,
@@ -54,12 +59,11 @@
     },
     "Line Fitting Settings": {
         "color": "#162F65",
-        "markeredgecolor": "blue",
-        "markerfacecolor": "black",
         "linestyle": "-",
-        "linewidth": 1
+        "linewidth": 1,
+        "label": "Fit"
     },
-    "Residual Plot Settings": {
+    "Scatter Plot Settings": {
         "color": "#B2CBDE",
         "edgecolor": "#162F65",
         "linewidth": 0.4,

@@ -41,10 +41,9 @@ class CohnAlpha:
                      show_plot: bool = True, 
                      save_fig: bool = True, 
                      save_dir: str = './', 
-                     leg_label: str = "frequency intensity",
-                     annotate_font_weight: str = "bold", 
-                     annotate_color: str = "black", 
-                     annotate_background_color: str = "white"):
+                     caSet: dict = {},
+                     sps: dict = {},
+                     lfs: dict = {}):
         
         '''
         Creating PSD plot from an array of data inputs.
@@ -56,10 +55,6 @@ class CohnAlpha:
             - show_plot (whether to show plot) default is True
             - save_fig (whether to save figure) default is True
             - save_dir (figure save directory) default if root folder
-            - leg_label (label for the legend)
-            - annotate_font_weight (annotation font weight) default is bold
-            - annotate_color (color of the annotation) default is black
-            - annotate_background_color (color of the annotation background) default is white
 
         Outputs: 
             - f (DESCRIPTION NEEDED)
@@ -69,11 +64,17 @@ class CohnAlpha:
         '''
 
         # Annotation Parameters
+<<<<<<< HEAD
 
         self.leg_label = leg_label
         self.annotate_font_weight = annotate_font_weight
         self.annotate_color = annotate_color
         self.annotate_background_color = annotate_background_color
+=======
+        self.annotate_font_weight = caSet['Annotation Font Weight']
+        self.annotate_color = caSet['Annotation Color']
+        self.annotate_background_color = caSet['Annotation Background Color']
+>>>>>>> origin
         
         # Making count of bins over time histogram
         count_bins = np.diff(self.meas_time_range) / self.dwell_time
@@ -94,15 +95,6 @@ class CohnAlpha:
         timeline = np.linspace(start=self.meas_time_range[0], 
                             stop=self.meas_time_range[1],
                             num=int(count_bins))/1e9
-        
-        # Plotting counts over time histogram (ensure constant or near constant)
-        fig1, ax1 = plt.subplots()
-        ax1.plot(timeline, counts_time_hist, '.', label=self.leg_label)
-        
-        # Setting axis titles and legend
-        ax1.set_ylabel('Counts')
-        ax1.set_xlabel('Time(s)')
-        ax1.legend()
         
         # Calculating power spectral density distribution from counts over time hist (Get frequency of counts samples)
         fs = 1 / (timeline[3]-timeline[2])
@@ -125,20 +117,20 @@ class CohnAlpha:
                     str(np.around(pcov[1,1]*2*np.pi, decimals=2)))
         
         # Plotting the auto-power-spectral-density distribution and fit
-        fig2, ax2 = plt.subplots()
+        fig, ax = plt.subplots()
 
         # Creating a plot with semilogarithmic (log-scale) x-axis 
-        ax2.semilogx(f[1:-2], Pxx[1:-2], '.', label=self.leg_label)
-        ax2.semilogx(f[1:-2], CAFit(f[1:-2], *popt), '--', label='fit')
+        ax.semilogx(f[1:-2], Pxx[1:-2], '.', **sps)
+        ax.semilogx(f[1:-2], CAFit(f[1:-2], *popt), **lfs)
         
         # Setting minimum and maximum for y
-        ymin, ymax = ax2.get_ylim()
+        ymin, ymax = ax.get_ylim()
         dy = ymax-ymin
 
         # Creating axis titles
-        ax2.set_xlim([1, 200])
-        ax2.set_xlabel('Frequency (Hz)')
-        ax2.set_ylabel('CohnAlpha (V$^2$/Hz)')
+        ax.set_xlim([1, 200])
+        ax.set_xlabel('Frequency (Hz)')
+        ax.set_ylabel('Intensity (V$^2$/Hz)')
 
         # Constructing alpha string
         alph_str = (r'$\alpha$ = (' +
@@ -146,7 +138,7 @@ class CohnAlpha:
                     str(np.around(pcov[1,1]*2*np.pi, decimals=2)) + ') 1/s')
         
         # Annotating the plots
-        ax2.annotate(alph_str, 
+        ax.annotate(alph_str, 
                     xy=(1.5, ymin+0.1*dy), 
                     xytext=(1.5, ymin+0.1*dy),
                     fontsize=16, 
@@ -155,20 +147,16 @@ class CohnAlpha:
                     backgroundcolor=self.annotate_background_color)
         
         # Creating title and legend
-        ax2.set_title('Cohn Alpha Graph')
-        ax2.legend(loc='upper right')
+        ax.set_title('Cohn Alpha Graph')
+        ax.legend(loc='upper right')
         
 
         # Saving figure (optional)
         if save_fig:
 
-            fig1.tight_layout()
-            save_filename = os.path.join(save_dir, 'CohnAlpha1')
-            fig1.savefig(save_filename, dpi=300, bbox_inches='tight')
-
-            fig2.tight_layout()
+            fig.tight_layout()
             save_filename = os.path.join(save_dir, 'CohnAlpha2')
-            fig2.savefig(save_filename, dpi=300, bbox_inches='tight')
+            fig.savefig(save_filename, dpi=300, bbox_inches='tight')
 
 
         # Showing plot (optional)

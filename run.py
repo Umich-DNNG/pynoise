@@ -259,8 +259,10 @@ def edit(window: Tk,
                             parameters.hvs_drop.append(setting)
                         case 'Line Fitting Settings':
                             parameters.lfs_drop.append(setting)
-                        case 'Residual Plot Settings':
-                            parameters.rps_drop.append(setting)
+                        case 'Scatter Plot Settings':
+                            parameters.sps_drop.append(setting)
+                        case 'Semilog Plot Settings':
+                            parameters.sls_drop.append(setting)
             else:
                 if parameters.settings[group].get(setting) == None:
                     match group:
@@ -268,8 +270,10 @@ def edit(window: Tk,
                             parameters.hvs_drop.remove(setting)
                         case 'Line Fitting Settings':
                             parameters.lfs_drop.remove(setting)
-                        case 'Residual Plot Settings':
-                            parameters.rps_drop.remove(setting)
+                        case 'Scatter Plot Settings':
+                            parameters.sps_drop.remove(setting)
+                        case 'Semilog Plot Settings':
+                            parameters.sls_drop.remove(setting)
                 parameters.settings[group][setting] = saveType(inputs[group][setting].get())
     parameters.sort_drops()
     # Compare the modified settings to the previous and save the number of changes.
@@ -429,7 +433,9 @@ def raSplit(window: Tk,
                                                                                     parameters.settings['General Settings']['Sort data'],
                                                                                     parameters.settings['RossiAlpha Settings']['Reset time'],
                                                                                     parameters.settings['RossiAlpha Settings']['Time difference method'],
-                                                                                    parameters.settings['RossiAlpha Settings']['Digital delay'])),
+                                                                                    parameters.settings['RossiAlpha Settings']['Digital delay'],
+                                                                                    parameters.settings['Input/Output Settings']['Quiet mode'],
+                                                                                    False)),
                                     'There are already stored time differences '
                                     + 'in this runtime. Do you want to overwrite them?')
                         # Otherwise, create with no warning.
@@ -438,7 +444,9 @@ def raSplit(window: Tk,
                                                     parameters.settings['General Settings']['Sort data'],
                                                     parameters.settings['RossiAlpha Settings']['Reset time'],
                                                     parameters.settings['RossiAlpha Settings']['Time difference method'],
-                                                    parameters.settings['RossiAlpha Settings']['Digital delay'])
+                                                    parameters.settings['RossiAlpha Settings']['Digital delay'],
+                                                    parameters.settings['Input/Output Settings']['Quiet mode'],
+                                                    False)
                             log(message='Successfully calculated time differences for file:\n'
                                 +parameters.settings['Input/Output Settings']['Input file/folder'],
                                 window=window)
@@ -468,9 +476,10 @@ def raSplit(window: Tk,
                                                 menu=lambda:analyzer.createBestFit(parameters.settings['RossiAlpha Settings']['Minimum cutoff'],
                                                                                    parameters.settings['RossiAlpha Settings']['Time difference method'],
                                                                                    parameters.settings['General Settings'],
+                                                                                   parameters.settings['Input/Output Settings']['Save figures'],
                                                                                    parameters.settings['Input/Output Settings']['Save directory'],
                                                                                    parameters.settings['Line Fitting Settings'],
-                                                                                   parameters.settings['Residual Plot Settings'],
+                                                                                   parameters.settings['Scatter Plot Settings'],
                                                                                    parameters.settings['Histogram Visual Settings'])),
                                     'There is an already stored best fit line '
                                     + 'in this runtime. Do you want to overwrite it?')
@@ -480,9 +489,10 @@ def raSplit(window: Tk,
                             analyzer.createBestFit(parameters.settings['RossiAlpha Settings']['Minimum cutoff'],
                                                    parameters.settings['RossiAlpha Settings']['Time difference method'],
                                                    parameters.settings['General Settings'],
+                                                   parameters.settings['Input/Output Settings']['Save figures'],
                                                    parameters.settings['Input/Output Settings']['Save directory'],
                                                    parameters.settings['Line Fitting Settings'],
-                                                   parameters.settings['Residual Plot Settings'],
+                                                   parameters.settings['Scatter Plot Settings'],
                                                    parameters.settings['Histogram Visual Settings'])
                             log(message='Successfully created a best fit for file:\n'
                                 +parameters.settings['Input/Output Settings']['Input file/folder'],
@@ -496,7 +506,9 @@ def raSplit(window: Tk,
                 return True
             # Otherwise, run the full analysis.
             else:
-                analyzer.fullFolder(parameters.settings)
+                gui.folderProgress()
+                analyzer.fullFolder(parameters.settings, window)
+                gui.raMenu()
                 log(message='Successfully ran all analysis with folder:\n'
                             +parameters.settings['Input/Output Settings']['Input file/folder'],
                             window=window)
@@ -505,9 +517,10 @@ def caSplit(window: Tk, parameters: set.Settings):
     analyzer.conductCohnAlpha(parameters.settings['Input/Output Settings']['Input file/folder'],
                               parameters.settings['Input/Output Settings']['Save directory'],
                               parameters.settings['General Settings']['Show plots'],
-                              parameters.settings['General Settings']['Save figures'],
+                              parameters.settings['Input/Output Settings']['Save figures'],
                               parameters.settings['CohnAlpha Settings'],
-                              parameters.settings['CohnAlpha Visual Settings'])
+                              parameters.settings['Semilog Plot Settings'],
+                              parameters.settings['Line Fitting Settings'])
     log(message='Successfully ran Cohn Alpha analysis on file:\n'
         +parameters.settings['Input/Output Settings']['Input file/folder'],
         window=window)
@@ -516,8 +529,12 @@ def fySplit(window: Tk, parameters: set.Settings):
     analyzer.runFeynmanY(parameters.settings['Input/Output Settings'],
                          parameters.settings['FeynmanY Settings'],
                          parameters.settings['General Settings']['Show plots'],
-                         parameters.settings['General Settings']['Save figures'],
+                         parameters.settings['Input/Output Settings']['Save figures'],
+                         parameters.settings['Input/Output Settings']['Quiet mode'],
+                         parameters.settings['General Settings']['Verbose iterations'],
                          parameters.settings['Histogram Visual Settings'],
+                         parameters.settings['Line Fitting Settings'],
+                         parameters.settings['Scatter Plot Settings'],
                          window)
     gui.feynmanYMenu()
     log(message='Successfully ran Feynman Y analysis on file:\n'
