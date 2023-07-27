@@ -160,7 +160,17 @@ class FeynmanY:
 
 
 
-    def fitting(self, x_data, y_data, gamma_guess, alpha_guess, save_fig: bool = False, show_plot: bool = False, save_dir: str = './'):
+    def fitting(self, 
+                x_data, 
+                y_data, 
+                gamma_guess, 
+                alpha_guess, 
+                save_fig: bool = False, 
+                show_plot: bool = False, 
+                save_dir: str = './', 
+                fit_opt: dict = {},
+                scatter_opt: dict = {}, 
+                type: str = 'Y'):
 
         # Convert the lists to NumPy arrays
         x = np.array(x_data)
@@ -187,10 +197,11 @@ class FeynmanY:
         self.pred = YFit(x_fit, self.gamma, self.alpha)
 
         # Plot the original data points and the fitted curve
-        plt.scatter(x, y, label='Data')
-        plt.plot(x_fit, self.pred, color='red', label='Fitted Curve')
-        plt.xlabel('x')
-        plt.ylabel('y')
+        plt.scatter(x, y, label='Data', **scatter_opt)
+        plt.plot(x_fit, self.pred, label='Fitted Curve', **fit_opt)
+        plt.xlabel('Tau Value')
+        plt.ylabel(type + ' Value')
+        plt.title(type + ' Distribution')
         plt.legend()
 
         # Saving the figure (optional)

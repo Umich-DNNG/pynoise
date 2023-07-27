@@ -106,7 +106,17 @@ class Analyzer:
         file.flush()
         file.close()
 
-    def runFeynmanY(self, io: dict, fy: dict, show: bool, save: bool, quiet: bool, verbose: bool = False, hvs: dict = None, window: Tk = None):
+    def runFeynmanY(self, 
+                    io: dict, 
+                    fy: dict, 
+                    show: bool, 
+                    save: bool, 
+                    quiet: bool, 
+                    verbose: bool = False, 
+                    hvs: dict = {}, 
+                    lfs: dict = {},
+                    sps: dict = {}, 
+                    window: Tk = None):
         
         '''Run FeynmanY analysis for varying tau values.
         Plots each tau value and estimates alpha.
@@ -196,7 +206,20 @@ class Analyzer:
                                alpha_guess=-0.01, 
                                save_fig=save, 
                                show_plot=show, 
-                               save_dir=io['Save directory'])
+                               save_dir=io['Save directory'],
+                               fit_opt=lfs,
+                               scatter_opt=sps,
+                               type='Y')
+        FeynmanYObject.fitting(tValues, 
+                               y2Values, 
+                               gamma_guess=yValues[-1], 
+                               alpha_guess=-0.01, 
+                               save_fig=save, 
+                               show_plot=show, 
+                               save_dir=io['Save directory'],
+                               fit_opt=lfs,
+                               scatter_opt=sps,
+                               type='Y2')
         if io['Save raw data']:
             if verbose:
                 filename = 'FYFull'
