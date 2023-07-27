@@ -21,7 +21,7 @@ class Settings:
                          'General Settings': {},
                          'RossiAlpha Settings': {},
                          'CohnAlpha Settings' : {},
-                         'CohnAlpha Visual Settings': {},
+                         'Semilog Plot Settings': {},
                          'FeynmanY Settings' : {},
                          'Histogram Visual Settings': {},
                          'Line Fitting Settings': {},
