@@ -528,6 +528,8 @@ def fySplit(window: Tk, parameters: set.Settings):
                          parameters.settings['Input/Output Settings']['Quiet mode'],
                          parameters.settings['General Settings']['Verbose iterations'],
                          parameters.settings['Histogram Visual Settings'],
+                         parameters.settings['Line Fitting Settings'],
+                         parameters.settings['Residual Plot Settings'],
                          window)
     gui.feynmanYMenu()
     log(message='Successfully ran Feynman Y analysis on file:\n'
