@@ -236,7 +236,7 @@ class Analyzer:
                         filename,
                         io['Save directory'])
 
-    def conductCohnAlpha(self, input: str, output: str, show: bool, save: bool, caGen: dict, caVis: dict, test: dict):
+    def conductCohnAlpha(self, input: str, output: str, show: bool, save: bool, caSet: dict, sps: dict, lfs: dict):
 
         '''Runs Cohn Alpha analysis.
         
@@ -245,25 +245,23 @@ class Analyzer:
         - output: the save directory.
         - show: whether or not to show plots.
         - save: whether or not to save plots.
-        - caGen: the CohnAlpha Settings dictionary.
-        - caVis: the CohnAlpha Visual Settings dictionary.'''
+        - caSet: the CohnAlpha Settings dictionary.
+        - sps: the Semilog Plot Settings dictionary.'''
 
         # Load the values from the specified file into an NP array.
         values = np.loadtxt(input, usecols=(0,3), max_rows=2000000, dtype=float)
         # Create a Cohn Alpha object with the given settings.
         CA_Object = ca.CohnAlpha(values,
-                                 caGen['Clean pulses switch'], 
-                                 caGen['Dwell time'],
-                                 caGen['Meas time range'])
+                                 caSet['Clean pulses switch'], 
+                                 caSet['Dwell time'],
+                                 caSet['Meas time range'])
         # Conduct Cohn Alpha analysis with the given settings.
         CA_Object.conductCohnAlpha(show,
                                    save,
                                    output,
-                                   caVis['Legend Label'],
-                                   caVis['Annotation Font Weight'],
-                                   caVis['Annotation Color'],
-                                   caVis['Annotation Background Color'],
-                                   test)
+                                   caSet,
+                                   sps,
+                                   lfs)
 
     def createTimeDifs(self, io: dict, sort: bool, reset: float, method: str, delay: int, quiet: bool, folder: bool = False):
         
