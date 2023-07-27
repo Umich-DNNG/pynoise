@@ -206,7 +206,7 @@ class FeynmanY:
 
         # Saving the figure (optional)
         if save_fig:
-            save_filename = os.path.join(save_dir, 'FeynmanY_fitting.png') 
+            save_filename = os.path.join(save_dir, 'Feynman' + type + '_fitting.png') 
             plt.savefig(save_filename, dpi=300, bbox_inches='tight')
 
         # Displaying the plot (optional)
