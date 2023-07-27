@@ -259,7 +259,7 @@ def edit(window: Tk,
                             parameters.hvs_drop.append(setting)
                         case 'Line Fitting Settings':
                             parameters.lfs_drop.append(setting)
-                        case 'Residual Plot Settings':
+                        case 'Scatter Plot Settings':
                             parameters.rps_drop.append(setting)
             else:
                 if parameters.settings[group].get(setting) == None:
@@ -268,7 +268,7 @@ def edit(window: Tk,
                             parameters.hvs_drop.remove(setting)
                         case 'Line Fitting Settings':
                             parameters.lfs_drop.remove(setting)
-                        case 'Residual Plot Settings':
+                        case 'Scatter Plot Settings':
                             parameters.rps_drop.remove(setting)
                 parameters.settings[group][setting] = saveType(inputs[group][setting].get())
     parameters.sort_drops()
@@ -475,7 +475,7 @@ def raSplit(window: Tk,
                                                                                    parameters.settings['Input/Output Settings']['Save figures'],
                                                                                    parameters.settings['Input/Output Settings']['Save directory'],
                                                                                    parameters.settings['Line Fitting Settings'],
-                                                                                   parameters.settings['Residual Plot Settings'],
+                                                                                   parameters.settings['Scatter Plot Settings'],
                                                                                    parameters.settings['Histogram Visual Settings'])),
                                     'There is an already stored best fit line '
                                     + 'in this runtime. Do you want to overwrite it?')
@@ -488,7 +488,7 @@ def raSplit(window: Tk,
                                                    parameters.settings['Input/Output Settings']['Save figures'],
                                                    parameters.settings['Input/Output Settings']['Save directory'],
                                                    parameters.settings['Line Fitting Settings'],
-                                                   parameters.settings['Residual Plot Settings'],
+                                                   parameters.settings['Scatter Plot Settings'],
                                                    parameters.settings['Histogram Visual Settings'])
                             log(message='Successfully created a best fit for file:\n'
                                 +parameters.settings['Input/Output Settings']['Input file/folder'],
@@ -529,7 +529,7 @@ def fySplit(window: Tk, parameters: set.Settings):
                          parameters.settings['General Settings']['Verbose iterations'],
                          parameters.settings['Histogram Visual Settings'],
                          parameters.settings['Line Fitting Settings'],
-                         parameters.settings['Residual Plot Settings'],
+                         parameters.settings['Scatter Plot Settings'],
                          window)
     gui.feynmanYMenu()
     log(message='Successfully ran Feynman Y analysis on file:\n'

@@ -135,7 +135,7 @@ class Editor:
                 settings.write('\t"FeynmanY Settings": {\n\t\t\n\t},\n')
                 settings.write('\t"Histogram Visual Settings": {\n\t\t\n\t},\n')
                 settings.write('\t"Line Fitting Settings": {\n\t\t\n\t},\n')
-                settings.write('\t"Residual Plot Settings": {\n\t\t\n\t}\n}')
+                settings.write('\t"Scatter Plot Settings": {\n\t\t\n\t}\n}')
                 settings.flush()
             call([EDITOR, settings.name])
         # Create a temp file to compare the edited settings to the previous ones.

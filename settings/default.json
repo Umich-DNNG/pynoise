@@ -59,7 +59,7 @@
         "linestyle": "-",
         "linewidth": 1
     },
-    "Residual Plot Settings": {
+    "Scatter Plot Settings": {
         "color": "#B2CBDE",
         "edgecolor": "#162F65",
         "linewidth": 0.4,
