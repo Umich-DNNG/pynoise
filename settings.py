@@ -25,7 +25,7 @@ class Settings:
                          'FeynmanY Settings' : {},
                          'Histogram Visual Settings': {},
                          'Line Fitting Settings': {},
-                         'Residual Plot Settings': {}
+                         'Scatter Plot Settings': {}
         }
         # The variable that stores the path of the 
         # .json file that was most recently imported.
@@ -136,7 +136,7 @@ class Settings:
                                 self.hvs_drop.append(setting)
                             case 'Line Fitting Settings':
                                 self.lfs_drop.append(setting)
-                            case 'Residual Plot Settings':
+                            case 'Scatter Plot Settings':
                                 self.rps_drop.append(setting)
                 # Otherwise, add/modify the specified setting.
                 else:
@@ -146,7 +146,7 @@ class Settings:
                                 self.hvs_drop.remove(setting)
                             case 'Line Fitting Settings':
                                 self.lfs_drop.remove(setting)
-                            case 'Residual Plot Settings':
+                            case 'Scatter Plot Settings':
                                 self.rps_drop.remove(setting)
                     self.settings[group][setting] = parameters[group][setting]
         self.sort_drops()
@@ -164,7 +164,7 @@ class Settings:
             self.hvs_drop.append(setting)
         for setting in self.settings['Line Fitting Settings']:
             self.lfs_drop.append(setting)
-        for setting in self.settings['Residual Plot Settings']:
+        for setting in self.settings['Scatter Plot Settings']:
             self.rps_drop.append(setting)
         # Load the new parameters from the json file.
         self.settings = json.load(open(path))
@@ -172,7 +172,7 @@ class Settings:
             self.hvs_drop.remove(setting)
         for setting in self.settings['Line Fitting Settings']:
             self.lfs_drop.remove(setting)
-        for setting in self.settings['Residual Plot Settings']:
+        for setting in self.settings['Scatter Plot Settings']:
             self.rps_drop.remove(setting)
         self.sort_drops()
         # If the JSON file being loaded is a permanent file, change the 

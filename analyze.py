@@ -416,7 +416,7 @@ class Analyzer:
         - save: whether or not to save figures.
         - output: the save directory.
         - line: the Line Fitting Settings dictionary.
-        - res: the Residual Plot Settings dictionary.
+        - res: the Scatter Plot Settings dictionary.
         - hist: the Histogram Visual Settings dictionary.
         
         Optional:
@@ -453,7 +453,7 @@ class Analyzer:
                            settings['Input/Output Settings']['Save figures'],
                            settings['Input/Output Settings']['Save directory'],
                            settings['Line Fitting Settings'],
-                           settings['Residual Plot Settings'],
+                           settings['Scatter Plot Settings'],
                            settings['Histogram Visual Settings'])
         # Close all currently open plots.
         pyplot.close()
@@ -535,7 +535,7 @@ class Analyzer:
                                        settings['Input/Output Settings']['Save figures'],
                                        settings['Input/Output Settings']['Save directory'],
                                        settings['Line Fitting Settings'],
-                                       settings['Residual Plot Settings'],
+                                       settings['Scatter Plot Settings'],
                                        settings['Histogram Visual Settings'],
                                        folder)
                     pyplot.close()
@@ -593,7 +593,7 @@ class Analyzer:
                                                  settings['General Settings'],
                                                  settings['Input/Output Settings']['Save directory'],
                                                  settings['Line Fitting Settings'], 
-                                                 settings['Residual Plot Settings'])
+                                                 settings['Scatter Plot Settings'])
         # Fit the total histogram with weighting.
         thisWeightedFit.fit_RA_hist_weighting()
         # Plot the total histogram fit.
