@@ -42,11 +42,9 @@ class CohnAlpha:
                      show_plot: bool = True, 
                      save_fig: bool = True, 
                      save_dir: str = './', 
-                     leg_label: str = "Measurement",
-                     annotate_font_weight: str = "bold", 
-                     annotate_color: str = "black", 
-                     annotate_background_color: str = "white",
-                     test: dict = {}):
+                     caSet: dict = {},
+                     sps: dict = {},
+                     lfs: dict = {}):
         
         '''
         Creating PSD plot from an array of data inputs.
@@ -58,10 +56,6 @@ class CohnAlpha:
             - show_plot (whether to show plot) default is True
             - save_fig (whether to save figure) default is True
             - save_dir (figure save directory) default if root folder
-            - leg_label (label for the legend)
-            - annotate_font_weight (annotation font weight) default is bold
-            - annotate_color (color of the annotation) default is black
-            - annotate_background_color (color of the annotation background) default is white
 
         Outputs: 
             - f (DESCRIPTION NEEDED)
@@ -71,10 +65,9 @@ class CohnAlpha:
         '''
 
         # Annotation Parameters
-        self.leg_label = leg_label
-        self.annotate_font_weight = annotate_font_weight
-        self.annotate_color = annotate_color
-        self.annotate_background_color = annotate_background_color
+        self.annotate_font_weight = caSet['Annotation Font Weight']
+        self.annotate_color = caSet['Annotation Color']
+        self.annotate_background_color = caSet['Annotation Background Color']
         
         # Making count of bins over time histogram
         count_bins = np.diff(self.meas_time_range) / self.dwell_time
@@ -120,9 +113,8 @@ class CohnAlpha:
         fig, ax = plt.subplots()
 
         # Creating a plot with semilogarithmic (log-scale) x-axis 
-        ax.semilogx(f[1:-2], Pxx[1:-2], '.', label=self.leg_label, markeredgecolor= "#162F65",
-                     markeredgewidth = 0.2, markerfacecolor = "#B2CBDE")
-        ax.semilogx(f[1:-2], CAFit(f[1:-2], *popt), label='Fit', **test)
+        ax.semilogx(f[1:-2], Pxx[1:-2], '.', **sps)
+        ax.semilogx(f[1:-2], CAFit(f[1:-2], *popt), **lfs)
         
         # Setting minimum and maximum for y
         ymin, ymax = ax.get_ylim()
