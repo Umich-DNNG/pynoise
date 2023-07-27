@@ -198,7 +198,7 @@ class FeynmanY:
 
         # Plot the original data points and the fitted curve
         plt.scatter(x, y, label='Data', **scatter_opt)
-        plt.plot(x_fit, self.pred, label='Fitted Curve', **fit_opt)
+        plt.plot(x_fit, self.pred, label=f'Fitted Curve (gamma={self.gamma:.3g}, alpha={self.alpha:.3g})', **fit_opt)
         plt.xlabel('Tau Value')
         plt.ylabel(type + ' Value')
         plt.title(type + ' Distribution')
