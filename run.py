@@ -515,7 +515,8 @@ def caSplit(window: Tk, parameters: set.Settings):
                               parameters.settings['General Settings']['Show plots'],
                               parameters.settings['Input/Output Settings']['Save figures'],
                               parameters.settings['CohnAlpha Settings'],
-                              parameters.settings['CohnAlpha Visual Settings'])
+                              parameters.settings['Semilog Plot Settings'],
+                              parameters.settings['Line Fitting Settings'])
     log(message='Successfully ran Cohn Alpha analysis on file:\n'
         +parameters.settings['Input/Output Settings']['Input file/folder'],
         window=window)
