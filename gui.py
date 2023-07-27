@@ -13,10 +13,10 @@ window: Tk = None
 parameters: set.Settings = None
 # Global variables that keep track of the row of 
 # the bottom of Histogram Visual, Line Fitting, and 
-# Residual Plot Settings for adding new settings.
+# Scatter Plot Settings for adding new settings.
 bottom: dict[str:int] = {'Histogram Visual Settings': None,
                          'Line Fitting Settings': None,
-                         'Residual Plot Settings': None}
+                         'Scatter Plot Settings': None}
 newSet=None
 newVal=None
 
@@ -299,7 +299,7 @@ def add(canvas: Canvas, group: str):
         # Visual Settings are currently the group that goes down the furthest.
         if len(cur_row) == 2 and cur_row[0].widgetName == 'ttk::label' and cur_row[1].widgetName == 'ttk::label':
             # Get the bottom of both settings groups.
-            bot = max(bottom['Residual Plot Settings'], bottom['Line Fitting Settings'])
+            bot = max(bottom['Scatter Plot Settings'], bottom['Line Fitting Settings'])
             # For the entire settings.
             while bot != top:
                 # Get the widgets in the current row.
@@ -310,7 +310,7 @@ def add(canvas: Canvas, group: str):
                 # Move up one row.
                 bot -= 1
             # Increase the bottoms of both groups.
-            bottom['Residual Plot Settings'] += 1
+            bottom['Scatter Plot Settings'] += 1
             bottom['Line Fitting Settings'] += 1
         # Move the add button down one row.
         canvas.children['editor'].children[group[0:group.find('Settings')].lower()+'add'].grid(row=top+1)
@@ -337,8 +337,8 @@ def add(canvas: Canvas, group: str):
     else:'''
     # Move the add button down one row.
     canvas.children['editor'].children[group[0:group.find('Settings')].lower()+'add'].grid(row=top+1)
-    # If we're looking at residual plot settings:
-    if group == 'Residual Plot Settings':
+    # If we're looking at Scatter Plot Settings:
+    if group == 'Scatter Plot Settings':
         # Create a unique dictionary key for the new setting.
         index = 'rps' + str(top)
         # Create a string variable linked to 
@@ -440,13 +440,13 @@ def editor_menu(prev):
             'FeynmanY Settings' : {},
             'Histogram Visual Settings': {},
             'Line Fitting Settings': {},
-            'Residual Plot Settings': {}}
+            'Scatter Plot Settings': {}}
     newSet={'Histogram Visual Settings': {},
             'Line Fitting Settings': {},
-            'Residual Plot Settings': {}}
+            'Scatter Plot Settings': {}}
     newVal={'Histogram Visual Settings': {},
             'Line Fitting Settings': {},
-            'Residual Plot Settings': {}}
+            'Scatter Plot Settings': {}}
     # Clear the window of all previous entries, labels, and buttons.
     for item in window.winfo_children():
         item.destroy()
@@ -515,7 +515,7 @@ def editor_menu(prev):
             editor.children[(group + ' ' + setting + ' value').lower()].insert(0,run.format(parameters.settings[group][setting]))
             # Increase the setting number.
             setNum += 1
-        if group == 'Histogram Visual Settings' or group == 'Line Fitting Settings' or group == 'Residual Plot Settings':
+        if group == 'Histogram Visual Settings' or group == 'Line Fitting Settings' or group == 'Scatter Plot Settings':
             match group:
                 case 'Histogram Visual Settings':
                     ttk.Button(editor,
@@ -535,7 +535,7 @@ def editor_menu(prev):
                     ttk.Button(editor,
                             name=group[0:group.find('Settings')].lower()+'add',
                             text='+',
-                            command=lambda: add(canvas, 'Residual Plot Settings'),
+                            command=lambda: add(canvas, 'Scatter Plot Settings'),
                             width=1
                             ).grid(column=(groupNum*3+1) % 9,row=curTop+setNum,padx=10)
             bottom[group] = curTop + setNum

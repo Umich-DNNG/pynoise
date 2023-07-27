@@ -163,7 +163,7 @@ def main(editorIn: edit.Editor, queue: list[str] = []):
                                                editor.parameters.settings['Input/Output Settings']['Save figures'],
                                                editor.parameters.settings['Input/Output Settings']['Save directory'],
                                                editor.parameters.settings['Line Fitting Settings'],
-                                               editor.parameters.settings['Residual Plot Settings'],
+                                               editor.parameters.settings['Scatter Plot Settings'],
                                                editor.parameters.settings['Histogram Visual Settings'])
                         editor.log('New best fit and residual created.\n')
             # View and/or edit program settings.

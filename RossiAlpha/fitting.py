@@ -201,7 +201,7 @@ class RossiHistogramFit:
         '''
 
         self.fitting_options = fitting_opts
-        #self.residual_options = settings['Residual Plot Settings']
+        #self.residual_options = settings['Scatter Plot Settings']
         self.residual_options = residual_opts
         #self.hist_visual_options = settings['Histogram Visual Settings']
         self.hist_visual_options = hist_visual_opts

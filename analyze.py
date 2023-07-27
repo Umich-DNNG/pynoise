@@ -28,7 +28,7 @@ class Analyzer:
         self.input: str = None
         self.method: str = None
 
-    def export(self, data: dict[str:tuple], singles: list[tuple], method: str):
+    def export(self, data: dict[str:tuple], singles: list[tuple], method: str, output: str = './data'):
 
         '''Export data from analysis to a csv file. The file 
         will be stored in the data folder and will be named 
@@ -49,7 +49,7 @@ class Analyzer:
         # Get the current time for file naming.
         curTime = time.localtime()
         # Name the file appropriately with the method name and current time.
-        fileName = ('./data/' + method +
+        fileName = (output + '/' + method +
                     ('(0' if curTime.tm_mon < 10 else '(') + str(curTime.tm_mon) +
                     ('-0' if curTime.tm_mday < 10 else '-') + str(curTime.tm_mday) +
                     ('-0' if curTime.tm_year%100 < 10 else '-') + str(curTime.tm_year%100) +
@@ -183,7 +183,8 @@ class Analyzer:
                     self.export({'Count': (range(0,len(counts)), 0),
                                  'Frequency': (counts,0)},
                                  [('Tau',tau)],
-                                 'FY' + str(tau))
+                                 'FY' + str(tau),
+                                 io['Save directory'])
                 if show or save:
                     FeynmanYObject.FeynmanY_histogram(counts,
                                                     fy['Plot scale'],
@@ -232,9 +233,10 @@ class Analyzer:
                         [('Gamma',FeynmanYObject.gamma),
                          ('Alpha',FeynmanYObject.alpha),
                          ('Input file', io['Input file/folder'])],
-                        filename)
+                        filename,
+                        io['Save directory'])
 
-    def conductCohnAlpha(self, input: str, output: str, show: bool, save: bool, caGen: dict, caVis: dict):
+    def conductCohnAlpha(self, input: str, output: str, show: bool, save: bool, caGen: dict, caVis: dict, test: dict):
 
         '''Runs Cohn Alpha analysis.
         
@@ -260,7 +262,8 @@ class Analyzer:
                                    caVis['Legend Label'],
                                    caVis['Annotation Font Weight'],
                                    caVis['Annotation Color'],
-                                   caVis['Annotation Background Color'])
+                                   caVis['Annotation Background Color'],
+                                   test)
 
     def createTimeDifs(self, io: dict, sort: bool, reset: float, method: str, delay: int, quiet: bool, folder: bool = False):
         
@@ -413,7 +416,7 @@ class Analyzer:
         - save: whether or not to save figures.
         - output: the save directory.
         - line: the Line Fitting Settings dictionary.
-        - res: the Residual Plot Settings dictionary.
+        - res: the Scatter Plot Settings dictionary.
         - hist: the Histogram Visual Settings dictionary.
         
         Optional:
@@ -450,7 +453,7 @@ class Analyzer:
                            settings['Input/Output Settings']['Save figures'],
                            settings['Input/Output Settings']['Save directory'],
                            settings['Line Fitting Settings'],
-                           settings['Residual Plot Settings'],
+                           settings['Scatter Plot Settings'],
                            settings['Histogram Visual Settings'])
         # Close all currently open plots.
         pyplot.close()
@@ -479,7 +482,8 @@ class Analyzer:
                         ('B', self.best_fit.b),
                         ('Alpha', self.best_fit.alpha),
                         ('Input file', settings['Input/Output Settings']['Input file/folder'])],
-                        'RAFile')
+                        'RAFile',
+                        settings['Input/Output Settings']['Save directory'])
 
     def replace_zeroes(self, lst: list):
 
@@ -531,7 +535,7 @@ class Analyzer:
                                        settings['Input/Output Settings']['Save figures'],
                                        settings['Input/Output Settings']['Save directory'],
                                        settings['Line Fitting Settings'],
-                                       settings['Residual Plot Settings'],
+                                       settings['Scatter Plot Settings'],
                                        settings['Histogram Visual Settings'],
                                        folder)
                     pyplot.close()
@@ -560,7 +564,8 @@ class Analyzer:
                                     ('B', self.best_fit.b),
                                     ('Alpha', self.best_fit.alpha),
                                     ('Input file', settings['Input/Output Settings']['Input file/folder'])],
-                                    'RAFolder' + str(folder))
+                                    'RAFolder' + str(folder),
+                                    settings['Input/Output Settings']['Save directory'])
                     if window != None:
                         window.children['progress']['value'] += 10
                         wait = BooleanVar()
@@ -588,7 +593,7 @@ class Analyzer:
                                                  settings['General Settings'],
                                                  settings['Input/Output Settings']['Save directory'],
                                                  settings['Line Fitting Settings'], 
-                                                 settings['Residual Plot Settings'])
+                                                 settings['Scatter Plot Settings'])
         # Fit the total histogram with weighting.
         thisWeightedFit.fit_RA_hist_weighting()
         # Plot the total histogram fit.
@@ -628,4 +633,5 @@ class Analyzer:
                          ('Alpha', thisWeightedFit.alpha),
                          ('Input folder', settings['Input/Output Settings']['Input file/folder']),
                          ('Number of folders', settings['General Settings']['Number of folders'])],
-                        filename)
+                        filename,
+                        settings['Input/Output Settings']['Save directory'])
