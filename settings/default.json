@@ -3,7 +3,7 @@
         "Input file/folder": "none",
         "Time column": 0,
         "Channels column": null,
-        "Save directory": "./",
+        "Save directory": "./data",
         "Save figures": false,
         "Save raw data": false,
         "Keep logs": false,
@@ -56,8 +56,6 @@
     },
     "Line Fitting Settings": {
         "color": "#162F65",
-        "markeredgecolor": "blue",
-        "markerfacecolor": "black",
         "linestyle": "-",
         "linewidth": 1
     },
