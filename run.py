@@ -260,7 +260,9 @@ def edit(window: Tk,
                         case 'Line Fitting Settings':
                             parameters.lfs_drop.append(setting)
                         case 'Scatter Plot Settings':
-                            parameters.rps_drop.append(setting)
+                            parameters.sps_drop.append(setting)
+                        case 'Semilog Plot Settings':
+                            parameters.sls_drop.append(setting)
             else:
                 if parameters.settings[group].get(setting) == None:
                     match group:
@@ -269,7 +271,9 @@ def edit(window: Tk,
                         case 'Line Fitting Settings':
                             parameters.lfs_drop.remove(setting)
                         case 'Scatter Plot Settings':
-                            parameters.rps_drop.remove(setting)
+                            parameters.sps_drop.remove(setting)
+                        case 'Semilog Plot Settings':
+                            parameters.sls_drop.remove(setting)
                 parameters.settings[group][setting] = saveType(inputs[group][setting].get())
     parameters.sort_drops()
     # Compare the modified settings to the previous and save the number of changes.

@@ -16,7 +16,8 @@ parameters: set.Settings = None
 # Scatter Plot Settings for adding new settings.
 bottom: dict[str:int] = {'Histogram Visual Settings': None,
                          'Line Fitting Settings': None,
-                         'Scatter Plot Settings': None}
+                         'Scatter Plot Settings': None,
+                         'Semilog Plot Settings': None}
 newSet=None
 newVal=None
 
@@ -291,15 +292,15 @@ def add(canvas: Canvas, group: str):
     global window, bottom, newSet, newVal
     # Get the bottom of the desired group.
     top = bottom[group]
-    '''if group == 'Histogram Visual Settings':
+    if group == 'Semilog Plot Settings':
         # Get the widgets in the row beneath the settings group.
         cur_row = canvas.children['editor'].grid_slaves(row=top+1)
         # If the row is only two labels, we can assume that this is the Residual 
         # Plot Settings and Line Fitting Settings titles, meaning Histogram 
         # Visual Settings are currently the group that goes down the furthest.
-        if len(cur_row) == 2 and cur_row[0].widgetName == 'ttk::label' and cur_row[1].widgetName == 'ttk::label':
+        if len(cur_row) == 3 and cur_row[0].widgetName == 'ttk::label' and cur_row[1].widgetName == 'ttk::label' and cur_row[2].widgetName == 'ttk::label':
             # Get the bottom of both settings groups.
-            bot = max(bottom['Scatter Plot Settings'], bottom['Line Fitting Settings'])
+            bot = max(bottom['Scatter Plot Settings'], bottom['Line Fitting Settings'], bottom['Histogram Visual Settings'])
             # For the entire settings.
             while bot != top:
                 # Get the widgets in the current row.
@@ -309,97 +310,98 @@ def add(canvas: Canvas, group: str):
                     item.grid(row=bot+1)
                 # Move up one row.
                 bot -= 1
-            # Increase the bottoms of both groups.
+            # Increase the bottoms of all three groups.
+            bottom['Histogram Visual Settings'] += 1
             bottom['Scatter Plot Settings'] += 1
             bottom['Line Fitting Settings'] += 1
         # Move the add button down one row.
         canvas.children['editor'].children[group[0:group.find('Settings')].lower()+'add'].grid(row=top+1)
         # Create a unique dictionary key for the new setting.
-        index = 'hvs' + str(top)
+        index = 'sls' + str(top)
         # Create a string variable linked to 
         # this setting in the new settings dictionary.
         newSet[group][index] = tk.StringVar()
         # The dropdown menu for the new setting.
         ttk.OptionMenu(canvas.children['editor'],
                        newSet[group][index],
-                       *parameters.hvs_drop
+                       *parameters.sls_drop
                        ).grid(column=7,row=top,padx=10)
         # Create a string variable linked to this 
         # setting value in the new values dictionary.
         newVal[group][index] = tk.StringVar()
         # The entry box for the new setting value.
         tk.Entry(canvas.children['editor'],
-                 name=('new hvs value ' + str(top)).lower(),
+                 name=('new sls value ' + str(top)).lower(),
                  textvariable=newVal[group][index],
                  width=12
                  ).grid(column=8,row=top,padx=10)
     # If one of the other settings groups:
-    else:'''
-    # Move the add button down one row.
-    canvas.children['editor'].children[group[0:group.find('Settings')].lower()+'add'].grid(row=top+1)
-    # If we're looking at Scatter Plot Settings:
-    if group == 'Scatter Plot Settings':
-        # Create a unique dictionary key for the new setting.
-        index = 'rps' + str(top)
-        # Create a string variable linked to 
-        # this setting in the new settings dictionary.
-        newSet[group][index] = tk.StringVar()
-        # The dropdown menu for the new setting.
-        ttk.OptionMenu(canvas.children['editor'],
-                       newSet[group][index],
-                       *parameters.rps_drop
-                       ).grid(column=7,row=top,padx=10)
-        # Create a string variable linked to this 
-        # setting value in the new values dictionary.
-        newVal[group][index] = tk.StringVar()
-        # The entry box for the new setting value.
-        tk.Entry(canvas.children['editor'],
-                name=('new rps value ' + str(top)).lower(),
-                textvariable=newVal[group][index],
-                width=12
-                ).grid(column=8,row=top,padx=10)
-    # If we're looking at histogram visual settings:
-    elif group == 'Histogram Visual Settings':
-        # Create a unique dictionary key for the new setting.
-        index = 'hvs' + str(top)
-        # Create a string variable linked to 
-        # this setting in the new settings dictionary.
-        newSet[group][index] = tk.StringVar()
-        # The dropdown menu for the new setting.
-        ttk.OptionMenu(canvas.children['editor'],
-                       newSet[group][index],
-                       *parameters.hvs_drop
-                       ).grid(column=1,row=top,padx=10)
-        # Create a string variable linked to this 
-        # setting value in the new values dictionary.
-        newVal[group][index] = tk.StringVar()
-        # The entry box for the new setting value.
-        tk.Entry(canvas.children['editor'],
-                name=('new hvs value ' + str(top)).lower(),
-                textvariable=newVal[group][index],
-                width=12
-                ).grid(column=2,row=top,padx=10)
-    # If we're looking at line fitting settings:
     else:
-        # Create a unique dictionary key for the new setting.
-        index = 'lfs' + str(top)
-        # Create a string variable linked to 
-        # this setting in the new settings dictionary.
-        newSet[group][index] = tk.StringVar()
-        # The dropdown menu for the new setting.
-        ttk.OptionMenu(canvas.children['editor'],
-                       newSet[group][index],
-                       *parameters.lfs_drop
-                       ).grid(column=4,row=top,padx=10)
-        # Create a string variable linked to this 
-        # setting value in the new values dictionary.
-        newVal[group][index] = tk.StringVar()
-        # The entry box for the new setting value.
-        tk.Entry(canvas.children['editor'],
-                 name=('new lfs value ' + str(top)).lower(),
-                 textvariable=newVal[group][index],
-                 width=12
-                 ).grid(column=5,row=top,padx=10)
+        # Move the add button down one row.
+        canvas.children['editor'].children[group[0:group.find('Settings')].lower()+'add'].grid(row=top+1)
+        # If we're looking at Scatter Plot Settings:
+        if group == 'Scatter Plot Settings':
+            # Create a unique dictionary key for the new setting.
+            index = 'sps' + str(top)
+            # Create a string variable linked to 
+            # this setting in the new settings dictionary.
+            newSet[group][index] = tk.StringVar()
+            # The dropdown menu for the new setting.
+            ttk.OptionMenu(canvas.children['editor'],
+                        newSet[group][index],
+                        *parameters.sps_drop
+                        ).grid(column=7,row=top,padx=10)
+            # Create a string variable linked to this 
+            # setting value in the new values dictionary.
+            newVal[group][index] = tk.StringVar()
+            # The entry box for the new setting value.
+            tk.Entry(canvas.children['editor'],
+                    name=('new sps value ' + str(top)).lower(),
+                    textvariable=newVal[group][index],
+                    width=12
+                    ).grid(column=8,row=top,padx=10)
+        # If we're looking at histogram visual settings:
+        elif group == 'Histogram Visual Settings':
+            # Create a unique dictionary key for the new setting.
+            index = 'hvs' + str(top)
+            # Create a string variable linked to 
+            # this setting in the new settings dictionary.
+            newSet[group][index] = tk.StringVar()
+            # The dropdown menu for the new setting.
+            ttk.OptionMenu(canvas.children['editor'],
+                        newSet[group][index],
+                        *parameters.hvs_drop
+                        ).grid(column=1,row=top,padx=10)
+            # Create a string variable linked to this 
+            # setting value in the new values dictionary.
+            newVal[group][index] = tk.StringVar()
+            # The entry box for the new setting value.
+            tk.Entry(canvas.children['editor'],
+                    name=('new hvs value ' + str(top)).lower(),
+                    textvariable=newVal[group][index],
+                    width=12
+                    ).grid(column=2,row=top,padx=10)
+        # If we're looking at line fitting settings:
+        else:
+            # Create a unique dictionary key for the new setting.
+            index = 'lfs' + str(top)
+            # Create a string variable linked to 
+            # this setting in the new settings dictionary.
+            newSet[group][index] = tk.StringVar()
+            # The dropdown menu for the new setting.
+            ttk.OptionMenu(canvas.children['editor'],
+                        newSet[group][index],
+                        *parameters.lfs_drop
+                        ).grid(column=4,row=top,padx=10)
+            # Create a string variable linked to this 
+            # setting value in the new values dictionary.
+            newVal[group][index] = tk.StringVar()
+            # The entry box for the new setting value.
+            tk.Entry(canvas.children['editor'],
+                    name=('new lfs value ' + str(top)).lower(),
+                    textvariable=newVal[group][index],
+                    width=12
+                    ).grid(column=5,row=top,padx=10)
     # Increment the bottom of the current group.
     bottom[group] += 1
     # Create a new updated scrollbar.
@@ -443,10 +445,12 @@ def editor_menu(prev):
             'Scatter Plot Settings': {}}
     newSet={'Histogram Visual Settings': {},
             'Line Fitting Settings': {},
-            'Scatter Plot Settings': {}}
+            'Scatter Plot Settings': {},
+            'Semilog Plot Settings': {}}
     newVal={'Histogram Visual Settings': {},
             'Line Fitting Settings': {},
-            'Scatter Plot Settings': {}}
+            'Scatter Plot Settings': {},
+            'Semilog Plot Settings': {}}
     # Clear the window of all previous entries, labels, and buttons.
     for item in window.winfo_children():
         item.destroy()
@@ -515,8 +519,15 @@ def editor_menu(prev):
             editor.children[(group + ' ' + setting + ' value').lower()].insert(0,run.format(parameters.settings[group][setting]))
             # Increase the setting number.
             setNum += 1
-        if group == 'Histogram Visual Settings' or group == 'Line Fitting Settings' or group == 'Scatter Plot Settings':
+        if group == 'Semilog Plot Settings' or group == 'Histogram Visual Settings' or group == 'Line Fitting Settings' or group == 'Scatter Plot Settings':
             match group:
+                case 'Semilog Plot Settings':
+                    ttk.Button(editor,
+                            name=group[0:group.find('Settings')].lower()+'add',
+                            text='+',
+                            command=lambda: add(canvas, 'Semilog Plot Settings'),
+                            width=1
+                            ).grid(column=(groupNum*3+1) % 9,row=curTop+setNum,padx=10)
                 case 'Histogram Visual Settings':
                     ttk.Button(editor,
                             name=group[0:group.find('Settings')].lower()+'add',
