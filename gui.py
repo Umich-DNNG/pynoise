@@ -516,7 +516,7 @@ def editor_menu(prev):
                   width=12
                   ).grid(column=(groupNum*3+2) % 9,row=curTop+setNum,padx=10)
             # Insert into the entry box the current value of the setting.
-            editor.children[(group + ' ' + setting + ' value').lower()].insert(0,run.format(parameters.settings[group][setting]))
+            editor.children[(group + ' ' + setting + ' value').lower()].insert(0,set.format(parameters.settings[group][setting]))
             # Increase the setting number.
             setNum += 1
         if group == 'Semilog Plot Settings' or group == 'Histogram Visual Settings' or group == 'Line Fitting Settings' or group == 'Scatter Plot Settings':

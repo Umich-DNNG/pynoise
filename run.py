@@ -1,5 +1,8 @@
 '''The file that runs code related to the GUI implementation.'''
 
+
+
+# Necessary imports.
 import os
 import io
 import time
@@ -9,27 +12,28 @@ import gui
 import settings as set
 import analyze as alz
 
-#--------------------Global Variables--------------------#
 
-# The analysis object
+
+# Global variables for the analysis object 
+# and file that will have logs written to it.
 analyzer = alz.Analyzer()
-
-# The file that will have logs written to it.
 logfile: io.TextIOWrapper = None
 
-#--------------------GUI Functions--------------------#
+
 
 def create_logfile():
 
     '''Create a log file for logging user interactions.'''
 
+
+    # Use the global logfile variable.
     global logfile
     # Ensure a log file does not already exist.
     if logfile is None:
         # Get local time.
         curTime = time.localtime()
         # Create log file name with relative path and timestamp.
-        logName = ('./logs/' + str(curTime.tm_year) 
+        logName = ('logs/' + str(curTime.tm_year) 
                     + '-' + str(curTime.tm_mon) 
                     + '-' + str(curTime.tm_mday) 
                     + '@' + str(curTime.tm_hour)
@@ -45,17 +49,14 @@ def create_logfile():
         # Flush the file so it can be read immediately.
         logfile.flush()
 
-def log(message: str,
-        xor=None,
-        window: Tk=None,
-        menu=None):
+
+
+def log(message, xor=None, window: Tk=None, menu=None):
 
     '''Log a message to the current window and the logfile.
     
-    Requires:
-    - message: the string that will be displayed.
-
-    Optional:    
+    Inputs:
+    - message: the string or string-returning function that will be displayed.  
     - xor: a boolean that determines where this message should be displayed:
         - True: show only in the given label.
         - False: show only in the logfile.
@@ -65,13 +66,19 @@ def log(message: str,
     - menu: if returning to a previous menu, this is that menu 
     function. If not defined, will assume staying on the same menu.'''
 
+
+    # Use the global logfile variable.
     global logfile
+    # If there is a menu to be run, call it.
     if menu != None:
         error = menu()
+    # Otherwise, mark no error by default.
     else:
         error = False
+    # If there is no error:
     if not error:
-        if not isinstance(message,str):
+        # If message is a function, call it and save the output.
+        if not isinstance(message, str):
             message = message()
         # When applicable, log the message to the logfile.
         if xor == None or not xor:
@@ -90,6 +97,7 @@ def log(message: str,
             logfile.flush()
         # When applicable, set the label in the window to have the correct message.
         if xor == None or xor:
+            # If there is not already a log element on the screen, create one.
             if window.children.get('log') == None:
                 ttk.Separator(window,
                               orient='horizontal',
@@ -98,52 +106,27 @@ def log(message: str,
                         name='log',
                         text=message,
                         ).pack(side=TOP,padx=10,pady=10)
+            # Otherwise, just replace the text in the log element.
             else:
                 window.children['log'].config(text=message)
+
+
 
 def warningFunction(popup: Tk,
                     to):
 
     '''The function that is called when the user chooses to ignore a warning.
     
-    Requires:
+    Inputs:
     - popup: the warning window that will be deleted.
-    - to: the main function that will be called.
-    '''
+    - to: the main function that will be called.'''
+
 
     # Destroy the warning window and run the desired function.
     popup.destroy()
     to()
 
-def format(value):
 
-    '''Converts a variable to a properly formatted string. 
-    This is needed for floats/ints in scientific notation.
-    
-    Requires:
-    - value: the variable that is to be converted into a string.'''
-
-    # If variable is a list.
-    if isinstance(value, list):
-        response ='['
-        # For each entry, properly convert it to a string and 
-        # add it to the list string with a separating ', '.
-        for entry in value:
-            response += format(entry) + ', '
-        # Remove the extra ', ' and close the list.
-        response = response[0:len(response)-2] + ']'
-        # Return completed list.
-        return response
-    # If variable is a float/int and is of an excessively large or 
-    # small magnitude, display it in scientific notation.
-    elif ((isinstance(value, float) or isinstance(value, int)) 
-          and (value > 1000 
-               or value < -1000 
-               or (value < 0.01 and value > -0.01 and value != 0))):
-        return f'{value:g}'
-    # Otherwise, just return a string cast of the variable.
-    else:
-        return str(value)
 
 def saveType(value: str):
 
@@ -212,8 +195,8 @@ def changes(parameters: set.Settings):
             if (baseline.settings[group].get(setting) 
                 != parameters.settings[group][setting]):
                 log(setting + ' in ' + group + ': ' 
-                    + format(baseline.settings[group].get(setting)) + ' -> '
-                    + format(parameters.settings[group][setting]) + '.\n',
+                    + set.format(baseline.settings[group].get(setting)) + ' -> '
+                    + set.format(parameters.settings[group][setting]) + '.\n',
                     xor=False)
                 count += 1
     # For each setting in the baseline, if it does not 
@@ -223,6 +206,7 @@ def changes(parameters: set.Settings):
             if parameters.settings[group].get(setting) == None and setting != 'Channels column':
                 log(setting + ' in ' + group + ' removed.\n', xor=False)
                 count += 1
+    # Return the number of changes.
     return count
 
 def edit(window: Tk,
@@ -235,25 +219,36 @@ def edit(window: Tk,
     '''Save the inputs from the editor menu to the settings.
     
     Requires:
+    - window: the window that will display the number of changes.
     - inputs: a dictionary of tkinter string variables. 
     Should have groups that match the current settings.
+    - newSet: the new settings that have been added.
+    - newVal: the values of the new settings.
     - parameters: the settings object holding the current settings.
     - prev: the GUI function for the menu 
     to return to after the settings menu.'''
 
+    # For every new proposed setting:
     for group in newSet:
         for key in newSet[group]:
+            # If the setting isn't the placeholder 'Cancel' 
+            # or 'Select setting...', and the value isn't 
+            # blank, add the setting and value to the inputs.
             if newSet[group][key].get() != 'Cancel' and newSet[group][key].get() != 'select setting...' and newVal[group][key].get() != '':
                 inputs[group][newSet[group][key].get()] = newVal[group][key]
-
+    
+    # Write the current parameters to a temp file for comparison.
     parameters.write(os.path.abspath('./settings/comp.json'))
-    # For each group and setting in the inputs, convert the 
-    # string to the correct time and save it accordingly.
+    # For each setting change:
     for group in inputs:
         for setting in inputs[group]:
+            # If the setting is being deleted:
             if inputs[group][setting].get() == '':
+                # Confirm the setting currently exists.
                 if parameters.settings[group].get(setting) != None:
+                    # Pop the setting from the group.
                     parameters.settings[group].pop(setting)
+                    # Add the setting back to the appropriate dropdown menu.
                     match group:
                         case 'Histogram Visual Settings':
                             parameters.hvs_drop.append(setting)
@@ -263,7 +258,10 @@ def edit(window: Tk,
                             parameters.sps_drop.append(setting)
                         case 'Semilog Plot Settings':
                             parameters.sls_drop.append(setting)
+            # Otherwise:
             else:
+                # If this is a new setting, remove it 
+                # from the appropriate dropdown menu.
                 if parameters.settings[group].get(setting) == None:
                     match group:
                         case 'Histogram Visual Settings':
@@ -274,9 +272,12 @@ def edit(window: Tk,
                             parameters.sps_drop.remove(setting)
                         case 'Semilog Plot Settings':
                             parameters.sls_drop.remove(setting)
+                # Store the correct value.
                 parameters.settings[group][setting] = saveType(inputs[group][setting].get())
+    # Sort the dropdown menus.
     parameters.sort_drops()
-    # Compare the modified settings to the previous and save the number of changes.
+    # Compare the modified settings to the 
+    # previous and save the number of changes.
     total = changes(parameters)
     # If there were changes made, notify the user.
     if total > 0:
@@ -285,6 +286,7 @@ def edit(window: Tk,
             True,
             window,
             lambda: gui.setMenu(prev))
+    # Otherwise, just return to the settings menu.
     else:
         gui.setMenu(prev)
 
@@ -301,10 +303,10 @@ def download(parameters: set.Settings,
     - append: a boolean that represents whether this download is 
     meant for appending or overwriting the entire settings.
     - prev: the menu to return to after downloading.'''
-
-    # If file exists.
+    
+    # If file exists:
     if os.path.isfile(file):
-        # If in append mode.
+        # If in append mode:
         if append:
             # If settings have not been initialized, read in the defualt.
             if parameters.origin == 'None':
