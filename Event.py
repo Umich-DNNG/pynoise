@@ -11,7 +11,8 @@ class Event:
 
     '''The class for each radiation measurement. Stores the time 
     of measurement and channel that it was recorded by (if given).'''
-    
+
+
     def __init__(self, time, channel = None):
 
         '''Initializes the measurement time and channel for an Event.
@@ -21,12 +22,14 @@ class Event:
         - channel: the channel the measurement was taken 
         on. If not given, assumes no channel data.'''
 
+
+        # Store the time and channel data accordingly.
         self.time = time
         self.channel = channel
 
 
 
-def createEventsListFromTxtFile(filePath:str,
+def createEventsListFromTxtFile(path:str,
                                 timeCol:int = 0,
                                 channelCol:int = None,
                                 quiet:bool = False,
@@ -35,8 +38,7 @@ def createEventsListFromTxtFile(filePath:str,
     '''Creates an event list from a text file.
     
     Inputs:
-    - filePath: a string that indicates 
-    the absolute path of the input file.
+    - path: a string that indicates the absolute path of the input file.
     - timeCol: a integer indicating which column in the 
     file holds the time data. If not given, assumes column 0.
     - channelCol: an integer indicating which column in the file 
@@ -50,6 +52,7 @@ def createEventsListFromTxtFile(filePath:str,
     - events: the list containing one Event 
     object for each row in the text file.'''
 
+
     # Initialize the list.
     events = []
     # If not in quiet nor folder mode, print 
@@ -57,7 +60,7 @@ def createEventsListFromTxtFile(filePath:str,
     if not quiet and not folder:
         print('Loading data...')
     # Open the given file in read mode.
-    with open(filePath, 'r') as file:
+    with open(path, 'r') as file:
         # If not in folder mode, make a progress bar.
         if not folder:
             file = tqdm(file)
