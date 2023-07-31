@@ -14,6 +14,43 @@ os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
 
 
+def format(value):
+
+    '''Converts a variable to a properly formatted string (needed 
+    for floats/ints in scientific notation). Supports ints, floats, 
+    strings, and lists/nested lists of these basic variables.
+        
+    Inputs:
+    - value: the variable that is to be converted into a string.
+        
+    Outputs:
+    - the string equivalent of value.'''
+
+
+    # If the variable is a list:
+    if isinstance(value, list):
+        response ='['
+        # For each entry, properly convert it to a string and 
+        # add it to the list string with a separating ', '.
+        for entry in value:
+            response += format(entry) + ', '
+        # Remove the extra ', ' and close the list.
+        response = response[:len(response)-2] + ']'
+        # Return the completed list.
+        return response
+    # If variable is a float/int and is of an excessively large or 
+    # small magnitude, display it in scientific notation.
+    elif ((isinstance(value, float) or isinstance(value, int)) 
+        and (value > 1000 
+            or value < -1000 
+            or (value < 0.01 and value > -0.01 and value != 0))):
+        return f'{value:g}'
+    # Otherwise, just return a string cast of the variable.
+    else:
+        return str(value)
+
+
+
 class Settings:
 
     '''The class that contains the settings dictionary along 
@@ -92,43 +129,6 @@ class Settings:
 
 
 
-    def format(self, value):
-
-        '''Converts a variable to a properly formatted string (needed 
-        for floats/ints in scientific notation). Supports ints, floats, 
-        strings, and lists/nested lists of these basic variables.
-        
-        Inputs:
-        - value: the variable that is to be converted into a string.
-        
-        Outputs:
-        - the string equivalent of value.'''
-
-
-        # If the variable is a list:
-        if isinstance(value, list):
-            response ='['
-            # For each entry, properly convert it to a string and 
-            # add it to the list string with a separating ', '.
-            for entry in value:
-                response += self.format(entry) + ', '
-            # Remove the extra ', ' and close the list.
-            response = response[:len(response)-2] + ']'
-            # Return the completed list.
-            return response
-        # If variable is a float/int and is of an excessively large or 
-        # small magnitude, display it in scientific notation.
-        elif ((isinstance(value, float) or isinstance(value, int)) 
-            and (value > 1000 
-                or value < -1000 
-                or (value < 0.01 and value > -0.01 and value != 0))):
-            return f'{value:g}'
-        # Otherwise, just return a string cast of the variable.
-        else:
-            return str(value)
-
-
-
     def compare(self):
 
         '''Compare the current settings to the most recently 
@@ -149,13 +149,14 @@ class Settings:
             for setting in self.settings[group]:
                 if baseline.settings[group].get(setting) != self.settings[group][setting]:
                     list.append(setting + ' in ' + group + ': ' 
-                                + self.format(baseline.settings[group].get(setting)) 
-                                + ' -> ' + self.format(self.settings[group][setting]))
+                                + format(baseline.settings[group].get(setting)) 
+                                + ' -> ' + format(self.settings[group][setting]))
         # For each setting in the baseline, if it does not 
         # exist in the current settings, store the removal.
         for group in baseline.settings:
             for setting in baseline.settings[group]:
-                if self.settings[group].get(setting) == None and baseline.settings[group].get(setting) != None:
+                if (self.settings[group].get(setting) == None 
+                    and baseline.settings[group].get(setting) != None):
                     list.append(setting + ' in ' + group + ' removed')
         # Return the list of changes for printing.
         return list
