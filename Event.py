@@ -30,7 +30,7 @@ class Event:
 
 
 
-def createEventsListFromTxtFile(filePath:str,
+def createEventsListFromTxtFile(path:str,
                                 timeCol:int = 0,
                                 channelCol:int = None,
                                 quiet:bool = False,
@@ -39,8 +39,7 @@ def createEventsListFromTxtFile(filePath:str,
     '''Creates an event list from a text file.
     
     Inputs:
-    - filePath: a string that indicates 
-    the absolute path of the input file.
+    - path: a string that indicates the absolute path of the input file.
     - timeCol: a integer indicating which column in the 
     file holds the time data. If not given, assumes column 0.
     - channelCol: an integer indicating which column in the file 
@@ -63,7 +62,7 @@ def createEventsListFromTxtFile(filePath:str,
     if not quiet and not folder:
         print('Loading data...')
     # Open the given file in read mode.
-    with open(filePath, 'r') as file:
+    with open(path, 'r') as file:
         # If not in folder mode, make a progress bar.
         if not folder:
             file = tqdm(file)
