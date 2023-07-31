@@ -130,16 +130,21 @@ def warningFunction(popup: Tk,
 
 def saveType(value: str):
 
-    '''Converts the output of a tkinter string variable to 
-    its proper value for storage. WARNING: this implementation 
-    does not support nested lists or any dictionaries.
+    '''Converts the output of a tkinter string variable to its 
+    proper value for storage. This supports None, ints, floats, 
+    booleans, strings, and non-nested lists of these variable types.
     
-    Requires:
-    - value: the string to be converted to a value.'''
+    Inputs:
+    - value: the string to be converted.
+    
+    Outputs:
+    - the value stored as its correct type.'''
 
-    # If variable is a list:
+
+    # If variable is None, store it as such.
     if value == 'None':
         return None
+    # If variable is a list:
     if value[0] == '[':
         # Get rid of brackets and make empty list variable.
         value = value[1:len(value)-1]
@@ -171,43 +176,7 @@ def saveType(value: str):
     except ValueError:
         return value
 
-def changes(parameters: set.Settings):
 
-    '''Compare recently edited settings to the 
-    previous version and log any changes.
-    
-    Requires:
-    - parameters: the settings object holding the current settings.
-    
-    Returns:
-    - count: the number of changes made.'''
-
-    # Create a baseline settings object for comparison.
-    baseline = set.Settings()
-    count = 0
-    # Read in previous settings and delete temp file.
-    baseline.read(os.path.abspath('./settings/comp.json'))
-    os.remove(os.path.abspath('./settings/comp.json'))
-    # For every setting in the current settings, compare its
-    # value to the source value and log if it is new or changed.
-    for group in parameters.settings:
-        for setting in parameters.settings[group]:
-            if (baseline.settings[group].get(setting) 
-                != parameters.settings[group][setting]):
-                log(setting + ' in ' + group + ': ' 
-                    + set.format(baseline.settings[group].get(setting)) + ' -> '
-                    + set.format(parameters.settings[group][setting]) + '.\n',
-                    xor=False)
-                count += 1
-    # For each setting in the baseline, if it does not 
-    # exist in the current settings, log the removal.
-    for group in baseline.settings:
-        for setting in baseline.settings[group]:
-            if parameters.settings[group].get(setting) == None and setting != 'Channels column':
-                log(setting + ' in ' + group + ' removed.\n', xor=False)
-                count += 1
-    # Return the number of changes.
-    return count
 
 def edit(window: Tk,
          inputs: dict,
@@ -218,7 +187,7 @@ def edit(window: Tk,
 
     '''Save the inputs from the editor menu to the settings.
     
-    Requires:
+    Inputs:
     - window: the window that will display the number of changes.
     - inputs: a dictionary of tkinter string variables. 
     Should have groups that match the current settings.
@@ -228,6 +197,7 @@ def edit(window: Tk,
     - prev: the GUI function for the menu 
     to return to after the settings menu.'''
 
+
     # For every new proposed setting:
     for group in newSet:
         for key in newSet[group]:
@@ -236,9 +206,8 @@ def edit(window: Tk,
             # blank, add the setting and value to the inputs.
             if newSet[group][key].get() != 'Cancel' and newSet[group][key].get() != 'select setting...' and newVal[group][key].get() != '':
                 inputs[group][newSet[group][key].get()] = newVal[group][key]
-    
     # Write the current parameters to a temp file for comparison.
-    parameters.write(os.path.abspath('./settings/comp.json'))
+    parameters.write(os.path.abspath('settings/comp.json'))
     # For each setting change:
     for group in inputs:
         for setting in inputs[group]:
@@ -277,11 +246,14 @@ def edit(window: Tk,
     # Sort the dropdown menus.
     parameters.sort_drops()
     # Compare the modified settings to the 
-    # previous and save the number of changes.
-    total = changes(parameters)
+    # previous and save the change messages.
+    changes = parameters.compare(True)
+    # Log each change message to the logfile.
+    for message in changes:
+        log(message=message, xor=False)
     # If there were changes made, notify the user.
-    if total > 0:
-        log('Succesfully made ' + str(total) + ' changes to the '
+    if len(changes) > 0:
+        log('Succesfully made ' + str(len(changes)) + ' changes to the '
             + 'settings\n(see logfile for more information).',
             True,
             window,
@@ -290,20 +262,20 @@ def edit(window: Tk,
     else:
         gui.setMenu(prev)
 
-def download(parameters: set.Settings,
-             file: str,
-             append: bool,
-             prev):
 
-    '''Download the file given in the global response variable.
+
+def download(parameters: set.Settings, file: str, append: bool, prev):
+
+    '''Download settings from the file given.
     
-    Requires:
+    Inputs:
     - parameters: the settings object holding the current settings.
-    - file: the absolute path of the file being saved to.
+    - file: the absolute path of the file being downloaded from.
     - append: a boolean that represents whether this download is 
     meant for appending or overwriting the entire settings.
     - prev: the menu to return to after downloading.'''
     
+
     # If file exists:
     if os.path.isfile(file):
         # If in append mode:
@@ -326,10 +298,9 @@ def download(parameters: set.Settings,
               + 'you did not include the .json extenstion in your input.')
         return True
 
-def export(window: Tk,
-           parameters: set.Settings,
-           file: str,
-           warn: bool):
+
+
+def export(window: Tk, parameters: set.Settings, file: str, warn: bool):
 
     '''Save settings to the specified file at the end of runtime.
     
@@ -338,10 +309,9 @@ def export(window: Tk,
     - parameters: the settings object holding the current settings.
     - file: the absolute path of the file being saved to.
     - warn: a boolean that determines whether or not 
-    the program should warn the user of the overwrite.
-    
-    If no file is given, the function assumes the 
-    file is in the global response variable.'''
+    the program should warn the user of the overwrite.'''
+
+
 
     # If the file already exists, warns the user of the overwrite.
     if warn and os.path.isfile(file):
@@ -350,81 +320,100 @@ def export(window: Tk,
         return
      # Otherwise, save to the new file.
     else:
+        # If saving as default, do a complete 
+        # overwrite and write an appropriate message.
         if file == os.path.abspath('./settings/default.json'):
             parameters.write(file)
             message = 'Default settings successfully overwritten.'
+        # Otherwise, save based on the default 
+        # and write an appropriate message.
         else:
             parameters.save(file)
             message = 'Settings successfully saved to file:\n' + file + '.'
+    # Shut down the program.
     shutdown(window, parameters, message)
 
-def shutdown(window: Tk,
-             parameters: set.Settings,
-             message: str = None):
+
+
+def shutdown(window: Tk, parameters: set.Settings, message: str = None):
 
     '''Close the program & logfile and delete the logfile is applicable.
     
-    Requires:
+    Inputs:
     - window: the main window that will be closed down.
-    - parameters: the settings object holding the current settings.'''
+    - parameters: the settings object holding the current settings.
+    - message: the message to display in the final window, if any.'''
 
+    # Use the global logfile variable.
     global logfile
+    # Close the main window.
     window.destroy()
+    # Run the goodbye menu.
     gui.byeMenu(message)
     # Close the logfile.
     logfile.close()
     # If user doesn't want logs, delete the logfile.
     if not parameters.settings['Input/Output Settings']['Keep logs']:
         os.remove(logfile.name)
+    # Otherwise:
     else:
+        # Open the logfile in read mode, read 
+        # all of the lines, and close it again.
         logfile = open(logfile.name,'r')
         lines = logfile.readlines()
         logfile.close()
+        # Open the logfile and write everything 
+        # except the disclaimer to the file.
         logfile = open(logfile.name,'w')
         logfile.write(lines[0])
         for line in lines[2:]:
             logfile.write(line)
         logfile.close()
 
-def raSplit(window: Tk,
-            mode: str,
-            parameters: set.Settings):
+
+
+def raSplit(window: Tk, mode: str, parameters: set.Settings):
 
     '''The main driver for the Rossi Alpha analysis. 
     Checks for user error and saved data overwriting.
     
-    Requires:
+    Inputs:
+    - window: the main window of the gui.
     - mode: a string of the analysis that is desired. It should 
     exactly match the name of the function to be called.
     - parameters: the settings object holding the current settings.'''
 
-    # If no input defined, throw error.
+
+    # If no input defined, throw an error.
     if parameters.settings['Input/Output Settings']['Input file/folder'] == 'none':
         gui.error('You currently have no input file or folder defined.\n\n'
             + 'Please make sure to specify one before running any analysis.\n')
         return True
-    # If user does have an input.
+    # If input is defined:
     else:
         # Get name of actual file/folder without entire path.
         name = parameters.settings['Input/Output Settings']['Input file/folder']
         name = name[name.rfind('/')+1:]
         # If name has a . in it, assume a single file.
         if name.count('.') > 0:
-            # If time difference method is not any and all, throw an error.
-            if parameters.settings['RossiAlpha Settings']['Time difference method'] != 'any_and_all':
-                gui.error('To analyze a single file, you must use '
-                    + 'the any_and_all time difference method only.\n')
+            # If time difference method is not any and all 
+            # and channel column is None, throw an error.
+            if (parameters.settings['RossiAlpha Settings']['Time difference method'] != 'any_and_all' 
+            and parameters.settings['Input/Output Settings']['Channels column'] == None):
+                gui.error('To analyze a file with more than any_and_all, '
+                          + 'you must define a channels column.\n')
                 return True
             # Otherwise, split on the analysis type.
             else:
                 match mode:
-                    # Run all analysis; no checks needed.
+                    # Run all analysis:
                     case 'raAll':
+                        # Run full file and log the completion.
                         analyzer.fullFile(parameters.settings)
                         log(message='Successfully ran all analysis on file:\n'
                             +parameters.settings['Input/Output Settings']['Input file/folder'],
                             window=window)
-                    # Create time differences.
+                    # Create time differences:
                     case 'createTimeDifs':
                         # If time differences already exist, warn user.
                         if analyzer.time_difs is not None:
@@ -506,16 +495,30 @@ def raSplit(window: Tk,
                 gui.error('You can only run full folder analysis.\n\n'
                       + 'These modular options are for single files.')
                 return True
-            # Otherwise, run the full analysis.
+            # Otherwise:
             else:
+                # Show the progress menu for folders.
                 gui.folderProgress()
+                # Run full folder analysis.
                 analyzer.fullFolder(parameters.settings, window)
+                # Return to the Rossi Alpha menu and log the success.
                 gui.raMenu()
                 log(message='Successfully ran all analysis with folder:\n'
                             +parameters.settings['Input/Output Settings']['Input file/folder'],
                             window=window)
-                
+
+
+
 def caSplit(window: Tk, parameters: set.Settings):
+
+    '''The main driver for Cohn Alpha analysis.
+    
+    Inputs:
+    - window: the main window of the gui.
+    - parameters: the settings object holding the current settings.'''
+
+
+    # Conduct Cohn Alpha analysis and log the success.
     analyzer.conductCohnAlpha(parameters.settings['Input/Output Settings']['Input file/folder'],
                               parameters.settings['Input/Output Settings']['Save directory'],
                               parameters.settings['General Settings']['Show plots'],
@@ -527,7 +530,18 @@ def caSplit(window: Tk, parameters: set.Settings):
         +parameters.settings['Input/Output Settings']['Input file/folder'],
         window=window)
 
+
+
 def fySplit(window: Tk, parameters: set.Settings):
+
+    '''The main driver for FeynmanY analysis.
+    
+    Inputs:
+    - window: the main window of the gui.
+    - parameters: the settings object holding the current settings.'''
+
+
+    # Conduct FeynmanY analysis and log the success.
     analyzer.runFeynmanY(parameters.settings['Input/Output Settings'],
                          parameters.settings['FeynmanY Settings'],
                          parameters.settings['General Settings']['Show plots'],

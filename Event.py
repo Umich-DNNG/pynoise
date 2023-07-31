@@ -11,7 +11,6 @@ class Event:
 
     '''The class for each radiation measurement. Stores the time 
     of measurement and channel that it was recorded by (if given).'''
-    
 
 
     def __init__(self, time, channel = None):
@@ -52,7 +51,6 @@ def createEventsListFromTxtFile(path:str,
     Outputs:
     - events: the list containing one Event 
     object for each row in the text file.'''
-
 
 
     # Initialize the list.

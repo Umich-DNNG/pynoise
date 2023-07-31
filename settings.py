@@ -16,9 +16,10 @@ os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
 def format(value):
 
-    '''Converts a variable to a properly formatted string (needed 
-    for floats/ints in scientific notation). Supports ints, floats, 
-    strings, and lists/nested lists of these basic variables.
+    '''Converts a variable to a properly formatted string 
+    (needed for floats/ints in scientific notation). 
+    Supports ints, floats, and lists/nested lists of these 
+    basic variables. All others are casted to strings.
         
     Inputs:
     - value: the variable that is to be converted into a string.
@@ -129,32 +130,46 @@ class Settings:
 
 
 
-    def compare(self):
+    def compare(self, current:bool = False):
 
         '''Compare the current settings to the most recently 
-        imported + appended version to see if they have changed.'''
+        imported + appended version to see if they have changed.
+        
+        Inputs:
+        - current: a boolean stating what settings should be 
+        imported into the baseline (current or origin + appended). If 
+        current is True, there MUST be a comp.json file in the 
+        settings folder. If not given, assumes False (origin + appended).'''
 
 
         # Create the baseline settings object and the list of changes.
         baseline = Settings()
         list = []
-        # Read in previous settings and append the
-        # most recently appended settings, if any.
-        baseline.read(self.origin)
-        if self.appended != None:
-            baseline.append(self.appended)
-        # For each setting in the current settings, if it's different 
-        # compared to the baseline or new, store the difference.
+        # If comparing current settings:
+        if current:
+            # Read in from the temporary comparison file.
+            baseline.read(os.path.abspath('settings/comp.json'))
+            # Close the temporary comparison file.
+            os.remove(os.path.abspath('settings/comp.json'))
+        # If comparing to baseline:
+        else:
+            # Read in previous settings and append the
+            # most recently appended settings, if any.
+            baseline.read(self.origin)
+            if self.appended != None:
+                baseline.append(self.appended)
+        # For each setting in the current settings:
         for group in self.settings:
             for setting in self.settings[group]:
+                # If it's different or new, store the difference.
                 if baseline.settings[group].get(setting) != self.settings[group][setting]:
                     list.append(setting + ' in ' + group + ': ' 
                                 + format(baseline.settings[group].get(setting)) 
                                 + ' -> ' + format(self.settings[group][setting]))
-        # For each setting in the baseline, if it does not 
-        # exist in the current settings, store the removal.
+        # For each setting in the baseline:
         for group in baseline.settings:
             for setting in baseline.settings[group]:
+                # If it does not exist in the current settings, store the removal.
                 if (self.settings[group].get(setting) == None 
                     and baseline.settings[group].get(setting) != None):
                     list.append(setting + ' in ' + group + ' removed')
