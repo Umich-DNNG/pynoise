@@ -14,7 +14,6 @@ def main():
     '''The main function that starts the whole program.'''
 
 
-
     # Try to find the -g command-line 
     # argument and start the gui if found.
     try:
