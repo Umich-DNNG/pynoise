@@ -846,7 +846,7 @@ def startup():
     window.title('Welcome!')
     # If settings are not yet defined, construct an empty settings object.
     if parameters == None:
-        parameters = set.Settings()
+        parameters = set.Settings(gui=True)
     # Create a logfile if one doesn't already exist.
     run.create_logfile()
     # Welcome information for the user.
