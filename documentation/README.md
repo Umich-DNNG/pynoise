@@ -156,4 +156,4 @@ To download this program as a package, navigate into the pyNoise folder on your 
 ```python setup.py sdist```
 This should create a subfolder called "dist" within your pyNoise folder. Within the dist folder, there should be a file ending in .tar.gz. Install the package by running the following command with the correct path to this .tar.gz file:
 ```pip install ./dist/pyNoise-1.0.0.tar.gz```
-You should now be able to use pyNoise as a python package. 
+You should now be able to use pyNoise as a python package.
