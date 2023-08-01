@@ -7,6 +7,10 @@ import os                              # For saving figures
 
 # ------------ Power Spectral Density Fitting Function ----------------------------------------------
 def CAFit(f, A, alpha, c):
+    '''
+    Description:
+        - Arbitrary fitting function used for line fitting in conductCohnAlpha()
+    '''
     return A / (1+(f**2/alpha**2)) + c
 # ---------------------------------------------------------------------------------------------------
 

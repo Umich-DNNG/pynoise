@@ -79,7 +79,6 @@ Outputs:
 * popt (TODO-description)
 * pcov (TODO-description)
 
-
 Running through all power spectral density analyses will produce an image that is similar to the following: 
 
 <img src="./CohnAlpha.png" width="400" >
