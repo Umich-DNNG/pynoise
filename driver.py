@@ -1,5 +1,8 @@
 '''The main file that should be run each time the user wants to use this Python Suite.'''
 
+
+
+# Necessary imports.
 import editor as edit
 from RossiAlpha import raDriver as ra
 from CohnAlpha import CohnAlphaDriver as ca
@@ -7,17 +10,24 @@ from FeynmanY import fyDriver as fy
 import os
 import sys
 
-# The editor class that contains the settings and settings editor.
-editor = edit.Editor()
 
-# Set the current working directory for assigning absolute paths.
+
+# Declare the global editor class that contains the 
+# settings and settings editor and Set the current 
+# working directory for assigning absolute paths.
+editor = edit.Editor()
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
+
+
 
 def main():
 
     '''The main driver that runs the whole program.'''
 
+
+    # Use the global editor variable.
     global editor
+    # Initialize the user response variable.
     selection = 'blank'
     # Command queue.
     queue = []
@@ -50,7 +60,7 @@ def main():
     # If there are program commands, loop through them.
     if start != -1:
         # Skip over --commands/-c.
-        start = start + 1
+        start += 1
         # Keep looping until reaching the end of the commands 
         # or reaching another command line argument.
         while start < len(sys.argv) and sys.argv[start].find('-') == -1:
@@ -83,6 +93,7 @@ def main():
                  + 'file or multiple across numerous folders.\n')
     # Continue looping until the user has selected an import option.
     while selection != 'd' and selection != 'i':
+        # Display options.
         editor.print('Would you like to use the default settings or import another .json file?')
         editor.print('d - use default settings')
         editor.print('i - import custom settings')
@@ -91,30 +102,31 @@ def main():
         if len(queue) != 0:
             selection = queue[0]
             queue.pop(0)
-            if selection == '':
-                editor.print('Running automated return command...')
-            else:
-                editor.print('Running automated command ' + selection + '...')
+            # Tell user automated command is being run.
+            editor.print('Running automated command ' + selection + '...')
         # Otherwise, prompt the user.
         else:
             selection = input('Select settings choice: ')
         match selection:
             # Import the default settings.
             case 'd':
-                editor.print('')
-                editor.print('Initializing program with default settings...')
+                # Display progress.
+                editor.print('\nInitializing program with default settings...')
                 # Create absolute path for the default settings file and read it in.
                 path = os.path.abspath('./settings/default.json')
                 editor.parameters.read(path)
                 editor.changeLog()
+                # Display confirmation.
                 editor.log('Settings from default.json succesfully imported.\n')
             # Import custom settings.
             case 'i':
+                # Initialize the user response variables.
                 file = ''
                 choice = 'blank'
                 opt = 'blank'
                 # Keep looping until valid command or user cancels.
-                while opt != '' and opt != 'o' and opt != 'a':
+                while opt != '' and opt != 'x' and opt != 'o' and opt != 'a':
+                    # Display options.
                     editor.print('\nYou have two import options:')
                     editor.print('o - overwrite entire settings')
                     editor.print('a - append settings to default')
@@ -123,7 +135,8 @@ def main():
                     if len(queue) != 0:
                         opt = queue[0]
                         queue.pop(0)
-                        if opt == '':
+                        # Tell user automated command is being run.
+                        if opt == '' or opt == 'x':
                             editor.print('Running automated return command...')
                         else:
                             editor.print('Running automated command ' + opt + '...')
@@ -141,6 +154,9 @@ def main():
                         case '':
                             editor.print('Canceling import...\n')
                             selection = ''
+                        case 'x':
+                            editor.print('Canceling import...\n')
+                            selection = ''
                         # Catchall for invalid commands.
                         case _:
                             print('ERROR: Unrecognized command ' + opt 
@@ -154,10 +170,11 @@ def main():
                     if len(queue) != 0:
                         file = queue[0]
                         queue.pop(0)
+                        # Tell user automated command is being run.
                         if file == '':
                             editor.print('Running automated return command...')
                         else:
-                            editor.print('Using automated file ' + file + '...')
+                            editor.print('Using automated file ' + file + '.json...')
                     # Otherwise, prompt the user.
                     else:
                         file = input('Enter a settings file (no .json extension): ')
@@ -165,6 +182,7 @@ def main():
                     file = file + '.json'
                     # If file exists.
                     if os.path.isfile(os.path.abspath(file)):
+                        # Display progress.
                         editor.print('Importing settings from ' + file + '...')
                         # Append settings.
                         if opt == 'a':
@@ -173,12 +191,14 @@ def main():
                             # Append changed/removed settings.
                             editor.parameters.append(os.path.abspath(file))
                             editor.changeLog()
+                            # Display confirmation.
                             editor.log('Settings from ' + file + ' succesfully'
                                        + ' appended to the default.\n')
                         # Overwrite all settings.
                         else:
                             editor.parameters.read(os.path.abspath(file))
                             editor.changeLog()
+                            # Display confirmation.
                             editor.log('Settings from ' + file + ' succesfully imported.\n')
                     # User cancels import.
                     elif file == '.json':
@@ -193,10 +213,12 @@ def main():
             # Catchall for invalid commands.
             case _:
                 print('ERROR: You must choose what settings to import.\n')
+    # Display confirmation.
     editor.print('Settings initialized. You can now begin using the program.\n')
     editor.print('----------------------------------------------------------\n')
     # Continue running the program until the user is done.
     while selection != '' and selection != 'x':
+        # Display options.
         editor.print('You can utitilze any of the following functions:')
         editor.print('r - run Rossi Alpha analysis')
         editor.print('c - run Cohn Alpha Analysis')
@@ -208,7 +230,8 @@ def main():
         if len(queue) != 0:
             selection = queue[0]
             queue.pop(0)
-            if selection == '':
+            # Tell user automated command is being run.
+            if selection == '' or selection == 'x':
                 editor.print('Running automated return command...')
             else:
                 editor.print('Running automated command ' + selection + '...')
@@ -240,10 +263,11 @@ def main():
                 if len(queue) != 0:
                     choice = queue[0]
                     queue.pop(0)
-                    if choice == '':
+                    # Tell user automated command is being run.
+                    if choice != 'q':
                         editor.print('Running automated return command...')
                     else:
-                        editor.print('Running automated command ' + choice + '...')
+                        editor.print('Running automated command q...')
                 # Otherwise, prompt the user.
                 else:
                     choice = input('Enter q to quit and anything else to abort: ')
@@ -261,10 +285,11 @@ def main():
                 if len(queue) != 0:
                     choice = queue[0]
                     queue.pop(0)
-                    if choice == '':
+                    # Tell user automated command is being run.
+                    if choice != 'q':
                         editor.print('Running automated return command...')
                     else:
-                        editor.print('Running automated command ' + choice + '...')
+                        editor.print('Running automated command q...')
                 # Otherwise, prompt the user.
                 else:
                     choice = input('Enter q to quit and anything else to abort: ')
@@ -279,12 +304,15 @@ def main():
             case _:
                 print('ERROR: Unrecognized command ' + selection 
                     + '. Please review the list of appriopriate inputs.\n')
-    # If the settings have been changed at any point during runtime, notify user.
+    # Check for changes in the settings.
     list = editor.parameters.compare()
+    # If there are changes:
     if len(list) != 0:
+        # Initialize user response variable.
         selection = ''
         # Continue looping until the user has decided what to do with their changes.
         while selection != 'd' and selection != 'n' and selection != 'a':
+            # Display options and changes.
             editor.print('You have made unsaved changes to the '
               + 'settings:\n')
             editor.print('Base settings: ' + editor.parameters.origin)
@@ -300,10 +328,8 @@ def main():
             if len(queue) != 0:
                 selection = queue[0]
                 queue.pop(0)
-                if selection == '':
-                    editor.print('Running automated return command...')
-                else:
-                    editor.print('Running automated command ' + selection + '...')
+                # Tell user automated command is being run.
+                editor.print('Running automated command ' + selection + '...')
             # Otherwise, prompt the user.
             else:
                 selection = input('Select an option: ')
@@ -316,10 +342,11 @@ def main():
                     if len(queue) != 0:
                         choice = queue[0]
                         queue.pop(0)
-                        if choice == '':
+                        # Tell user automated command is being run.
+                        if choice != 'y':
                             editor.print('Running automated return command...')
                         else:
-                            editor.print('Running automated command ' + choice + '...')
+                            editor.print('Running automated command y...')
                     # Otherwise, prompt the user.
                     else:
                         choice = input('Enter y to continue and anything else to abort: ')
@@ -337,6 +364,7 @@ def main():
                         selection = ''
                 # User wants to save settings in a new file.
                 case 'n':
+                    # Initialize user response variables.
                     path = 'blank'
                     file = 'blank'
                     # Loop until user cancels or the user has created a new settings
@@ -348,6 +376,7 @@ def main():
                         if len(queue) != 0:
                             file = queue[0]
                             queue.pop(0)
+                            # Tell user automated command is being run.
                             if file == '':
                                 editor.print('Running automated return command...')
                             else:
@@ -355,6 +384,7 @@ def main():
                         # Otherwise, prompt the user.
                         else:
                             file  = input('Name of file (or blank to cancel): ')
+                        # If user doesn't cancel:
                         if file != '':
                             # Create absolute path for user given file.
                             file = file + '.json'
@@ -369,10 +399,11 @@ def main():
                                 if len(queue) != 0:
                                     choice = queue[0]
                                     queue.pop(0)
-                                    if choice == '':
+                                    # Tell user automated command is being run.
+                                    if choice != 'y':
                                         editor.print('Running automated return command...')
                                     else:
-                                        editor.print('Running automated command ' + choice + '...')
+                                        editor.print('Running automated command y...')
                                 # Otherwise, prompt the user.
                                 else:
                                     choice = input('Enter y to continue and anything else to abort: ')
@@ -390,6 +421,7 @@ def main():
                                 editor.print('Saving current settings to new file ' + file + '...')
                                 editor.parameters.save(path)
                                 editor.log('Settings saved to file ' + file + '.\n')
+                        # Otherwise, return to the previous choice.
                         else:
                             editor.print('')
                             selection = ''
@@ -401,10 +433,11 @@ def main():
                     if len(queue) != 0:
                         choice = queue[0]
                         queue.pop(0)
-                        if choice == '':
+                        # Tell user automated command is being run.
+                        if choice != 'y':
                             editor.print('Running automated return command...')
                         else:
-                            editor.print('Running automated command ' + choice + '...')
+                            editor.print('Running automated command y...')
                     # Otherwise, prompt the user.
                     else:
                         choice = input('Enter y to continue and anything else to abort: ')

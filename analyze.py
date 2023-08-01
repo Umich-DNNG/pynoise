@@ -1,5 +1,8 @@
 '''The object used for analyzing data.'''
 
+
+
+# Necessary imports.
 import os
 import numpy as np
 import matplotlib.pyplot as pyplot
@@ -14,11 +17,18 @@ from FeynmanY import feynman as fey
 from tkinter import *
 from tqdm import tqdm
 
+
+
 class Analyzer:
+
+    '''The class that runs analysis. Can be used 
+    in either terminal or gui implementation.'''
+
 
     def __init__(self):
 
         '''The initializer for the Analyzer object.'''
+
 
         # Initialize the variables used to determine whether 
         # or not RossiAlpha elements have to be recreated.
@@ -28,13 +38,18 @@ class Analyzer:
         self.input: str = None
         self.method: str = None
 
-    def export(self, data: dict[str:tuple], singles: list[tuple], method: str, output: str = './data'):
+
+    def export(self, 
+               data: dict[str:tuple], 
+               singles: list[tuple], 
+               method: str, 
+               output: str = './data'):
 
         '''Export data from analysis to a csv file. The file 
         will be stored in the data folder and will be named 
         based on the give analysis method and current time.
         
-        Requires:
+        Inputs:
         - dict: a dictionary that contains all the 
         list data to be outputted to the csv file. 
         Each key will be the name of the column, and 
@@ -44,7 +59,9 @@ class Analyzer:
         - single: a list of single values to display on the top row. 
         Each list value will contain a tuple, whose first entry is 
         the name of the value and whose second entry is the value.
-        - method: the name of the method of analysis.'''
+        - method: the name of the method of analysis.
+        - output: the output directory. If not given, defaults to ./data.'''
+
 
         # Get the current time for file naming.
         curTime = time.localtime()
@@ -106,6 +123,8 @@ class Analyzer:
         file.flush()
         file.close()
 
+
+
     def runFeynmanY(self, 
                     io: dict, 
                     fy: dict, 
@@ -121,19 +140,27 @@ class Analyzer:
         '''Run FeynmanY analysis for varying tau values.
         Plots each tau value and estimates alpha.
         
-        Requires:
+        Inputs:
         - io: the Input/Output Settings dictionary.
         - fy: the FeynmanY Settings dictionary.
         - show: whether or not to show plots.
         - save: whether or not to save plots.
-
-        Optional:
+        - quiet: whether or not to silence print statements.
+        - verbose: whether or not the analysis should 
+        consider each tau value for exporting.
+        - hvs: the Histogram Visual Settings.
+        - lfs: the Line Fitting Settings.
+        - sps: the Scatter Plot Settings.
         - window: the window object, if being run in GUI mode.'''
         
+
+        # Initialize variables.
         yValues = []
         y2Values = []
         tValues = []
+        # Fill the tau list with the desired tau values.
         tValues.extend(range(fy['Tau range'][0], fy['Tau range'][1]+1, fy['Increment amount']))
+        # Create a FeynmanY object.
         FeynmanYObject = fey.FeynmanY(fy['Tau range'], fy['Increment amount'], fy['Plot scale'])
         # Load in the data and sort it.
         data = evt.createEventsListFromTxtFile(io['Input file/folder'],
@@ -161,14 +188,17 @@ class Analyzer:
         meas_time += end - begin
         # For GUI mode.
         if window is not None:
+            # Increment the progress bar.
             window.children['progress']['value'] += 1
             wait = BooleanVar()
             # After 1 ms, set the dummy variable to True.
             window.after(1, wait.set, True)
             # Wait for the dummy variable to be set, then continue.
             window.wait_variable(wait)
+        # If not in quiet mode, display progress.
         if not quiet:
             print('Running each tau value...')
+        # For each tau value:
         for tau in tqdm(tValues):
             # Convert the data into bin frequency counts.
             counts = FeynmanYObject.randomCounts(data, tau, meas_time)
@@ -178,13 +208,16 @@ class Analyzer:
             y, y2 = FeynmanYObject.computeYY2(tau)
             yValues.append(y)
             y2Values.append(y2)
+            # If in verbose mode:
             if verbose:
+                # Save the raw data if desired..
                 if io['Save raw data']:
                     self.export({'Count': (range(0,len(counts)), 0),
                                  'Frequency': (counts,0)},
                                  [('Tau',tau)],
                                  'FY' + str(tau),
                                  io['Save directory'])
+                # Call the histogram plotter if desired.
                 if show or save:
                     FeynmanYObject.FeynmanY_histogram(counts,
                                                     fy['Plot scale'],
@@ -192,13 +225,16 @@ class Analyzer:
                                                     save,
                                                     io['Save directory'],
                                                     hvs)
+            # For GUI mode.
             if window is not None:
+                # Increment the progress bar.
                 window.children['progress']['value'] += 1
                 wait = BooleanVar()
                 # After 1 ms, set the dummy variable to True.
                 window.after(1, wait.set, True)
                 # Wait for the dummy variable to be set, then continue.
                 window.wait_variable(wait)
+        # Plot and fit both Y and Y2 values against tau.
         FeynmanYObject.plot(tValues, yValues, save, show, io['Save directory'])
         FeynmanYObject.plot(tValues, y2Values, save, show, io['Save directory'])
         FeynmanYObject.fitting(tValues, 
@@ -221,11 +257,14 @@ class Analyzer:
                                fit_opt=lfs,
                                scatter_opt=sps,
                                type='Y2')
+        # If saving raw dta:
         if io['Save raw data']:
+            # Create a proper file name.
             if verbose:
                 filename = 'FYFull'
             else:
                 filename = 'FY'
+            # Export the data.
             self.export({'Tau':(tValues,0),
                          'Experimental Y':(yValues,0),
                          'Experimental Y2':(y2Values,0),
@@ -236,17 +275,28 @@ class Analyzer:
                         filename,
                         io['Save directory'])
 
-    def conductCohnAlpha(self, input: str, output: str, show: bool, save: bool, caSet: dict, sps: dict, lfs: dict):
+
+
+    def conductCohnAlpha(self,
+                         input:str,
+                         output:str,
+                         show:bool,
+                         save:bool,
+                         caSet:dict,
+                         sps:dict,
+                         lfs:dict):
 
         '''Runs Cohn Alpha analysis.
         
-        Requires:
+        Inputs:
         - input: the file path.
         - output: the save directory.
         - show: whether or not to show plots.
         - save: whether or not to save plots.
-        - caSet: the CohnAlpha Settings dictionary.
-        - sps: the Semilog Plot Settings dictionary.'''
+        - caSet: the CohnAlpha Settings.
+        - sps: the Semilog Plot Settings.
+        - lfs: the Line Fitting Settings.'''
+
 
         # Load the values from the specified file into an NP array.
         values = np.loadtxt(input, usecols=(0,3), max_rows=2000000, dtype=float)
@@ -256,24 +306,31 @@ class Analyzer:
                                  caSet['Dwell time'],
                                  caSet['Meas time range'])
         # Conduct Cohn Alpha analysis with the given settings.
-        CA_Object.conductCohnAlpha(show,
-                                   save,
-                                   output,
-                                   caSet,
-                                   sps,
-                                   lfs)
+        CA_Object.conductCohnAlpha(show, save, output, caSet, sps, lfs)
 
-    def createTimeDifs(self, io: dict, sort: bool, reset: float, method: str, delay: int, quiet: bool, folder: bool = False):
+
+
+    def createTimeDifs(self,
+                       io:dict,
+                       sort:bool,
+                       reset:float,
+                       method:str,
+                       delay:int,
+                       quiet:bool,
+                       folder:bool = False):
         
         '''Create Rossi Alpha time differences.
         
-        Requires:
+        Inputs:
         - io: the Input/Output Settings dictionary.
         - sort: whether or not to sort the data.
         - reset: the reset time.
         - method: the time difference method.
-        - delay: the digital delay.'''
+        - delay: the digital delay.
+        - quiet: whether or not to output print statements.
+        - folder: whether or not this is for folder analysis.'''
         
+
         # Load the data according to its file type.
         if io['Input file/folder'].endswith(".txt"):
             data = evt.createEventsListFromTxtFile(io['Input file/folder'],
@@ -297,33 +354,55 @@ class Analyzer:
         self.input = io['Input file/folder']
         self.method = method
 
-    def createPlot(self, width: int, reset: float, save: bool, show: bool, output: str, vis: dict, folder: bool = False, verbose: bool = False):
+
+
+    def createPlot(self,
+                   width:int,
+                   reset:float,
+                   save:bool,
+                   show:bool,
+                   output:str,
+                   vis:dict,
+                   folder:bool = False,
+                   verbose:bool = False):
         
         '''Create a Rossi Alpha histogram. Assumes 
         that time differences are already calculated.
         
-        Requires:
+        Inputs:
         - width: the bin width.
         - reset: the reset time.
         - save: whether or not to save plots.
         - show: whether or not to show plots.
         - output: the save directory.
-        - vis: the Histogram Visual Settings dictionary.'''
+        - vis: the Histogram Visual Settings dictionary.
+        - folder: whether or not this is for folder analysis.
+        - verbose: whether or not individual files should be outputted.'''
         
+
         # Create a RossiHistogram object and plot the data with the given settings.
         self.histogram = plt.RossiHistogram(self.time_difs, width, reset)
         self.histogram.plot(save, show, output, vis, folder, verbose)
 
-    def calculateTimeDifsAndPlot(self, io: dict, gen: dict, raGen: dict, raVis: dict, folder: bool = False):
+
+
+    def calculateTimeDifsAndPlot(self,
+                                 io:dict,
+                                 gen:dict,
+                                 raGen:dict,
+                                 raVis:dict,
+                                 folder:bool = False):
 
         '''Simultaneously calculate the time 
         differences and construct a Rossi Histogram.
         
-        Requires:
+        Inputs:
         - io: the Input/Output Settings dictionary.
         - gen: the General Settings dictionary.
         - raGen: the RossiAlpha Settings dictionary.
-        - raVis: the Histogram Visual Settings dictionary.'''
+        - raVis: the Histogram Visual Settings dictionary.
+        - folder: whether or not this is for folder analysis.'''
+
 
         # Reset the time differences.
         self.time_difs = None
@@ -356,13 +435,17 @@ class Analyzer:
         self.input = io['Input file/folder']
         self.method = raGen['Time difference method']
 
+
+
     def plotSplit(self, settings: dict, folder: bool = False):
 
         '''Determines what combination of time difference 
         calculation and Rossi Histogram constructing to do.
         
-        Requires:
-        - settings: the current runtime settings.'''
+        Inputs:
+        - settings: the current runtime settings.
+        - folder: whether or not this is for folder analysis.'''
+
 
         # If time differences have not yet been calculated or the 
         # current method/input file do not match those previously used:
@@ -403,11 +486,22 @@ class Analyzer:
                             folder,
                             settings['General Settings']['Verbose iterations'])
             
-    def createBestFit(self, cutoff: int, method: str, gen: dict, save: str, output: str, line: dict, res: dict, hist: dict, index = None):
+
+            
+    def createBestFit(self,
+                      cutoff:int,
+                      method:str,
+                      gen:dict,
+                      save:str,
+                      output:str,
+                      line:dict,
+                      res:dict,
+                      hist:dict,
+                      index:int = None):
         
         '''Create a Rossi Histogram line of best fit and residual plot.
         
-        Requires:
+        Inputs:
         - cutoff: the minimum cutoff.
         - method: the time difference method.
         - gen: the General Settings dictionary.
@@ -416,10 +510,9 @@ class Analyzer:
         - line: the Line Fitting Settings dictionary.
         - res: the Scatter Plot Settings dictionary.
         - hist: the Histogram Visual Settings dictionary.
-        
-        Optional:
         - index: the folder index, if applicable.'''
         
+
         # Construct a RossiHistogramFit object and plot it with the given settings.
         self.best_fit = fit.RossiHistogramFit(self.histogram.counts,
                                               self.histogram.bin_centers,
@@ -435,12 +528,15 @@ class Analyzer:
                                        index,
                                        gen['Verbose iterations'])
 
+
+
     def fullFile(self, settings: dict):
 
         '''Run full Rossi Alpha analysis on a single file.
         
-        Requires:
+        Inputs:
         - settings: the current runtime settings.'''
+
 
         # Run the plot split.
         self.plotSplit(settings)
@@ -483,13 +579,19 @@ class Analyzer:
                         'RAFile',
                         settings['Input/Output Settings']['Save directory'])
 
+
+
     def replace_zeroes(self, lst: list):
 
         '''Replace all zeroes in a list with 
         the average of the non-zero elements.
         
-        Requires:
-        - lst: the list to be edited.'''
+        Inputs:
+        - lst: the list to be edited.
+        
+        Outputs:
+        - the edited list.'''
+        
 
         # Create a list of all the non-zero elements and compute their average.
         non_zero_elements = [x for x in lst if x != 0]
@@ -501,12 +603,16 @@ class Analyzer:
         # Return the edited list.
         return lst
 
+
+
     def fullFolder(self, settings: dict, window: Tk = None):
 
         '''Conduct RossiAlpha analysis on a folder of files.
         
-        Requires:
-        - settings: the dictionary that contains all of the runtime settings.'''
+        Inputs:
+        - settings: the dictionary that contains all of the runtime settings.
+        - window: the gui window, if in gui mode.'''
+
 
         # Store the original folder pathway.
         original = settings['Input/Output Settings']['Input file/folder']
@@ -536,6 +642,7 @@ class Analyzer:
                                        settings['Scatter Plot Settings'],
                                        settings['Histogram Visual Settings'],
                                        folder)
+                    # Close all open plots.
                     pyplot.close()
                     # If exporting raw data for individual folders:
                     if settings['Input/Output Settings']['Save raw data'] == True and settings['General Settings']['Verbose iterations'] == True:
@@ -564,7 +671,9 @@ class Analyzer:
                                     ('Input file', settings['Input/Output Settings']['Input file/folder'])],
                                     'RAFolder' + str(folder),
                                     settings['Input/Output Settings']['Save directory'])
+                    # If in gui mode:
                     if window != None:
+                        # Incremement the progress bar.
                         window.children['progress']['value'] += 10
                         wait = BooleanVar()
                         # After 1 ms, set the dummy variable to True.
