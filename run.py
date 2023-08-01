@@ -281,7 +281,7 @@ def download(parameters: set.Settings, file: str, append: bool, prev):
         # If in append mode:
         if append:
             # If settings have not been initialized, read in the defualt.
-            if parameters.origin == 'None':
+            if parameters.origin == None:
                 parameters.read(os.path.abspath('./settings/default.json'))
             # Append the file to the current settings.
             parameters.append(file)

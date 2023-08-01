@@ -73,13 +73,14 @@ def createEventsListFromTxtFile(path:str,
             time = columns[timeCol]
             # If there is no channel column, set the channel to None.
             if channelCol is None:
-                channel = None
+                # Store the time data in an event object.
+                event = Event(float(time))
             # Otherwise, save the channel data from the appropriate column.
             else:
                 channel = columns[channelCol]
-            # Store the time and channel data in an 
-            # event object and add it to the events list.
-            event = Event(float(time), int(channel))
+                # Store the time and channel data in an event object.
+                event = Event(float(time), int(channel))      
+            # Add the current Event to the events list.  
             events.append(event)
     # Return the events list.
     return events
