@@ -1,5 +1,8 @@
 '''The file that creates and runs all program GUI elements.'''
 
+
+
+# Necessary imports.
 from tkinter import *
 from tkinter import ttk
 import tkinter as tk
@@ -7,43 +10,53 @@ import settings as set
 import os
 import run
 
-# The main window that is used for the program.
+
+
+# Global variables for the main window, Settings 
+# object, and variables for adding new settings.
 window: Tk = None
-# The settings used during runtime
 parameters: set.Settings = None
-# Global variables that keep track of the row of 
-# the bottom of Histogram Visual, Line Fitting, and 
-# Scatter Plot Settings for adding new settings.
 bottom: dict[str:int] = {'Histogram Visual Settings': None,
                          'Line Fitting Settings': None,
                          'Scatter Plot Settings': None,
                          'Semilog Plot Settings': None}
-newSet=None
-newVal=None
+newSet, newVal = None, None
+
+
 
 def prompt(prev,
            to,
-           message='Enter your choice:',
-           title='User Prompt',
-           prefill:str=None,
-           log:str=None):
+           message:str = 'Enter your choice:',
+           title:str = 'User Prompt',
+           prefill:str = '',
+           log = None):
 
     '''Create a prompt window to get a text input from the user.
     
-    Requires:
+    Inputs:
     - prev: the function to return to if the user cancels the input.
     - to: the function that is called when the user confirms their input.
-    
-    Optional:
-    - message: the message that the user sees above the entry box.
-    - title: the title of the window
-    - log: the message logged to the logfile and 
-    window when the prompt is successfully entered.'''
+    - message: the message that the user sees above the entry 
+    box. If not given, defaults to 'Enter your choice:'.
+    - title: the title of the window. If not given, defaults to 'User Prompt'.
+    - prefill: the string to pre fill the entry 
+    box with. If not given, assumes no prefill.
+    - log: the message logged to the logfile and window when the 
+    prompt is successfully entered. Should be a function that takes 
+    in the user response. If not given, assumes no log message.'''
 
+
+    # Use the global window variable.
     global window
+    # Create a tkinter string variable.
     response = tk.StringVar()
+    # If no log message, make the continue button action 
+    # just the to function with the user response as input.
     if log == None:
         action = lambda value: to(value)
+    # If there is a log, make the continue button log 
+    # the given log message function the and run the 
+    # to function with the user response as input.
     else:
         action = lambda value: run.log(message=lambda: log(value),
                                        window=window,
@@ -63,8 +76,7 @@ def prompt(prev,
               name='response',
               textvariable=response,
               ).pack(side=TOP,padx=10,pady=10)
-    if prefill is not None:
-        window.children['response'].insert(0,prefill)
+    window.children['response'].insert(0,prefill)
     # The confirmation button.
     ttk.Button(window,
               name='continue',
@@ -78,15 +90,19 @@ def prompt(prev,
               command=prev
               ).pack(side=TOP,padx=10,pady=10)
     
+
+
 def error(message='Something went wrong. Please contact the developers.',
           title='ERROR!'):
+    
     '''Create an error popup for when the user encounters an error.
     
-    Parameters:
+    Inputs:
     - message: the error message that the user will see.
     - title: the title of the window.
     
     If no parameters are given, a default error popup is shown. '''
+
 
     # Create a new popup and title it accordingly.
     popup=Tk()
@@ -105,18 +121,21 @@ def error(message='Something went wrong. Please contact the developers.',
     # Open the popup.
     popup.mainloop()
 
+
+
 def warning(to,
             message='This action will delete data. Are you sure you want to do this?',
             title='WARNING!'):
 
-    '''Display a warning popup when the user is at risk of deleting/overwriting data.
+    '''Display a warning popup when the user 
+    is at risk of deleting/overwriting data.
     
-    Requires:
-    - to: the function to be called should the user choose to ignore the warning.
-    
-    Optional:
+    Inputs:
+    - to: the function to be called should 
+    the user choose to ignore the warning.
     - message: the warning the user will receive.
     - title: the title of the popup.'''
+
 
     # Create a new popup and title it accordingly.
     popup=Tk()
@@ -141,15 +160,19 @@ def warning(to,
     # Open the popup.
     popup.mainloop()
 
+
+
 def shutdown_menu():
 
     '''Load the shutdown menu GUI if need be.'''
 
+
+    # Use the global window and parameters variables.
     global window, parameters
     # Compare the current settings to the most recently 
     # imported + appended and store the changes.
     list = parameters.compare()
-    # If there were changes from the baseline.
+    # If there were changes from the baseline:
     if len(list) != 0:
         # Clear the window of all previous entries, labels, and buttons.
         for item in window.winfo_children():
@@ -221,12 +244,23 @@ def shutdown_menu():
                 ).pack(side=TOP,padx=10,pady=10)
     # If no changes, program can just end here.
     else:
-        run.shutdown(window,parameters)
+        run.shutdown(window, parameters)
+
+
 
 def byeMenu(message: str = None):
-    # Clear the window of all previous entries, labels, and buttons.
+
+    '''Creates a temporary window that thanks the 
+    user and displays a confimation message if given.
+    
+    Inputs:
+    - message: the confirmation message displayed 
+    to the user. If not given, assumes no message.'''
+
+
+    # Create a popup window and tkinter bool variable.
     popup = Tk()
-    var = IntVar()
+    var = BooleanVar()
     # Properly name the window.
     popup.title('Thank you!')
     # Goodbye message.
@@ -234,19 +268,27 @@ def byeMenu(message: str = None):
               name='goodbye',
               text='Thank you for using the\nDNNG/PyNoise project.',
               ).pack(side=TOP,padx=10,pady=10)
+    # If there is a message, log it to the screen and the logfile.
     if message != None:
         run.log(message=message,window=popup)
-    popup.after(2000, var.set, 1)
+    # After 2000 ms, set the bool variable to True.
+    popup.after(2000, var.set, True)
+    # Wait to continue running until the variable is set.
     popup.wait_variable(var)
+    # Destroy the window.
     popup.destroy()
+
+
 
 def setMenu(prev):
 
     '''The GUI for the settings menu.
     
-    Requires:
+    Inputs:
     - prev: the GUI function for the previous menu.'''
 
+
+    # Use the global window variable.
     global window
     # Clear the window of all previous entries, labels, and buttons.
     for item in window.winfo_children():
@@ -279,29 +321,36 @@ def setMenu(prev):
               command=prev
               ).pack(side=TOP,padx=10,pady=10)
 
+
+
 def add(canvas: Canvas, group: str):
 
     '''Adds a blank setting box for the specified group.
     
-    Requires:
+    Inputs:
     - canvas: the editor canvas that holds all editor menu objects.
     - group: the name of the settings group. Must 
     be exactly the same as stored in the settings 
     object and must be a matplotlib settings group.'''
 
+
+    # Use the global window and new settings variables.
     global window, bottom, newSet, newVal
     # Get the bottom of the desired group.
     top = bottom[group]
+    # If in big row 2 of the settings gui (semilog plot settings):
     if group == 'Semilog Plot Settings':
         # Get the widgets in the row beneath the settings group.
         cur_row = canvas.children['editor'].grid_slaves(row=top+1)
-        # If the row is only two labels, we can assume that this is the Residual 
-        # Plot Settings and Line Fitting Settings titles, meaning Histogram 
-        # Visual Settings are currently the group that goes down the furthest.
-        if len(cur_row) == 3 and cur_row[0].widgetName == 'ttk::label' and cur_row[1].widgetName == 'ttk::label' and cur_row[2].widgetName == 'ttk::label':
-            # Get the bottom of both settings groups.
+        # If the row has 3 elements and all are labels, 
+        # assume it is the begininng of big row 3.
+        if (len(cur_row) == 3 
+            and cur_row[0].widgetName == 'ttk::label' 
+            and cur_row[1].widgetName == 'ttk::label' 
+            and cur_row[2].widgetName == 'ttk::label'):
+            # Get the bottom of big row 3.
             bot = max(bottom['Scatter Plot Settings'], bottom['Line Fitting Settings'], bottom['Histogram Visual Settings'])
-            # For the entire settings.
+            # For the entirety of big row 3:
             while bot != top:
                 # Get the widgets in the current row.
                 cur_row = canvas.children['editor'].grid_slaves(row=bot)
@@ -310,7 +359,7 @@ def add(canvas: Canvas, group: str):
                     item.grid(row=bot+1)
                 # Move up one row.
                 bot -= 1
-            # Increase the bottoms of all three groups.
+            # Increase the bottoms of big row 3.
             bottom['Histogram Visual Settings'] += 1
             bottom['Scatter Plot Settings'] += 1
             bottom['Line Fitting Settings'] += 1
@@ -335,7 +384,7 @@ def add(canvas: Canvas, group: str):
                  textvariable=newVal[group][index],
                  width=12
                  ).grid(column=8,row=top,padx=10)
-    # If one of the other settings groups:
+    # If in big row 3 of the settings gui (all other settings):
     else:
         # Move the add button down one row.
         canvas.children['editor'].children[group[0:group.find('Settings')].lower()+'add'].grid(row=top+1)
@@ -360,7 +409,7 @@ def add(canvas: Canvas, group: str):
                     textvariable=newVal[group][index],
                     width=12
                     ).grid(column=8,row=top,padx=10)
-        # If we're looking at histogram visual settings:
+        # If we're looking at Histogram Visual Settings:
         elif group == 'Histogram Visual Settings':
             # Create a unique dictionary key for the new setting.
             index = 'hvs' + str(top)
@@ -381,7 +430,7 @@ def add(canvas: Canvas, group: str):
                     textvariable=newVal[group][index],
                     width=12
                     ).grid(column=2,row=top,padx=10)
-        # If we're looking at line fitting settings:
+        # If we're looking at Line Fitting Settings:
         else:
             # Create a unique dictionary key for the new setting.
             index = 'lfs' + str(top)
@@ -421,19 +470,25 @@ def add(canvas: Canvas, group: str):
     # Delete the old scrollbar.
     window.winfo_children()[1].destroy()
 
+
+
 def editor_menu(prev):
 
     '''The GUI for the editor menu.
     
-    Requires:
+    Inputd:
     - prev: the GUI function for the menu 
     to return to after the settings menu.'''
 
+
+    # Use the global window, settings, and new settings variables.
     global window, parameters, newSet, newVal
+    # Initialize counter variables.
     groupNum=0
     curTop=1
     curMax = 0
-    # Initialize inputs dictionary (assume num/name of settings groups are constant).
+    # Initialize inputs dictionary (assume 
+    # num/name of settings groups are constant).
     inputs={'Input/Output Settings': {},
             'General Settings': {},
             'RossiAlpha Settings': {},
@@ -443,6 +498,7 @@ def editor_menu(prev):
             'Histogram Visual Settings': {},
             'Line Fitting Settings': {},
             'Scatter Plot Settings': {}}
+    # Empty the newSet and newVal variables.
     newSet={'Histogram Visual Settings': {},
             'Line Fitting Settings': {},
             'Scatter Plot Settings': {},
@@ -519,7 +575,12 @@ def editor_menu(prev):
             editor.children[(group + ' ' + setting + ' value').lower()].insert(0,set.format(parameters.settings[group][setting]))
             # Increase the setting number.
             setNum += 1
-        if group == 'Semilog Plot Settings' or group == 'Histogram Visual Settings' or group == 'Line Fitting Settings' or group == 'Scatter Plot Settings':
+        # If the current group is one of the matplotlib settings groups:
+        if (group == 'Semilog Plot Settings' or 
+            group == 'Histogram Visual Settings' or 
+            group == 'Line Fitting Settings' or 
+            group == 'Scatter Plot Settings'):
+            # Split based on the group to make the appropriate add button.
             match group:
                 case 'Semilog Plot Settings':
                     ttk.Button(editor,
@@ -549,7 +610,9 @@ def editor_menu(prev):
                             command=lambda: add(canvas, 'Scatter Plot Settings'),
                             width=1
                             ).grid(column=(groupNum*3+1) % 9,row=curTop+setNum,padx=10)
+            # Store the bottom of the group.
             bottom[group] = curTop + setNum
+            # Increment the settings number.
             setNum += 1
         # If the total settings in this group were the max 
         # in this row, set the current max to this value.
@@ -558,37 +621,54 @@ def editor_menu(prev):
         # Increase the group number.
         groupNum += 1
 
+
+
 def folderProgress():
+
+    '''Show the progress bar while running Rossi Alpha folder analysis.'''
+
+
+    # Use the global window and settings variables.
     global window, parameters
     # Clear the window of all previous entries, labels, and buttons.
     for item in window.winfo_children():
         item.destroy()
+    # Properly name the window.
     window.title('Analysis Progress')
+    # Store the length of the progress bar.
     length = parameters.settings['General Settings']['Number of folders'] * 20
+    # Tell the user analysis is underway.
     ttk.Label(master=window,
               name='info',
               text='Currently running Rossi Alpha folder analysis...'
               ).pack(side=TOP,padx=10,pady=10)
+    # The progress bar.
     ttk.Progressbar(master=window,
                     orient=HORIZONTAL,
                     length=length,
                     mode = 'determinate',
                     name='progress',
                     ).pack(side=TOP,padx=10)
+    # The disclaimer text.
     ttk.Label(master=window,
               name='disclaimer',
               text='This process may take a couple minutes.'
               ).pack(side=TOP,padx=10,pady=10)
+    # Create a dummy boolean variable
     wait = BooleanVar()
     # After 1 ms, set the dummy variable to True.
     window.after(1, wait.set, True)
     # Wait for the dummy variable to be set, then continue.
     window.wait_variable(wait)
 
+
+
 def raMenu():
 
     '''The GUI for the Rossi Alpha menu.'''
 
+
+    # Use the global window and settings variables.
     global window, parameters
     # Clear the window of all previous entries, labels, and buttons.
     for item in window.winfo_children():
@@ -637,10 +717,14 @@ def raMenu():
               command=main
               ).pack(side=TOP,padx=10,pady=10)
 
+
+
 def cohnAlphaMenu():
 
     '''The GUI for the Cohn Alpha menu.'''
 
+
+    # Use the global window and settings variables.
     global window, parameters
     # Clear the window of all previous entries, labels, and buttons.
     for item in window.winfo_children():
@@ -672,26 +756,37 @@ def cohnAlphaMenu():
               ).pack(side=TOP,padx=10,pady=10)
 
 def feynmanProgress():
+
+    '''Show the progress bar while running FeynmanY analysis.'''
+
+
+    # Use the global window and settings variables.
     global window, parameters
     # Clear the window of all previous entries, labels, and buttons.
     for item in window.winfo_children():
         item.destroy()
+    # Properly name the window.
     window.title('Analysis Progress')
+    # Store the length of the progress bar.
     length = int(((parameters.settings['FeynmanY Settings']['Tau range'][1] - parameters.settings['FeynmanY Settings']['Tau range'][0])/parameters.settings['FeynmanY Settings']['Increment amount']+2)*2)
+    # Tell the user analysis is underway.
     ttk.Label(master=window,
               name='info',
               text='Currently running Feynman Y analysis...'
               ).pack(side=TOP,padx=10,pady=10)
+    # The progress bar.
     ttk.Progressbar(master=window,
                     orient=HORIZONTAL,
                     length=length,
                     mode = 'determinate',
                     name='progress',
                     ).pack(side=TOP,padx=10)
+    # The disclaimer text.
     ttk.Label(master=window,
               name='disclaimer',
               text='This process may take a couple minutes.'
               ).pack(side=TOP,padx=10,pady=10)
+    # Create a dummy boolean variable.
     wait = BooleanVar()
     # After 1 ms, set the dummy variable to True.
     window.after(1, wait.set, True)
@@ -699,10 +794,14 @@ def feynmanProgress():
     window.wait_variable(wait)
     run.fySplit(window, parameters)
 
+
+
 def feynmanYMenu():
 
     '''The GUI for the Feynman Y menu.'''
 
+    
+    # Use the global window and settings variables.
     global window, parameters
     # Clear the window of all previous entries, labels, and buttons.
     for item in window.winfo_children():
@@ -733,10 +832,17 @@ def feynmanYMenu():
               command=main
               ).pack(side=TOP,padx=10,pady=10)
 
+
+
 def download_menu(prev, to):
 
-    '''The GUI for the settings download menu.'''
+    '''The GUI for the settings download menu.
+    
+    Inputs:
+    - prev: the menu to return to if the user cancels.
+    - to: the menu to go to after downloading settings.'''
 
+    # Use the global window and settings variables.
     global window, parameters
     # Clear the window of all previous entries, labels, and buttons.
     for item in window.winfo_children():
@@ -759,7 +865,7 @@ def download_menu(prev, to):
                                       'settings/',
                                       lambda response: 'Settings successfully appended from file:\n' + response + '.json.')
                ).pack(side=TOP,padx=10)
-        # Button for overwriting the entire settings.
+    # Button for overwriting the entire settings.
     ttk.Button(window,
                name='restore',
                text='Restore defaults',
@@ -777,10 +883,14 @@ def download_menu(prev, to):
                command=prev
                ).pack(side=TOP,padx=10,pady=10)
 
+
+
 def main():
 
     '''The GUI for the main menu.'''
 
+
+    # Use the global window variable.
     global window
     # Clear the window of all previous entries, labels, and buttons.
     for item in window.winfo_children():
@@ -825,15 +935,19 @@ def main():
                                        'Shutdown Confirmation')
                ).pack(side=TOP,padx=10,pady=10)
 
+
+
 def startup():
 
     '''The GUI for the startup menu.'''
 
+
+    # Use the global window and settings variables.
     global window, parameters
-    # If window is not yet defined, create it and grid it.
+    # If window is not yet defined, create it 
+    # and set the dimensions to be full screen.
     if window == None:
         window = Tk()
-        #window.grid()
         width= window.winfo_screenwidth()               
         height= window.winfo_screenheight()               
         window.geometry("%dx%d" % (width, height))
