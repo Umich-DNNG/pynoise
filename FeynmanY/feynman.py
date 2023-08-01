@@ -196,13 +196,21 @@ class FeynmanY:
         # Generate y values using the fitted parameters
         self.pred = YFit(x_fit, self.gamma, self.alpha)
 
+        prev_label = fit_opt.get('label')
+        fit_opt['label'] = f'Fitted Curve (gamma={self.gamma:.3g}, alpha={self.alpha:.3g})'
+        
         # Plot the original data points and the fitted curve
-        plt.scatter(x, y, label='Data', **scatter_opt)
-        plt.plot(x_fit, self.pred, label=f'Fitted Curve (gamma={self.gamma:.3g}, alpha={self.alpha:.3g})', **fit_opt)
+        plt.scatter(x, y, **scatter_opt)
+        plt.plot(x_fit, self.pred, **fit_opt)
         plt.xlabel('Tau Value')
         plt.ylabel(type + ' Value')
         plt.title(type + ' Distribution')
         plt.legend()
+
+        if prev_label == None:
+            fit_opt.pop('label')
+        else:
+            fit_opt['label'] = prev_label
 
         # Saving the figure (optional)
         if save_fig:
