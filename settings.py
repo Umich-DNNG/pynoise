@@ -189,7 +189,9 @@ class Settings:
 
 
         # Load the new parameters from the json file.
-        parameters = json.load(open(path))
+        file = open(path, 'r')
+        parameters = json.load(file)
+        file.close()
         # For each of the settings listed:
         for group in parameters:
             for setting in parameters[group]:
@@ -232,7 +234,7 @@ class Settings:
             self.sort_drops()
         # If the append is from a permanent file, mark that 
         # file as the most recently file appended from.
-        if path != os.path.abspath('append.json'):
+        if path != os.path.abspath('settings/append.json'):
             self.appended = path
 
 
@@ -259,7 +261,9 @@ class Settings:
             for setting in self.settings['Semilog Plot Settings']:
                 self.sls_drop.append(setting)
         # Load the new parameters from the json file.
-        self.settings = json.load(open(path))
+        file = open(path, 'r')
+        self.settings = json.load(file)
+        file.close()
         # If in gui mode:
         if self.gui_mode:
             # Remove all the used settings from the dropdown menus.
@@ -275,7 +279,7 @@ class Settings:
             self.sort_drops()
         # If the JSON file being loaded is a permanent file, change the 
         # settings origin and clear the most recently appended variable.
-        if path != os.path.abspath('current.json'):
+        if path != os.path.abspath('settings/current.json'):
             self.origin = path
             self.appended = None
 
@@ -294,6 +298,7 @@ class Settings:
         # dumps function to export the current settings.
         with open(path,'w') as file:
             file.write(json.dumps(self.settings, indent=4))
+        file.close()
 
 
 
@@ -336,3 +341,4 @@ class Settings:
         # dumps function to export the current settings.
         with open(path,'w') as file:
             file.write(json.dumps(output, indent=4))
+        file.close()
