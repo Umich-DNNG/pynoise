@@ -384,128 +384,133 @@ def raSplit(window: Tk, mode: str, parameters: set.Settings):
     - parameters: the settings object holding the current settings.'''
 
 
-    # If no input defined, throw an error.
-    if parameters.settings['Input/Output Settings']['Input file/folder'] == 'none':
-        gui.error('You currently have no input file or folder defined.\n\n'
-            + 'Please make sure to specify one before running any analysis.\n')
+    # Ensure there is a valid input file/ folder, and if not throw an error.
+    if (not os.path.isfile(parameters.settings['Input/Output Settings']['Input file/folder'])
+    and not os.path.isdir(parameters.settings['Input/Output Settings']['Input file/folder'])):
+        gui.error('ERROR: You currently have no input file or '
+                  + 'folder defined or the specified input file/'
+                  + 'directory does not exist.\n\nPlease make sure '
+                  + 'to adjust this before running any analysis.\n')
         return True
-    # If input is defined:
+    # If time difference method is not any and all 
+    # and channel column is None, throw an error.
+    if (parameters.settings['RossiAlpha Settings']['Time difference method'] != 'any_and_all' 
+    and parameters.settings['Input/Output Settings']['Channels column'] == None):
+        gui.error('To analyze a file/folder with more than any_and_all, '
+                  + 'you must define a channels column.\n')
+        return True
+    # Get name of actual file/folder for later use.
+    name = parameters.settings['Input/Output Settings']['Input file/folder']
+    name = name[name.rfind('/')+1:]
+    # If name has a . in it, assume a single file.
+    if name.count('.') > 0:
+        # Split on the analysis type.
+        match mode:
+            # Run all analysis:
+            case 'raAll':
+                # Run full file and log the completion.
+                analyzer.fullFile(parameters.settings)
+                log(message='Successfully ran all analysis on file:\n'
+                    +parameters.settings['Input/Output Settings']['Input file/folder'],
+                    window=window)
+            # Create time differences:
+            case 'createTimeDifs':
+                # If time differences already exist, warn user.
+                if analyzer.RATimeDifs['Time differences'] is not None:
+                    # Create a dictionary of the current relevant settings.
+                    check = {'Input file/folder': parameters.settings['Input/Output Settings']['Input file/folder'],
+                            'Sort data': parameters.settings['General Settings']['Sort data'],
+                            'Time difference method': parameters.settings['RossiAlpha Settings']['Time difference method'],
+                            'Digital delay': parameters.settings['RossiAlpha Settings']['Digital delay'],
+                            'Reset time': parameters.settings['RossiAlpha Settings']['Reset time']}
+                    # If in folder mode, add the number of folders setting.
+                    if name.count('.') == 0:
+                        check['Number of folders'] == parameters.settings['General Settings']['Number of folders']
+                    # If time differences are still valid:
+                    if analyzer.isValid('RATimeDifs', check):
+                        # Notify user that calculation is being canceled.
+                        gui.error('Time differences have already been '
+                                 + 'generated with these settings.\nTime '
+                                 + 'difference calculation has been aborted.\n',
+                                 'Recalculation Paused')
+                    # If time differences are not valid 
+                    # anymore, warn user of overwrite.
+                    else:
+                        gui.warning(lambda: log(message='Successfully recalculated time differences for file:\n'
+                                            +parameters.settings['Input/Output Settings']['Input file/folder'],
+                                            window=window,
+                                            menu=lambda:analyzer.createTimeDifs(parameters.settings['Input/Output Settings'],
+                                                                                parameters.settings['General Settings']['Sort data'],
+                                                                                parameters.settings['RossiAlpha Settings']['Reset time'],
+                                                                                parameters.settings['RossiAlpha Settings']['Time difference method'],
+                                                                                parameters.settings['RossiAlpha Settings']['Digital delay'],
+                                                                                parameters.settings['Input/Output Settings']['Quiet mode'],
+                                                                                False)),
+                                'There are already stored time differences '
+                                + 'in this runtime. Do you want to overwrite them?')
+                # Otherwise, create with no warning.
+                else:
+                    analyzer.createTimeDifs(parameters.settings['Input/Output Settings'],
+                                            parameters.settings['General Settings']['Sort data'],
+                                            parameters.settings['RossiAlpha Settings']['Reset time'],
+                                            parameters.settings['RossiAlpha Settings']['Time difference method'],
+                                            parameters.settings['RossiAlpha Settings']['Digital delay'],
+                                            parameters.settings['Input/Output Settings']['Quiet mode'],
+                                            False)
+                    log(message='Successfully calculated time differences for file:\n'
+                        +parameters.settings['Input/Output Settings']['Input file/folder'],
+                        window=window)
+            # Create a histogram plot.
+            case 'plotSplit':
+                # If histogram already exists, warn user.
+                if analyzer.RAHist['Histogram'] is not None:
+                    gui.warning(lambda: log(message='Successfully recreated a histogram for file:\n'
+                                        +parameters.settings['Input/Output Settings']['Input file/folder'],
+                                        window=window,
+                                        menu=lambda:analyzer.plotSplit(parameters.settings)),
+                                'There is an already stored histogram '
+                                + 'in this runtime. Do you want to overwrite it?')
+                # Otherwise, create with no warning.
+                else:
+                    analyzer.plotSplit(parameters.settings)
+                    log(message='Successfully created a histogram for file:\n'
+                        +parameters.settings['Input/Output Settings']['Input file/folder'],
+                        window=window)
+            # Create a best fit + residual.
+            case 'createBestFit':
+                # If best fit already exists, warn user.
+                if analyzer.RABestFit['Best fit'] is not None:
+                    gui.warning(lambda: log(message='Successfully recreated a best fit for file:\n'
+                                        +parameters.settings['Input/Output Settings']['Input file/folder'],
+                                        window=window,
+                                        menu=lambda:analyzer.fitSplit(parameters.settings,
+                                                                      name.count('.') == 0)),
+                            'There is an already stored best fit line '
+                            + 'in this runtime. Do you want to overwrite it?')
+                # Otherwise, create with no warning.
+                else:
+                    analyzer.fitSplit(parameters.settings, name.count('.') == 0)
+                    log(message='Successfully created a best fit for file:\n'
+                        +parameters.settings['Input/Output Settings']['Input file/folder'],
+                        window=window)
+    # Otherwise, assume folder data.
     else:
-        # Get name of actual file/folder without entire path.
-        name = parameters.settings['Input/Output Settings']['Input file/folder']
-        name = name[name.rfind('/')+1:]
-        # If name has a . in it, assume a single file.
-        if name.count('.') > 0:
-            # If time difference method is not any and all 
-            # and channel column is None, throw an error.
-            if (parameters.settings['RossiAlpha Settings']['Time difference method'] != 'any_and_all' 
-            and parameters.settings['Input/Output Settings']['Channels column'] == None):
-                gui.error('To analyze a file with more than any_and_all, '
-                          + 'you must define a channels column.\n')
-                return True
-            # Otherwise, split on the analysis type.
-            else:
-                match mode:
-                    # Run all analysis:
-                    case 'raAll':
-                        # Run full file and log the completion.
-                        analyzer.fullFile(parameters.settings)
-                        log(message='Successfully ran all analysis on file:\n'
-                            +parameters.settings['Input/Output Settings']['Input file/folder'],
-                            window=window)
-                    # Create time differences:
-                    case 'createTimeDifs':
-                        # If time differences already exist, warn user.
-                        if analyzer.time_difs is not None:
-                            gui.warning(lambda: log(message='Successfully recalculated time differences for file:\n'
-                                                +parameters.settings['Input/Output Settings']['Input file/folder'],
-                                                window=window,
-                                                menu=lambda:analyzer.createTimeDifs(parameters.settings['Input/Output Settings'],
-                                                                                    parameters.settings['General Settings']['Sort data'],
-                                                                                    parameters.settings['RossiAlpha Settings']['Reset time'],
-                                                                                    parameters.settings['RossiAlpha Settings']['Time difference method'],
-                                                                                    parameters.settings['RossiAlpha Settings']['Digital delay'],
-                                                                                    parameters.settings['Input/Output Settings']['Quiet mode'],
-                                                                                    False)),
-                                    'There are already stored time differences '
-                                    + 'in this runtime. Do you want to overwrite them?')
-                        # Otherwise, create with no warning.
-                        else:
-                            analyzer.createTimeDifs(parameters.settings['Input/Output Settings'],
-                                                    parameters.settings['General Settings']['Sort data'],
-                                                    parameters.settings['RossiAlpha Settings']['Reset time'],
-                                                    parameters.settings['RossiAlpha Settings']['Time difference method'],
-                                                    parameters.settings['RossiAlpha Settings']['Digital delay'],
-                                                    parameters.settings['Input/Output Settings']['Quiet mode'],
-                                                    False)
-                            log(message='Successfully calculated time differences for file:\n'
-                                +parameters.settings['Input/Output Settings']['Input file/folder'],
-                                window=window)
-                    # Create a histogram plot.
-                    case 'plotSplit':
-                        # If histogram already exists, warn user.
-                        if analyzer.histogram is not None:
-                            gui.warning(lambda: log(message='Successfully recreated a histogram for file:\n'
-                                                +parameters.settings['Input/Output Settings']['Input file/folder'],
-                                                window=window,
-                                                menu=lambda:analyzer.plotSplit(parameters.settings)),
-                                    'There is an already stored histogram '
-                                    + 'in this runtime. Do you want to overwrite it?')
-                        # Otherwise, create with no warning.
-                        else:
-                            analyzer.plotSplit(parameters.settings)
-                            log(message='Successfully created a histogram for file:\n'
-                                +parameters.settings['Input/Output Settings']['Input file/folder'],
-                                window=window)
-                    # Create a best fit + residual.
-                    case 'createBestFit':
-                        # If best fit already exists, warn user.
-                        if analyzer.best_fit is not None:
-                            gui.warning(lambda: log(message='Successfully recreated a best fit for file:\n'
-                                                +parameters.settings['Input/Output Settings']['Input file/folder'],
-                                                window=window,
-                                                menu=lambda:analyzer.createBestFit(parameters.settings['RossiAlpha Settings']['Minimum cutoff'],
-                                                                                   parameters.settings['RossiAlpha Settings']['Time difference method'],
-                                                                                   parameters.settings['General Settings'],
-                                                                                   parameters.settings['Input/Output Settings']['Save figures'],
-                                                                                   parameters.settings['Input/Output Settings']['Save directory'],
-                                                                                   parameters.settings['Line Fitting Settings'],
-                                                                                   parameters.settings['Scatter Plot Settings'],
-                                                                                   parameters.settings['Histogram Visual Settings'])),
-                                    'There is an already stored best fit line '
-                                    + 'in this runtime. Do you want to overwrite it?')
-                        # Otherwise, create with no warning.
-                        else:
-                            analyzer.plotSplit(parameters.settings)
-                            analyzer.createBestFit(parameters.settings['RossiAlpha Settings']['Minimum cutoff'],
-                                                   parameters.settings['RossiAlpha Settings']['Time difference method'],
-                                                   parameters.settings['General Settings'],
-                                                   parameters.settings['Input/Output Settings']['Save figures'],
-                                                   parameters.settings['Input/Output Settings']['Save directory'],
-                                                   parameters.settings['Line Fitting Settings'],
-                                                   parameters.settings['Scatter Plot Settings'],
-                                                   parameters.settings['Histogram Visual Settings'])
-                            log(message='Successfully created a best fit for file:\n'
-                                +parameters.settings['Input/Output Settings']['Input file/folder'],
-                                window=window)
-        # Otherwise, assume folder data.
+        # If modular analysis is attempted, throw and error.
+        if mode != 'raAll':
+            gui.error('You can only run full folder analysis.\n\n'
+                  + 'These modular options are for single files.')
+            return True
+        # Otherwise:
         else:
-            # If modular analysis is attempted, throw and error.
-            if mode != 'raAll':
-                gui.error('You can only run full folder analysis.\n\n'
-                      + 'These modular options are for single files.')
-                return True
-            # Otherwise:
-            else:
-                # Show the progress menu for folders.
-                gui.folderProgress()
-                # Run full folder analysis.
-                analyzer.fullFolder(parameters.settings, window)
-                # Return to the Rossi Alpha menu and log the success.
-                gui.raMenu()
-                log(message='Successfully ran all analysis with folder:\n'
-                            +parameters.settings['Input/Output Settings']['Input file/folder'],
-                            window=window)
+            # Show the progress menu for folders.
+            gui.folderProgress()
+            # Run full folder analysis.
+            analyzer.fullFolder(parameters.settings, window)
+            # Return to the Rossi Alpha menu and log the success.
+            gui.raMenu()
+            log(message='Successfully ran all analysis with folder:\n'
+                        +parameters.settings['Input/Output Settings']['Input file/folder'],
+                        window=window)
 
 
 
