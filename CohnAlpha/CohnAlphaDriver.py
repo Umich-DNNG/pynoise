@@ -43,7 +43,8 @@ def main(editorIn: edit.Editor, queue: list[str]):
                                               editor.parameters.settings['Input/Output Settings']['Save figures'],
                                               editor.parameters.settings['CohnAlpha Settings'],
                                               editor.parameters.settings['Semilog Plot Settings'],
-                                              editor.parameters.settings['Line Fitting Settings'])
+                                              editor.parameters.settings['Line Fitting Settings'],
+                                              editor.parameters.settings['Scatter Plot Settings'])
                     editor.log('Ran the entire Cohn Alpha on file ' 
                                 + editor.parameters.settings['Input/Output Settings']['Input file/folder'] 
                                 + '.\n')

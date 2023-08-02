@@ -278,7 +278,7 @@ class RossiHistogramFit:
         ax2.axhline(y=0, color='#162F65', linestyle='--')
         ax2.set_ylim([-1, 1])
         ax2.set_xlabel("Time Differences(ns)")
-        ax2.set_ylabel('Relative residuals')
+        ax2.set_ylabel('Relative Residuals (%)')
 
         # Setting title for entire figure
         fig.suptitle(self.timeDifMethod, fontsize=14)
