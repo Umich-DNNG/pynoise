@@ -31,7 +31,8 @@ class Event:
 
 def createEventsListFromTxtFile(path:str,
                                 timeCol:int = 0,
-                                channelCol:int = None,
+                                channel:int = None,
+                                isColumn:bool = True,
                                 quiet:bool = False,
                                 folder:bool = False):
     
@@ -41,8 +42,11 @@ def createEventsListFromTxtFile(path:str,
     - path: a string that indicates the absolute path of the input file.
     - timeCol: a integer indicating which column in the 
     file holds the time data. If not given, assumes column 0.
-    - channelCol: an integer indicating which column in the file 
-    holds the channel data. If not given, assumes no channel column.
+    - channel: an integer indicating which column in the file 
+    holds the channel data or what the channel for all data 
+    points should be. If not given, assumes no channel column.
+    - isColumn: a boolean that determines whether channel is a column 
+    or channel value. If not given, assumes True (channel is a column).
     - quiet: a boolean indicating whether or not print statements should 
     be silenced. If not given, assumes False (uses print statements).
     - folder: a boolean indicating whether or not this file is for 
@@ -70,17 +74,21 @@ def createEventsListFromTxtFile(path:str,
             # whitespace and split the columns up.
             columns = line.strip().split()
             # Save the time data from the appropriate column.
-            time = columns[timeCol]
-            # If there is no channel column, set the channel to None.
-            if channelCol is None:
-                # Store the time data in an event object.
-                event = Event(float(time))
-            # Otherwise, save the channel data from the appropriate column.
+            timeIn = columns[timeCol]
+            if isColumn:
+                # If there is no channel column, set the channel to None.
+                if channel is None:
+                    # Store the time data in an event object.
+                    event = Event(float(timeIn))
+                # Otherwise, save the channel data from the appropriate column.
+                else:
+                    channelIn = columns[channel]
+                    # Store the time and channel data in an event object.
+                    event = Event(float(timeIn), int(channelIn))
             else:
-                channel = columns[channelCol]
-                # Store the time and channel data in an event object.
-                event = Event(float(time), int(channel))      
+                event = Event(float(timeIn), channel)
             # Add the current Event to the events list.  
             events.append(event)
+    file.close()
     # Return the events list.
     return events
