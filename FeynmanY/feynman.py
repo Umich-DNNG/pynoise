@@ -196,16 +196,37 @@ class FeynmanY:
         # Generate y values using the fitted parameters
         self.pred = YFit(x_fit, self.gamma, self.alpha)
 
+        # Compute residuals
+        residuals = y - YFit(x, self.gamma, self.alpha)
+
+        # Create figure and axes
+        fig, (ax1, ax2) = plt.subplots(nrows=2, sharex=True, figsize=(8, 6), gridspec_kw={'height_ratios': [2, 1]})
+
+        # Plotting original data points and fitted curve in top subplot
+        ax1.scatter(x, y, **scatter_opt)
+        ax1.plot(x_fit, self.pred, **fit_opt)
+        ax1.set_ylabel(type + ' Value')
+        ax1.set_title(type + ' Distribution')
+
+        # Computing residuals and plot in bottom subplot
+        residuals_norm = residuals / np.max(np.abs(residuals))
+
+        ax2.scatter(x, residuals_norm, **scatter_opt)
+        ax2.axhline(y=0, color='#162F65', linestyle='--')
+        ax2.set_ylim([-1, 1])
+        ax2.set_xlabel('Tau Values')
+        ax2.set_ylabel('Relative Residuals (%)')
+
         prev_label = fit_opt.get('label')
         fit_opt['label'] = f'Fitted Curve (gamma={self.gamma:.3g}, alpha={self.alpha:.3g})'
         
         # Plot the original data points and the fitted curve
-        plt.scatter(x, y, **scatter_opt)
-        plt.plot(x_fit, self.pred, **fit_opt)
-        plt.xlabel('Tau Value')
-        plt.ylabel(type + ' Value')
-        plt.title(type + ' Distribution')
-        plt.legend()
+        # plt.scatter(x, y, **scatter_opt)
+        # plt.plot(x_fit, self.pred, **fit_opt)
+        # plt.xlabel('Tau Value')
+        # plt.ylabel(type + ' Value')
+        # plt.title(type + ' Distribution')
+        # plt.legend()
 
         if prev_label == None:
             fit_opt.pop('label')
