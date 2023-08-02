@@ -197,7 +197,7 @@ class FeynmanY:
         self.pred = YFit(x_fit, self.gamma, self.alpha)
 
         prev_label = fit_opt.get('label')
-        fit_opt['label'] = f'Fitted Curve (gamma={self.gamma:.3g}, alpha={self.alpha:.3g})'
+        fit_opt['label'] = (prev_label if prev_label != None else 'Fitted Curve') + f' (gamma={self.gamma:.3g}, alpha={self.alpha:.3g})'
         
         # Plot the original data points and the fitted curve
         plt.scatter(x, y, **scatter_opt)
