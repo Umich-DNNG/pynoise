@@ -425,7 +425,7 @@ def raSplit(window: Tk, mode: str, parameters: set.Settings):
                             'Reset time': parameters.settings['RossiAlpha Settings']['Reset time']}
                     # If in folder mode, add the number of folders setting.
                     if name.count('.') == 0:
-                        check['Number of folders'] == parameters.settings['General Settings']['Number of folders']
+                        check['Number of folders'] = parameters.settings['General Settings']['Number of folders']
                     # If time differences are still valid:
                     if analyzer.isValid('RATimeDifs', check):
                         # Notify user that calculation is being canceled.

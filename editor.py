@@ -140,6 +140,7 @@ class Editor:
                 settings.flush()
             # Call the editor.
             call([EDITOR, settings.name])
+        settings.close()
         # Create a temp file to compare the 
         # edited settings to the previous ones.
         self.parameters.write(os.path.abspath('settings/comp.json'))

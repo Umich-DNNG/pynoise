@@ -190,7 +190,9 @@ class Analyzer:
         data = evt.createEventsListFromTxtFile(io['Input file/folder'],
                                                io['Time column'],
                                                io['Channels column'],
-                                               quiet)
+                                               True,
+                                               quiet,
+                                               False)
         data.sort(key=lambda Event: Event.time)
         # Initialize variables for counting
         # the total real measurement time.
@@ -357,18 +359,35 @@ class Analyzer:
         
 
         # Load the data according to its file type.
-        # TODO: Add folder support.
+        # TODO: Add folder modular support.
+        # Create an empty data list.
+        data = []
         if io['Input file/folder'].endswith(".txt"):
             data = evt.createEventsListFromTxtFile(io['Input file/folder'],
                                                    io['Time column'],
                                                    io['Channels column'],
+                                                   True,
                                                    quiet,
                                                    True if folder != 0 else False)
         elif io['Input file/folder'].endswith(".lmx"):
             data = lmx.readLMXFile(io['Input file/folder'])
-        # If file type isn't valid, throw an error.
+        # If folder analysis:
         else:
-            return ValueError
+            # For each file in the specified folder:
+            for filename in os.listdir(io['Input file/folder']):
+                if len(filename) >= 14:
+                    board = filename[0:8]
+                    ntxt = filename[len(filename)-6:]
+                    channel = filename[8:len(filename)-6]
+                    if board == 'board0ch' and ntxt == '_n.txt' and channel.isnumeric() and int(channel) >= 0:
+                        # Change the input file to this file.
+                        # Add the data from this file to the events list.
+                        data.extend(evt.createEventsListFromTxtFile(io['Input file/folder'] + "/" + filename,
+                                                                    io['Time column'],
+                                                                    int(channel),
+                                                                    False,
+                                                                    io['Quiet mode'],
+                                                                    True))
         # Sort the data if applicable.
         if sort:
             data.sort(key=lambda Event: Event.time)
@@ -437,18 +456,35 @@ class Analyzer:
 
         # Reset the time differences.
         self.RATimeDifs['Time differences'] = None
+        # Create an empty data list.
+        data = []
         # Load the data according to its file type.
         if io['Input file/folder'].endswith(".txt"):
             data = evt.createEventsListFromTxtFile(io['Input file/folder'],
                                                    io['Time column'],
                                                    io['Channels column'],
+                                                   True,
                                                    io['Quiet mode'],
                                                    folder)
         elif io['Input file/folder'].endswith(".lmx"):
             data =  lmx.readLMXFile(io['Input file/folder'])
-        # If file type isn't valid, throw an error.
+        # If folder analysis:
         else:
-            return ValueError
+            # For each file in the specified folder:
+            for filename in os.listdir(io['Input file/folder']):
+                if len(filename) >= 14:
+                    board = filename[0:8]
+                    ntxt = filename[len(filename)-6:]
+                    channel = filename[8:len(filename)-6]
+                    if board == 'board0ch' and ntxt == '_n.txt' and channel.isnumeric() and int(channel) >= 0:
+                        # Change the input file to this file.
+                        # Add the data from this file to the events list.
+                        data.extend(evt.createEventsListFromTxtFile(io['Input file/folder'] + "/" + filename,
+                                                                    io['Time column'],
+                                                                    int(channel),
+                                                                    False,
+                                                                    io['Quiet mode'],
+                                                                    True))
         # Sort the data if applicable.
         if gen['Sort data']:
             data.sort(key=lambda Event: Event.time)
@@ -489,7 +525,7 @@ class Analyzer:
         name = name[name.rfind('/')+1:]
         # If in folder mode, add the number of folders setting.
         if name.count('.') == 0:
-            check['Number of folders'] == settings['General Settings']['Number of folders']
+            check['Number of folders'] = settings['General Settings']['Number of folders']
         # If time differences have not yet been calculated or the 
         # current settings do not match those previously used:
         if self.RATimeDifs['Time differences'] is None or not self.isValid('RATimeDifs', check):
@@ -589,12 +625,12 @@ class Analyzer:
                 'Digital delay': settings['RossiAlpha Settings']['Digital delay'],
                 'Reset time': settings['RossiAlpha Settings']['Reset time'],
                 'Bin width': settings['RossiAlpha Settings']['Bin width']}
-        # Get the name of the input.
-        name = settings['Input/Output Settings']['Input file/folder']
-        name = name[name.rfind('/')+1:]
         # If in folder mode, add the number of folders setting.
-        if name.count('.') == 0:
-            check['Number of folders'] == settings['General Settings']['Number of folders']
+        if folder:
+            check['Number of folders'] = settings['General Settings']['Number of folders']
+            index = int(settings['Input/Output Settings']['Input file/folder'][settings['Input/Output Settings']['Input file/folder'].rfind('/')+1:])
+        else:
+            index = None
         # If histogram has not yet been generated or the 
         # current settings do not match those previously used, rerun the plot split
         if self.RAHist['Histogram'] is None or not self.isValid('RAHist', check):
@@ -607,7 +643,9 @@ class Analyzer:
                            settings['Input/Output Settings']['Save directory'],
                            settings['Line Fitting Settings'],
                            settings['Scatter Plot Settings'],
-                           settings['Histogram Visual Settings'])
+                           settings['Histogram Visual Settings'],
+                           index)
+
 
 
     def fullFile(self, settings: dict):
@@ -689,60 +727,54 @@ class Analyzer:
         original = settings['Input/Output Settings']['Input file/folder']
         # Loop for the number of folders specified.
         for folder in tqdm(range(1, settings['General Settings']['Number of folders'] + 1)):
-            # For each file in the specified folder:
-            for filename in os.listdir(original + "/" + str(folder)):
-                # If this is the desired file:
-                if filename.endswith("n_allch.txt"):
-                    # Change the input file to this file.
-                    settings['Input/Output Settings']['Input file/folder'] = original + "/" + str(folder) + "/" + filename
-                    # Conduct full analysis.
-                    self.fitSplit(settings, True)
-                    # If this is the first folder, initialize the histogram array.
-                    if folder == 1:
-                        RA_hist_array = self.RAHist['Histogram'].counts
-                    # Otherwise, add the counts to the histogram array.
-                    else:
-                        RA_hist_array = np.vstack((RA_hist_array, self.RAHist['Histogram'].counts))
-                    # Close all open plots.
-                    pyplot.close()
-                    # If exporting raw data for individual folders:
-                    if settings['Input/Output Settings']['Save raw data'] == True and settings['General Settings']['Verbose iterations'] == True:
-                        # Initialize variables.
-                        begin = []
-                        end = []
-                        resStart = 0
-                        # Continue increasing the residual/prediction starting index 
-                        # while the minimum cutoff is greater than the current bin center.
-                        while settings['RossiAlpha Settings']['Minimum cutoff'] > self.RAHist['Histogram'].bin_centers[resStart]:
-                            resStart += 1
-                        # Construct the beginning and ending bin edges lists.
-                        for i in range(len(self.RAHist['Histogram'].bin_edges)-1):
-                            begin.append(self.RAHist['Histogram'].bin_edges[i])
-                            end.append(self.RAHist['Histogram'].bin_edges[i+1])
-                        # Export the beginning and ends of bins, measured counts, 
-                        # predicted counts, residual, fit parameters, and file name.
-                        self.export({'Bin beginning': (begin,0),
-                                    'Bin ending': (end,0),
-                                    'Measured Count': (self.RAHist['Histogram'].counts,0),
-                                    'Predicted Count': (self.RABestFit['Best fit'].pred,resStart),
-                                    'Residual': (self.RABestFit['Best fit'].residuals,resStart)},
-                                    [('A', self.RABestFit['Best fit'].a),
-                                    ('B', self.RABestFit['Best fit'].b),
-                                    ('Alpha', self.RABestFit['Best fit'].alpha),
-                                    ('Input file', settings['Input/Output Settings']['Input file/folder'])],
-                                    'RAFolder' + str(folder),
-                                    settings['Input/Output Settings']['Save directory'])
-                    # If in gui mode:
-                    if window != None:
-                        # Incremement the progress bar.
-                        window.children['progress']['value'] += 10
-                        wait = BooleanVar()
-                        # After 1 ms, set the dummy variable to True.
-                        window.after(1, wait.set, True)
-                        # Wait for the dummy variable to be set, then continue.
-                        window.wait_variable(wait)
-                    # Break to the next folder.
-                    break
+            # Add the folder number to the input.
+            settings['Input/Output Settings']['Input file/folder'] = original + '/' + str(folder)
+            # Conduct full analysis.
+            self.fitSplit(settings, True)
+            # If this is the first folder, initialize the histogram array.
+            if folder == 1:
+                RA_hist_array = self.RAHist['Histogram'].counts
+            # Otherwise, add the counts to the histogram array.
+            else:
+                RA_hist_array = np.vstack((RA_hist_array, self.RAHist['Histogram'].counts))
+            # Close all open plots.
+            pyplot.close()
+            # If exporting raw data for individual folders:
+            if settings['Input/Output Settings']['Save raw data'] == True and settings['General Settings']['Verbose iterations'] == True:
+                # Initialize variables.
+                begin = []
+                end = []
+                resStart = 0
+                # Continue increasing the residual/prediction starting index 
+                # while the minimum cutoff is greater than the current bin center.
+                while settings['RossiAlpha Settings']['Minimum cutoff'] > self.RAHist['Histogram'].bin_centers[resStart]:
+                    resStart += 1
+                # Construct the beginning and ending bin edges lists.
+                for i in range(len(self.RAHist['Histogram'].bin_edges)-1):
+                    begin.append(self.RAHist['Histogram'].bin_edges[i])
+                    end.append(self.RAHist['Histogram'].bin_edges[i+1])
+                # Export the beginning and ends of bins, measured counts, 
+                # predicted counts, residual, fit parameters, and file name.
+                self.export({'Bin beginning': (begin,0),
+                            'Bin ending': (end,0),
+                            'Measured Count': (self.RAHist['Histogram'].counts,0),
+                            'Predicted Count': (self.RABestFit['Best fit'].pred,resStart),
+                            'Residual': (self.RABestFit['Best fit'].residuals,resStart)},
+                            [('A', self.RABestFit['Best fit'].a),
+                            ('B', self.RABestFit['Best fit'].b),
+                            ('Alpha', self.RABestFit['Best fit'].alpha),
+                            ('Input file', settings['Input/Output Settings']['Input file/folder'])],
+                            'RAFolder' + str(folder),
+                            settings['Input/Output Settings']['Save directory'])
+            # If in gui mode:
+            if window != None:
+                # Incremement the progress bar.
+                window.children['progress']['value'] += 10
+                wait = BooleanVar()
+                # After 1 ms, set the dummy variable to True.
+                window.after(1, wait.set, True)
+                # Wait for the dummy variable to be set, then continue.
+                window.wait_variable(wait)
         # Restore the original folder pathway.
         settings['Input/Output Settings']['Input file/folder'] = original
         # Compute the histogram standard deviation and total.

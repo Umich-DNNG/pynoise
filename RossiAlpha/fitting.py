@@ -418,12 +418,24 @@ class Fit_With_Weighting:
             upper_bound = self.hist[:-1] + self.uncertainties[:-1]
             ax.fill_between(time_diff_centers, lower_bound, upper_bound, alpha=0.3, color='gray')
 
+        prev_label = self.fitting_options.get('label')
+        self.fitting_options['label'] = ((prev_label if prev_label != None else 'Fitted Curve')
+                                         + ' (A=' + f'{self.a:.3g}' + ', alpha=' 
+                                         + f'{self.alpha:.3g}' + ', B=' 
+                                         + f'{self.b:.3g}' + ')')
+
         # Adding the fit to the data
         ax.plot(self.xfit, self.pred, **self.fitting_options)
         
         # Setting the axis labels
         ax.set_xlabel('Time difference (ns)')
         ax.set_ylabel('Counts')
+        ax.legend()
+
+        if prev_label == None:
+            self.fitting_options.pop('label')
+        else:
+            self.fitting_options['label'] = prev_label
 
         # Adjusting layout and saving figure (optional)
         if save_fig:

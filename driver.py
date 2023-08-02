@@ -69,6 +69,7 @@ def main():
                 # Open the file and read the entire file.
                 file = open(os.path.abspath(sys.argv[start]))
                 commands = file.read()
+                file.close()
                 # Keep looping until there are no more newlines.
                 while commands.find('\n') != -1:
                     # Isolate the next entry, remove it from the 
