@@ -284,7 +284,8 @@ class Analyzer:
                          save:bool,
                          caSet:dict,
                          sps:dict,
-                         lfs:dict):
+                         lfs:dict,
+                         scatter_plot_settings:dict):
 
         '''Runs Cohn Alpha analysis.
         
@@ -306,7 +307,7 @@ class Analyzer:
                                  caSet['Dwell time'],
                                  caSet['Meas time range'])
         # Conduct Cohn Alpha analysis with the given settings.
-        CA_Object.conductCohnAlpha(show, save, output, caSet, sps, lfs)
+        CA_Object.conductCohnAlpha(show, save, output, caSet, sps, lfs, scatter_plot_settings)
 
 
 
