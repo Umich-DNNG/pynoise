@@ -163,9 +163,17 @@ class RossiHistogramFit:
         ax1.bar(self.bin_centers, self.counts, width=0.8*(self.bin_centers[1]-self.bin_centers[0]), 
                 alpha=0.6, color="b", align="center", edgecolor="k", linewidth=0.5, fill=True)
         
-        ax1.plot(line_x, self.pred, 'r--', label='Fit: A=%5.3f, alpha=%5.3f, B=%5.3f' % tuple(popt), **self.fitting_options)
+        prev_label = self.fitting_options.get('label')
+        self.fitting_options['label'] = (prev_label if prev_label != None else 'Fitted Curve') + (' (A=%5.3f, alpha=%5.3f, B=%5.3f)' % tuple(popt))
+
+        ax1.plot(line_x, self.pred, 'r--', **self.fitting_options)
         ax1.legend()
         ax1.set_ylabel(self.y_axis)
+
+        if prev_label == None:
+            self.fitting_options.pop('label')
+        else:
+            self.fitting_options['label'] = prev_label
 
         # Saving figure (optional)
         if save_fig:
@@ -246,11 +254,19 @@ class RossiHistogramFit:
         # Create figure and axes
         fig, (ax1, ax2) = plt.subplots(nrows=2, sharex=True, figsize=(8, 6), gridspec_kw={'height_ratios': [2, 1]})
 
+        prev_label = self.fitting_options.get('label')
+        self.fitting_options['label'] = (prev_label if prev_label != None else 'Fitted Curve') + (' (A=%5.3f, alpha=%5.3f, B=%5.3f)' % tuple(popt))
+
         # Plotting histogram and fitting curve in top subplot
         ax1.bar(self.bin_centers, self.counts, width=0.8*(self.bin_centers[1]-self.bin_centers[0]), **self.hist_visual_options)
-        ax1.plot(line_x, self.pred, label='Fit: A=%5.3f, alpha=%5.3f, B=%5.3f' % tuple(popt), **self.fitting_options)
+        ax1.plot(line_x, self.pred, **self.fitting_options)
         ax1.legend()
         ax1.set_ylabel("Coincidence rate (s^-1)")
+
+        if prev_label == None:
+            self.fitting_options.pop('label')
+        else:
+            self.fitting_options['label'] = prev_label
 
         # Computing residuals and plot in bottom subplot
         self.residuals = self.counts[fit_index] - self.pred
@@ -403,7 +419,7 @@ class Fit_With_Weighting:
             ax.fill_between(time_diff_centers, lower_bound, upper_bound, alpha=0.3, color='gray')
 
         # Adding the fit to the data
-        ax.plot(self.xfit, self.pred, label='Fit', **self.fitting_options)
+        ax.plot(self.xfit, self.pred, **self.fitting_options)
         
         # Setting the axis labels
         ax.set_xlabel('Time difference (ns)')

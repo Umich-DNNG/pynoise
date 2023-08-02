@@ -22,8 +22,8 @@
     "RossiAlpha Settings": {
         "Time difference method": "any_and_all",
         "Digital delay": 750,
-        "Combine Calc and Binning": false,
         "Reset time": 1000,
+        "Combine Calc and Binning": false,
         "Bin width": 9,
         "Error Bar/Band": "band",
         "Minimum cutoff": 30
