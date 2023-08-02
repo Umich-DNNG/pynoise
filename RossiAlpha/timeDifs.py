@@ -63,6 +63,7 @@ class timeDifCalcs:
         time_diffs = np.array([])
         n = len(self.events)
         i = 0
+        prevent = False
         # Iterate through the whole time vector.
         while i < len(self.events):
             # Create an empty channel bank.
@@ -91,12 +92,15 @@ class timeDifCalcs:
                         stamped_time = self.events[i].time
                         while self.events[i].time < stamped_time + self.digital_delay:
                            i += 1
+                        prevent = True
                     # Add the current channel to the channel bank if considering channels.
                     if(self.method != "any_and_all"):
                         ch_bank.add(self.events[j].channel)
             # Iterate to the next data point without double counting for digital delay.
-            if self.method != 'any_and_all cross_correlations no_repeat digital_delay':
+            if not prevent:
                 i += 1
+            else:
+                prevent = False
         # Store the time differences array.
         self.timeDifs = time_diffs
         # Return the time differences array.
@@ -144,6 +148,7 @@ class timeDifCalcs:
         i = 0
         num_bins = int(self.reset_time / bin_width)
         histogram = np.zeros(num_bins)
+        prevent = False
         # Iterate through the whole time vector.
         while i < len(self.events):
             # Create an empty channel bank.
@@ -178,12 +183,15 @@ class timeDifCalcs:
                         stamped_time = self.events[i]
                         while self.events[i].time < stamped_time + self.digital_delay:
                            i += 1
+                        prevent = True
                     # Add the current channel to the channel bank if considering channels.
                     if(self.method != "any_and_all"):
                         ch_bank.add(self.events[j].channel)
             # Iterate to the next data point.
-            if self.method != 'any_and_all cross_correlations no_repeat digital_delay':
+            if not prevent:
                 i += 1
+            else:
+                prevent = False
         # Normalize the histogram.
         bin_edges = np.linspace(0, self.reset_time, num_bins + 1)
         bin_centers = 0.5 * (bin_edges[1:] + bin_edges[:-1])

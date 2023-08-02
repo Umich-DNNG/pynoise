@@ -225,7 +225,7 @@ def readLMXFile(fileName):
 
         # read the events
         events, endtime = readData(lmxfile, tickLength, internalScaler)
-
+    lmxfile.close()
     return events
 
 

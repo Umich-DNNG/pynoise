@@ -65,11 +65,12 @@ def main(editor: edit.Editor, queue: list[str] = []):
                       + 'directory does not exist. Please make sure '
                       + 'to adjust this before running any analysis.\n')
             # Ensure the user is using a valid time difference method.
-            if (editor.parameters.settings['RossiAlpha Settings']['Time difference method'] != 'any_and_all' 
-                  and editor.parameters.settings['Input/Output Settings']['Channels column'] is None):
+            elif (editor.parameters.settings['RossiAlpha Settings']['Time difference method'] != 'any_and_all' 
+                  and editor.parameters.settings['Input/Output Settings']['Channels column'] is None
+                  and name.count('.') > 0):
                 print('ERROR: When using methods other than any_and_all, you must specify a column.\n')
             # For full analysis:
-            if selection == 'm':
+            elif selection == 'm':
                 # Display progress.
                 editor.print('Running the entire RossiAlpha method...')
                 # If input is file:
@@ -100,7 +101,7 @@ def main(editor: edit.Editor, queue: list[str] = []):
                             'Reset time': editor.parameters.settings['RossiAlpha Settings']['Reset time']}
                     # If in folder mode, add the number of folders setting.
                     if name.count('.') == 0:
-                        check['Number of folders'] == editor.parameters.settings['General Settings']['Number of folders']
+                        check['Number of folders'] = editor.parameters.settings['General Settings']['Number of folders']
                     # If time differences are still valid:
                     if analyzer.isValid('RATimeDifs', check):
                         # Notify user that calculation is being canceled.
