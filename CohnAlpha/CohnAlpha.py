@@ -43,12 +43,13 @@ class CohnAlpha:
 
 
     def conductCohnAlpha(self, 
-                     show_plot: bool = True, 
-                     save_fig: bool = True, 
-                     save_dir: str = './', 
-                     caSet: dict = {},
-                     sps: dict = {},
-                     lfs: dict = {}):
+                         show_plot: bool = True, 
+                         save_fig: bool = True, 
+                         save_dir: str = './', 
+                         caSet: dict = {},
+                         sps: dict = {},
+                         lfs: dict = {},
+                         scatter_opt: dict = {}):
         
         '''
         Creating PSD plot from an array of data inputs.
@@ -114,20 +115,15 @@ class CohnAlpha:
                     str(np.around(pcov[1,1]*2*np.pi, decimals=2)))
         
         # Plotting the auto-power-spectral-density distribution and fit
-        fig, ax = plt.subplots()
+        fig, (ax1, ax2) = plt.subplots(nrows=2, sharex=True, figsize=(8, 6), gridspec_kw={'height_ratios': [2, 1]})
 
         # Creating a plot with semilogarithmic (log-scale) x-axis 
-        ax.semilogx(f[1:-2], Pxx[1:-2], '.', **sps)
-        ax.semilogx(f[1:-2], CAFit(f[1:-2], *popt), **lfs)
+        ax1.semilogx(f[1:-2], Pxx[1:-2], '.', **sps)
+        ax1.semilogx(f[1:-2], CAFit(f[1:-2], *popt), **lfs)
         
         # Setting minimum and maximum for y
-        ymin, ymax = ax.get_ylim()
+        ymin, ymax = ax1.get_ylim()
         dy = ymax-ymin
-
-        # Creating axis titles
-        ax.set_xlim([1, 200])
-        ax.set_xlabel('Frequency (Hz)')
-        ax.set_ylabel('Intensity (V$^2$/Hz)')
 
         # Constructing alpha string
         alph_str = (r'$\alpha$ = (' +
@@ -135,7 +131,7 @@ class CohnAlpha:
                     str(np.around(pcov[1,1]*2*np.pi, decimals=2)) + ') 1/s')
         
         # Annotating the plots
-        ax.annotate(alph_str, 
+        ax1.annotate(alph_str, 
                     xy=(1.5, ymin+0.1*dy), 
                     xytext=(1.5, ymin+0.1*dy),
                     fontsize=16, 
@@ -144,15 +140,30 @@ class CohnAlpha:
                     backgroundcolor=self.annotate_background_color)
         
         # Creating title and legend
-        ax.set_title('Cohn Alpha Graph')
-        ax.legend(loc='upper right')
-        
+        ax1.set_title('Cohn Alpha Graph')
+        ax1.legend(loc='upper right')
 
+         # Creating axis titles
+        ax1.set_xlim([1, 200])
+        ax1.set_xlabel('Frequency (Hz)')
+        ax1.set_ylabel('Intensity (V$^2$/Hz)')
+
+        # Compute residuals
+        residuals = Pxx[1:-2] - CAFit(f[1:-2], *popt)
+
+        # Computing residuals and plot in bottom subplot
+        residuals_norm = residuals / np.max(np.abs(residuals))
+
+        ax2.scatter(f[1:-2], residuals_norm, **scatter_opt)  # Use f for residuals
+        ax2.axhline(y=0, color='#162F65', linestyle='--')
+        ax2.set_ylim([-1, 1])
+        ax2.set_xlabel('Frequency (Hz)')
+        ax2.set_ylabel('Relative Residuals (%)')
+        
         # Saving figure (optional)
         if save_fig:
-
             fig.tight_layout()
-            save_filename = os.path.join(save_dir, 'CohnAlpha2')
+            save_filename = os.path.join(save_dir, 'CohnAlpha')
             fig.savefig(save_filename, dpi=300, bbox_inches='tight')
 
 
@@ -162,4 +173,4 @@ class CohnAlpha:
         
         # Outputting the PSD distribution and fit
         return f, Pxx, popt, pcov
-    # ---------------------------------------------------------------------------------------------------
+    # ---------------------------------------------------------------------------------------------------   
