@@ -590,7 +590,8 @@ class Analyzer:
         - hist: the Histogram Visual Settings dictionary.
         - index: the folder index, if applicable.'''
         
-
+        if ra['Fit range'][1] == 'Reset time':
+            ra['Fit range'][1] = ra['Reset time']
         # Construct a RossiHistogramFit object and plot it with the given settings.
         self.RABestFit['Best fit'] = fit.RossiHistogramFit(self.RAHist['Histogram'].counts,
                                               self.RAHist['Histogram'].bin_centers,
@@ -604,6 +605,7 @@ class Analyzer:
                                        hist,
                                        index,
                                        verbose)
+        ra['Fit range'][1] = 'Reset time'
 
 
 
