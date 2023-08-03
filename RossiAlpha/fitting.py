@@ -43,7 +43,7 @@ def exp_decay_2_param(x, a, b):
 #--------------------------------------------------------------------------------    
 
 class RossiHistogramFit:
-    def __init__(self, counts, bin_centers,timeDifMethod = 'any_and_all', fit_range = None  ):
+    def __init__(self, counts, bin_centers,timeDifMethod = 'aa', fit_range = None  ):
         
         '''
         Description:
@@ -161,7 +161,8 @@ class RossiHistogramFit:
                 alpha=0.6, color="b", align="center", edgecolor="k", linewidth=0.5, fill=True)
         
         prev_label = self.fitting_options.get('label')
-        self.fitting_options['label'] = (prev_label if prev_label != None else 'Fitted Curve') + (' (A=%5.3f, alpha=%5.3f, B=%5.3f)' % tuple(popt))
+        self.fitting_options['label'] = ((prev_label if prev_label != None else 'Fitted Curve') 
+                                         + f' (A={self.a:.3g}, alpha={self.alpha:.3g}, B={self.b:.3g})')
 
         ax1.plot(line_x, self.pred, 'r--', **self.fitting_options)
         ax1.legend()
@@ -251,7 +252,8 @@ class RossiHistogramFit:
         fig, (ax1, ax2) = plt.subplots(nrows=2, sharex=True, figsize=(8, 6), gridspec_kw={'height_ratios': [2, 1]})
 
         prev_label = self.fitting_options.get('label')
-        self.fitting_options['label'] = (prev_label if prev_label != None else 'Fitted Curve') + (' (A=%5.3f, alpha=%5.3f, B=%5.3f)' % tuple(popt))
+        self.fitting_options['label'] = ((prev_label if prev_label != None else 'Fitted Curve') 
+                                         + f' (A={self.a:.3g}, alpha={self.alpha:.3g}, B={self.b:.3g})')
 
         # Plotting histogram and fitting curve in top subplot
         ax1.bar(self.bin_centers, self.counts, width=0.8*(self.bin_centers[1]-self.bin_centers[0]), **self.hist_visual_options)

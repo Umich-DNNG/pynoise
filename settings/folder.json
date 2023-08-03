@@ -9,7 +9,7 @@
         "Verbose iterations": false
     },
     "RossiAlpha Settings": {
-        "Time difference method": "any_and_all cross_correlations no_repeat digital_delay",
+        "Time difference method": ["aa", "cc", "dd"],
         "Bin width": 30,
         "Reset time": 3000,
         "Fit range": [

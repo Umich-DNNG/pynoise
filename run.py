@@ -394,9 +394,10 @@ def raSplit(window: Tk, mode: str, parameters: set.Settings):
         return True
     # If time difference method is not any and all 
     # and channel column is None, throw an error.
-    if (parameters.settings['RossiAlpha Settings']['Time difference method'] != 'any_and_all' 
+    if (parameters.settings['RossiAlpha Settings']['Time difference method'] != 'aa' 
+    and parameters.settings['RossiAlpha Settings']['Time difference method'] != ['aa']
     and parameters.settings['Input/Output Settings']['Channels column'] == None):
-        gui.error('To analyze a file/folder with more than any_and_all, '
+        gui.error('To analyze a file/folder with more than any and all, '
                   + 'you must define a channels column.\n')
         return True
     # Get name of actual file/folder for later use.
