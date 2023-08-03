@@ -399,18 +399,18 @@ class Fit_With_Weighting:
        
         time_diff_centers = self.time_diff_centers[1:] - np.diff(self.time_diff_centers[:2])/2
         
-        fig, ax = plt.subplots()
+        fig, (ax1, ax2) = plt.subplots(nrows=2, sharex=True, figsize=(8, 6), gridspec_kw={'height_ratios': [2, 1]})
         
         # Creating a scatter plot with the data
-        ax.scatter(time_diff_centers, self.hist[:-1], **self.residual_options)
+        ax1.scatter(time_diff_centers, self.hist[:-1], **self.residual_options)
         
         if errorBars == "bar":
-            ax.errorbar(time_diff_centers, self.hist[:-1], yerr=self.uncertainties[:-1], fmt='o', ecolor='black',capsize=5)
+            ax1.errorbar(time_diff_centers, self.hist[:-1], yerr=self.uncertainties[:-1], fmt='o', ecolor='black',capsize=5)
         #ax.fill_between(time_diff_centers, self.hist[:-1] - self.uncertainties[:-1], self.hist[:-1] + self.uncertainties[:-1], alpha=0.3, color='gray')
         elif errorBars == "band":
             lower_bound = self.hist[:-1] - self.uncertainties[:-1]
             upper_bound = self.hist[:-1] + self.uncertainties[:-1]
-            ax.fill_between(time_diff_centers, lower_bound, upper_bound, alpha=0.3, color='gray')
+            ax1.fill_between(time_diff_centers, lower_bound, upper_bound, alpha=0.3, color='gray')
 
         prev_label = self.fitting_options.get('label')
         self.fitting_options['label'] = ((prev_label if prev_label != None else 'Fitted Curve')
@@ -419,12 +419,21 @@ class Fit_With_Weighting:
                                          + f'{self.b:.3g}' + ')')
 
         # Adding the fit to the data
-        ax.plot(self.xfit, self.pred, **self.fitting_options)
+        ax1.plot(self.xfit, self.pred, **self.fitting_options)
         
         # Setting the axis labels
-        ax.set_xlabel('Time difference (ns)')
-        ax.set_ylabel('Counts')
-        ax.legend()
+        ax1.set_xlabel('Time difference (ns)')
+        ax1.set_ylabel('Counts')
+        ax1.legend()
+
+        # Computing residuals and plot in bottom subplot
+        residuals = self.hist[:-1] - self.pred
+        residuals_norm = residuals / np.max(np.abs(residuals))
+        ax2.scatter(time_diff_centers, residuals_norm, **self.residual_options)
+        ax2.axhline(y=0, color='#162F65', linestyle='--')
+        ax2.set_ylim([-1, 1])
+        ax2.set_xlabel('Time difference (ns)')
+        ax2.set_ylabel('Relative residuals')
 
         if prev_label == None:
             self.fitting_options.pop('label')
@@ -440,5 +449,3 @@ class Fit_With_Weighting:
         # Displaying the plot (optional)
         if show_plot:
             plt.show()
-       
-
