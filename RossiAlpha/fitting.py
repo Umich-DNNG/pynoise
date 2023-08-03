@@ -443,12 +443,13 @@ class Fit_With_Weighting:
         ax1.legend()
 
         # Computing residuals and plot in bottom subplot
-        residuals = self.hist[fit_index] - self.pred
-        residuals_norm = residuals / np.max(np.abs(residuals))
+        # residuals = self.hist[fit_index] - self.pred
+        residuals = ((self.pred - self.hist[fit_index]) / self.hist[fit_index]) * 100
+        # residuals_norm = residuals / np.max(np.abs(residuals))
 
-        ax2.scatter(self.time_diff_centers[fit_index], residuals_norm, **self.residual_options)
+        ax2.scatter(self.time_diff_centers[fit_index], residuals, **self.residual_options)
         ax2.axhline(y=0, color='#162F65', linestyle='--')
-        ax2.set_ylim([-1, 1])
+        # ax2.set_ylim([-100, 100])
         ax2.set_xlabel('Time difference (ns)')
         ax2.set_ylabel('Relative residuals (%)')
 
