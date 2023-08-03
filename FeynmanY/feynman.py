@@ -215,7 +215,7 @@ class FeynmanY:
         ax2.axhline(y=0, color='#162F65', linestyle='--')
         # ax2.set_ylim([-1, 1])
         ax2.set_xlabel('Tau Values')
-        ax2.set_ylabel('Relative Residuals (%)')
+        ax2.set_ylabel('Percent difference (%)')
 
         prev_label = fit_opt.get('label')
         fit_opt['label'] = (prev_label if prev_label != None else 'Fitted Curve') + f' (gamma={self.gamma:.3g}, alpha={self.alpha:.3g})'
