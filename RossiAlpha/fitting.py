@@ -279,12 +279,13 @@ class RossiHistogramFit:
             self.fitting_options['label'] = prev_label
 
         # Computing residuals and plot in bottom subplot
-        self.residuals = self.counts[fit_index] - self.pred
-        residuals_norm = self.residuals / np.max(np.abs(self.residuals))
+        # self.residuals = self.counts[fit_index] - self.pred
+        self.residuals = ((self.pred - self.counts[fit_index]) / self.counts[fit_index]) * 100
+        # residuals_norm = self.residuals / np.max(np.abs(self.residuals))
 
         index = (time_diff_centers >= xfit[0]) & (time_diff_centers <= xfit[-1])
 
-        ax2.scatter(time_diff_centers[index], residuals_norm, **self.residual_options)
+        ax2.scatter(time_diff_centers[index], self.residuals, **self.residual_options)
         ax2.axhline(y=0, color='#162F65', linestyle='--')
         ax2.set_ylim([-1, 1])
         ax2.set_xlabel("Time Differences(ns)")
