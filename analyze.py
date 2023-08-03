@@ -42,7 +42,8 @@ class Analyzer:
         self.RAHist = {'Histogram': [],
                        'Bin width': None}
         self.RABestFit = {'Best fit': [],
-                          'Fit range': None}
+                          'Fit minimum': [],
+                          'Fit maximum': []}
         self.CohnAlpha = {}
         self.FeynmanY = {}
 
@@ -632,36 +633,48 @@ class Analyzer:
         - folder: whether or not this is for folder analysis.'''
         
         self.RABestFit['Best fit'].clear()
-        if ra['Fit range'][1] == 'Reset time':
-            ra['Fit range'][1] = ra['Reset time']
-            auto = True
+        self.RABestFit['Fit minimum'].clear()
+        self.RABestFit['Fit maximum'].clear()
+        if isinstance(ra['Fit maximum'],list):
+            for i in range(0,len(ra['Fit maximum'])):
+                if ra['Fit maximum'][i] == None:
+                    self.RABestFit['Fit maximum'].append(ra['Reset time'])
+                else:
+                    self.RABestFit['Fit maximum'].append(ra['Fit maximum'][i])
         else:
-            auto = False
-        for i in range(0, len(self.RAHist['Histogram'])):
-            # Construct a RossiHistogramFit object and plot it with the given settings.
-            self.RABestFit['Best fit'].append(fit.RossiHistogramFit(self.RAHist['Histogram'][i].counts,
-                                                self.RAHist['Histogram'][i].bin_centers,
-                                                self.RATimeDifs['Time difference method'][i],
-                                                ra['Fit range']))
-            input =  self.RATimeDifs['Input file/folder']
-            if folder:
-                input = input[input[:input.rfind('/')].rfind('/')+1:].replace('/','-')
+            if ra['Fit maximum'] == None:
+                self.RABestFit['Fit maximum'].append(ra['Reset time'])
             else:
-                input = input[input.rfind('/')+1:]
-            self.RABestFit['Best fit'][i].fit_and_residual(save,
-                                                           output,
-                                                           show,
-                                                           line,
-                                                           res,
-                                                           hist,
-                                                           input,
-                                                           self.RATimeDifs['Time difference method'][i],
-                                                           folder,
-                                                           verbose)
-            pyplot.close()
-        if auto:
-            ra['Fit range'][1] = 'Reset time'
-        self.RABestFit['Fit range'] = ra['Fit range']
+                self.RABestFit['Fit maximum'].append(ra['Fit maximum'])
+        if isinstance(ra['Fit minimum'],list):
+            for i in range(0,len(ra['Fit minimum'])):
+                self.RABestFit['Fit minimum'].append(ra['Fit minimum'][i])
+        else:
+            self.RABestFit['Fit minimum'].append(ra['Fit minimum'])
+        for i in range(0, len(self.RAHist['Histogram'])):
+            for j in range(0, len(self.RABestFit['Fit minimum'])):
+                # Construct a RossiHistogramFit object and plot it with the given settings.
+                self.RABestFit['Best fit'].append(fit.RossiHistogramFit(self.RAHist['Histogram'][i].counts,
+                                                    self.RAHist['Histogram'][i].bin_centers,
+                                                    self.RATimeDifs['Time difference method'][i],
+                                                    self.RABestFit['Fit minimum'][j],
+                                                    self.RABestFit['Fit maximum'][j]))
+                input =  self.RATimeDifs['Input file/folder']
+                if folder:
+                    input = input[input[:input.rfind('/')].rfind('/')+1:].replace('/','-')
+                else:
+                    input = input[input.rfind('/')+1:]
+                self.RABestFit['Best fit'][i*len(self.RABestFit['Fit minimum'])+j].fit_and_residual(save,
+                                                            output,
+                                                            show,
+                                                            line,
+                                                            res,
+                                                            hist,
+                                                            input,
+                                                            self.RATimeDifs['Time difference method'][i],
+                                                            folder,
+                                                            verbose)
+                pyplot.close()
 
 
 
@@ -712,6 +725,7 @@ class Analyzer:
         # Close all currently open plots.
         pyplot.close()
         # If exporting raw data:
+        # TODO: Fix data exporting.
         if settings['Input/Output Settings']['Save raw data'] == True:
             # Initialize variables.
             begin = []
@@ -800,6 +814,7 @@ class Analyzer:
             # Close all open plots.
             pyplot.close()
             # If exporting raw data for individual folders:
+            # TODO: Fix data exporting.
             if settings['Input/Output Settings']['Save raw data'] == True and settings['General Settings']['Verbose iterations'] == True:
                 # Initialize variables.
                 begin = []
@@ -837,6 +852,26 @@ class Analyzer:
                 window.wait_variable(wait)
         # Restore the original folder pathway.
         settings['Input/Output Settings']['Input file/folder'] = original
+        auto = []
+        if isinstance(settings['RossiAlpha Settings']['Fit maximum'], list):
+            for i in range(0,len(settings['RossiAlpha Settings']['Fit maximum'])):
+                if settings['RossiAlpha Settings']['Fit maximum'][i] == None:
+                    settings['RossiAlpha Settings']['Fit maximum'][i] = settings['RossiAlpha Settings']['Reset time']
+                    auto.append(True)
+                else:
+                    auto.append(False)
+        else:
+            if settings['RossiAlpha Settings']['Fit maximum'] == None:
+                settings['RossiAlpha Settings']['Fit maximum'] = [settings['RossiAlpha Settings']['Reset time']]
+                auto = True
+            else:
+                settings['RossiAlpha Settings']['Fit maximum'] = [settings['RossiAlpha Settings']['Fit maximum']]
+                auto = False
+        if not isinstance(settings['RossiAlpha Settings']['Fit minimum'], list):
+            settings['RossiAlpha Settings']['Fit minimum'] = [settings['RossiAlpha Settings']['Fit minimum']]
+            min_single = True
+        else:
+            min_single = False
         for i in range(0, len(RA_hist_array)):
             # Compute the histogram standard deviation and total.
             RA_std_dev.append(np.std(RA_hist_array[i], axis=0, ddof=1))
@@ -848,30 +883,37 @@ class Analyzer:
             uncertainties[i] = self.replace_zeroes(uncertainties[i])
             # Add the time difference centers and uncertainties to the total histogram.
             RA_hist_total[i] = np.vstack((RA_hist_total[i], time_diff_centers[i], uncertainties[i]))
-            if settings['RossiAlpha Settings']['Fit range'][1] == 'Reset time':
-                settings['RossiAlpha Settings']['Fit range'][1] = settings['RossiAlpha Settings']['Reset time']
-                auto = True
-            else:
-                auto = False
-            # Create a fit object for the total histogram.
-            thisWeightedFit = fit.Fit_With_Weighting(RA_hist_total[i],
-                                                    settings['RossiAlpha Settings']['Fit range'],
-                                                    settings['Input/Output Settings']['Save directory'],
-                                                    settings['Line Fitting Settings'], 
-                                                    settings['Scatter Plot Settings'])
-            # Fit the total histogram with weighting.
-            thisWeightedFit.fit_RA_hist_weighting()
-            # Plot the total histogram fit.
-            thisWeightedFit.plot_RA_and_fit(settings['Input/Output Settings']['Save figures'], 
-                                            settings['General Settings']['Show plots'],
-                                            settings['RossiAlpha Settings']['Error Bar/Band'],
-                                            settings['Input/Output Settings']['Input file/folder'][settings['Input/Output Settings']['Input file/folder'].rfind('/')+1:],
-                                            self.RATimeDifs['Time difference method'][i])
+            for j in range(0, len(settings['RossiAlpha Settings']['Fit minimum'])):
+                # Create a fit object for the total histogram.
+                thisWeightedFit = fit.Fit_With_Weighting(RA_hist_total[i],
+                                                        settings['RossiAlpha Settings']['Fit minimum'][j],
+                                                        settings['RossiAlpha Settings']['Fit maximum'][j],
+                                                        settings['Input/Output Settings']['Save directory'],
+                                                        settings['Line Fitting Settings'], 
+                                                        settings['Scatter Plot Settings'])
+                # Fit the total histogram with weighting.
+                thisWeightedFit.fit_RA_hist_weighting()
+                # Plot the total histogram fit.
+                thisWeightedFit.plot_RA_and_fit(settings['Input/Output Settings']['Save figures'], 
+                                                settings['General Settings']['Show plots'],
+                                                settings['RossiAlpha Settings']['Error Bar/Band'],
+                                                settings['Input/Output Settings']['Input file/folder'][settings['Input/Output Settings']['Input file/folder'].rfind('/')+1:],
+                                                self.RATimeDifs['Time difference method'][i])
+        if isinstance(auto, bool):
             if auto:
-                settings['RossiAlpha Settings']['Fit range'][1] = 'Reset time'
+                settings['RossiAlpha Settings']['Fit maximum'] = None
+            else:
+                settings['RossiAlpha Settings']['Fit maximum'] = settings['RossiAlpha Settings']['Fit maximum'][0]
+        else:
+            for i in range(0,len(auto)):
+                if auto[i]:
+                    settings['RossiAlpha Settings']['Fit maximum'][i] = None
+        if min_single:
+            settings['RossiAlpha Settings']['Fit minimum'] = settings['RossiAlpha Settings']['Fit minimum'][0]
         # Close all open plots.
         pyplot.close()
         # If saving raw data:
+        # TODO: Fix data exporting.
         if settings['Input/Output Settings']['Save raw data'] == True:
             begin = []
             end = []

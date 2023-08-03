@@ -392,17 +392,18 @@ def raSplit(window: Tk, mode: str, parameters: set.Settings):
                   + 'directory does not exist.\n\nPlease make sure '
                   + 'to adjust this before running any analysis.\n')
         return True
+     # Get name of actual file/folder for later use.
+    name = parameters.settings['Input/Output Settings']['Input file/folder']
+    name = name[name.rfind('/')+1:]
     # If time difference method is not any and all 
     # and channel column is None, throw an error.
     if (parameters.settings['RossiAlpha Settings']['Time difference method'] != 'aa' 
     and parameters.settings['RossiAlpha Settings']['Time difference method'] != ['aa']
-    and parameters.settings['Input/Output Settings']['Channels column'] == None):
+    and parameters.settings['Input/Output Settings']['Channels column'] == None
+    and name.count('.') > 0):
         gui.error('To analyze a file/folder with more than any and all, '
                   + 'you must define a channels column.\n')
         return True
-    # Get name of actual file/folder for later use.
-    name = parameters.settings['Input/Output Settings']['Input file/folder']
-    name = name[name.rfind('/')+1:]
     # If name has a . in it, assume a single file.
     if name.count('.') > 0:
         # Split on the analysis type.
