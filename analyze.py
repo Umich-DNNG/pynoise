@@ -592,6 +592,9 @@ class Analyzer:
         
         if ra['Fit range'][1] == 'Reset time':
             ra['Fit range'][1] = ra['Reset time']
+            auto = True
+        else:
+            auto = False
         # Construct a RossiHistogramFit object and plot it with the given settings.
         self.RABestFit['Best fit'] = fit.RossiHistogramFit(self.RAHist['Histogram'].counts,
                                               self.RAHist['Histogram'].bin_centers,
@@ -605,7 +608,8 @@ class Analyzer:
                                        hist,
                                        index,
                                        verbose)
-        ra['Fit range'][1] = 'Reset time'
+        if auto:
+            ra['Fit range'][1] = 'Reset time'
 
 
 
@@ -788,9 +792,14 @@ class Analyzer:
         uncertainties = self.replace_zeroes(uncertainties)
         # Add the time difference centers and uncertainties to the total histogram.
         RA_hist_total = np.vstack((RA_hist_total, time_diff_centers, uncertainties))
+        if settings['RossiAlpha Settings']['Fit range'][1] == 'Reset time':
+            settings['RossiAlpha Settings']['Fit range'][1] = settings['RossiAlpha Settings']['Reset time']
+            auto = True
+        else:
+            auto = False
         # Create a fit object for the total histogram.
         thisWeightedFit = fit.Fit_With_Weighting(RA_hist_total,
-                                                 settings['General Settings'],
+                                                 settings['RossiAlpha Settings']['Fit range'],
                                                  settings['Input/Output Settings']['Save directory'],
                                                  settings['Line Fitting Settings'], 
                                                  settings['Scatter Plot Settings'])
@@ -800,6 +809,8 @@ class Analyzer:
         thisWeightedFit.plot_RA_and_fit(settings['Input/Output Settings']['Save figures'], 
                                         settings['General Settings']['Show plots'],
                                         settings['RossiAlpha Settings']['Error Bar/Band'])
+        if auto:
+            settings['RossiAlpha Settings']['Fit range'][1] = 'Reset time'
         # Close all open plots.
         pyplot.close()
         # If saving raw data:

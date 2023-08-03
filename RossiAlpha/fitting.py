@@ -297,7 +297,7 @@ class RossiHistogramFit:
 #--------------------------------------------------------------------------------
 
 class Fit_With_Weighting:
-    def __init__(self,RA_hist_totals, general_settings: dict, saveDir: str, fitting_opts: dict, residual_opts: dict):
+    def __init__(self,RA_hist_totals, fit_range: dict, saveDir: str, fitting_opts: dict, residual_opts: dict):
 
         '''
         Description:
@@ -323,7 +323,7 @@ class Fit_With_Weighting:
         self.num_bins = np.size(RA_hist_totals[0])
         self.time_diff_centers = RA_hist_totals[1]
         self.uncertainties = RA_hist_totals[2]
-        self.fit_range = general_settings['Fit range']
+        self.fit_range = fit_range
         self.save_dir = saveDir
         self.a = None
         self.b = None
