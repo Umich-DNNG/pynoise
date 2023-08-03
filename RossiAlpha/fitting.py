@@ -439,6 +439,7 @@ class Fit_With_Weighting:
         # Setting the axis labels
         ax1.set_xlabel('Time difference (ns)')
         ax1.set_ylabel('Counts')
+        ax1.set_title('Weighted Fit Using ' + method)
         ax1.legend()
 
         # Computing residuals and plot in bottom subplot
