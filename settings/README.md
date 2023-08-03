@@ -19,7 +19,6 @@ These settings are applicable to all three methods.
 
 These settings are applicable to all three methods.
 
-- "Fit range": [0.0, 1000.0] represents the range of fittig
 - "Number of folders": 10 represents the number of folders that you want to conduct the analysis on (only for multi-folder analysis)
 - "Verbose iterations": false represents... TODO
 - "Sort data": true represents whether the input data should be sorted
@@ -31,12 +30,12 @@ These settings are applicable to all three methods.
 These settings are ONLY applicable to the Rossi-Alpha method.
 
 - "Time difference method": "any_and_all" represents the time difference method performed on the data input
-- "Digital delay": 750 represents... TODO
+- "Digital delay": 750 represents... TODO- "Reset time": 1000 represents... TODO
+- "Reset time": 1000 denotes the end of fit range
 - "Combine Calc and Binning": false represents whether calculating the binning and the creating the histogram should be combined
-- "Reset time": 1000 represents... TODO
 - "Bin width": 9 represents the width of the histogram bins
 - "Error Bar/Band": "band" represents the type of measuring the error
-- "Minimum cutoff": 30 represents when the line fitting should start
+- "Fit range": [30.0, "Reset time"] represents the range of fitting
 
 
 ## CohnAlpha Settings
