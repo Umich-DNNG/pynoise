@@ -16,19 +16,18 @@ class timeDifCalcs:
     '''The tiem differences object that stores 
     events and calculates time differences.'''
 
-    def __init__(self, events: list[Event], reset_time: float = None, method: str = 'any_and_all', digital_delay: int = None):
+    def __init__(self, events: list[Event], reset_time: float = None, method: str = 'aa', digital_delay: int = None):
         
         '''Initializes a time difference object. Autogenerates variables where necessary.
     
         Inputs:
         - events: the list of measurement times for each data point.
         - digital_delay: the amount of digital delay, if 
-        applicable. Only required when using the any_and_all 
-        cross_correlations no_repeat digital_delay method.
+        applicable. Only required when using the dd method.
         - reset_time: the maximum time difference allowed. If 
         not given, will autogenerate the best reset time.
         - method: the method of calculating time 
-        differences (assumes any_and_all).'''
+        differences (assumes aa).'''
         
 
         # Store events as a list.
@@ -42,7 +41,7 @@ class timeDifCalcs:
         # Store the method of analysis.
         self.method = method
         # When considering digital delay, store given digital delay.
-        if self.method == 'any_and_all cross_correlations no_repeat digital_delay':
+        if self.method == 'dd':
             self.digital_delay = digital_delay
         # Initialize the blank time differences.
         self.timeDifs = None
@@ -77,16 +76,16 @@ class timeDifCalcs:
                     break
                 # If the method is any and all, continue. Otherwise, assure 
                 # that the channels are different between the two data points.
-                if((self.method == 'any_and_all') or self.events[j].channel != self.events[i].channel):
+                if((self.method == 'aa') or self.events[j].channel != self.events[i].channel):
                     # If the method is any and all or cross_correlation, continue. Otherwise, 
                     # check that the current data point's channel is not in the bank.
-                    if(self.method == 'any_and_all' or 
-                       self.method == 'any_and_all cross_correlations' or 
+                    if(self.method == 'aa' or 
+                       self.method == 'cc' or 
                        self.events[j].channel not in ch_bank):
                         # Add the current time difference to the list.
                         time_diffs = np.append(time_diffs,(self.events[j].time - self.events[i].time))
                     # If digital delay is on:
-                    elif(self.method == 'any_and_all cross_correlations no_repeat digital_delay'):
+                    elif(self.method == 'dd'):
                         # Skip to the nearest data point after the
                         # current one with the digital delay added.
                         stamped_time = self.events[i].time
@@ -94,7 +93,7 @@ class timeDifCalcs:
                            i += 1
                         prevent = True
                     # Add the current channel to the channel bank if considering channels.
-                    if(self.method != "any_and_all"):
+                    if(self.method != "aa"):
                         ch_bank.add(self.events[j].channel)
             # Iterate to the next data point without double counting for digital delay.
             if not prevent:
@@ -109,6 +108,7 @@ class timeDifCalcs:
 
 
     def calculateTimeDifsAndBin(self, 
+                                input:str,
                                 bin_width:int = None, 
                                 save_fig:bool = False, 
                                 show_plot:bool = True, 
@@ -162,10 +162,10 @@ class timeDifCalcs:
                     break
                 # If the method is any and all, continue. Otherwise, assure 
                 # that the channels are different between the two data points.
-                if((self.method == 'any_and_all') or self.events[j].channel != self.events[i].channel):
+                if((self.method == 'aa') or self.events[j].channel != self.events[i].channel):
                     # If the method is any and all or cross_correlation, continue. Otherwise, 
                     # check that the current data point's channel is not in the bank.
-                    if(self.method == 'any_and_all' or self.method == 'any_and_all cross_correlations' or self.events[j].channel not in ch_bank):
+                    if(self.method == 'aa' or self.method == 'cc' or self.events[j].channel not in ch_bank):
                         # Store the current time difference.
                         thisDif = self.events[j].time - self.events[i].time
                         # Calculate the bin index for the current time difference.
@@ -177,7 +177,7 @@ class timeDifCalcs:
                         # Increase the histogram count in the appropriate bin.
                         histogram[binIndex] += 1    
                     # If digital delay is on:
-                    elif(self.method == 'any_and_all cross_correlations no_repeat digital_delay'):
+                    elif(self.method == 'dd'):
                         # Skip to the nearest data point after the
                         # current one with the digital delay added.
                         stamped_time = self.events[i]
@@ -185,7 +185,7 @@ class timeDifCalcs:
                            i += 1
                         prevent = True
                     # Add the current channel to the channel bank if considering channels.
-                    if(self.method != "any_and_all"):
+                    if(self.method != "aa"):
                         ch_bank.add(self.events[j].channel)
             # Iterate to the next data point.
             if not prevent:
@@ -198,6 +198,6 @@ class timeDifCalcs:
         # Constuct the rossiHistogram object and plot accordingly.
         rossiHistogram = plt.RossiHistogram(bin_width= bin_width, reset_time=self.reset_time)
         rossiHistogram.initFromHist(histogram,bin_centers,bin_edges)
-        rossiHistogram.plotFromHist(plot_opts,save_fig,show_plot,save_dir,folder,verbose)
+        rossiHistogram.plotFromHist(input,self.method,plot_opts,save_fig,show_plot,save_dir,folder,verbose)
         # Return the rossiHistogram object and related NP arrays.
         return rossiHistogram, histogram, bin_centers, bin_edges
