@@ -289,7 +289,7 @@ class RossiHistogramFit:
         ax2.axhline(y=0, color='#162F65', linestyle='--')
         ax2.set_ylim([-1, 1])
         ax2.set_xlabel("Time Differences(ns)")
-        ax2.set_ylabel('Relative Residuals (%)')
+        ax2.set_ylabel('Percent difference (%)')
 
         # Setting title for entire figure
         fig.suptitle('Fit Using ' + self.timeDifMethod, fontsize=14)
@@ -452,7 +452,7 @@ class Fit_With_Weighting:
         ax2.axhline(y=0, color='#162F65', linestyle='--')
         # ax2.set_ylim([-100, 100])
         ax2.set_xlabel('Time difference (ns)')
-        ax2.set_ylabel('Relative residuals (%)')
+        ax2.set_ylabel('Percent difference (%)')
 
         if prev_label == None:
             self.fitting_options.pop('label')

@@ -159,7 +159,7 @@ class CohnAlpha:
         ax2.axhline(y=0, color='#162F65', linestyle='--')
         # ax2.set_ylim([-1, 1])
         ax2.set_xlabel('Frequency (Hz)')
-        ax2.set_ylabel('Relative Residuals (%)')
+        ax2.set_ylabel('Percent difference (%)')
         
         # Saving figure (optional)
         if save_fig:
