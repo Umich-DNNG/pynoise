@@ -32,16 +32,16 @@ class Analyzer:
 
         # Initialize the variables used to determine whether 
         # or not certain elements have to be recreated.
-        self.RATimeDifs = {'Time differences': None,
+        self.RATimeDifs = {'Time differences': [],
                            'Input file/folder': None,
                            'Number of folders': None,
                            'Sort data': None,
-                           'Time difference method': None,
+                           'Time difference method': [],
                            'Digital delay': None,
                            'Reset time': None}
-        self.RAHist = {'Histogram': None,
+        self.RAHist = {'Histogram': [],
                        'Bin width': None}
-        self.RABestFit = {'Best fit': None,
+        self.RABestFit = {'Best fit': [],
                           'Fit range': None}
         self.CohnAlpha = {}
         self.FeynmanY = {}
@@ -357,10 +357,13 @@ class Analyzer:
         - folder: the number of folders (0 if single file).'''
         
 
-        # Load the data according to its file type.
-        # TODO: Add folder modular support.
+        # Clear out the current time difference data if not in folder mode.
+        if folder == 0:
+            self.RATimeDifs['Time differences'].clear()
+            self.RATimeDifs['Time difference method'].clear()
         # Create an empty data list.
         data = []
+        # Load the data according to its file type.
         if io['Input file/folder'].endswith(".txt"):
             data = evt.createEventsListFromTxtFile(io['Input file/folder'],
                                                    io['Time column'],
@@ -390,15 +393,22 @@ class Analyzer:
         # Sort the data if applicable.
         if sort:
             data.sort(key=lambda Event: Event.time)
-        # Create the time difference object and calculate 
-        # the time differences with the given settings.
-        self.RATimeDifs['Time differences'] = dif.timeDifCalcs(data, reset, method, delay)
-        self.RATimeDifs['Time differences'] = self.RATimeDifs['Time differences'].calculateTimeDifsFromEvents()
+        # If methods is a list, create a time difference for each instance.
+        if isinstance(method, list):
+            for type in method:
+                self.RATimeDifs['Time differences'].append(dif.timeDifCalcs(data, reset, type, delay))
+                self.RATimeDifs['Time difference method'].append(type)
+        # Otherwise, just create one with the given method.
+        else:
+            self.RATimeDifs['Time differences'].append(dif.timeDifCalcs(data, reset, method, delay))
+            self.RATimeDifs['Time difference method'].append(method)
+        # For each time difs object, create the time differences.
+        for i in range(0,len(self.RATimeDifs['Time differences'])):
+            self.RATimeDifs['Time differences'][i] = self.RATimeDifs['Time differences'][i].calculateTimeDifsFromEvents()
         # Save the current relevant settings.
         self.RATimeDifs['Input file/folder'] = io['Input file/folder']
         self.RATimeDifs['Sort data'] = sort
         self.RATimeDifs['Number of folders'] = folder
-        self.RATimeDifs['Time difference method'] = method
         self.RATimeDifs['Digital delay'] = delay
         self.RATimeDifs['Reset time'] = reset
         
@@ -428,9 +438,16 @@ class Analyzer:
         - verbose: whether or not individual files should be outputted.'''
         
 
-        # Create a RossiHistogram object and plot the data with the given settings.
-        self.RAHist['Histogram'] = plt.RossiHistogram(self.RATimeDifs['Time differences'], width, reset)
-        self.RAHist['Histogram'].plot(save, show, output, vis, folder, verbose)
+        # Clear out the current time difference data if not in folder mode.
+        if not folder:
+            self.RAHist['Histogram'].clear()
+        # Create a RossiHistogram object for each time difference.
+        for time_dif in self.RATimeDifs['Time differences']:
+            self.RAHist['Histogram'].append(plt.RossiHistogram(time_dif, width, reset))
+        # Plot each histogram.
+        for i in range (0, len(self.RAHist['Histogram'])):
+            self.RAHist['Histogram'][i].plot(save, show, output, vis, folder, verbose)
+        # Store the current setting.
         self.RAHist['Bin width'] = width
 
 
@@ -438,8 +455,8 @@ class Analyzer:
     def calculateTimeDifsAndPlot(self,
                                  io:dict,
                                  gen:dict,
-                                 raGen:dict,
-                                 raVis:dict,
+                                 ra:dict,
+                                 hist:dict,
                                  folder:bool = False):
 
         '''Simultaneously calculate the time 
@@ -448,15 +465,19 @@ class Analyzer:
         Inputs:
         - io: the Input/Output Settings dictionary.
         - gen: the General Settings dictionary.
-        - raGen: the RossiAlpha Settings dictionary.
-        - raVis: the Histogram Visual Settings dictionary.
+        - ra: the RossiAlpha Settings dictionary.
+        - hist: the Histogram Visual Settings dictionary.
         - folder: whether or not this is for folder analysis.'''
 
 
-        # Reset the time differences.
-        self.RATimeDifs['Time differences'] = None
-        # Create an empty data list.
+        # Clear out the current data if not in folder mode.
+        if not folder:
+            self.RATimeDifs['Time differences'].clear()
+            self.RATimeDifs['Time difference method'].clear()
+            self.RAHist['Histogram'].clear()
+        # Create empty data and time difference lists.
         data = []
+        timeDifCalcs = []
         # Load the data according to its file type.
         if io['Input file/folder'].endswith(".txt"):
             data = evt.createEventsListFromTxtFile(io['Input file/folder'],
@@ -487,19 +508,32 @@ class Analyzer:
         # Sort the data if applicable.
         if gen['Sort data']:
             data.sort(key=lambda Event: Event.time)
-        # Construct a time differences object with the given settings.
-        thisTimeDifCalc = dif.timeDifCalcs(data, raGen['Reset time'], raGen['Time difference method'], raGen['Digital delay'])
+        # If methods is a list, create a time difference for each instance.
+        if isinstance(ra['Time difference method'], list):
+            for type in ra['Time difference method']:
+                self.RATimeDifs['Time differences'].append(dif.timeDifCalcs(data, ra['Reset time'], type, ra['Digital delay']))
+                self.RATimeDifs['Time difference method'].append(type)
+        # Otherwise, just create one with the given method.
+        else:
+            self.RATimeDifs['Time differences'].append(dif.timeDifCalcs(data, ra['Reset time'], ra['Time difference method'], ra['Digital delay']))
+            self.RATimeDifs['Time difference method'].append(ra['Time difference method'])
         # Simulatenously calculate the time differences and bin them.
-        self.RAHist['Histogram'], counts, bin_centers, bin_edges = thisTimeDifCalc.calculateTimeDifsAndBin(raGen['Bin width'],
-                                                                                                 io['Save figures'],
-                                                                                                 gen['Show plots'],
-                                                                                                 io['Save directory'],
-                                                                                                 raVis,
-                                                                                                 folder,
-                                                                                                 gen['Verbose iterations'])
-        # Save the input and method of analysis.
+        for i in range (0, len(timeDifCalcs)):
+            currentHist, counts, bin_centers, bin_edges = timeDifCalcs[i].calculateTimeDifsAndBin(ra['Bin width'],
+                                                                                                    io['Save figures'],
+                                                                                                    gen['Show plots'],
+                                                                                                    io['Save directory'],
+                                                                                                    hist,
+                                                                                                    folder,
+                                                                                                    gen['Verbose iterations'])
+            self.RAHist['Histogram'].append(currentHist)
+        # Save the current settings.
         self.RATimeDifs['Input file/folder'] = io['Input file/folder']
-        self.RATimeDifs['Time difference method'] = raGen['Time difference method']
+        self.RATimeDifs['Sort data'] = gen['Sort data']
+        self.RATimeDifs['Number of folders'] = folder
+        self.RATimeDifs['Digital delay'] = ra['Digital delay']
+        self.RATimeDifs['Reset time'] = ra['Reset time']
+        self.RAHist['Bin width'] = ra['Bin width']
 
 
 
@@ -516,7 +550,7 @@ class Analyzer:
         # Create a dictionary of the current relevant settings.
         check = {'Input file/folder': settings['Input/Output Settings']['Input file/folder'],
                 'Sort data': settings['General Settings']['Sort data'],
-                'Time difference method': settings['RossiAlpha Settings']['Time difference method'],
+                'Time difference method': (settings['RossiAlpha Settings']['Time difference method'] if isinstance(settings['RossiAlpha Settings']['Time difference method'], list) else [settings['RossiAlpha Settings']['Time difference method']]),
                 'Digital delay': settings['RossiAlpha Settings']['Digital delay'],
                 'Reset time': settings['RossiAlpha Settings']['Reset time']}
         # Get the name of the input.
@@ -590,26 +624,30 @@ class Analyzer:
         - hist: the Histogram Visual Settings dictionary.
         - index: the folder index, if applicable.'''
         
+        if index == None:
+            self.RABestFit['Best fit'].clear()
         if ra['Fit range'][1] == 'Reset time':
             ra['Fit range'][1] = ra['Reset time']
             auto = True
         else:
             auto = False
-        # Construct a RossiHistogramFit object and plot it with the given settings.
-        self.RABestFit['Best fit'] = fit.RossiHistogramFit(self.RAHist['Histogram'].counts,
-                                              self.RAHist['Histogram'].bin_centers,
-                                              ra['Time difference method'],
-                                              ra['Fit range'])
-        self.RABestFit['Best fit'].fit_and_residual(save,
-                                       output,
-                                       show,
-                                       line,
-                                       res,
-                                       hist,
-                                       index,
-                                       verbose)
+        for i in range(0, len(self.RAHist['Histogram'])):
+            # Construct a RossiHistogramFit object and plot it with the given settings.
+            self.RABestFit['Best fit'].append(fit.RossiHistogramFit(self.RAHist['Histogram'][i].counts,
+                                                self.RAHist['Histogram'][i].bin_centers,
+                                                self.RATimeDifs['Time difference method'][i],
+                                                ra['Fit range']))
+            self.RABestFit['Best fit'][i].fit_and_residual(save,
+                                        output,
+                                        show,
+                                        line,
+                                        res,
+                                        hist,
+                                        index,
+                                        verbose)
         if auto:
             ra['Fit range'][1] = 'Reset time'
+        self.RABestFit['Fit range'] = ra['Fit range']
 
 
 
@@ -626,7 +664,7 @@ class Analyzer:
         # Create a dictionary of the current relevant settings.
         check = {'Input file/folder': settings['Input/Output Settings']['Input file/folder'],
                 'Sort data': settings['General Settings']['Sort data'],
-                'Time difference method': settings['RossiAlpha Settings']['Time difference method'],
+                'Time difference method': (settings['RossiAlpha Settings']['Time difference method'] if isinstance(settings['RossiAlpha Settings']['Time difference method'], list) else [settings['RossiAlpha Settings']['Time difference method']]),
                 'Digital delay': settings['RossiAlpha Settings']['Digital delay'],
                 'Reset time': settings['RossiAlpha Settings']['Reset time'],
                 'Bin width': settings['RossiAlpha Settings']['Bin width']}

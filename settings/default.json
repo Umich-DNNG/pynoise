@@ -16,7 +16,7 @@
         "Show plots": false
     },
     "RossiAlpha Settings": {
-        "Time difference method": "any_and_all",
+        "Time difference method": "aa",
         "Digital delay": 750,
         "Reset time": 1000,
         "Combine Calc and Binning": false,
