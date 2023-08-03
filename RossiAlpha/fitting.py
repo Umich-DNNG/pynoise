@@ -43,7 +43,7 @@ def exp_decay_2_param(x, a, b):
 #--------------------------------------------------------------------------------    
 
 class RossiHistogramFit:
-    def __init__(self, counts, bin_centers,timeDifMethod = 'aa', fit_range = None  ):
+    def __init__(self, counts, bin_centers,timeDifMethod = 'aa', begin = None, end = None):
         
         '''
         Description:
@@ -62,9 +62,12 @@ class RossiHistogramFit:
         # Required parameters
         self.counts = counts
         self.bin_centers = bin_centers
-        self.fit_range = fit_range
+        if begin == None:
+            begin = min(bin_centers)
+        if end == None:
+            end = max(bin_centers)
+        self.fit_range = [begin, end]
         self.timeDifMethod = timeDifMethod
-
         self.save_fig = False
         self.save_dir = "./data"
         self.show_plot = True
@@ -77,8 +80,7 @@ class RossiHistogramFit:
         self.pred = None
         self.residuals = None
 
-        if fit_range is None:
-            self.fit_range = [min(bin_centers), max(bin_centers)] 
+
 
 
     def fit(self, save_fig: bool = True, save_dir = './data', show_plot: bool = True, fitting_opts = None,hist_visual_opts = None):
@@ -287,7 +289,6 @@ class RossiHistogramFit:
 
         ax2.scatter(time_diff_centers[index], self.residuals, **self.residual_options)
         ax2.axhline(y=0, color='#162F65', linestyle='--')
-        ax2.set_ylim([-1, 1])
         ax2.set_xlabel("Time Differences(ns)")
         ax2.set_ylabel('Percent difference (%)')
 
@@ -297,7 +298,7 @@ class RossiHistogramFit:
         # Adjusting layout and saving figure (optional)
         if self.save_fig and (not folder or verbose):
             fig.tight_layout()
-            save_filename = os.path.join(self.save_dir, 'fit_and_res_' + input + '_' + method)
+            save_filename = os.path.join(self.save_dir, 'fit_and_res_' + input + '_' + method.replace(' ','_') + '_' + str(self.fit_range[0]) + '-' + str(self.fit_range[1]) + '.png')
             fig.savefig(save_filename, dpi=300, bbox_inches='tight')
 
         # Showing plot (optional)
@@ -309,7 +310,7 @@ class RossiHistogramFit:
 #--------------------------------------------------------------------------------
 
 class Fit_With_Weighting:
-    def __init__(self,RA_hist_totals, fit_range: dict, saveDir: str, fitting_opts: dict, residual_opts: dict):
+    def __init__(self,RA_hist_totals, begin, end, saveDir: str, fitting_opts: dict, residual_opts: dict):
 
         '''
         Description:
@@ -335,7 +336,7 @@ class Fit_With_Weighting:
         self.num_bins = np.size(RA_hist_totals[0])
         self.time_diff_centers = RA_hist_totals[1]
         self.uncertainties = RA_hist_totals[2]
-        self.fit_range = fit_range
+        self.fit_range = [begin, end]
         self.save_dir = saveDir
         self.a = None
         self.b = None
@@ -450,7 +451,6 @@ class Fit_With_Weighting:
 
         ax2.scatter(self.time_diff_centers[fit_index], residuals, **self.residual_options)
         ax2.axhline(y=0, color='#162F65', linestyle='--')
-        # ax2.set_ylim([-100, 100])
         ax2.set_xlabel('Time difference (ns)')
         ax2.set_ylabel('Percent difference (%)')
 
@@ -462,7 +462,7 @@ class Fit_With_Weighting:
         # Adjusting layout and saving figure (optional)
         if save_fig:
             fig.tight_layout()
-            save_filename = os.path.join(self.save_dir, 'weighted_fit_and_res_' + input + '_' + method.replace(' ','_') + '.png') 
+            save_filename = os.path.join(self.save_dir, 'weighted_fit_and_res_' + input + '_' + method.replace(' ','_') + '_' + str(self.fit_range[0]) + '-' + str(self.fit_range[1]) + '.png') 
             fig.savefig(save_filename, dpi=300, bbox_inches='tight')
         
         # Displaying the plot (optional)

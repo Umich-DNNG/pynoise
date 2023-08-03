@@ -1,14 +1,16 @@
 {
     "Input/Output Settings": {
-        "Input file/folder": "/Users/maxtennant/Dropbox (University of Michigan)/MUSIC/Data/OSCAR/20210322_Wk4/20210322_06_RF3-42_CF_OS_run1_60min_0947/1/board0_n_allch.txt",
-        "Time column": 1,
-        "Channels column": 0,
+        "Input file/folder": "./RossiAlpha/sample_data/RF3-40_59min.txt",
+        "Time column": 0,
+        "Channels column": null,
         "Save figures": true
     },
     "General Settings": {
         "Show plots": true
     },
     "RossiAlpha Settings": {
-        "Time difference method" : ["aa","cc","dd"]
+        "Time difference method": ["aa"],
+        "Fit minimum": [0, 30, 50, 100],
+        "Fit maximum": [null, 500, 750, null]
     }
 }

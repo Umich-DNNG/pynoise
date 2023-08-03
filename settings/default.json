@@ -22,10 +22,8 @@
         "Combine Calc and Binning": false,
         "Bin width": 9,
         "Error Bar/Band": "band",
-        "Fit range": [
-            30.0,
-            "Reset time"
-        ]
+        "Fit minimum": 30,
+        "Fit maximum": null
     },
     "CohnAlpha Settings": {
         "Dwell time": 2e6,
