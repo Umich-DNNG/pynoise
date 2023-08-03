@@ -357,10 +357,9 @@ class Analyzer:
         - folder: the number of folders (0 if single file).'''
         
 
-        # Clear out the current time difference data if not in folder mode.
-        if folder == 0:
-            self.RATimeDifs['Time differences'].clear()
-            self.RATimeDifs['Time difference method'].clear()
+        # Clear out the current time difference data and methods.
+        self.RATimeDifs['Time differences'].clear()
+        self.RATimeDifs['Time difference method'].clear()
         # Create an empty data list.
         data = []
         # Load the data according to its file type.
@@ -415,6 +414,7 @@ class Analyzer:
 
 
     def createPlot(self,
+                   input:str,
                    width:int,
                    reset:float,
                    save:bool,
@@ -438,15 +438,14 @@ class Analyzer:
         - verbose: whether or not individual files should be outputted.'''
         
 
-        # Clear out the current time difference data if not in folder mode.
-        if not folder:
-            self.RAHist['Histogram'].clear()
+        # Clear out the current histogram data.
+        self.RAHist['Histogram'].clear()
         # Create a RossiHistogram object for each time difference.
         for time_dif in self.RATimeDifs['Time differences']:
             self.RAHist['Histogram'].append(plt.RossiHistogram(time_dif, width, reset))
         # Plot each histogram.
         for i in range (0, len(self.RAHist['Histogram'])):
-            self.RAHist['Histogram'][i].plot(save, show, output, vis, folder, verbose)
+            self.RAHist['Histogram'][i].plot(input, self.RATimeDifs['Time difference method'][i], save, show, output, vis, folder, verbose)
         # Store the current setting.
         self.RAHist['Bin width'] = width
 
@@ -470,11 +469,10 @@ class Analyzer:
         - folder: whether or not this is for folder analysis.'''
 
 
-        # Clear out the current data if not in folder mode.
-        if not folder:
-            self.RATimeDifs['Time differences'].clear()
-            self.RATimeDifs['Time difference method'].clear()
-            self.RAHist['Histogram'].clear()
+        # Clear out all of the current data.
+        self.RATimeDifs['Time differences'].clear()
+        self.RATimeDifs['Time difference method'].clear()
+        self.RAHist['Histogram'].clear()
         # Create empty data and time difference lists.
         data = []
         timeDifCalcs = []
@@ -519,13 +517,19 @@ class Analyzer:
             self.RATimeDifs['Time difference method'].append(ra['Time difference method'])
         # Simulatenously calculate the time differences and bin them.
         for i in range (0, len(timeDifCalcs)):
-            currentHist, counts, bin_centers, bin_edges = timeDifCalcs[i].calculateTimeDifsAndBin(ra['Bin width'],
-                                                                                                    io['Save figures'],
-                                                                                                    gen['Show plots'],
-                                                                                                    io['Save directory'],
-                                                                                                    hist,
-                                                                                                    folder,
-                                                                                                    gen['Verbose iterations'])
+            input = io['Input file/folder']
+            if folder:
+                input = input[input[:input.rfind('/')].rfind('/')+1:].replace('/','-')
+            else:
+                input = input[input.rfind('/')+1:]
+            currentHist, counts, bin_centers, bin_edges = timeDifCalcs[i].calculateTimeDifsAndBin(input,
+                                                                                                  ra['Bin width'],
+                                                                                                  io['Save figures'],
+                                                                                                  gen['Show plots'],
+                                                                                                  io['Save directory'],
+                                                                                                  hist,
+                                                                                                  folder,
+                                                                                                  gen['Verbose iterations'])
             self.RAHist['Histogram'].append(currentHist)
         # Save the current settings.
         self.RATimeDifs['Input file/folder'] = io['Input file/folder']
@@ -555,10 +559,11 @@ class Analyzer:
                 'Reset time': settings['RossiAlpha Settings']['Reset time']}
         # Get the name of the input.
         name = settings['Input/Output Settings']['Input file/folder']
-        name = name[name.rfind('/')+1:]
-        # If in folder mode, add the number of folders setting.
-        if name.count('.') == 0:
+        if folder:
+            name = name[name[:name.rfind('/')].rfind('/')+1:].replace('/','-')
             check['Number of folders'] = settings['General Settings']['Number of folders']
+        else:
+            name = name[name.rfind('/')+1:]   
         # If time differences have not yet been calculated or the 
         # current settings do not match those previously used:
         if self.RATimeDifs['Time differences'] is None or not self.isValid('RATimeDifs', check):
@@ -578,7 +583,8 @@ class Analyzer:
                                     settings['RossiAlpha Settings']['Digital delay'],
                                     settings['Input/Output Settings']['Quiet mode'],
                                     settings['General Settings']['Number of folders'] if folder else 0)
-                self.createPlot(settings['RossiAlpha Settings']['Bin width'],
+                self.createPlot(name,
+                                settings['RossiAlpha Settings']['Bin width'],
                                 settings['RossiAlpha Settings']['Reset time'],
                                 settings['Input/Output Settings']['Save figures'],
                                 settings['General Settings']['Show plots'],
@@ -588,7 +594,8 @@ class Analyzer:
                                 settings['General Settings']['Verbose iterations'])
         # Otherwise, just create a Rossi Histogram plot. 
         else:
-            self.createPlot(settings['RossiAlpha Settings']['Bin width'],
+            self.createPlot(name,
+                            settings['RossiAlpha Settings']['Bin width'],
                             settings['RossiAlpha Settings']['Reset time'],
                             settings['Input/Output Settings']['Save figures'],
                             settings['General Settings']['Show plots'],
@@ -608,7 +615,7 @@ class Analyzer:
                       line:dict,
                       res:dict,
                       hist:dict,
-                      index:int = None):
+                      folder:bool = False):
         
         '''Create a Rossi Histogram line of best fit and residual plot.
         
@@ -622,10 +629,9 @@ class Analyzer:
         - line: the Line Fitting Settings dictionary.
         - res: the Scatter Plot Settings dictionary.
         - hist: the Histogram Visual Settings dictionary.
-        - index: the folder index, if applicable.'''
+        - folder: whether or not this is for folder analysis.'''
         
-        if index == None:
-            self.RABestFit['Best fit'].clear()
+        self.RABestFit['Best fit'].clear()
         if ra['Fit range'][1] == 'Reset time':
             ra['Fit range'][1] = ra['Reset time']
             auto = True
@@ -637,14 +643,22 @@ class Analyzer:
                                                 self.RAHist['Histogram'][i].bin_centers,
                                                 self.RATimeDifs['Time difference method'][i],
                                                 ra['Fit range']))
+            input =  self.RATimeDifs['Input file/folder']
+            if folder:
+                input = input[input[:input.rfind('/')].rfind('/')+1:].replace('/','-')
+            else:
+                input = input[input.rfind('/')+1:]
             self.RABestFit['Best fit'][i].fit_and_residual(save,
-                                        output,
-                                        show,
-                                        line,
-                                        res,
-                                        hist,
-                                        index,
-                                        verbose)
+                                                           output,
+                                                           show,
+                                                           line,
+                                                           res,
+                                                           hist,
+                                                           input,
+                                                           self.RATimeDifs['Time difference method'][i],
+                                                           folder,
+                                                           verbose)
+            pyplot.close()
         if auto:
             ra['Fit range'][1] = 'Reset time'
         self.RABestFit['Fit range'] = ra['Fit range']
@@ -668,12 +682,6 @@ class Analyzer:
                 'Digital delay': settings['RossiAlpha Settings']['Digital delay'],
                 'Reset time': settings['RossiAlpha Settings']['Reset time'],
                 'Bin width': settings['RossiAlpha Settings']['Bin width']}
-        # If in folder mode, add the number of folders setting.
-        if folder:
-            check['Number of folders'] = settings['General Settings']['Number of folders']
-            index = int(settings['Input/Output Settings']['Input file/folder'][settings['Input/Output Settings']['Input file/folder'].rfind('/')+1:])
-        else:
-            index = None
         # If histogram has not yet been generated or the 
         # current settings do not match those previously used, rerun the plot split
         if self.RAHist['Histogram'] is None or not self.isValid('RAHist', check):
@@ -687,7 +695,7 @@ class Analyzer:
                            settings['Line Fitting Settings'],
                            settings['Scatter Plot Settings'],
                            settings['Histogram Visual Settings'],
-                           index)
+                           folder)
 
 
 
@@ -765,7 +773,11 @@ class Analyzer:
         - settings: the dictionary that contains all of the runtime settings.
         - window: the gui window, if in gui mode.'''
 
-
+        RA_hist_array = []
+        RA_std_dev = []
+        RA_hist_total = []
+        time_diff_centers = []
+        uncertainties = []
         # Store the original folder pathway.
         original = settings['Input/Output Settings']['Input file/folder']
         # Loop for the number of folders specified.
@@ -773,13 +785,18 @@ class Analyzer:
             # Add the folder number to the input.
             settings['Input/Output Settings']['Input file/folder'] = original + '/' + str(folder)
             # Conduct full analysis.
-            self.fitSplit(settings, True)
+            if settings['General Settings']['Verbose iterations']:
+                self.fitSplit(settings, True)
+            else:
+                self.plotSplit(settings, True)
             # If this is the first folder, initialize the histogram array.
             if folder == 1:
-                RA_hist_array = self.RAHist['Histogram'].counts
+                for histogram in self.RAHist['Histogram']:
+                    RA_hist_array.append(histogram.counts)
             # Otherwise, add the counts to the histogram array.
             else:
-                RA_hist_array = np.vstack((RA_hist_array, self.RAHist['Histogram'].counts))
+                for i in range(0, len(self.RAHist['Histogram'])):
+                    RA_hist_array[i] = np.vstack((RA_hist_array[i], self.RAHist['Histogram'][i].counts))
             # Close all open plots.
             pyplot.close()
             # If exporting raw data for individual folders:
@@ -820,35 +837,38 @@ class Analyzer:
                 window.wait_variable(wait)
         # Restore the original folder pathway.
         settings['Input/Output Settings']['Input file/folder'] = original
-        # Compute the histogram standard deviation and total.
-        RA_std_dev = np.std(RA_hist_array, axis=0, ddof=1)
-        RA_hist_total = np.sum(RA_hist_array, axis=0)
-        # Calculate the time difference centers.
-        time_diff_centers = self.RAHist['Histogram'].bin_edges[1:] - np.diff(self.RAHist['Histogram'].bin_edges[:2]) / 2
-        # Calculate the uncertainties and replace zeroes.
-        uncertainties = RA_std_dev * settings['General Settings']['Number of folders']
-        uncertainties = self.replace_zeroes(uncertainties)
-        # Add the time difference centers and uncertainties to the total histogram.
-        RA_hist_total = np.vstack((RA_hist_total, time_diff_centers, uncertainties))
-        if settings['RossiAlpha Settings']['Fit range'][1] == 'Reset time':
-            settings['RossiAlpha Settings']['Fit range'][1] = settings['RossiAlpha Settings']['Reset time']
-            auto = True
-        else:
-            auto = False
-        # Create a fit object for the total histogram.
-        thisWeightedFit = fit.Fit_With_Weighting(RA_hist_total,
-                                                 settings['RossiAlpha Settings']['Fit range'],
-                                                 settings['Input/Output Settings']['Save directory'],
-                                                 settings['Line Fitting Settings'], 
-                                                 settings['Scatter Plot Settings'])
-        # Fit the total histogram with weighting.
-        thisWeightedFit.fit_RA_hist_weighting()
-        # Plot the total histogram fit.
-        thisWeightedFit.plot_RA_and_fit(settings['Input/Output Settings']['Save figures'], 
-                                        settings['General Settings']['Show plots'],
-                                        settings['RossiAlpha Settings']['Error Bar/Band'])
-        if auto:
-            settings['RossiAlpha Settings']['Fit range'][1] = 'Reset time'
+        for i in range(0, len(RA_hist_array)):
+            # Compute the histogram standard deviation and total.
+            RA_std_dev.append(np.std(RA_hist_array[i], axis=0, ddof=1))
+            RA_hist_total.append(np.sum(RA_hist_array[i], axis=0))
+            # Calculate the time difference centers.
+            time_diff_centers.append(self.RAHist['Histogram'][i].bin_edges[1:] - np.diff(self.RAHist['Histogram'][i].bin_edges[:2]) / 2)
+            # Calculate the uncertainties and replace zeroes.
+            uncertainties.append(RA_std_dev[i] * settings['General Settings']['Number of folders'])
+            uncertainties[i] = self.replace_zeroes(uncertainties[i])
+            # Add the time difference centers and uncertainties to the total histogram.
+            RA_hist_total[i] = np.vstack((RA_hist_total[i], time_diff_centers[i], uncertainties[i]))
+            if settings['RossiAlpha Settings']['Fit range'][1] == 'Reset time':
+                settings['RossiAlpha Settings']['Fit range'][1] = settings['RossiAlpha Settings']['Reset time']
+                auto = True
+            else:
+                auto = False
+            # Create a fit object for the total histogram.
+            thisWeightedFit = fit.Fit_With_Weighting(RA_hist_total[i],
+                                                    settings['RossiAlpha Settings']['Fit range'],
+                                                    settings['Input/Output Settings']['Save directory'],
+                                                    settings['Line Fitting Settings'], 
+                                                    settings['Scatter Plot Settings'])
+            # Fit the total histogram with weighting.
+            thisWeightedFit.fit_RA_hist_weighting()
+            # Plot the total histogram fit.
+            thisWeightedFit.plot_RA_and_fit(settings['Input/Output Settings']['Save figures'], 
+                                            settings['General Settings']['Show plots'],
+                                            settings['RossiAlpha Settings']['Error Bar/Band'],
+                                            settings['Input/Output Settings']['Input file/folder'][settings['Input/Output Settings']['Input file/folder'].rfind('/')+1:],
+                                            self.RATimeDifs['Time difference method'][i])
+            if auto:
+                settings['RossiAlpha Settings']['Fit range'][1] = 'Reset time'
         # Close all open plots.
         pyplot.close()
         # If saving raw data:

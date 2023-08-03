@@ -66,7 +66,7 @@ class RossiHistogramFit:
         self.timeDifMethod = timeDifMethod
 
         self.save_fig = False
-        self.save_dir = "./"
+        self.save_dir = "./data"
         self.show_plot = True
         self.fitting_options = None
         self.residual_options = None
@@ -81,7 +81,7 @@ class RossiHistogramFit:
             self.fit_range = [min(bin_centers), max(bin_centers)] 
 
 
-    def fit(self, save_fig: bool = True, save_dir = './', show_plot: bool = True, fitting_opts = None,hist_visual_opts = None):
+    def fit(self, save_fig: bool = True, save_dir = './data', show_plot: bool = True, fitting_opts = None,hist_visual_opts = None):
         self.fitting_options = fitting_opts
         self.hist_visual_options = hist_visual_opts
         self.save_dir = save_dir
@@ -176,16 +176,28 @@ class RossiHistogramFit:
         # Saving figure (optional)
         if save_fig:
             fig.tight_layout()
-            fig.savefig('fitted_only', dpi=300, bbox_inches='tight')
+            save_filename = os.path.join(self.save_dir, 'fitted')
+            fig.savefig(save_filename, dpi=300, bbox_inches='tight')
 
         # Showing plot (optional)
         if show_plot:
             plt.show()
+        plt.close()
         return popt
 
 #--------------------------------------------------------------------------------
 
-    def fit_and_residual(self, save_fig: bool, save_dir, show_plot: bool, fitting_opts,residual_opts,hist_visual_opts, folder_index = None, verbose: bool = False):
+    def fit_and_residual(self, 
+                         save_fig: bool, 
+                         save_dir: str, 
+                         show_plot: bool, 
+                         fitting_opts: dict, 
+                         residual_opts: dict, 
+                         hist_visual_opts: dict, 
+                         input: str, 
+                         method: str = 'aa', 
+                         folder: bool = False, 
+                         verbose: bool = False):
 
         '''
         Description:
@@ -245,7 +257,7 @@ class RossiHistogramFit:
         self.a = popt[0]
         self.alpha = popt[1]
         self.b = popt[2]
-        if folder_index is None:
+        if not folder:
             print('Fit parameters: A =', popt[0], ', alpha =', popt[1], ', B =', popt[2])
 
         # Create figure and axes
@@ -279,21 +291,18 @@ class RossiHistogramFit:
         ax2.set_ylabel('Relative Residuals (%)')
 
         # Setting title for entire figure
-        fig.suptitle(self.timeDifMethod, fontsize=14)
+        fig.suptitle('Fit Using ' + self.timeDifMethod, fontsize=14)
 
         # Adjusting layout and saving figure (optional)
-        if self.save_fig and (folder_index is None or verbose):
+        if self.save_fig and (not folder or verbose):
             fig.tight_layout()
-            if folder_index is not None:
-                save_filename = os.path.join(self.save_dir, 'fitted_and_residual_folder' + str(folder_index)) 
-                fig.savefig(save_filename, dpi=300, bbox_inches='tight')
-            else:
-                save_filename = os.path.join(self.save_dir, 'fitted_and_residual')
-                fig.savefig(save_filename, dpi=300, bbox_inches='tight')
+            save_filename = os.path.join(self.save_dir, 'fit_and_res_' + input + '_' + method)
+            fig.savefig(save_filename, dpi=300, bbox_inches='tight')
 
         # Showing plot (optional)
-        if show_plot and (folder_index is None or verbose):
+        if show_plot and (not folder or verbose):
             plt.show()
+        plt.close()
         return popt
 
 #--------------------------------------------------------------------------------
@@ -385,7 +394,7 @@ class Fit_With_Weighting:
         self.xfit = xfit
 
        
-    def plot_RA_and_fit(self, save_fig: bool, show_plot: bool, errorBars: str):
+    def plot_RA_and_fit(self, save_fig: bool, show_plot: bool, errorBars: str, input: str, method:str = 'aa'):
 
         '''
         Description:
@@ -426,6 +435,7 @@ class Fit_With_Weighting:
         # Setting the axis labels
         ax.set_xlabel('Time difference (ns)')
         ax.set_ylabel('Counts')
+        ax.set_title('Weighted Fit Using ' + method)
         ax.legend()
 
         if prev_label == None:
@@ -436,11 +446,10 @@ class Fit_With_Weighting:
         # Adjusting layout and saving figure (optional)
         if save_fig:
             fig.tight_layout()
-            save_filename = os.path.join(self.save_dir, 'histogram_weighting_total.png') 
+            save_filename = os.path.join(self.save_dir, 'weighted_fit_and_res_' + input + '_' + method.replace(' ','_') + '.png') 
             fig.savefig(save_filename, dpi=300, bbox_inches='tight')
         
         # Displaying the plot (optional)
         if show_plot:
             plt.show()
-       
-
+        plt.close()
