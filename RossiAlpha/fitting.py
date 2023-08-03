@@ -43,7 +43,7 @@ def exp_decay_2_param(x, a, b):
 #--------------------------------------------------------------------------------    
 
 class RossiHistogramFit:
-    def __init__(self, counts, bin_centers, min_cutoff,timeDifMethod = 'any_and_all', fit_range = None  ):
+    def __init__(self, counts, bin_centers,timeDifMethod = 'any_and_all', fit_range = None  ):
         
         '''
         Description:
@@ -52,7 +52,6 @@ class RossiHistogramFit:
         Inputs:
             - counts (The set of values of the histogram as a list)
             - bin_centers (adjusted bin centers for visual plotting)
-            - min_cutoff: The minimum cutoff for producing the fit
             - timeDifMethod: method used to calculate time differences
             - fit_range: range of values to fit the curve to
             
@@ -64,7 +63,6 @@ class RossiHistogramFit:
         self.counts = counts
         self.bin_centers = bin_centers
         self.fit_range = fit_range
-        self.min_cutoff = min_cutoff
         self.timeDifMethod = timeDifMethod
 
         self.save_fig = False
@@ -125,8 +123,7 @@ class RossiHistogramFit:
         time_diff_centers = self.bin_centers[1:] - np.diff(self.bin_centers[:2])/2
 
         # Choosing region to fit
-        fit_index = np.where((time_diff_centers > self.min_cutoff) & 
-                             (time_diff_centers >= self.fit_range[0]) & 
+        fit_index = np.where((time_diff_centers >= self.fit_range[0]) & 
                              (time_diff_centers <= self.fit_range[1]))
 
         xfit = time_diff_centers[fit_index]
@@ -219,8 +216,7 @@ class RossiHistogramFit:
         time_diff_centers = self.bin_centers[1:] - np.diff(self.bin_centers[:2])/2
 
         # Choosing region to fit
-        fit_index = np.where((time_diff_centers > self.min_cutoff) & 
-                             (time_diff_centers >= self.fit_range[0]) & 
+        fit_index = np.where((time_diff_centers >= self.fit_range[0]) & 
                              (time_diff_centers <= self.fit_range[1]))
 
         xfit = time_diff_centers[fit_index]
@@ -301,7 +297,7 @@ class RossiHistogramFit:
 #--------------------------------------------------------------------------------
 
 class Fit_With_Weighting:
-    def __init__(self,RA_hist_totals, min_cutoff: int, general_settings: dict, saveDir: str, fitting_opts: dict, residual_opts: dict):
+    def __init__(self,RA_hist_totals, general_settings: dict, saveDir: str, fitting_opts: dict, residual_opts: dict):
 
         '''
         Description:
@@ -328,7 +324,6 @@ class Fit_With_Weighting:
         self.time_diff_centers = RA_hist_totals[1]
         self.uncertainties = RA_hist_totals[2]
         self.fit_range = general_settings['Fit range']
-        self.min_cutoff = min_cutoff
         self.save_dir = saveDir
         self.a = None
         self.b = None
@@ -354,9 +349,8 @@ class Fit_With_Weighting:
         '''
 
         # Choosing region to fit
-        fit_index = np.where(((self.time_diff_centers > self.min_cutoff) & 
-            (self.time_diff_centers >= self.fit_range[0]) & 
-            (self.time_diff_centers <= self.fit_range[1])))
+        fit_index = np.where((self.time_diff_centers >= self.fit_range[0]) &
+                             (self.time_diff_centers <= self.fit_range[1]))
         xfit = self.time_diff_centers[fit_index]
         
         # Fitting distribution
