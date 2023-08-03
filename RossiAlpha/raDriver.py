@@ -65,9 +65,10 @@ def main(editor: edit.Editor, queue: list[str] = []):
                       + 'directory does not exist. Please make sure '
                       + 'to adjust this before running any analysis.\n')
             # Ensure the user is using a valid time difference method.
-            elif (editor.parameters.settings['RossiAlpha Settings']['Time difference method'] != 'aa' 
-                  and editor.parameters.settings['Input/Output Settings']['Channels column'] is None
-                  and name.count('.') > 0):
+            if (editor.parameters.settings['RossiAlpha Settings']['Time difference method'] != 'aa' 
+                and editor.parameters.settings['RossiAlpha Settings']['Time difference method'] != ['aa']
+                and editor.parameters.settings['Input/Output Settings']['Channels column'] == None
+                and name.count('.') > 0):
                 print('ERROR: When using methods other than any and all, you must specify a column.\n')
             # For full analysis:
             elif selection == 'm':
