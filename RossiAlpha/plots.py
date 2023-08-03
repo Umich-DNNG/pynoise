@@ -90,7 +90,7 @@ class RossiHistogram:
             plt.title(self.title + method)
 
             plt.tight_layout()
-            save_filename = os.path.join(self.save_dir, 'histogram_' + input + '_' + method + '_''.png')
+            save_filename = os.path.join(self.save_dir, 'histogram_' + input + '_' + method + '.png')
             plt.savefig(save_filename, dpi=300, bbox_inches='tight')
         
         # Showing plot (optional)
@@ -159,7 +159,7 @@ class RossiHistogram:
             plt.title(self.title + method)
 
             plt.tight_layout()
-            save_filename = os.path.join(self.save_dir, 'histogram_' + input + '_' + method + '_.png')
+            save_filename = os.path.join(self.save_dir, 'histogram_' + input + '_' + method + '.png')
             plt.savefig(save_filename, dpi=300, bbox_inches='tight')
         
         # Showing plot (optional)

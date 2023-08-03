@@ -12,9 +12,7 @@
         "Time difference method": ["aa","cc","dd"],
         "Bin width": 30,
         "Reset time": 3000,
-        "Fit range": [
-            50.0,
-            "Reset time"
-        ]
+        "Fit minimum": [0,20,50],
+        "Fit maximum": [null,null,null]
     }
 }
