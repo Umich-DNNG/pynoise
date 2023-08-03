@@ -149,14 +149,15 @@ class CohnAlpha:
         ax1.set_ylabel('Intensity (V$^2$/Hz)')
 
         # Compute residuals
-        residuals = Pxx[1:-2] - CAFit(f[1:-2], *popt)
+        # residuals = Pxx[1:-2] - CAFit(f[1:-2], *popt)
+        residuals = ((CAFit(f[1:-2], *popt) - Pxx[1:-2]) / Pxx[1:-2]) * 100
 
         # Computing residuals and plot in bottom subplot
-        residuals_norm = residuals / np.max(np.abs(residuals))
+        # residuals_norm = residuals / np.max(np.abs(residuals))
 
-        ax2.scatter(f[1:-2], residuals_norm, **scatter_opt)  # Use f for residuals
+        ax2.scatter(f[1:-2], residuals, **scatter_opt)  # Use f for residuals
         ax2.axhline(y=0, color='#162F65', linestyle='--')
-        ax2.set_ylim([-1, 1])
+        # ax2.set_ylim([-1, 1])
         ax2.set_xlabel('Frequency (Hz)')
         ax2.set_ylabel('Relative Residuals (%)')
         
