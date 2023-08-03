@@ -42,8 +42,7 @@ class Analyzer:
         self.RAHist = {'Histogram': None,
                        'Bin width': None}
         self.RABestFit = {'Best fit': None,
-                          'Fit range': None,
-                          'Minimum cutoff': None}
+                          'Fit range': None}
         self.CohnAlpha = {}
         self.FeynmanY = {}
 
@@ -567,11 +566,11 @@ class Analyzer:
 
             
     def createBestFit(self,
-                      cutoff:int,
-                      method:str,
-                      gen:dict,
-                      save:str,
+                      save:bool,
                       output:str,
+                      show:bool,
+                      verbose:bool,
+                      ra:dict,
                       line:dict,
                       res:dict,
                       hist:dict,
@@ -580,11 +579,12 @@ class Analyzer:
         '''Create a Rossi Histogram line of best fit and residual plot.
         
         Inputs:
-        - cutoff: the minimum cutoff.
-        - method: the time difference method.
-        - gen: the General Settings dictionary.
         - save: whether or not to save figures.
         - output: the save directory.
+        - show: whether or not to show plots.
+        - verbose: whether or not individual file
+        results should be exported.
+        - ra: the Rossi Alpha settings dictionary.
         - line: the Line Fitting Settings dictionary.
         - res: the Scatter Plot Settings dictionary.
         - hist: the Histogram Visual Settings dictionary.
@@ -594,17 +594,16 @@ class Analyzer:
         # Construct a RossiHistogramFit object and plot it with the given settings.
         self.RABestFit['Best fit'] = fit.RossiHistogramFit(self.RAHist['Histogram'].counts,
                                               self.RAHist['Histogram'].bin_centers,
-                                              cutoff,
-                                              method,
-                                              gen['Fit range'])
+                                              ra['Time difference method'],
+                                              ra['Fit range'])
         self.RABestFit['Best fit'].fit_and_residual(save,
                                        output,
-                                       gen['Show plots'],
+                                       show,
                                        line,
                                        res,
                                        hist,
                                        index,
-                                       gen['Verbose iterations'])
+                                       verbose)
 
 
 
@@ -636,11 +635,11 @@ class Analyzer:
         if self.RAHist['Histogram'] is None or not self.isValid('RAHist', check):
             self.plotSplit(settings, folder)
         # Create a best fit.
-        self.createBestFit(settings['RossiAlpha Settings']['Minimum cutoff'],
-                           settings['RossiAlpha Settings']['Time difference method'],
-                           settings['General Settings'],
-                           settings['Input/Output Settings']['Save figures'],
+        self.createBestFit(settings['Input/Output Settings']['Save figures'],
                            settings['Input/Output Settings']['Save directory'],
+                           settings['General Settings']['Show plots'],
+                           settings['General Settings']['Verbose iterations'],
+                           settings['RossiAlpha Settings'],
                            settings['Line Fitting Settings'],
                            settings['Scatter Plot Settings'],
                            settings['Histogram Visual Settings'],
@@ -668,7 +667,7 @@ class Analyzer:
             resStart = 0
             # Continue increasing the residual/prediction starting index 
             # while the minimum cutoff is greater than the current bin center.
-            while settings['RossiAlpha Settings']['Minimum cutoff'] > self.RAHist['Histogram'].bin_centers[resStart]:
+            while settings['RossiAlpha Settings']['Fit range'][0] > self.RAHist['Histogram'].bin_centers[resStart]:
                 resStart += 1
             # Construct the beginning and ending bin edges lists.
             for i in range(len(self.RAHist['Histogram'].bin_edges)-1):
@@ -747,7 +746,7 @@ class Analyzer:
                 resStart = 0
                 # Continue increasing the residual/prediction starting index 
                 # while the minimum cutoff is greater than the current bin center.
-                while settings['RossiAlpha Settings']['Minimum cutoff'] > self.RAHist['Histogram'].bin_centers[resStart]:
+                while settings['RossiAlpha Settings']['Fit range'][0] > self.RAHist['Histogram'].bin_centers[resStart]:
                     resStart += 1
                 # Construct the beginning and ending bin edges lists.
                 for i in range(len(self.RAHist['Histogram'].bin_edges)-1):
@@ -789,7 +788,6 @@ class Analyzer:
         RA_hist_total = np.vstack((RA_hist_total, time_diff_centers, uncertainties))
         # Create a fit object for the total histogram.
         thisWeightedFit = fit.Fit_With_Weighting(RA_hist_total,
-                                                 settings['RossiAlpha Settings']['Minimum cutoff'],
                                                  settings['General Settings'],
                                                  settings['Input/Output Settings']['Save directory'],
                                                  settings['Line Fitting Settings'], 
@@ -808,7 +806,7 @@ class Analyzer:
             end = []
             predStart = 0
             # Find the starting index of the prediction data.
-            while settings['RossiAlpha Settings']['Minimum cutoff'] > time_diff_centers[predStart]:
+            while settings['RossiAlpha Settings']['Fit range'][0] > time_diff_centers[predStart]:
                 predStart += 1
             # Fill out the beginning and ending of each bin.
             # TODO: May be able to delete this.
