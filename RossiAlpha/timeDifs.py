@@ -108,6 +108,7 @@ class timeDifCalcs:
 
 
     def calculateTimeDifsAndBin(self, 
+                                input:str,
                                 bin_width:int = None, 
                                 save_fig:bool = False, 
                                 show_plot:bool = True, 
@@ -197,6 +198,6 @@ class timeDifCalcs:
         # Constuct the rossiHistogram object and plot accordingly.
         rossiHistogram = plt.RossiHistogram(bin_width= bin_width, reset_time=self.reset_time)
         rossiHistogram.initFromHist(histogram,bin_centers,bin_edges)
-        rossiHistogram.plotFromHist(plot_opts,save_fig,show_plot,save_dir,folder,verbose)
+        rossiHistogram.plotFromHist(input,self.method,plot_opts,save_fig,show_plot,save_dir,folder,verbose)
         # Return the rossiHistogram object and related NP arrays.
         return rossiHistogram, histogram, bin_centers, bin_edges

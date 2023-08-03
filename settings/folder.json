@@ -5,11 +5,11 @@
         "Save figures": true
     },
     "General Settings": {
-        "Show plots": true,
+        "Show plots": false,
         "Verbose iterations": false
     },
     "RossiAlpha Settings": {
-        "Time difference method": ["aa", "cc", "dd"],
+        "Time difference method": ["aa","cc","dd"],
         "Bin width": 30,
         "Reset time": 3000,
         "Fit range": [

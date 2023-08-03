@@ -5,7 +5,7 @@ import os
 plt.ioff()
 
 class RossiHistogram:
-    def __init__(self,  time_diffs = None, bin_width: int = None, reset_time: int = None):
+    def __init__(self, time_diffs = None, bin_width: int = None, reset_time: int = None):
 
         '''
         Description:
@@ -32,12 +32,12 @@ class RossiHistogram:
         self.bin_width = bin_width
         self.x_axis = "Time Differences"
         self.y_axis = "Count"
-        self.title = "Histogram"
+        self.title = "Histogram Using "
         
         # Parameters set once plot(time_diffs) is called
         self.counts, self.bin_edges, self.bin_centers = None, None, None
 
-    def plot(self , save_fig: bool = False, show_plot: bool = True, save_dir:str= './',plot_opts: dict = None, folder: bool = False, verbose: bool = False, **kwargs ):
+    def plot(self, input: str, method: str = 'aa', save_fig: bool = False, show_plot: bool = True, save_dir:str= './',plot_opts: dict = None, folder: bool = False, verbose: bool = False, **kwargs ):
         
 
         '''
@@ -87,10 +87,10 @@ class RossiHistogram:
 
             plt.xlabel(self.x_axis)
             plt.ylabel(self.y_axis)
-            plt.title(self.title)
+            plt.title(self.title + method)
 
             plt.tight_layout()
-            save_filename = os.path.join(self.save_dir, 'histogram.png')
+            save_filename = os.path.join(self.save_dir, 'histogram_' + input + '_' + method + '_''.png')
             plt.savefig(save_filename, dpi=300, bbox_inches='tight')
         
         # Showing plot (optional)
@@ -103,7 +103,7 @@ class RossiHistogram:
 
             plt.xlabel(self.x_axis)
             plt.ylabel(self.y_axis)
-            plt.title(self.title)
+            plt.title(self.title + method)
             
             plt.show()
 
@@ -129,8 +129,9 @@ class RossiHistogram:
         self.counts = counts
         self.bin_centers = bin_centers
         self.bin_edges = bin_edges
+        self.title = 'Histogram Using '
 
-    def plotFromHist(self, plot_opts: dict = None, save_fig: bool = False, show_plot: bool = True, save_dir:str= None, folder: bool = False, verbose: bool = False):
+    def plotFromHist(self, input: str, method: str = 'aa', plot_opts: dict = None, save_fig: bool = False, show_plot: bool = True, save_dir:str= None, folder: bool = False, verbose: bool = False):
         '''Description: Used to plot the histogram when the time differences were calculated simulatenously while being binned. 
         
         Inputs: 
@@ -155,10 +156,10 @@ class RossiHistogram:
 
             plt.xlabel(self.x_axis)
             plt.ylabel(self.y_axis)
-            plt.title(self.title)
+            plt.title(self.title + method)
 
             plt.tight_layout()
-            save_filename = os.path.join(self.save_dir, 'histogram.png')
+            save_filename = os.path.join(self.save_dir, 'histogram_' + input + '_' + method + '_.png')
             plt.savefig(save_filename, dpi=300, bbox_inches='tight')
         
         # Showing plot (optional)
@@ -171,7 +172,7 @@ class RossiHistogram:
 
             plt.xlabel(self.x_axis)
             plt.ylabel(self.y_axis)
-            plt.title(self.title)
+            plt.title(self.title + method)
             
             plt.show()
 
