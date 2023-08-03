@@ -5,16 +5,16 @@
         "Save figures": true
     },
     "General Settings": {
-        "Fit range": [
-            50.0,
-            "end"
-        ],
         "Show plots": true,
         "Verbose iterations": false
     },
     "RossiAlpha Settings": {
-        "Time difference method": "any_and_all",
+        "Time difference method": "any_and_all cross_correlations no_repeat digital_delay",
         "Bin width": 30,
-        "Reset time": 3000
+        "Reset time": 3000,
+        "Fit range": [
+            50.0,
+            "Reset time"
+        ]
     }
 }
