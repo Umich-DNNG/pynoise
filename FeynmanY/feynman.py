@@ -91,7 +91,7 @@ class FeynmanY:
                            save_dir: str = './',
                            hvs: dict = None):
 
-        '''Creates a histogram from a numpy array of random trigger probabilities .
+        '''Creates a histogram from a numpy array of random trigger probabilities.
         
         Requires:
         - triggers: the list of Events. Assumes the 
@@ -197,7 +197,7 @@ class FeynmanY:
         self.pred = YFit(x_fit, self.gamma, self.alpha)
 
         # Compute residuals
-        residuals = y - YFit(x, self.gamma, self.alpha)
+        residuals = ((YFit(x, self.gamma, self.alpha) - y) / y) * 100
 
         # Create figure and axes
         fig, (ax1, ax2) = plt.subplots(nrows=2, sharex=True, figsize=(8, 6), gridspec_kw={'height_ratios': [2, 1]})
@@ -209,11 +209,11 @@ class FeynmanY:
         ax1.set_title(type + ' Distribution')
 
         # Computing residuals and plot in bottom subplot
-        residuals_norm = residuals / np.max(np.abs(residuals))
+        # residuals_norm = residuals / np.max(np.abs(residuals))
 
-        ax2.scatter(x, residuals_norm, **scatter_opt)
+        ax2.scatter(x, residuals, **scatter_opt)
         ax2.axhline(y=0, color='#162F65', linestyle='--')
-        ax2.set_ylim([-1, 1])
+        # ax2.set_ylim([-1, 1])
         ax2.set_xlabel('Tau Values')
         ax2.set_ylabel('Relative Residuals (%)')
 
