@@ -1,14 +1,20 @@
 {
     "Input/Output Settings": {
-        "Input file/folder": "/Users/maxtennant/Dropbox (University of Michigan)/MUSIC/Data/OSCAR/20210322_Wk4/20210322_06_RF3-42_CF_OS_run1_60min_0947",
+        "Input file/folder": "/Users/maxtennant/Dropbox (University of Michigan)/MUSIC/Data/OSCAR/20210329_Wk5/20210329_10_RF9-46_CF_OS_61min_1minfiles",
         "Save raw data": false,
         "Save figures": true
     },
     "General Settings": {
+        "Fit range": [
+            50.0,
+            "end"
+        ],
         "Show plots": true,
         "Verbose iterations": false
     },
     "RossiAlpha Settings": {
-        "Time difference method": "any_and_all cross_correlations no_repeat digital_delay"
+        "Time difference method": "any_and_all",
+        "Bin width": 30,
+        "Reset time": 3000
     }
 }

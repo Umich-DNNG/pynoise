@@ -10,10 +10,6 @@
         "Quiet mode": false
     },
     "General Settings": {
-        "Fit range": [
-            0.0,
-            1000.0
-        ],
         "Number of folders": 10,
         "Verbose iterations": false,
         "Sort data": true,
@@ -26,7 +22,10 @@
         "Combine Calc and Binning": false,
         "Bin width": 9,
         "Error Bar/Band": "band",
-        "Minimum cutoff": 30
+        "Fit range": [
+            30.0,
+            "Reset time"
+        ]
     },
     "CohnAlpha Settings": {
         "Dwell time": 2e6,
@@ -42,7 +41,7 @@
     "FeynmanY Settings": {
         "Tau range": [30, 3000],
         "Increment amount": 30,
-        "Plot scale": "log"
+        "Plot scale": "linear"
     },
     "Semilog Plot Settings": {
         "label": "Frequency Intensity",
