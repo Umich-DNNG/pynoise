@@ -769,12 +769,13 @@ class Analyzer:
 
         # Create a list of all the non-zero elements and compute their average.
         non_zero_elements = [x for x in lst if x != 0]
-        average = sum(non_zero_elements) / len(non_zero_elements)
-        # For each zero in the list, replace it with the average.
-        for i in range(len(lst)):
-            if lst[i] == 0:
-                lst[i] = average
-        # Return the edited list.
+        if len(non_zero_elements) != 0:
+            average = sum(non_zero_elements) / len(non_zero_elements)
+            # For each zero in the list, replace it with the average.
+            for i in range(len(lst)):
+                if lst[i] == 0:
+                    lst[i] = average
+            # Return the edited list.
         return lst
 
 
