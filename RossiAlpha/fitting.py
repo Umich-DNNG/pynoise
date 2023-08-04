@@ -389,10 +389,9 @@ class Fit_With_Weighting:
 
         self.pred = exp_decay_3_param(xfit, *popt, c0)
         
-        cerr = np.std(self.hist[-int(self.num_bins*0.05):], axis=0, ddof=1)
+        #cerr = np.std(self.hist[-int(self.num_bins*0.05):], axis=0, ddof=1)
         
-        perr = np.sqrt(np.diag(pcov)) 
-        perr = np.hstack((perr, cerr))
+        self.perr = np.sqrt(np.diag(pcov))
         
         self.xfit = xfit
 
@@ -429,20 +428,38 @@ class Fit_With_Weighting:
             upper_bound = self.hist[:-1] + self.uncertainties[:-1]
             ax1.fill_between(time_diff_centers1, lower_bound, upper_bound, alpha=0.3, color='gray')
 
-        prev_label = self.fitting_options.get('label')
-        self.fitting_options['label'] = ((prev_label if prev_label != None else 'Fitted Curve')
-                                         + ' (A=' + f'{self.a:.3g}' + ', alpha=' 
-                                         + f'{self.alpha:.3g}' + ', B=' 
-                                         + f'{self.b:.3g}' + ')')
-
         # Adding the fit to the data
         ax1.plot(self.xfit, self.pred, **self.fitting_options)
-        
+
+        equation = r'$Ae^{-\alpha}+B$:'
+        alph_str = (r'— $\alpha$ = (' + f'{self.alpha:.3g}' + '$\pm$ ' + f'{self.perr[1]:.3g}' + ') 1/ns')
+        a_str = (r'— $A$ = (' + f'{self.a:.3g}' + '$\pm$ ' + f'{self.perr[0]:.3g}' + ') counts')
+        b_str = r'— $B$ = ' + f'{self.b:.3g} counts'
+        ymin, ymax = ax1.get_ylim()
+        xmin, xmax = ax1.get_xlim()
+        xloc = (xmin+xmax)/3
+        dy = ymax-ymin
+        ax1.annotate(equation, 
+                    xy=(xloc*3/3.5, ymax-0.2*dy), 
+                    xytext=(xloc*3/3.5, ymax-0.2*dy),
+                    fontsize=16)
+        ax1.annotate(a_str, 
+                    xy=(xloc, ymax-0.3*dy), 
+                    xytext=(xloc, ymax-0.3*dy),
+                    fontsize=16)
+        ax1.annotate(alph_str, 
+                    xy=(xloc, ymax-0.4*dy), 
+                    xytext=(xloc, ymax-0.4*dy),
+                    fontsize=16)
+        ax1.annotate(b_str, 
+                    xy=(xloc, ymax-0.5*dy), 
+                    xytext=(xloc, ymax-0.5*dy),
+                    fontsize=16)
+
         # Setting the axis labels
         ax1.set_xlabel('Time difference (ns)')
         ax1.set_ylabel('Counts')
         ax1.set_title('Weighted Fit Using ' + method)
-        ax1.legend()
 
         # Computing residuals and plot in bottom subplot
         # residuals = self.hist[fit_index] - self.pred
@@ -453,11 +470,6 @@ class Fit_With_Weighting:
         ax2.axhline(y=0, color='#162F65', linestyle='--')
         ax2.set_xlabel('Time difference (ns)')
         ax2.set_ylabel('Percent difference (%)')
-
-        if prev_label == None:
-            self.fitting_options.pop('label')
-        else:
-            self.fitting_options['label'] = prev_label
 
         # Adjusting layout and saving figure (optional)
         if save_fig:
