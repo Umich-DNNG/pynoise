@@ -385,7 +385,7 @@ class Fit_With_Weighting:
         self.a = popt[0]
         self.alpha = popt[1]
         self.b = c0
-        print('Fit parameters: A =', popt[0], ', alpha =', popt[1], ', B =', c0)
+        #print('Fit parameters: A =', popt[0], ', alpha =', popt[1], ', B =', c0)
 
         self.pred = exp_decay_3_param(xfit, *popt, c0)
         
@@ -431,10 +431,10 @@ class Fit_With_Weighting:
         # Adding the fit to the data
         ax1.plot(self.xfit, self.pred, **self.fitting_options)
 
-        equation = r'$Ae^{-\alpha}+B$:'
-        alph_str = (r'— $\alpha$ = (' + f'{self.alpha:.3g}' + '$\pm$ ' + f'{self.perr[1]:.3g}' + ') 1/ns')
-        a_str = (r'— $A$ = (' + f'{self.a:.3g}' + '$\pm$ ' + f'{self.perr[0]:.3g}' + ') counts')
-        b_str = r'— $B$ = ' + f'{self.b:.3g} counts'
+        equation = r'$Ae^{\alpha}+B$:'
+        alph_str = (r'$\alpha$ = (' + f'{self.alpha:.3g}' + '$\pm$ ' + f'{self.perr[1]:.3g}' + ') 1/ns')
+        a_str = (r'$A$ = (' + f'{self.a:.3g}' + '$\pm$ ' + f'{self.perr[0]:.3g}' + ') counts')
+        b_str = r'$B$ = ' + f'{self.b:.3g} counts'
         ymin, ymax = ax1.get_ylim()
         xmin, xmax = ax1.get_xlim()
         xloc = (xmin+xmax)/3
