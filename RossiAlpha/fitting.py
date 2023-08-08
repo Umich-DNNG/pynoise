@@ -421,24 +421,19 @@ class Fit_With_Weighting:
         Outputs: 
             - None
         '''
-
-        self.fit_index = np.where((self.bin_centers >= self.fit_range[0]) &
-                             (self.bin_centers <= self.fit_range[1]))
-
-        time_diff_centers1 = self.bin_centers[1:] - np.diff(self.bin_centers[:2])/2
         
         fig, (ax1, ax2) = plt.subplots(nrows=2, sharex=True, figsize=(8, 6), gridspec_kw={'height_ratios': [2, 1]})
         
         # Creating a scatter plot with the data
-        ax1.scatter(time_diff_centers1, self.hist[:-1], **self.residual_options)
+        ax1.scatter(self.bin_centers, self.hist, **self.residual_options)
         
         if errorBars == "bar":
-            ax1.errorbar(time_diff_centers1, self.hist[:-1], yerr=self.uncertainties[:-1], fmt='o', ecolor='black',capsize=5)
+            ax1.errorbar(self.bin_centers, self.hist, yerr=self.uncertainties, fmt='o', ecolor='black',capsize=5)
         #ax.fill_between(time_diff_centers, self.hist[:-1] - self.uncertainties[:-1], self.hist[:-1] + self.uncertainties[:-1], alpha=0.3, color='gray')
         elif errorBars == "band":
-            lower_bound = self.hist[:-1] - self.uncertainties[:-1]
-            upper_bound = self.hist[:-1] + self.uncertainties[:-1]
-            ax1.fill_between(time_diff_centers1, lower_bound, upper_bound, alpha=0.3, color='gray')
+            lower_bound = self.hist - self.uncertainties
+            upper_bound = self.hist + self.uncertainties
+            ax1.fill_between(self.bin_centers, lower_bound, upper_bound, alpha=0.3, color='gray')
 
         # Adding the fit to the data
         ax1.plot(self.xfit, self.pred, **self.fitting_options)
@@ -475,10 +470,10 @@ class Fit_With_Weighting:
 
         # Computing residuals and plot in bottom subplot
         # residuals = self.hist[self.fit_index] - self.pred
-        residuals = ((self.pred - self.hist[self.fit_index]) / self.hist[self.fit_index]) * 100
+        self.residuals = ((self.pred - self.hist[self.fit_index]) / self.hist[self.fit_index]) * 100
         # residuals_norm = residuals / np.max(np.abs(residuals))
 
-        ax2.scatter(self.bin_centers[self.fit_index], residuals, **self.residual_options)
+        ax2.scatter(self.bin_centers[self.fit_index], self.residuals, **self.residual_options)
         ax2.axhline(y=0, color='#162F65', linestyle='--')
         ax2.set_xlabel('Time difference (ns)')
         ax2.set_ylabel('Percent difference (%)')

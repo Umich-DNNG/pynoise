@@ -818,33 +818,35 @@ class Analyzer:
             # Close all open plots.
             pyplot.close()
             # If exporting raw data for individual folders:
-            # TODO: Fix data exporting.
             if settings['Input/Output Settings']['Save raw data'] == True and settings['General Settings']['Verbose iterations'] == True:
                 # Initialize variables.
                 begin = []
                 end = []
-                resStart = 0
-                # Continue increasing the residual/prediction starting index 
-                # while the minimum cutoff is greater than the current bin center.
-                while settings['RossiAlpha Settings']['Fit range'][0] > self.RAHist['Histogram'].bin_centers[resStart]:
-                    resStart += 1
                 # Construct the beginning and ending bin edges lists.
-                for i in range(len(self.RAHist['Histogram'].bin_edges)-1):
-                    begin.append(self.RAHist['Histogram'].bin_edges[i])
-                    end.append(self.RAHist['Histogram'].bin_edges[i+1])
-                # Export the beginning and ends of bins, measured counts, 
-                # predicted counts, residual, fit parameters, and file name.
-                self.export({'Bin beginning': (begin,0),
-                            'Bin ending': (end,0),
-                            'Measured Count': (self.RAHist['Histogram'].counts,0),
-                            'Predicted Count': (self.RABestFit['Best fit'].pred,resStart),
-                            'Residual': (self.RABestFit['Best fit'].residuals,resStart)},
-                            [('A', self.RABestFit['Best fit'].a),
-                            ('B', self.RABestFit['Best fit'].b),
-                            ('Alpha', self.RABestFit['Best fit'].alpha),
-                            ('Input file', settings['Input/Output Settings']['Input file/folder'])],
-                            'RAFolder' + str(folder),
-                            settings['Input/Output Settings']['Save directory'])
+                for i in range(len(self.RAHist['Histogram'][0].bin_edges)-1):
+                    begin.append(self.RAHist['Histogram'][0].bin_edges[i])
+                    end.append(self.RAHist['Histogram'][0].bin_edges[i+1])
+                numRanges = len(self.RABestFit['Fit minimum'])
+                for i in range(0,len(self.RABestFit['Best fit'])):
+                    # Export the beginning and ends of bins, measured counts, 
+                    # predicted counts, residual, fit parameters, and file name.
+                    self.export({'Bin beginning': (begin,0),
+                                'Bin ending': (end,0),
+                                'Measured Count': (self.RAHist['Histogram'][int(i/numRanges)].counts,0),
+                                'Predicted Count': (self.RABestFit['Best fit'][i].pred,self.RABestFit['Best fit'][i].fit_index[0][0]),
+                                'Percent error': (self.RABestFit['Best fit'][i].residuals,self.RABestFit['Best fit'][i].fit_index[0][0])},
+                                [('A', self.RABestFit['Best fit'][i].a),
+                                ('A uncertainty', self.RABestFit['Best fit'][i].perr[0]),
+                                ('Alpha', self.RABestFit['Best fit'][i].alpha),
+                                ('Alpha uncertainty', self.RABestFit['Best fit'][i].perr[1]),
+                                ('B', self.RABestFit['Best fit'][i].b),
+                                ('Fit minimum',self.RABestFit['Fit minimum'][i % numRanges]),
+                                ('Fit maximum',self.RABestFit['Fit maximum'][i % numRanges]),
+                                ('Time difference method',self.RATimeDifs['Time difference method'][int(i/numRanges)]),
+                                ('Bin width',self.RAHist['Histogram'][int(i/numRanges)].bin_width),
+                                ('Input file', settings['Input/Output Settings']['Input file/folder'])],
+                                'RAFolder' + str(folder),
+                                settings['Input/Output Settings']['Save directory'])
             # If in gui mode:
             if window != None:
                 # Incremement the progress bar.
@@ -903,6 +905,42 @@ class Analyzer:
                                                 settings['RossiAlpha Settings']['Error Bar/Band'],
                                                 settings['Input/Output Settings']['Input file/folder'][settings['Input/Output Settings']['Input file/folder'].rfind('/')+1:],
                                                 self.RATimeDifs['Time difference method'][i])
+                # If saving raw data:
+                if settings['Input/Output Settings']['Save raw data'] == True:
+                    begin = []
+                    end = []
+                    # Fill out the beginning and ending of each bin.
+                    halfWidth = settings['RossiAlpha Settings']['Bin width']/2
+                    for k in range(len(thisWeightedFit.bin_centers)):
+                        begin.append(thisWeightedFit.bin_centers[k]-halfWidth)
+                        end.append(thisWeightedFit.bin_centers[k]+halfWidth)
+                    # If using verbose mode, mark this as the final file.
+                    if settings['General Settings']['Verbose iterations'] == True:
+                        filename = 'RAFolderFull'
+                    # Otherwise, keep the shortened name.
+                    else:
+                        filename = 'RAFolder'
+                    # Export the time differences, weighted counts, 
+                    # uncertainties, predicted counts, number of folders, 
+                    # folder name, and fit parameters to a .csv.
+                    self.export({'Bin beginning': (begin,0),
+                                 'Bin ending': (end,0),
+                                 'Weighted Count': (thisWeightedFit.hist,0),
+                                 'Uncertainty': (thisWeightedFit.uncertainties,0),
+                                 'Predicted Count': (thisWeightedFit.pred, thisWeightedFit.fit_index[0][0]),
+                                 'Percent Error': (thisWeightedFit.residuals, thisWeightedFit.fit_index[0][0])},
+                                [('A', thisWeightedFit.a),
+                                 ('A uncertainty', thisWeightedFit.perr[0]),
+                                ('Alpha', thisWeightedFit.alpha),
+                                ('Alpha uncertainty', thisWeightedFit.perr[1]),
+                                ('B', thisWeightedFit.b),
+                                ('Fit minimum',settings['RossiAlpha Settings']['Fit minimum'][j]),
+                                ('Fit maximum',settings['RossiAlpha Settings']['Fit maximum'][j]),
+                                ('Time difference method',self.RATimeDifs['Time difference method'][i % len(self.RATimeDifs['Time difference method'])]),
+                                ('Bin width',settings['RossiAlpha Settings']['Bin width']),
+                                ('Input file', settings['Input/Output Settings']['Input file/folder'])],
+                                filename,
+                                settings['Input/Output Settings']['Save directory'])
         if isinstance(auto, bool):
             if auto:
                 settings['RossiAlpha Settings']['Fit maximum'] = None
@@ -916,37 +954,3 @@ class Analyzer:
             settings['RossiAlpha Settings']['Fit minimum'] = settings['RossiAlpha Settings']['Fit minimum'][0]
         # Close all open plots.
         pyplot.close()
-        # If saving raw data:
-        # TODO: Fix data exporting.
-        if settings['Input/Output Settings']['Save raw data'] == True:
-            begin = []
-            end = []
-            predStart = 0
-            # Find the starting index of the prediction data.
-            while settings['RossiAlpha Settings']['Fit range'][0] > time_diff_centers[predStart]:
-                predStart += 1
-            # Fill out the beginning and ending of each bin.
-            # TODO: May be able to delete this.
-            for i in range(len(self.RAHist['Histogram'].bin_edges)-1):
-                begin.append(self.RAHist['Histogram'].bin_edges[i])
-                end.append(self.RAHist['Histogram'].bin_edges[i+1])
-            # If using verbose mode, mark this as the final file.
-            if settings['General Settings']['Verbose iterations'] == True:
-                filename = 'RAFolderFull'
-            # Otherwise, keep the shortened name.
-            else:
-                filename = 'RAFolder'
-            # Export the time differences, weighted counts, 
-            # uncertainties, predicted counts, number of folders, 
-            # folder name, and fit parameters to a .csv.
-            self.export({'Time difference': (time_diff_centers,0),
-                         'Weighted Count': (thisWeightedFit.hist,0),
-                         'Uncertainty': (uncertainties,0),
-                         'Predicted Count': (thisWeightedFit.pred,predStart)},
-                        [('A', thisWeightedFit.a),
-                         ('B', thisWeightedFit.b),
-                         ('Alpha', thisWeightedFit.alpha),
-                         ('Input folder', settings['Input/Output Settings']['Input file/folder']),
-                         ('Number of folders', settings['General Settings']['Number of folders'])],
-                        filename,
-                        settings['Input/Output Settings']['Save directory'])
