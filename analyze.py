@@ -66,7 +66,7 @@ class Analyzer:
     def export(self, 
                data: dict[str:tuple], 
                singles: list[tuple], 
-               method: str, 
+               name: str, 
                output: str = './data'):
 
         '''Export data from analysis to a csv file. The file 
@@ -87,17 +87,8 @@ class Analyzer:
         - output: the output directory. If not given, defaults to ./data.'''
 
 
-        # Get the current time for file naming.
-        curTime = time.localtime()
         # Name the file appropriately with the method name and current time.
-        fileName = (output + '/' + method +
-                    ('(0' if curTime.tm_mon < 10 else '(') + str(curTime.tm_mon) +
-                    ('-0' if curTime.tm_mday < 10 else '-') + str(curTime.tm_mday) +
-                    ('-0' if curTime.tm_year%100 < 10 else '-') + str(curTime.tm_year%100) +
-                    ('@0' if curTime.tm_hour < 10 else '@') + str(curTime.tm_hour) +
-                    (':0' if curTime.tm_min < 10 else ':') + str(curTime.tm_min) +
-                    (':0' if curTime.tm_sec < 10 else ':') + str(curTime.tm_sec) +
-                    ').csv')
+        fileName = (output + '/raw_data_' + name + '.csv')
         # Open the new file.
         file = open(os.path.abspath(fileName),'w')
         # Initialize variables.
@@ -736,12 +727,17 @@ class Analyzer:
                 end.append(self.RAHist['Histogram'][0].bin_edges[i+1])
             numRanges = len(self.RABestFit['Fit minimum'])
             for i in range(0,len(self.RABestFit['Best fit'])):
+                name = settings['Input/Output Settings']['Input file/folder']
+                name = name[name.rfind('/')+1:]
+                name += ('_' + str(self.RATimeDifs['Time difference method'][int(i/numRanges)])
+                       + '_' + str(self.RABestFit['Fit minimum'][i % numRanges])
+                       + '-' + str(self.RABestFit['Fit maximum'][i % numRanges]))
                 # Export the beginning and ends of bins, measured counts, 
-                # predicted counts, residual, fit parameters, and file name.
+                # Fit counts, residual, fit parameters, and file name.
                 self.export({'Bin beginning': (begin,0),
                              'Bin ending': (end,0),
                              'Measured Count': (self.RAHist['Histogram'][int(i/numRanges)].counts,0),
-                             'Predicted Count': (self.RABestFit['Best fit'][i].pred,self.RABestFit['Best fit'][i].fit_index[0][0]),
+                             'Fit count': (self.RABestFit['Best fit'][i].pred,self.RABestFit['Best fit'][i].fit_index[0][0]),
                              'Percent error': (self.RABestFit['Best fit'][i].residuals,self.RABestFit['Best fit'][i].fit_index[0][0])},
                             [('A', self.RABestFit['Best fit'][i].a),
                              ('A uncertainty', self.RABestFit['Best fit'][i].perr[0]),
@@ -753,7 +749,7 @@ class Analyzer:
                              ('Time difference method',self.RATimeDifs['Time difference method'][int(i/numRanges)]),
                              ('Bin width',self.RAHist['Histogram'][int(i/numRanges)].bin_width),
                              ('Input file', settings['Input/Output Settings']['Input file/folder'])],
-                            'RAFile',
+                            name,
                             settings['Input/Output Settings']['Save directory'])
 
 
@@ -828,12 +824,17 @@ class Analyzer:
                     end.append(self.RAHist['Histogram'][0].bin_edges[i+1])
                 numRanges = len(self.RABestFit['Fit minimum'])
                 for i in range(0,len(self.RABestFit['Best fit'])):
+                    name = settings['Input/Output Settings']['Input file/folder']
+                    name = name[name[:name.rfind('/')].rfind('/')+1:].replace('/','-')
+                    name += ('_' + str(self.RATimeDifs['Time difference method'][int(i/numRanges)])
+                        + '_' + str(self.RABestFit['Fit minimum'][i % numRanges])
+                        + '-' + str(self.RABestFit['Fit maxmimum'][i % numRanges]))
                     # Export the beginning and ends of bins, measured counts, 
-                    # predicted counts, residual, fit parameters, and file name.
+                    # Fit counts, residual, fit parameters, and file name.
                     self.export({'Bin beginning': (begin,0),
                                 'Bin ending': (end,0),
                                 'Measured Count': (self.RAHist['Histogram'][int(i/numRanges)].counts,0),
-                                'Predicted Count': (self.RABestFit['Best fit'][i].pred,self.RABestFit['Best fit'][i].fit_index[0][0]),
+                                'Fit count': (self.RABestFit['Best fit'][i].pred,self.RABestFit['Best fit'][i].fit_index[0][0]),
                                 'Percent error': (self.RABestFit['Best fit'][i].residuals,self.RABestFit['Best fit'][i].fit_index[0][0])},
                                 [('A', self.RABestFit['Best fit'][i].a),
                                 ('A uncertainty', self.RABestFit['Best fit'][i].perr[0]),
@@ -914,20 +915,19 @@ class Analyzer:
                     for k in range(len(thisWeightedFit.bin_centers)):
                         begin.append(thisWeightedFit.bin_centers[k]-halfWidth)
                         end.append(thisWeightedFit.bin_centers[k]+halfWidth)
-                    # If using verbose mode, mark this as the final file.
-                    if settings['General Settings']['Verbose iterations'] == True:
-                        filename = 'RAFolderFull'
-                    # Otherwise, keep the shortened name.
-                    else:
-                        filename = 'RAFolder'
-                    # Export the time differences, weighted counts, 
-                    # uncertainties, predicted counts, number of folders, 
+                    name = settings['Input/Output Settings']['Input file/folder']
+                    name = name[name.rfind('/')+1:]
+                    name += ('_' + str(self.RATimeDifs['Time difference method'][i % len(self.RATimeDifs['Time difference method'])] )
+                        + '_' + str(settings['RossiAlpha Settings']['Fit minimum'][j])
+                        + '-' + str(settings['RossiAlpha Settings']['Fit maximum'][j]))
+                    # Export the time differences, Total counts, 
+                    # uncertainties, Fit counts, number of folders, 
                     # folder name, and fit parameters to a .csv.
                     self.export({'Bin beginning': (begin,0),
                                  'Bin ending': (end,0),
-                                 'Weighted Count': (thisWeightedFit.hist,0),
+                                 'Total count': (thisWeightedFit.hist,0),
                                  'Uncertainty': (thisWeightedFit.uncertainties,0),
-                                 'Predicted Count': (thisWeightedFit.pred, thisWeightedFit.fit_index[0][0]),
+                                 'Fit count': (thisWeightedFit.pred, thisWeightedFit.fit_index[0][0]),
                                  'Percent Error': (thisWeightedFit.residuals, thisWeightedFit.fit_index[0][0])},
                                 [('A', thisWeightedFit.a),
                                  ('A uncertainty', thisWeightedFit.perr[0]),
@@ -939,7 +939,7 @@ class Analyzer:
                                 ('Time difference method',self.RATimeDifs['Time difference method'][i % len(self.RATimeDifs['Time difference method'])]),
                                 ('Bin width',settings['RossiAlpha Settings']['Bin width']),
                                 ('Input file', settings['Input/Output Settings']['Input file/folder'])],
-                                filename,
+                                name,
                                 settings['Input/Output Settings']['Save directory'])
         if isinstance(auto, bool):
             if auto:
