@@ -122,13 +122,12 @@ class RossiHistogramFit:
                 "linewidth": 1
             }
         num_bins = np.size(self.counts)
-        time_diff_centers = self.bin_centers[1:] - np.diff(self.bin_centers[:2])/2
 
         # Choosing region to fit
-        fit_index = np.where((time_diff_centers >= self.fit_range[0]) & 
-                             (time_diff_centers <= self.fit_range[1]))
+        self.fit_index = np.where((self.bin_centers >= self.fit_range[0]) & 
+                             (self.bin_centers <= self.fit_range[1]))
 
-        xfit = time_diff_centers[fit_index]
+        xfit = self.bin_centers[self.fit_index]
 
         # Fitting distribution
         # Fitting the data using curve_fit
@@ -136,9 +135,9 @@ class RossiHistogramFit:
         a0 = np.max(self.counts)
         c0 = np.mean(self.counts[-int(num_bins*0.05):])
         b0 = ((np.log(c0)-np.log(self.counts[0]))/
-            (time_diff_centers[-1]-time_diff_centers[0]))
+            (self.bin_centers[-1]-self.bin_centers[0]))
         
-        yfit = self.counts[fit_index] - c0
+        yfit = self.counts[self.fit_index] - c0
         exp_decay_p0 = [a0, b0]
 
         # Fitting line function to truncated data
@@ -228,13 +227,12 @@ class RossiHistogramFit:
         self.save_dir = save_dir
         self.save_fig = save_fig
         num_bins = np.size(self.counts)
-        time_diff_centers = self.bin_centers[1:] - np.diff(self.bin_centers[:2])/2
 
         # Choosing region to fit
-        fit_index = np.where((time_diff_centers >= self.fit_range[0]) & 
-                             (time_diff_centers <= self.fit_range[1]))
+        self.fit_index = np.where((self.bin_centers >= self.fit_range[0]) & 
+                             (self.bin_centers <= self.fit_range[1]))
 
-        xfit = time_diff_centers[fit_index]
+        xfit = self.bin_centers[self.fit_index]
 
         # Fitting distribution
         # Fitting the data using curve_fit
@@ -242,14 +240,14 @@ class RossiHistogramFit:
         a0 = np.max(self.counts)
         c0 = np.mean(self.counts[-int(num_bins*0.05):])
         b0 = ((np.log(c0)-np.log(self.counts[0]))/
-            (time_diff_centers[-1]-time_diff_centers[0]))
+            (self.bin_centers[-1]-self.bin_centers[0]))
         
-        yfit = self.counts[fit_index] - c0
+        yfit = self.counts[self.fit_index] - c0
         exp_decay_p0 = [a0, b0]
 
         # Fitting line function to truncated data
         popt, pcov = curve_fit(exp_decay_2_param, xfit, yfit, bounds=exp_decay_fit_bounds, p0=exp_decay_p0, maxfev=1e6)
-
+        self.perr = np.sqrt(np.diag(pcov))
         # Deriving line x and line y
         line_x = xfit
         self.pred = exp_decay_3_param(xfit, *popt, c0)
@@ -259,35 +257,49 @@ class RossiHistogramFit:
         self.a = popt[0]
         self.alpha = popt[1]
         self.b = popt[2]
-        if not folder:
-            print('Fit parameters: A =', popt[0], ', alpha =', popt[1], ', B =', popt[2])
+        #if not folder:
+            #print('Fit parameters: A =', popt[0], ', alpha =', popt[1], ', B =', popt[2])
 
         # Create figure and axes
         fig, (ax1, ax2) = plt.subplots(nrows=2, sharex=True, figsize=(8, 6), gridspec_kw={'height_ratios': [2, 1]})
 
-        prev_label = self.fitting_options.get('label')
-        self.fitting_options['label'] = ((prev_label if prev_label != None else 'Fitted Curve') 
-                                         + f' (A={self.a:.3g}, alpha={self.alpha:.3g}, B={self.b:.3g})')
-
         # Plotting histogram and fitting curve in top subplot
         ax1.bar(self.bin_centers, self.counts, width=0.8*(self.bin_centers[1]-self.bin_centers[0]), **self.hist_visual_options)
         ax1.plot(line_x, self.pred, **self.fitting_options)
-        ax1.legend()
+        equation = r'$Ae^{\alpha}+B$:'
+        alph_str = (r'$\alpha$ = (' + f'{self.alpha:.3g}' + '$\pm$ ' + f'{self.perr[1]:.3g}' + ') 1/ns')
+        a_str = (r'$A$ = (' + f'{self.a:.3g}' + '$\pm$ ' + f'{self.perr[0]:.3g}' + ') counts')
+        b_str = r'$B$ = ' + f'{self.b:.3g} counts'
+        ymin, ymax = ax1.get_ylim()
+        xmin, xmax = ax1.get_xlim()
+        xloc = (xmin+xmax)/3
+        dy = ymax-ymin
+        ax1.annotate(equation, 
+                    xy=(xloc*3/3.5, ymax-0.2*dy), 
+                    xytext=(xloc*3/3.5, ymax-0.2*dy),
+                    fontsize=16)
+        ax1.annotate(a_str, 
+                    xy=(xloc, ymax-0.3*dy), 
+                    xytext=(xloc, ymax-0.3*dy),
+                    fontsize=16)
+        ax1.annotate(alph_str, 
+                    xy=(xloc, ymax-0.4*dy), 
+                    xytext=(xloc, ymax-0.4*dy),
+                    fontsize=16)
+        ax1.annotate(b_str, 
+                    xy=(xloc, ymax-0.5*dy), 
+                    xytext=(xloc, ymax-0.5*dy),
+                    fontsize=16)
         ax1.set_ylabel("Coincidence rate (s^-1)")
 
-        if prev_label == None:
-            self.fitting_options.pop('label')
-        else:
-            self.fitting_options['label'] = prev_label
-
         # Computing residuals and plot in bottom subplot
-        # self.residuals = self.counts[fit_index] - self.pred
-        self.residuals = ((self.pred - self.counts[fit_index]) / self.counts[fit_index]) * 100
+        # self.residuals = self.counts[self.fit_index] - self.pred
+        self.residuals = ((self.pred - self.counts[self.fit_index]) / self.counts[self.fit_index]) * 100
         # residuals_norm = self.residuals / np.max(np.abs(self.residuals))
 
-        index = (time_diff_centers >= xfit[0]) & (time_diff_centers <= xfit[-1])
+        index = (self.bin_centers >= xfit[0]) & (self.bin_centers <= xfit[-1])
 
-        ax2.scatter(time_diff_centers[index], self.residuals, **self.residual_options)
+        ax2.scatter(self.bin_centers[index], self.residuals, **self.residual_options)
         ax2.axhline(y=0, color='#162F65', linestyle='--')
         ax2.set_xlabel("Time Differences(ns)")
         ax2.set_ylabel('Percent difference (%)')
@@ -334,7 +346,7 @@ class Fit_With_Weighting:
         # Required parameters
         self.hist = RA_hist_totals[0]
         self.num_bins = np.size(RA_hist_totals[0])
-        self.time_diff_centers = RA_hist_totals[1]
+        self.bin_centers = RA_hist_totals[1]
         self.uncertainties = RA_hist_totals[2]
         self.fit_range = [begin, end]
         self.save_dir = saveDir
@@ -362,10 +374,10 @@ class Fit_With_Weighting:
         '''
 
         # Choosing region to fit
-        fit_index = np.where((self.time_diff_centers >= self.fit_range[0]) &
-                             (self.time_diff_centers <= self.fit_range[1]))
+        self.fit_index = np.where((self.bin_centers >= self.fit_range[0]) &
+                             (self.bin_centers <= self.fit_range[1]))
 
-        xfit = self.time_diff_centers[fit_index]
+        xfit = self.bin_centers[self.fit_index]
         
         # Fitting distribution
         # Fitting the data using curve_fit
@@ -373,11 +385,11 @@ class Fit_With_Weighting:
         a0 = np.max(self.hist)
         c0 = np.mean(self.hist[-int(self.num_bins*0.05):])
         b0 = ((np.log(c0)-np.log(self.hist[0]))/
-            (self.time_diff_centers[-1]-self.time_diff_centers[0]))
-        yfit = self.hist[fit_index] - c0
+            (self.bin_centers[-1]-self.bin_centers[0]))
+        yfit = self.hist[self.fit_index] - c0
         exp_decay_p0 = [a0, b0]
         popt, pcov = curve_fit(exp_decay_2_param, xfit, yfit, bounds=exp_decay_fit_bounds, 
-                               p0=exp_decay_p0,maxfev=1e6,sigma=self.uncertainties[fit_index], 
+                               p0=exp_decay_p0,maxfev=1e6,sigma=self.uncertainties[self.fit_index], 
                                absolute_sigma=True)
         
 
@@ -410,10 +422,10 @@ class Fit_With_Weighting:
             - None
         '''
 
-        fit_index = np.where((self.time_diff_centers >= self.fit_range[0]) &
-                             (self.time_diff_centers <= self.fit_range[1]))
+        self.fit_index = np.where((self.bin_centers >= self.fit_range[0]) &
+                             (self.bin_centers <= self.fit_range[1]))
 
-        time_diff_centers1 = self.time_diff_centers[1:] - np.diff(self.time_diff_centers[:2])/2
+        time_diff_centers1 = self.bin_centers[1:] - np.diff(self.bin_centers[:2])/2
         
         fig, (ax1, ax2) = plt.subplots(nrows=2, sharex=True, figsize=(8, 6), gridspec_kw={'height_ratios': [2, 1]})
         
@@ -462,11 +474,11 @@ class Fit_With_Weighting:
         ax1.set_title('Weighted Fit Using ' + method)
 
         # Computing residuals and plot in bottom subplot
-        # residuals = self.hist[fit_index] - self.pred
-        residuals = ((self.pred - self.hist[fit_index]) / self.hist[fit_index]) * 100
+        # residuals = self.hist[self.fit_index] - self.pred
+        residuals = ((self.pred - self.hist[self.fit_index]) / self.hist[self.fit_index]) * 100
         # residuals_norm = residuals / np.max(np.abs(residuals))
 
-        ax2.scatter(self.time_diff_centers[fit_index], residuals, **self.residual_options)
+        ax2.scatter(self.bin_centers[self.fit_index], residuals, **self.residual_options)
         ax2.axhline(y=0, color='#162F65', linestyle='--')
         ax2.set_xlabel('Time difference (ns)')
         ax2.set_ylabel('Percent difference (%)')

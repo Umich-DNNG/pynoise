@@ -146,6 +146,7 @@ class Analyzer:
         # Flush the output to the file and close it.
         file.flush()
         file.close()
+        time.sleep(1)
 
 
 
@@ -725,33 +726,35 @@ class Analyzer:
         # Close all currently open plots.
         pyplot.close()
         # If exporting raw data:
-        # TODO: Fix data exporting.
         if settings['Input/Output Settings']['Save raw data'] == True:
             # Initialize variables.
             begin = []
             end = []
-            resStart = 0
-            # Continue increasing the residual/prediction starting index 
-            # while the minimum cutoff is greater than the current bin center.
-            while settings['RossiAlpha Settings']['Fit range'][0] > self.RAHist['Histogram'].bin_centers[resStart]:
-                resStart += 1
             # Construct the beginning and ending bin edges lists.
-            for i in range(len(self.RAHist['Histogram'].bin_edges)-1):
-                begin.append(self.RAHist['Histogram'].bin_edges[i])
-                end.append(self.RAHist['Histogram'].bin_edges[i+1])
-            # Export the beginning and ends of bins, measured counts, 
-            # predicted counts, residual, fit parameters, and file name.
-            self.export({'Bin beginning': (begin,0),
-                        'Bin ending': (end,0),
-                        'Measured Count': (self.RAHist['Histogram'].counts,0),
-                        'Predicted Count': (self.RABestFit['Best fit'].pred,resStart),
-                        'Residual': (self.RABestFit['Best fit'].residuals,resStart)},
-                        [('A', self.RABestFit['Best fit'].a),
-                        ('B', self.RABestFit['Best fit'].b),
-                        ('Alpha', self.RABestFit['Best fit'].alpha),
-                        ('Input file', settings['Input/Output Settings']['Input file/folder'])],
-                        'RAFile',
-                        settings['Input/Output Settings']['Save directory'])
+            for i in range(len(self.RAHist['Histogram'][0].bin_edges)-1):
+                begin.append(self.RAHist['Histogram'][0].bin_edges[i])
+                end.append(self.RAHist['Histogram'][0].bin_edges[i+1])
+            numRanges = len(self.RABestFit['Fit minimum'])
+            for i in range(0,len(self.RABestFit['Best fit'])):
+                # Export the beginning and ends of bins, measured counts, 
+                # predicted counts, residual, fit parameters, and file name.
+                self.export({'Bin beginning': (begin,0),
+                             'Bin ending': (end,0),
+                             'Measured Count': (self.RAHist['Histogram'][int(i/numRanges)].counts,0),
+                             'Predicted Count': (self.RABestFit['Best fit'][i].pred,self.RABestFit['Best fit'][i].fit_index[0][0]),
+                             'Percent error': (self.RABestFit['Best fit'][i].residuals,self.RABestFit['Best fit'][i].fit_index[0][0])},
+                            [('A', self.RABestFit['Best fit'][i].a),
+                             ('A uncertainty', self.RABestFit['Best fit'][i].perr[0]),
+                             ('Alpha', self.RABestFit['Best fit'][i].alpha),
+                             ('Alpha uncertainty', self.RABestFit['Best fit'][i].perr[1]),
+                             ('B', self.RABestFit['Best fit'][i].b),
+                             ('Fit minimum',self.RABestFit['Fit minimum'][i % numRanges]),
+                             ('Fit maximum',self.RABestFit['Fit maximum'][i % numRanges]),
+                             ('Time difference method',self.RATimeDifs['Time difference method'][int(i/numRanges)]),
+                             ('Bin width',self.RAHist['Histogram'][int(i/numRanges)].bin_width),
+                             ('Input file', settings['Input/Output Settings']['Input file/folder'])],
+                            'RAFile',
+                            settings['Input/Output Settings']['Save directory'])
 
 
 
