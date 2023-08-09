@@ -137,7 +137,6 @@ class Analyzer:
         # Flush the output to the file and close it.
         file.flush()
         file.close()
-        time.sleep(1)
 
 
 

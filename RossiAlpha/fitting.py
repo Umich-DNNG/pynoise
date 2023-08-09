@@ -384,7 +384,7 @@ class Fit_With_Weighting:
         exp_decay_fit_bounds = ([0,-np.inf],[np.inf,0])
         a0 = np.max(self.hist)
         c0 = np.mean(self.hist[-int(self.num_bins*0.05):])
-        b0 = ((np.log(c0)-np.log(self.hist[0]))/
+        b0 = ((np.log(c0 if c0 != 0 else 1e-10)-np.log(self.hist[0]))/
             (self.bin_centers[-1]-self.bin_centers[0]))
         yfit = self.hist[self.fit_index] - c0
         exp_decay_p0 = [a0, b0]
