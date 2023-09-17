@@ -1,6 +1,6 @@
 # Automating Commands
 
-When the user wants to run the same thing multiple times, it may become tedious to manually enter each command. For this reason command inputs can be automated in two different ways. This section will walk through the example of opening the program, importing settings from auto.json, and closing the program. Commands for this would normally be:
+When the user wants to run the same thing multiple times, it may become tedious to manually enter each command. For this reason command inputs can be automated in two different ways. This section will walk through the example of opening the program, importing settings from auto.json, and closing the program. These are just example settings that can be automated based on the settings that currently exist. If there are more settings in the future that can be called, then it will also follow these directions very similarly Commands for this would normally be:
 * i - import custom settings
 * a - append settings to default
 * auto - the name of the settings file
