@@ -77,7 +77,7 @@ These settings are ONLY applicable to the visual in Rossi-Alpha method.
 - "fill": true represents whether to fill the histogram bins visually
 - "color": "#B2CBDE" represents the color of the histogram
 - "edgecolor": "#162F65" represents the edge color of the histogram
-- "linewidth": 0.4 represents... TODO
+- "linewidth": 0.4 represents the width of the line of the histogram
 
 
 ## Line Fitting Settings
