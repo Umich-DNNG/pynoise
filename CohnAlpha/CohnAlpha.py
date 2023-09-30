@@ -100,7 +100,7 @@ class CohnAlpha:
         # Apply welch approximation of the fourier transform, convertig counts over time to a frequency distribution
         f, Pxx = signal.welch(x=counts_time_hist, 
                             fs=fs, 
-                            nperseg=2**12, 
+                            nperseg=caSet['nperseg'], 
                             window='boxcar')
         
         # Fitting distribution with expected equation (Ignore start & end points that are incorrect due to welch endpoint assumptions)
