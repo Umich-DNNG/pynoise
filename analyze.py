@@ -318,14 +318,20 @@ class Analyzer:
 
         # Load the values from the specified file into an NP array.
         values = np.loadtxt(input, usecols=(0,3), max_rows=2000000, dtype=float)
+
+        values2 = np.loadtxt(caSet['Second Input file'], usecols=(0,3), max_rows=2000000, dtype=float)
         # Create a Cohn Alpha object with the given settings.
         CA_Object = ca.CohnAlpha(values,
+                                 values2,
                                  caSet['Clean pulses switch'], 
                                  caSet['Dwell time'],
                                  caSet['Meas time range'])
         # Conduct Cohn Alpha analysis with the given settings.
-        CA_Object.conductCohnAlpha(show, save, output, caSet, sps, lfs, scatter_plot_settings)
-
+        # Check if Cross-spectral-density method should be applied
+        if (caSet['Cross Spectral']):
+            CA_Object.conduct_CPSD(show, save, output, caSet, sps, lfs, scatter_plot_settings)
+        else:
+            CA_Object.conductCohnAlpha(show, save, output, caSet, sps, lfs, scatter_plot_settings)
 
 
     def createTimeDifs(self,
