@@ -5,6 +5,7 @@
 
 # Python software default outputs
 *__pycache__/
+*_env/
 
 # vscode configuration files
 *.vscode
