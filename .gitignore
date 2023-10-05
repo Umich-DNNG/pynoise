@@ -22,3 +22,6 @@
 
 # Raw data output should not be kept
 *.csv
+
+# Remove cached editing files
+*.swp
