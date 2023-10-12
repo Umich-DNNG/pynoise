@@ -35,7 +35,7 @@
         "Annotation Font Weight": "bold",
         "Annotation Color": "black",
         "Annotation Background Color": "white",
-        "nperseg": 4096
+        "nperseg": 4096,
         "Cross Spectral": true,
         "Second Input file": "./CohnAlpha/sample_data/stilbene_2in_CROCUS_20cm_offset_north.txt"
     },
