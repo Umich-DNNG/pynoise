@@ -1,6 +1,6 @@
 {
     "Input/Output Settings": {
-        "Input file/folder": "none",
+        "Input file/folder": "./CohnAlpha/sample_data/stilbene_2in_CROCUS_20cm_offset_east.txt",
         "Time column": 0,
         "Channels column": null,
         "Save directory": "./data",
@@ -13,7 +13,7 @@
         "Number of folders": 10,
         "Verbose iterations": false,
         "Sort data": true,
-        "Show plots": false
+        "Show plots": true
     },
     "RossiAlpha Settings": {
         "Time difference method": "aa",
@@ -36,6 +36,8 @@
         "Annotation Color": "black",
         "Annotation Background Color": "white",
         "nperseg": 4096
+        "Cross Spectral": true,
+        "Second Input file": "./CohnAlpha/sample_data/stilbene_2in_CROCUS_20cm_offset_north.txt"
     },
     "FeynmanY Settings": {
         "Tau range": [30, 3000],
