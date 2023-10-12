@@ -28,8 +28,8 @@
     "CohnAlpha Settings": {
         "Dwell time": 2e6,
         "Meas time range": [
-            1.5e11,
-            1e12
+            0,
+            3.75e12
         ],
         "Clean pulses switch": true,
         "Annotation Font Weight": "bold",
