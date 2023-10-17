@@ -15,6 +15,9 @@ To run the PyNoise project, the following programs ust be downloaded:
 * raDriver.py
 * psdDriver.py
 
+Additionally, the PyNoise suite requires Python 3.10 version to run. Make sure to update your Python version accordingly before using this program.
+
+
 ### Python Packages & Virtal Environment.
 
 Ensure that Python and ```pip``` are installed on your system. You can check this by running the following commands in the terminal:
