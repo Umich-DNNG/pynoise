@@ -34,7 +34,8 @@
         "Clean pulses switch": true,
         "Annotation Font Weight": "bold",
         "Annotation Color": "black",
-        "Annotation Background Color": "white"
+        "Annotation Background Color": "white",
+        "nperseg": 4096
     },
     "FeynmanY Settings": {
         "Tau range": [

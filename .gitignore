@@ -5,6 +5,7 @@
 
 # Python software default outputs
 *__pycache__/
+*_env/
 
 # vscode configuration files
 *.vscode
@@ -21,3 +22,6 @@
 
 # Raw data output should not be kept
 *.csv
+
+# Remove cached editing files
+*.swp

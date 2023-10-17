@@ -100,7 +100,7 @@ class CohnAlpha:
         # Apply welch approximation of the fourier transform, convertig counts over time to a frequency distribution
         f, Pxx = signal.welch(x=counts_time_hist, 
                             fs=fs, 
-                            nperseg=2**12, 
+                            nperseg=caSet['nperseg'], 
                             window='boxcar')
         
         # Fitting distribution with expected equation (Ignore start & end points that are incorrect due to welch endpoint assumptions)
@@ -127,17 +127,17 @@ class CohnAlpha:
 
         # Constructing alpha string
         alph_str = (r'$\alpha$ = (' +
-                    str(np.around(popt[1]*2*np.pi, decimals=2)) + '$\pm$ '+ 
-                    str(np.around(pcov[1,1]*2*np.pi, decimals=2)) + ') 1/s')
+            '{:.2e}'.format(np.around(popt[1]*2*np.pi, decimals=2)) + '$\pm$ ' + 
+            '{:.2e}'.format(np.around(pcov[1,1]*2*np.pi, decimals=2)) + ') 1/s')
         
         # Annotating the plots
         ax1.annotate(alph_str, 
-                    xy=(1.5, ymin+0.1*dy), 
-                    xytext=(1.5, ymin+0.1*dy),
-                    fontsize=16, 
-                    fontweight=self.annotate_font_weight,
-                    color=self.annotate_color, 
-                    backgroundcolor=self.annotate_background_color)
+                     xy=(1.5, ymin+0.1*dy), 
+                     xytext=(1.5, ymin+0.1*dy),
+                     fontsize=caSet['Font Size'], 
+                     fontweight=self.annotate_font_weight,
+                     color=self.annotate_color, 
+                     backgroundcolor=self.annotate_background_color)
         
         # Creating title and legend
         ax1.set_title('Cohn Alpha Graph')
@@ -157,7 +157,6 @@ class CohnAlpha:
 
         ax2.scatter(f[1:-2], residuals, **scatter_opt)  # Use f for residuals
         ax2.axhline(y=0, color='#162F65', linestyle='--')
-        # ax2.set_ylim([-1, 1])
         ax2.set_xlabel('Frequency (Hz)')
         ax2.set_ylabel('Percent difference (%)')
         
