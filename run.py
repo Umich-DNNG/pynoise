@@ -524,18 +524,29 @@ def caSplit(window: Tk, parameters: set.Settings):
     - window: the main window of the gui.
     - parameters: the settings object holding the current settings.'''
 
+    name = parameters.settings['Input/Output Settings']['Input file/folder']
+    name = name[name.rfind('/')+1:]
 
-    # Conduct Cohn Alpha analysis and log the success.
-    analyzer.conductCohnAlpha(parameters.settings['Input/Output Settings']['Input file/folder'],
-                              parameters.settings['Input/Output Settings']['Save directory'],
-                              parameters.settings['General Settings']['Show plots'],
-                              parameters.settings['Input/Output Settings']['Save figures'],
-                              parameters.settings['CohnAlpha Settings'],
-                              parameters.settings['Semilog Plot Settings'],
-                              parameters.settings['Line Fitting Settings'])
-    log(message='Successfully ran Cohn Alpha analysis on file:\n'
-        +parameters.settings['Input/Output Settings']['Input file/folder'],
-        window=window)
+    # if name has a . in it, assume a single file.
+    if name.count('.') > 0:
+        # Conduct Cohn Alpha analysis and log the success.
+        analyzer.conductCohnAlpha(parameters.settings['Input/Output Settings']['Input file/folder'],
+                                parameters.settings['Input/Output Settings']['Save directory'],
+                                parameters.settings['General Settings']['Show plots'],
+                                parameters.settings['Input/Output Settings']['Save figures'],
+                                parameters.settings['CohnAlpha Settings'],
+                                parameters.settings['Semilog Plot Settings'],
+                                parameters.settings['Line Fitting Settings'])
+        log(message='Successfully ran Cohn Alpha analysis on file:\n'
+            +parameters.settings['Input/Output Settings']['Input file/folder'],
+            window=window)
+    # Otherwise, assume folder data.
+    else:
+        analyzer.CohnAlphaFullFolder(parameters.settings, window)
+        log(message='Successfully ran Cohn Alpha analysis with folder:\n'
+            +parameters.settings['Input/Output Settings']['Input file/folder'],
+            window=window)
+
 
 
 

@@ -32,22 +32,46 @@ def main(editorIn: edit.Editor, queue: list[str]):
             selection = input('Enter a command: ')
         match selection:
             case 'm':
-                if editor.parameters.settings['Input/Output Settings']['Input file/folder'] == 'none':
-                    print('ERROR: You currently have no input file or folder defined. '
-                          + 'Please make sure to specify one before running any analysis.\n')
+                # Get the file name for later use.
+                name = editor.parameters.settings['Input/Output Settings']['Input file/folder']
+                name = name[name.rfind('/')+1:]
+                # if input is file:
+                if name.count('.') > 0:
+                    if editor.parameters.settings['Input/Output Settings']['Input file/folder'] == 'none':
+                        print('ERROR: You currently have no input file or folder defined. '
+                            + 'Please make sure to specify one before running any analysis.\n')
+                    else:
+                        editor.print('\nRunning the entire Cohn Alpha analysis...')
+                        analyzer.conductCohnAlpha(editor.parameters.settings['Input/Output Settings']['Input file/folder'],
+                                                editor.parameters.settings['Input/Output Settings']['Save directory'],
+                                                editor.parameters.settings['General Settings']['Show plots'],
+                                                editor.parameters.settings['Input/Output Settings']['Save figures'],
+                                                editor.parameters.settings['CohnAlpha Settings'],
+                                                editor.parameters.settings['Semilog Plot Settings'],
+                                                editor.parameters.settings['Line Fitting Settings'],
+                                                editor.parameters.settings['Scatter Plot Settings'])
+                        editor.log('Ran the entire Cohn Alpha on file ' 
+                                    + editor.parameters.settings['Input/Output Settings']['Input file/folder'] 
+                                    + '.\n')
+                # if input is a folder:
                 else:
-                    editor.print('\nRunning the entire Cohn Alpha analysis...')
-                    analyzer.conductCohnAlpha(editor.parameters.settings['Input/Output Settings']['Input file/folder'],
-                                              editor.parameters.settings['Input/Output Settings']['Save directory'],
-                                              editor.parameters.settings['General Settings']['Show plots'],
-                                              editor.parameters.settings['Input/Output Settings']['Save figures'],
-                                              editor.parameters.settings['CohnAlpha Settings'],
-                                              editor.parameters.settings['Semilog Plot Settings'],
-                                              editor.parameters.settings['Line Fitting Settings'],
-                                              editor.parameters.settings['Scatter Plot Settings'])
-                    editor.log('Ran the entire Cohn Alpha on file ' 
-                                + editor.parameters.settings['Input/Output Settings']['Input file/folder'] 
-                                + '.\n')
+                    if editor.parameters.settings['Input/Output Settings']['Input file/folder'] == 'none':
+                        print('ERROR: You currently have no input file or folder defined. '
+                            + 'Please make sure to specify one before running any analysis.\n')
+                    else:
+                        editor.print('\nRunning the entire Cohn Alpha analysis with folder...')
+                        analyzer.cohnAlphaFullFolder(editor.parameters.settings['Input/Output Settings']['Input file/folder'],
+                                                editor.parameters.settings['Input/Output Settings']['Save directory'],
+                                                editor.parameters.settings['General Settings']['Show plots'],
+                                                editor.parameters.settings['Input/Output Settings']['Save figures'],
+                                                editor.parameters.settings['CohnAlpha Settings'],
+                                                editor.parameters.settings['Semilog Plot Settings'],
+                                                editor.parameters.settings['Line Fitting Settings'],
+                                                editor.parameters.settings['Scatter Plot Settings'])
+                        editor.log('Ran the entire Cohn Alpha with folder ' 
+                                    + editor.parameters.settings['Input/Output Settings']['Input file/folder'] 
+                                    + '.\n')
+                
             # View and/or edit program settings.
             case 's':
                 editor.print('')

@@ -953,3 +953,16 @@ class Analyzer:
             settings['RossiAlpha Settings']['Fit minimum'] = settings['RossiAlpha Settings']['Fit minimum'][0]
         # Close all open plots.
         pyplot.close()
+
+    def CohnAlphaFullFolder(self, settings: dict):
+        # Store the original folder pathway.
+        original = settings['Input/Output Settings']['Input file/folder']
+        # Loop for the number of folders specified.
+        for folder in tqdm(range(1, settings['General Settings']['Number of folders'] + 1)):
+            # Add the folder number to the input.
+            settings['Input/Output Settings']['Input file/folder'] = original + '/' + str(folder)
+            # Conduct full analysis.
+
+            # Call Cohn Alpha driver function
+            self.conductCohnAlpha(settings, True)
+    
