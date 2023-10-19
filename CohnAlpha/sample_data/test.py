@@ -9,12 +9,12 @@ def CPSD(f, A, alpha, c):
 def conduct_CPSD(PowSpecDens_settings,leg_labels,
                  plt_title,
                  clean_pulses_switch):
-
+    
     count_bins = (
         np.diff(PowSpecDens_settings['meas time range'])/
         PowSpecDens_settings['dwell time']
                   )
-
+    
     counts_time_hist = np.zeros([2,int(count_bins)])
 
     list_data_array = np.loadtxt("stilbene_2in_CROCUS_20cm_offset_east.txt")
@@ -43,7 +43,7 @@ def conduct_CPSD(PowSpecDens_settings,leg_labels,
     timeline = np.linspace(PowSpecDens_settings['meas time range'][0],
                 PowSpecDens_settings['meas time range'][1], # Get measurement time in seconds
                 int(count_bins))/1e9
-
+    
     # Plot counts over time histogram (ensure constant or near constant)
     i=0
     for ch in [0,1]:
@@ -59,7 +59,7 @@ def conduct_CPSD(PowSpecDens_settings,leg_labels,
 
     f, Pxy = signal.csd(
         counts_time_hist[0,:], counts_time_hist[1,:], fs, nperseg=2**10, window='boxcar')
-
+    
     Pxy = np.abs(Pxy)
     # Apply welch windows and FFT to tapered windows, summation is smoothed FFT
 
@@ -71,7 +71,7 @@ def conduct_CPSD(PowSpecDens_settings,leg_labels,
                                      bounds=(0, np.inf),
                                      maxfev=100000
                                      )
-
+    
     fig2, ax2 = plt.subplots()
     ax2.semilogx(f[1:-2], Pxy[1:-2], '.', label=plt_title)
     ax2.semilogx(f[1:-2], CPSD(f[1:-2], *popt), '--', label='fit')

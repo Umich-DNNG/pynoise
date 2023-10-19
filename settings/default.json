@@ -26,7 +26,7 @@
         "Fit maximum": null
     },
     "CohnAlpha Settings": {
-        "Dwell time": 2e6,
+        "Dwell time": 1e6,
         "Meas time range": [
             0,
             3.75e12
