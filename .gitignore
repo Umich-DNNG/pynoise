@@ -1,7 +1,10 @@
+# Raw data that should not be on GitLab
+*.bin
+
 # Processed data that does not make sense to keep on GitLab
 *.png
 *.npy
-*.bin
+*.pdf
 
 # Python software default outputs
 *__pycache__/
