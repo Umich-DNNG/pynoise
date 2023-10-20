@@ -60,6 +60,7 @@ def main(editorIn: edit.Editor, queue: list[str]):
                             + 'Please make sure to specify one before running any analysis.\n')
                     else:
                         editor.print('\nRunning the entire Cohn Alpha analysis with folder...')
+                        # TODO: error, Analyzer.cohnAlphaFullFolder takes 2 positional arguments but 9 were given
                         analyzer.cohnAlphaFullFolder(editor.parameters.settings['Input/Output Settings']['Input file/folder'],
                                                 editor.parameters.settings['Input/Output Settings']['Save directory'],
                                                 editor.parameters.settings['General Settings']['Show plots'],
@@ -67,7 +68,8 @@ def main(editorIn: edit.Editor, queue: list[str]):
                                                 editor.parameters.settings['CohnAlpha Settings'],
                                                 editor.parameters.settings['Semilog Plot Settings'],
                                                 editor.parameters.settings['Line Fitting Settings'],
-                                                editor.parameters.settings['Scatter Plot Settings'])
+                                                editor.parameters.settings['Scatter Plot Settings'],
+                                                editor.parameters.settings)
                         editor.log('Ran the entire Cohn Alpha with folder ' 
                                     + editor.parameters.settings['Input/Output Settings']['Input file/folder'] 
                                     + '.\n')

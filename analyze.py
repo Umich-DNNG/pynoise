@@ -954,7 +954,16 @@ class Analyzer:
         # Close all open plots.
         pyplot.close()
 
-    def CohnAlphaFullFolder(self, settings: dict):
+    def cohnAlphaFullFolder(self,
+                         input:str,
+                         output:str,
+                         show:bool,
+                         save:bool,
+                         caSet:dict,
+                         sps:dict,
+                         lfs:dict,
+                         scatter_plot_settings:dict,
+                         settings: dict):
         # Store the original folder pathway.
         original = settings['Input/Output Settings']['Input file/folder']
         # Loop for the number of folders specified.
@@ -963,6 +972,14 @@ class Analyzer:
             settings['Input/Output Settings']['Input file/folder'] = original + '/' + str(folder)
             # Conduct full analysis.
 
-            # Call Cohn Alpha driver function
-            self.conductCohnAlpha(settings, True)
     
+
+            # Load the values from the specified file into an NP array.
+            values = np.loadtxt(input, usecols=(0,3), max_rows=2000000, dtype=float)
+            # Create a Cohn Alpha object with the given settings.
+            CA_Object = ca.CohnAlpha(values,
+                                    caSet['Clean pulses switch'], 
+                                    caSet['Dwell time'],
+                                    caSet['Meas time range'])
+            # Conduct Cohn Alpha analysis with the given settings.
+            CA_Object.conductCohnAlpha(show, save, output, caSet, sps, lfs, scatter_plot_settings)
