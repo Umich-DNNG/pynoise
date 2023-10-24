@@ -75,6 +75,7 @@ Inputs:
 * annotate_font_weight (default="bold", meaning that the annotation parameter will be bolded as a default)
 * annotate_color (default="black", meaning that the annotation parameter will be the color black as a default)
 * annotate_background_color (default="white", meaning that the annotation parameter will have a white background color as a default)
+* annotate_font_size (default=12, meaning that the annotation font size will be 12 as a default)
 
 
 Output:
