@@ -317,7 +317,7 @@ class Analyzer:
 
 
         # Load the values from the specified file into an NP array.
-        values = np.loadtxt(input, usecols=(0,3), max_rows=2000000, dtype=float)
+        values = np.loadtxt(input, usecols=(0,3), dtype=float)
         # Create a Cohn Alpha object with the given settings.
         CA_Object = ca.CohnAlpha(values,
                                  caSet['Clean pulses switch'], 
