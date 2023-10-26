@@ -73,6 +73,7 @@ class CohnAlpha:
         self.annotate_font_weight = caSet['Annotation Font Weight']
         self.annotate_color = caSet['Annotation Color']
         self.annotate_background_color = caSet['Annotation Background Color']
+        self.annotate_font_size = caSet['Font Size']
         
         # Making count of bins over time histogram
         count_bins = np.diff(self.meas_time_range) / self.dwell_time
@@ -134,7 +135,7 @@ class CohnAlpha:
         ax1.annotate(alph_str, 
                      xy=(1.5, ymin+0.1*dy), 
                      xytext=(1.5, ymin+0.1*dy),
-                     fontsize=caSet['Font Size'], 
+                     fontsize=self.annotate_font_size, 
                      fontweight=self.annotate_font_weight,
                      color=self.annotate_color, 
                      backgroundcolor=self.annotate_background_color)
