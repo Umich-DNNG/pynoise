@@ -967,15 +967,15 @@ class Analyzer:
         # Store the original folder pathway.
         original = settings['Input/Output Settings']['Input file/folder']
         # Loop for the number of folders specified.
-        for folder in tqdm(range(1, settings['General Settings']['Number of folders'] + 1)):
-            # Add the folder number to the input.
-            settings['Input/Output Settings']['Input file/folder'] = original + '/' + str(folder)
+        for file in os.listdir(input):
+
+            # append input file name to folder path
+            inputFile = original + '/' + str(file)
+            settings['Input/Output Settings']['Input file/folder'] = inputFile
             # Conduct full analysis.
 
-    
-
             # Load the values from the specified file into an NP array.
-            values = np.loadtxt(input, usecols=(0,3), max_rows=2000000, dtype=float)
+            values = np.loadtxt(settings['Input/Output Settings']['Input file/folder'], usecols=(0,3), max_rows=2000000, dtype=float)
             # Create a Cohn Alpha object with the given settings.
             CA_Object = ca.CohnAlpha(values,
                                     caSet['Clean pulses switch'], 
