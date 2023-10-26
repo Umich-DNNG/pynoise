@@ -317,12 +317,12 @@ class Analyzer:
 
 
         # Load the values from the specified file into an NP array.
-        values = np.loadtxt(input, usecols=(0,3), max_rows=2000000, dtype=float)
+        values = np.loadtxt(input)#, usecols=(0,3), max_rows=2000000, dtype=float)
 
-        values2 = np.loadtxt(caSet['Second Input file'], usecols=(0,3), max_rows=2000000, dtype=float)
+        #values2 = np.loadtxt(caSet['Second Input file'], usecols=(0,3), max_rows=2000000, dtype=float)
         # Create a Cohn Alpha object with the given settings.
         CA_Object = ca.CohnAlpha(values,
-                                 values2,
+                                 #values2,
                                  caSet['Clean pulses switch'], 
                                  caSet['Dwell time'],
                                  caSet['Meas time range'])

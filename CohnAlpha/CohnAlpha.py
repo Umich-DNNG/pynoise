@@ -17,7 +17,7 @@ def CAFit(f, A, alpha, c):
 class CohnAlpha:
     def __init__(self, 
                  list_data_array,
-                 list_data_array2, 
+                 #list_data_array2, 
                  clean_pulses_switch: bool = True, 
                  dwell_time: float = 2.0e6, 
                  meas_time_range: list[float] = [1.5e11, 1.0e12]):
@@ -38,7 +38,7 @@ class CohnAlpha:
 
         # Required Parameters
         self.list_data_array = list_data_array
-        self.list_data_array2 = list_data_array2
+        #self.list_data_array2 = list_data_array2
         self.clean_pulses_switch = clean_pulses_switch
         self.dwell_time = dwell_time
         self.meas_time_range = meas_time_range
@@ -60,24 +60,34 @@ class CohnAlpha:
         # Making count of bins over time histogram
         count_bins = np.diff(self.meas_time_range) / self.dwell_time
 
+        counts_time_hist = np.zeros([2,int(count_bins)])
+
+        index = self.list_data_array[:,0]!=0
+
         if self.clean_pulses_switch == 1:
-            indices = (self.list_data_array[:,-1]==1)
-            indices2 = (self.list_data_array2[:,-1]==1)
+            index = index & (self.list_data_array[:,-1]==1)
 
-        times = self.list_data_array[indices, 0]
-        times2 = self.list_data_array2[indices2, 0]
+        times = self.list_data_array[index, 0]
 
-        counts_time_hist, _ = np.histogram(
-                    times,
-                    bins=int(count_bins),
-                    range=self.meas_time_range
-                    )
-        
-        counts_time_hist2, _ = np.histogram(
-                    times2,
-                    bins=int(count_bins),
-                    range=self.meas_time_range
-                    )
+        N, _ = np.histogram(
+                 times,
+                 bins=int(count_bins),
+                 range=self.meas_time_range
+                 )
+        counts_time_hist[0,:] = N
+
+        list_data_array = np.loadtxt(caSet['Second Input file'])#, usecols=(0,3), max_rows=2000000, dtype=float)
+        index = list_data_array[:,0]!=0
+        if self.clean_pulses_switch == 1:
+            index = index & (list_data_array[:,-1]==1)
+        times = list_data_array[index,0]
+
+        N, _ = np.histogram(
+                  times,
+                  bins=int(count_bins),
+                  range=self.meas_time_range
+                  )
+        counts_time_hist[1,:] = N
         
         # counts_time_hist = np.zeros([2,int(count_bins)])
         ''' if np.size(channels) == 2:
@@ -104,18 +114,17 @@ class CohnAlpha:
                             stop=self.meas_time_range[1],
                             num=int(count_bins))/1e9
 
-        fig1, ax1 = plt.subplots()
+        '''fig1, ax1 = plt.subplots()
         ax1.plot(timeline, counts_time_hist, '.', label="TBD")
         ax1.plot(timeline, counts_time_hist2, '.', label="TBD")
 
         ax1.set_ylabel('Counts')
         ax1.set_xlabel('Time (s)')
-        ax1.legend()
+        ax1.legend()'''
         
         # Plot counts over time histogram (ensure constant or near constant)
-        '''
         i=0
-        for ch in channels:
+        for ch in [0,1]:
             fig1, ax1 = plt.subplots()
             ax1.plot(timeline, counts_time_hist[i,:], '.', label="TBD")
 
@@ -123,27 +132,26 @@ class CohnAlpha:
             ax1.set_xlabel('Time (s)')
             ax1.legend()
             i+=1
-        '''
 
         fs = 1/(timeline[3]-timeline[2]) # Get frequency of counts samples
 
         f, Pxy = signal.csd(
-            counts_time_hist, 
-            counts_time_hist2, 
+            counts_time_hist[0,:], 
+            counts_time_hist[1,:], 
             fs, 
-            nperseg=2**9, 
+            nperseg=2**10, 
             window='boxcar')
         Pxy = np.abs(Pxy)
 
-        f1, Pxx1 = signal.welch(x=counts_time_hist, 
+        '''f1, Pxx1 = signal.welch(x=counts_time_hist[0,:], 
                             fs=fs, 
                             nperseg=2**12, 
                             window='boxcar')
         
-        f2, Pxx2 = signal.welch(x=counts_time_hist2, 
+        f2, Pxx2 = signal.welch(x=counts_time_hist[1,:], 
                             fs=fs, 
                             nperseg=2**12, 
-                            window='boxcar')
+                            window='boxcar')'''
 
         # Apply welch windows and FFT to tapered windows, summation is smoothed FFT
 
@@ -156,7 +164,7 @@ class CohnAlpha:
                                         maxfev=100000
                                         )
 
-        popt1, pcov1 = curve_fit(CAFit, f1[1:-2], 
+        '''popt1, pcov1 = curve_fit(CAFit, f1[1:-2], 
                                         Pxx1[1:-2],
                                         p0=[Pxx1[2], 25, 0.001],
                                         bounds=(0, np.inf),
@@ -168,7 +176,7 @@ class CohnAlpha:
                                         p0=[Pxx2[2], 25, 0.001],
                                         bounds=(0, np.inf),
                                         maxfev=100000
-                                        )
+                                        )'''
         
         fig2, ax2 = plt.subplots()
         ax2.semilogx(f[1:-2], Pxy[1:-2], '.', **sps)
@@ -191,6 +199,8 @@ class CohnAlpha:
 
         # ax2.set_title(plt_title)
         ax2.legend(loc='upper right')
+
+        ax2.grid()
 
         '''
         # Plotting the auto-power-spectral-density distribution and fit
