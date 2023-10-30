@@ -318,6 +318,20 @@ class Analyzer:
 
         # Load the values from the specified file into an NP array.
         values = np.loadtxt(input, usecols=(0,3), dtype=float)
+
+        # -------- TODO: Using "clean_pulses_switch" here directly --------
+
+        # psuedocode shown below
+
+        '''
+        if clean_pulses_switch == 1:
+            values = np.loadtxt(input, usecols=(0,3), dtype=float)
+        else:
+            values = np.loadtxt(input, usecols=0, dtype=float)
+        '''
+
+        # -----------------------------------------------------------------
+
         # Create a Cohn Alpha object with the given settings.
         CA_Object = ca.CohnAlpha(values,
                                  caSet['Clean pulses switch'], 
