@@ -77,18 +77,11 @@ class CohnAlpha:
         
         # Making count of bins over time histogram
         count_bins = np.diff(self.meas_time_range) / self.dwell_time
-            
-        # Only considering rows where last column value == 1 (Optional)
-        if self.clean_pulses_switch == 1:
-            indices = (self.list_data_array[:,-1] == 1)
-        
-        # Taking first column values ONLY
-        times = self.list_data_array[indices, 0]
         
         # Generating corresponding histogram
-        counts_time_hist, _ = np.histogram(a=times, 
-                                        bins=int(count_bins), 
-                                        range=self.meas_time_range)
+        counts_time_hist, _ = np.histogram(a=self.list_data_array, 
+                                           bins=int(count_bins), 
+                                           range=self.meas_time_range)
         
         # Creating evenly spaced start and stop endpoint for plotting
         timeline = np.linspace(start=self.meas_time_range[0], 
