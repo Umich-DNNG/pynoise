@@ -321,14 +321,13 @@ class Analyzer:
 
         # -------- TODO: Using "clean_pulses_switch" here directly --------
 
-        # psuedocode shown below
-
-        '''
-        if clean_pulses_switch == 1:
+        # Only considering rows where last column value == 1 (Optional)
+        if caSet['Clean pulses switch'] == 1:
             values = np.loadtxt(input, usecols=(0,3), dtype=float)
+            values = values[values[:, 1] == 1]
+            values = values[:, 0]
         else:
             values = np.loadtxt(input, usecols=0, dtype=float)
-        '''
 
         # -----------------------------------------------------------------
 
