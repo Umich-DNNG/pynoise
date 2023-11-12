@@ -16,6 +16,8 @@ from CohnAlpha import CohnAlpha as ca
 from FeynmanY import feynman as fey
 from tkinter import *
 from tqdm import tqdm
+import psutil
+
 
 
 
@@ -967,19 +969,26 @@ class Analyzer:
         # Store the original folder pathway.
         original = settings['Input/Output Settings']['Input file/folder']
         # Loop for the number of folders specified.
-        for file in os.listdir(input):
 
-            # append input file name to folder path
-            inputFile = original + '/' + str(file)
-            settings['Input/Output Settings']['Input file/folder'] = inputFile
-            # Conduct full analysis.
+        # for file in os.listdir(input):
 
-            # Load the values from the specified file into an NP array.
-            values = np.loadtxt(settings['Input/Output Settings']['Input file/folder'], usecols=(0,3), max_rows=2000000, dtype=float)
-            # Create a Cohn Alpha object with the given settings.
-            CA_Object = ca.CohnAlpha(values,
-                                    caSet['Clean pulses switch'], 
-                                    caSet['Dwell time'],
-                                    caSet['Meas time range'])
-            # Conduct Cohn Alpha analysis with the given settings.
-            CA_Object.conductCohnAlpha(show, save, output, caSet, sps, lfs, scatter_plot_settings)
+        # hard coded settings for music folder:
+        sorted_list = sorted(os.listdir(input))
+        for file in sorted_list:
+            if (file[0].isdigit()):
+                # append input file name to folder path
+                inputFile = original + '/' + str(file) + '/' + str('all_n_times_b0_2.txt')
+                print("input file is ", inputFile)
+
+                settings['Input/Output Settings']['Input file/folder'] = inputFile
+                # Conduct full analysis.
+
+                # Load the values from the specified file into an NP array.
+                values = np.loadtxt(settings['Input/Output Settings']['Input file/folder'], usecols=(0,3), max_rows=2000000, dtype=float)
+                # Create a Cohn Alpha object with the given settings.
+                CA_Object = ca.CohnAlpha(values,
+                                        caSet['Clean pulses switch'], 
+                                        caSet['Dwell time'],
+                                        caSet['Meas time range'])
+                # Conduct Cohn Alpha analysis with the given settings.
+                CA_Object.conductCohnAlpha(show, save, output, caSet, sps, lfs, scatter_plot_settings)

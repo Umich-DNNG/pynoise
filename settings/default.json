@@ -1,6 +1,6 @@
 {
     "Input/Output Settings": {
-        "Input file/folder": "none",
+        "Input file/folder": "/Users/camdendo/Dropbox (University of Michigan)/20210322_06_RF3-42_CF_OS_run1_60min_0947",
         "Time column": 0,
         "Channels column": null,
         "Save directory": "./data",
@@ -13,7 +13,7 @@
         "Number of folders": 10,
         "Verbose iterations": false,
         "Sort data": true,
-        "Show plots": false
+        "Show plots": true
     },
     "RossiAlpha Settings": {
         "Time difference method": "aa",
@@ -32,7 +32,7 @@
             1e12
         ],
         "Clean pulses switch": true,
-        "Font Size": 12, 
+        "Font Size": 12,
         "Annotation Font Weight": "bold",
         "Annotation Color": "black",
         "Annotation Background Color": "white",
