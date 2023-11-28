@@ -17,6 +17,9 @@ from FeynmanY import feynman as fey
 from tkinter import *
 from tqdm import tqdm
 import psutil
+import sys
+from scipy import signal               # For welch (fourier transform)
+
 
 
 
@@ -294,7 +297,58 @@ class Analyzer:
                         filename,
                         io['Save directory'])
 
+    def find_large_relative_changes(data, threshold_percent, datasize=25000):
+        change_indices = []
+        
+        for i in range(1, len(data)):
+            change_percentage = abs(data[i] - data[i - 1]) / data[i - 1] * 100
+            if change_percentage > threshold_percent:
+                change_indices.append(i)
+        chunks = []
+        start_idx = 0
+        
+        for end_idx in change_indices:
+            chunk = data[start_idx:end_idx]
+            chunks.append(chunk)
+            start_idx = end_idx
+        
+        # Add the last chunk (from the last change index to the end of the data)
+        if start_idx < len(data):
+            last_chunk = data[start_idx:]
+            chunks.append(last_chunk)
+        # Further split chunks into smaller ones
+        smaller_chunks = []
+        for chunk in chunks:
+            if len(chunk) <= datasize:
+                smaller_chunks.append(chunk)
+            else:
+                num_subchunks = len(chunk) // datasize
+                remaining_data = chunk
+                for _ in range(num_subchunks):
+                    subchunk = remaining_data[:datasize]
+                    smaller_chunks.append(subchunk)
+                    remaining_data = remaining_data[datasize:]
+                if remaining_data.size > 0:
+                    smaller_chunks.append(remaining_data)
+                smaller_chunks = smaller_chunks
+        return chunks, smaller_chunks
+    
+    def process_chunk(chunk_index, chunk_data, dwell_time_ms, nperseg_m):
+        # Create the histogram
+        bin_width_ps = dwell_time_ms * 1e9  # Convert ms to ps
+        # Define explicit bin edges
+        bin_edges = np.arange(min(chunk_data), max(chunk_data) + bin_width_ps,
+                            bin_width_ps)
+        hist, _ = np.histogram(chunk_data, bins=bin_edges)
 
+        fs = round(1 / (dwell_time_ms / int(1000)))  # Frequency converting ns to s
+        f, Pxx = signal.welch(hist, fs, nperseg=nperseg_m, window='boxcar')
+        result = {
+            'chunk_index': chunk_index,
+            'f': f,
+            'Pxx': Pxx,
+        }
+        return result
 
     def conductCohnAlpha(self,
                          input:str,
@@ -317,9 +371,27 @@ class Analyzer:
         - sps: the Semilog Plot Settings.
         - lfs: the Line Fitting Settings.'''
 
+        # measure memory available on device
+        available_memory_gb = psutil.virtual_memory().available / 1073741824
+        print(f"Available Memory: {available_memory_gb:.2f} GB")
 
         # Load the values from the specified file into an NP array.
         values = np.loadtxt(input, usecols=(0,3), dtype=float)
+
+        # set parameters based on memory
+        # if (available_memory_gb < ):
+
+
+        dwell_time_ms = caSet['Dwell time']
+        // TODO: fix keyError
+        nperseg_m = caSet['nperseg']
+        threshold_percent = 0.2
+        chunks, schunks = self.find_large_relative_changes(values, threshold_percent)
+
+        # process chunks and get results
+        for chunk_index, chunk_data in enumerate(chunks):
+            result = self.process_chunk(chunk_index, chunk_data, dwell_time_ms, nperseg_m)
+
 
         # -------- TODO: Using "clean_pulses_switch" here directly --------
 
@@ -977,31 +1049,24 @@ class Analyzer:
                          caSet:dict,
                          sps:dict,
                          lfs:dict,
-                         scatter_plot_settings:dict,
-                         settings: dict):
-        # Store the original folder pathway.
-        original = settings['Input/Output Settings']['Input file/folder']
-        # Loop for the number of folders specified.
+                         scatter_plot_settings:dict,):
 
-        # for file in os.listdir(input):
 
-        # hard coded settings for music folder:
-        sorted_list = sorted(os.listdir(input))
-        for file in sorted_list:
-            if (file[0].isdigit()):
-                # append input file name to folder path
-                inputFile = original + '/' + str(file) + '/' + str('all_n_times_b0_2.txt')
-                print("input file is ", inputFile)
+        for file in os.listdir(input):
+            inputFile = input + '/' + file
+            self.conductCohnAlpha(inputFile, output, show, save, caSet, sps, lfs, scatter_plot_settings)
 
-                settings['Input/Output Settings']['Input file/folder'] = inputFile
-                # Conduct full analysis.
 
-                # Load the values from the specified file into an NP array.
-                values = np.loadtxt(settings['Input/Output Settings']['Input file/folder'], usecols=(0,3), max_rows=2000000, dtype=float)
-                # Create a Cohn Alpha object with the given settings.
-                CA_Object = ca.CohnAlpha(values,
-                                        caSet['Clean pulses switch'], 
-                                        caSet['Dwell time'],
-                                        caSet['Meas time range'])
-                # Conduct Cohn Alpha analysis with the given settings.
-                CA_Object.conductCohnAlpha(show, save, output, caSet, sps, lfs, scatter_plot_settings)
+
+        # # hard coded settings for music folder:
+        # sorted_list = sorted(os.listdir(input))
+        # for file in sorted_list:
+        #     if (file[0].isdigit()):
+        #         # append input file name to folder path
+        #         inputFile = original + '/' + str(file) + '/' + str('all_n_times_b0_2.txt')
+        #         print("input file is ", inputFile)
+        #         self.conductCohnAlpha(inputFile, output, show, save, caSet, sps, lfs, scatter_plot_settings)
+
+
+
+
