@@ -297,24 +297,31 @@ class Analyzer:
                         filename,
                         io['Save directory'])
 
-    def find_large_relative_changes(data, threshold_percent, datasize=25000):
+    def find_large_relative_changes(self, values, threshold_percent):
+        datasize = 25000
         change_indices = []
         
-        for i in range(1, len(data)):
-            change_percentage = abs(data[i] - data[i - 1]) / data[i - 1] * 100
+        for i in range(1, len(values)):
+            print ("values[i]", values[i])
+            print ("values[i-1]", values[i-1])
+            change_percentage = abs(values[i] - values[i-1])
+            # change_percentage = change_percentage / values[i - 1] * 100
+            print("change percent type", type(change_percentage))
+            print("length change percentage", len(change_percentage))
+            print("threshold percent type", type(threshold_percent))
             if change_percentage > threshold_percent:
                 change_indices.append(i)
         chunks = []
         start_idx = 0
         
         for end_idx in change_indices:
-            chunk = data[start_idx:end_idx]
+            chunk = values[start_idx:end_idx]
             chunks.append(chunk)
             start_idx = end_idx
         
         # Add the last chunk (from the last change index to the end of the data)
-        if start_idx < len(data):
-            last_chunk = data[start_idx:]
+        if start_idx < len(values):
+            last_chunk = values[start_idx:]
             chunks.append(last_chunk)
         # Further split chunks into smaller ones
         smaller_chunks = []
@@ -333,7 +340,7 @@ class Analyzer:
                 smaller_chunks = smaller_chunks
         return chunks, smaller_chunks
     
-    def process_chunk(chunk_index, chunk_data, dwell_time_ms, nperseg_m):
+    def process_chunk(self, chunk_index, chunk_data, dwell_time_ms, nperseg_m):
         # Create the histogram
         bin_width_ps = dwell_time_ms * 1e9  # Convert ms to ps
         # Define explicit bin edges
@@ -383,7 +390,6 @@ class Analyzer:
 
 
         dwell_time_ms = caSet['Dwell time']
-        // TODO: fix keyError
         nperseg_m = caSet['nperseg']
         threshold_percent = 0.2
         chunks, schunks = self.find_large_relative_changes(values, threshold_percent)
@@ -1055,18 +1061,4 @@ class Analyzer:
         for file in os.listdir(input):
             inputFile = input + '/' + file
             self.conductCohnAlpha(inputFile, output, show, save, caSet, sps, lfs, scatter_plot_settings)
-
-
-
-        # # hard coded settings for music folder:
-        # sorted_list = sorted(os.listdir(input))
-        # for file in sorted_list:
-        #     if (file[0].isdigit()):
-        #         # append input file name to folder path
-        #         inputFile = original + '/' + str(file) + '/' + str('all_n_times_b0_2.txt')
-        #         print("input file is ", inputFile)
-        #         self.conductCohnAlpha(inputFile, output, show, save, caSet, sps, lfs, scatter_plot_settings)
-
-
-
 

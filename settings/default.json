@@ -1,10 +1,10 @@
 {
     "Input/Output Settings": {
-        "Input file/folder": "/Users/camdendo/Dropbox (University of Michigan)/20210322_06_RF3-42_CF_OS_run1_60min_0947",
+        "Input file/folder": "./CohnAlpha/sample_data/stilbene_2in_CROCUS_20cm_offset_east.txt",
         "Time column": 0,
         "Channels column": null,
         "Save directory": "./data",
-        "Save figures": false,
+        "Save figures": true,
         "Save raw data": false,
         "Keep logs": false,
         "Quiet mode": false
