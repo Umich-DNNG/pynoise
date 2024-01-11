@@ -4,18 +4,23 @@ This section of the PyNoise suite is for Rossi Alpha Algorithm analysis. This dr
 
 ### Requirements
 
-Besides those mentioned in the main README file, the following programs must be downloaded to run RossiAlpha analysis:
-* analyzeAll.py
-* analyzingFolders.py
-* timeDifs.py
-* plots.py
-* fitting.py
-
-**TODO**: Add required libraries.
-
-Additionally, you will need the following:
+You will need the following inputs for the analysis:
 * A single file or folder of data that will be analyzed.
 * A settings configuration file (see the settings section for more information).
+
+Some example data inputs can be found with this link:
+**TODO PROVIDE LINK**
+
+### How To Run RossiAlpha
+* Create a .json file with the appropriate settings (default.json contains all the default settings)
+* Input the pathway of your input data directory into the "Input file/folder" setting under "Input/Output Settings" in the .json file that you created
+* Open your terminal and navigate to the PyNoise directory
+* Type "python3 main.py" and hit enter (You should be prompted with a welcome message)
+* Type "d" if you want to use the default settings or type "i" if you want to import the .json that created earlier
+* If you are using the default settings, type "r" to run the RossiAlpha analysis
+* If you are using the .json file from earlier, type "o" to run the RossiAlpha analysis
+* The results should either pop up on the screen, saved to a folder, or both.
+
 
 ### I/O FILE INFO
 
@@ -45,6 +50,7 @@ The RossiAlpha program can be run with a variety of options that change the visu
  <source src="./RossiAlphaDemo.mp4" type="video/mp4" >
  </video>
 </figure>
+
 ### Driver
 ```raDriver.py``` is used to run all analysis pertaining to the Rossi Alpha method, and is called from the main driver. **Trying to call raDriver independently will not work**. The driver has been designed modularly, so that analysis at any stage can be done without having to run through the entire process. There are 5 main options:
 * m - run the entire program through the [main driver](#main)
