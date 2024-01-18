@@ -1,6 +1,6 @@
 # PyNoise Project
 
-Welcome to the PyNoise Project! The goal of this Python suite is to process and analyze radiation data recorded from fission reactions. Our supported methods of analysis currently include Rossi Alpha and Power Spectral Density. For more information about these methods, please see the README files in their respective subdirectories.
+Welcome to the PyNoise Project! The goal of this Python suite is to process and analyze radiation data recorded from fission chain reactions. Our supported methods of analysis currently include Rossi Alpha, Cohn Alpha, and Feynman-Y. For more information about these methods, please see the README files in their respective subdirectories.
 
 ## How to Use
 
@@ -8,17 +8,12 @@ Welcome to the PyNoise Project! The goal of this Python suite is to process and 
 
 ### Requirements
 
-To run the PyNoise project, the following programs ust be downloaded:
-* driver.py
-* editor.py
-* settings.py
-* raDriver.py
-* psdDriver.py
-
-Additionally, the PyNoise suite requires Python 3.10 version to run. Make sure to update your Python version accordingly before using this program.
+To run the PyNoise project, please ensure you have the entire repo downloaded, even if you plan to use only one analysis method. Additionally, the PyNoise suite requires Python 3.10 version to run. Make sure to update your Python version accordingly before using this program.
 
 
-### Python Packages & Virtal Environment.
+### Installing Required Python Packages
+
+Pip is the preferred package manager for this project, and this README will explain how to install project dependencies with it. If you are using another manager, please consult its documentation on how to install project dependencies from the requirements.txt file. 
 
 Ensure that Python and ```pip``` are installed on your system. You can check this by running the following commands in the terminal:
 ```python
@@ -26,34 +21,13 @@ python --version
 pip --version
 ```
 
-Create a virtual environment (optional): It is recommended to isolate the programs' dependencies from other Python installations. In 
-the terminal, navigate to the PyNoise directory and run the following command to create a virtual environment:
-```python
-python -m venv myenv
-```
-
-Activate the virtual environment (optional). Run the following command for the different operating systems:
-
-For MacOS/Linux:
-```python
-source myenv/bin/activate
-```
-
-For Windows:
-```python
-myenv\Scipts\activate
-```
+Create a virtual environment (optional): If you want to install your project in a virtual environment, please do so now.
 
 With the virtual environment activated (or without one), navigate to the PyNoise directory and run the following command to install the 
 project dependencies:
 ```python
 pip install -r requirements.txt
 ```
-
-
-Additionally, you will need the following:
-* A single file or folder of data that will be analyzed.
-* A settings configuration file (see the settings section for more information).
 
 ### Settings Configurations
 
