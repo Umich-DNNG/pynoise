@@ -4,80 +4,21 @@ This folder contains all the relevant settings that are fed into the three analy
 
 ## Format
 
-Setting options can be stored after runtime in .json files for later use. Because settings files are read through the default JSON reader, the user must ensure that the json is properly formatted and all values are correctly inputted. Please review json formatting or the default.json file to ensure this is done correctly:
+Setting options can be stored after runtime in .json files for later use. Because settings files are read through the default JSON reader, the user must ensure that the json is properly formatted and all values are correctly inputted. Please review json formatting or the default.json file to ensure this is done correctly. A sample settings group is provided to demonstrate the proper formatting:
 
 ```
-{
-    "Input/Output Settings": {
-        "Input file/folder": "none",
-        "Time column": 0,
-        "Channels column": null,
-        "Save directory": "./data",
-        "Save figures": false,
-        "Save raw data": false,
-        "Keep logs": false,
-        "Quiet mode": false
-    },
-    "General Settings": {
-        "Number of folders": 10,
-        "Verbose iterations": false,
-        "Sort data": true,
-        "Show plots": false
-    },
-    "RossiAlpha Settings": {
-        "Time difference method": "aa",
-        "Digital delay": 750,
-        "Reset time": 1000,
-        "Combine Calc and Binning": false,
-        "Bin width": 9,
-        "Error Bar/Band": "band",
-        "Fit minimum": 30,
-        "Fit maximum": null
-    },
-    "CohnAlpha Settings": {
-        "Dwell time": 2e6,
-        "Meas time range": [
-            1.5e11,
-            1e12
-        ],
-        "Clean pulses switch": true,
-        "Font Size": 12, 
-        "Annotation Font Weight": "bold",
-        "Annotation Color": "black",
-        "Annotation Background Color": "white",
-        "nperseg": 4096
-    },
-    "FeynmanY Settings": {
-        "Tau range": [30, 3000],
-        "Increment amount": 30,
-        "Plot scale": "linear"
-    },
-    "Semilog Plot Settings": {
-        "label": "Frequency Intensity",
-        "markeredgecolor": "#162F65",
-        "markeredgewidth": 0.2,
-        "markerfacecolor": "#B2CBDE"
-    },
-    "Histogram Visual Settings": {
-        "alpha": 1,
-        "fill": true,
-        "color": "#B2CBDE",
-        "edgecolor": "#162F65",
-        "linewidth": 0.4
-    },
-    "Line Fitting Settings": {
-        "color": "#162F65",
-        "linestyle": "-",
-        "linewidth": 1,
-        "label": "Fit"
-    },
-    "Scatter Plot Settings": {
-        "color": "#B2CBDE",
-        "edgecolor": "#162F65",
-        "linewidth": 0.4,
-        "marker": "o",
-        "s": 20
-    }
+"CohnAlpha Settings": {
+    "Dwell time": 2e6,
+    "Meas time range": [
+        1.5e11,
+        1e12
+    ],
+    "Clean pulses switch": true,
+    "Font Size": 12, 
+    "Annotation Font Weight": "bold",
+    "Annotation Color": "black",
+    "Annotation Background Color": "white",
+    "nperseg": 4096
 }
 
 ```
@@ -157,9 +98,9 @@ To close the vim:
 
 **ROSSIALPHA SETTINGS**: This section has settings specific to Rossi Alpha analysis. Please see the Rossi Alpha README file for more information.
 
-**COHNALPHA SETTINGS**: This section has settings specific to Power Spectral Density analysis. Please see the PSD README file for more information.
+**COHNALPHA SETTINGS**: This section has settings specific to Cohn Alpha analysis. Please see the Cohn Alpha README file for more information.
 
-**FEYNMANY SETTINGS**: This section has settings specific to Power Spectral Density analysis. Please see the PSD README file for more information.
+**FEYNMANY SETTINGS**: This section has settings specific to Feynman-Y analysis. Please see the Feynman-Y README file for more information.
 
 **SEMILOG PLOT SETTINGS**: These settings correspond to the built-in matplotlib semilogx settings for whenever the program generates a semilog plot for CohnAlpha. See https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.semilogx.html for full documentation of options. All options on the website are supported.
 
