@@ -37,7 +37,7 @@ To allow for a wide range of graphing/analysis options, there is a settings syst
 
 ### Running PyNoise
 
-To run the PyNoise program, open a terminal in the pynoise folder and run the following command:
+To run the PyNoise program, open a terminal in the pynoise folder and enter the following command:
 
 ```python3.10 main.py [-g|--gui]```
 
