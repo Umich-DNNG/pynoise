@@ -13,6 +13,10 @@ You will need the following inputs for the analysis:
 Some example data inputs can be found with this link:
 **TODO PROVIDE LINK**
 
+### I/O FILE INFO
+
+The format of the file you want to analyze should be a .txt file with a list of time stamps of neutron detection times, separated by new lines. For folder analysis, the given folder should contain numbered folders that each contain data for analysis.
+
 ### How To Run RossiAlpha
 * Create a .json file with the appropriate settings (default.json contains all the default settings)
 * Input the pathway of your input data directory into the "Input file/folder" setting under "Input/Output Settings" in the .json file that you created
@@ -22,11 +26,6 @@ Some example data inputs can be found with this link:
 * If you are using the default settings, type "r" to run the RossiAlpha analysis
 * If you are using the .json file from earlier, type "o" to run the RossiAlpha analysis
 * The results should either pop up on the screen, saved to a folder, or both.
-
-
-### I/O FILE INFO
-
-The format of the file you want to analyze should be a .txt file with a list of time stamps of neutron detection times, separated by new lines. For folder analysis, the given folder should contain numbered folders that each contain data for analysis.
 
 ### Settings Configurations
 
@@ -39,7 +38,7 @@ The RossiAlpha program can be run with a variety of options that change the visu
     * **NOTE: the last three options are only valid for folder analysis. For single file analysis, any_and_all must be chosen.**
 * digital delay (*int*): The amount of digital delay, if applicable (see above).
 * **Histogram Generation Settings**: Settings specific to generating RossiAlpha histograms:
-    * Reset time (*int*): **TODO**: Find out what this is.
+    * Reset time (*int*): The maximum time difference recorded.
     * Bin width (*int*): The width of the histogram bins.
     * Error bar/band (*string*): For folder analysis, the type of visual used to show residuals of the overall line of best fit. Valid values are bar, band, and none.
 * **Fit Region Settings**: Settings specific to applying the line of best fit to Rossi Alpha histograms:
