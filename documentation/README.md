@@ -29,6 +29,8 @@ project dependencies:
 pip install -r requirements.txt
 ```
 
+tkinter should be a package included in your Python installation — however, it can be problematic and cannot be installed with pip. Please consult https://stackoverflow.com/questions/76105218/why-does-tkinter-or-turtle-seem-to-be-missing-or-broken-shouldnt-it-be-part for assistance.
+
 ### Settings Configurations
 
 To allow for a wide range of graphing/analysis options, there is a settings system that can be changed before or during runtime. Please consult the documentation in the settings folder, or use the default settings provided.
