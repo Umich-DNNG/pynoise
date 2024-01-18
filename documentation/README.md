@@ -37,9 +37,8 @@ To allow for a wide range of graphing/analysis options, there is a settings syst
 
 ### Running PyNoise
 
-After deciding what settings to include, the program will begin and you can select what command to do next:
-* r - run Rossi Alpha Analysis
-* p - run Power Spectral Density Analysis
-* s - view or edit the program settings
+To run the PyNoise program, open a terminal in the pynoise folder and run the following command:
 
-See the respective README files and sections for more information on each command.
+```python3.10 main.py [-g|--gui]```
+
+Including the -g or --gui will run the program in GUI mode; otherwise, the program will be run on the command line. After starting the program, instructions will be given on how to proceed.
