@@ -42,3 +42,6 @@ To run the PyNoise program, open a terminal in the pynoise folder and enter the 
 ```python3.10 main.py [-g|--gui]```
 
 Including the -g or --gui will run the program in GUI mode; otherwise, the program will be run on the command line. After starting the program, instructions will be given on how to proceed.
+
+### Editor
+The editor class for modifying settings is also accessible from the raDriver. See the main README file for more information on its proper use.
