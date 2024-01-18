@@ -13,4 +13,5 @@ pytz==2023.3
 scipy==1.10.1
 seaborn==0.12.2
 six==1.16.0
+tqdm==4.66.1
 tzdata==2023.3
