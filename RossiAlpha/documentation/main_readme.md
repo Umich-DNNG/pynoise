@@ -15,7 +15,9 @@ Some example data inputs can be found with this link:
 
 ### I/O FILE INFO
 
-The format of the file you want to analyze should be a .txt file with a list of time stamps of neutron detection times, separated by new lines. For folder analysis, the given folder should contain numbered folders that each contain data for analysis.
+The format of the file you want to analyze should be a .txt file with a list of time stamps of neutron detection times, separated by new lines. For folder analysis, the given folder should contain numbered folders that each contain data for analysis. A snippet of the sample data is shown below.
+
+<img src="./sample_data.png" width="400" >
 
 ### How To Run RossiAlpha
 * Create a .json file with the appropriate settings (default.json contains all the default settings)
