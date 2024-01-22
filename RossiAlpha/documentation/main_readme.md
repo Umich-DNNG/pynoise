@@ -21,7 +21,19 @@ The format of the file you want to analyze should be a .txt file with a list of 
 
 ### How To Run RossiAlpha
 * Create a .json file with the appropriate settings (default.json contains all the default settings)
-* Input the pathway of your input data directory into the "Input file/folder" setting under "Input/Output Settings" in the .json file that you created
+* Input the pathway of your input data directory into the "Input file/folder" setting under "Input/Output Settings" in the .json file that you created (as shown in the .json snippet below)
+```python
+"Input/Output Settings": {
+        "Input file/folder": INSERT PATHWAY HERE,
+        "Time column": 0,
+        "Channels column": null,
+        "Save directory": "./data",
+        "Save figures": false,
+        "Save raw data": false,
+        "Keep logs": false,
+        "Quiet mode": false
+    },
+```
 * Open your terminal and navigate to the PyNoise directory
 * Type "python3 main.py" and hit enter (You should be prompted with a welcome message)
 * Type "d" if you want to use the default settings or type "i" if you want to import the .json that created earlier
