@@ -11,7 +11,7 @@ You will need the following inputs for the analysis:
 * A settings configuration file (see the settings section for more information).
 
 Some example data inputs can be found with this link:
-[Google Drive - Sample Data](https://drive.google.com/drive/folders1jEswA6AqeNLgGJW6iXs1Ti7XEXad9D0w)
+[Google Drive - Sample Data](https://drive.google.com/drive/folders/1jEswA6AqeNLgGJW6iXs1Ti7XEXad9D0w)
 
 ### I/O FILE INFO
 
