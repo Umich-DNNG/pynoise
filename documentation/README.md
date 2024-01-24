@@ -29,7 +29,7 @@ project dependencies:
 pip install -r requirements.txt
 ```
 
-NOTE: tkinter should be a package included in your Python installation — however, it is occasionally omitted and cannot be installed with pip. Please consult https://stackoverflow.com/questions/76105218/why-does-tkinter-or-turtle-seem-to-be-missing-or-broken-shouldnt-it-be-part for assistance if this is the case.
+NOTE: tkinter should be a package included in your Python installation — however, it is occasionally omitted and cannot be installed with pip. Please consult [this page](https://stackoverflow.com/questions/76105218/why-does-tkinter-or-turtle-seem-to-be-missing-or-broken-shouldnt-it-be-part) for assistance if this is the case.
 
 ### Settings Configurations
 
@@ -44,6 +44,9 @@ To run the PyNoise program, open a terminal in the pynoise folder and enter the 
 Including the -g or --gui will run the program in GUI mode; otherwise, the program will be run on the command line. Providing -q or --quiet will run the program in quiet mode (see the settings README for more information). The -c or --commands is an optional argument that allows you to automate running of the PyNoise Suite (see the commands README for more information).
 
 **Before running any analysis, please ensure that the Input file/folder, Time column, and Channels column settings are accurate to the file you want to analyze (see the settings README for more information).**
+
+Sample data inputs can be found with this link:
+[Google Drive - Sample Data](https://drive.google.com/drive/folders/1jEswA6AqeNLgGJW6iXs1Ti7XEXad9D0w)
 
 ### Editor
 The editor class for modifying settings is also accessible from the raDriver. See the main README file for more information on its proper use.
