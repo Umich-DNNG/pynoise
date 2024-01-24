@@ -41,7 +41,9 @@ To run the PyNoise program, open a terminal in the pynoise folder and enter the 
 
 ```python3.10 main.py [-g|--gui] [-q|--quiet] [-c|--commands] [command_args]```
 
-Including the -g or --gui will run the program in GUI mode; otherwise, the program will be run on the command line. Providing -q or --quiet will run the program in quiet mode (see the settings README for more information). The -c or --commands is an optional argument that allows you to automate running of the PyNoise Suite (see the commands README for more information)..
+Including the -g or --gui will run the program in GUI mode; otherwise, the program will be run on the command line. Providing -q or --quiet will run the program in quiet mode (see the settings README for more information). The -c or --commands is an optional argument that allows you to automate running of the PyNoise Suite (see the commands README for more information).
+
+**Before running any analysis, please ensure that the Input file/folder, Time column, and Channels column settings are accurate to the file you want to analyze (see the settings README for more information).**
 
 ### Editor
 The editor class for modifying settings is also accessible from the raDriver. See the main README file for more information on its proper use.
