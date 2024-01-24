@@ -13,9 +13,6 @@ You will need the following inputs for the analysis:
 * A single file or folder of data that will be analyzed.
 * A settings configuration file (see the settings section for more information).
 
-Some example data inputs can be found with this link:
-[Google Drive - Sample Data](https://drive.google.com/drive/folders/1jEswA6AqeNLgGJW6iXs1Ti7XEXad9D0w)
-
 ### I/O FILE INFO
 
 The format of the file you want to analyze should be a .txt file with a list of time stamps of neutron detection times, separated by new lines. For folder analysis, the given folder should contain numbered folders that each contain data for analysis. A snippet of the sample data is shown below.
