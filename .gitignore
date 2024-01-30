@@ -1,10 +1,13 @@
-# Raw data that should not be on GitLab
+# Raw data and compiled executables that should not be on GitLab
 *.bin
+*.exe
 
 # Processed data that does not make sense to keep on GitLab
 *.png
 *.npy
 *.pdf
+*.txt
+*.csv
 
 # Python software default outputs
 *__pycache__/
@@ -20,11 +23,8 @@
 # Settings files should be user independent
 *.json
 
-# Input files are usually user independent
-*.txt
-
-# Raw data output should not be kept
-*.csv
-
 # Remove cached editing files
 *.swp
+
+# Ignore sample data
+data/*
