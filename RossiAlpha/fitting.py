@@ -267,7 +267,7 @@ class RossiHistogramFit:
         ax1.bar(self.bin_centers, self.counts, width=0.8*(self.bin_centers[1]-self.bin_centers[0]), **self.hist_visual_options)
         ax1.plot(line_x, self.pred, **self.fitting_options)
         equation = r'$Ae^{\alpha}+B$:'
-        alph_str = (r'$\alpha$ = (' + f'{self.alpha:.3g}' + '$\pm$ ' + f'{self.perr[1]:.3g}' + ') 1/ns')
+        alph_str = (r'$\alpha$ = (' + f'{self.alpha:.3g}' + '$\pm$ ' + f'{self.perr[1]:.3g}' + ') 1/s')
         a_str = (r'$A$ = (' + f'{self.a:.3g}' + '$\pm$ ' + f'{self.perr[0]:.3g}' + ') counts')
         b_str = r'$B$ = ' + f'{self.b:.3g} counts'
         ymin, ymax = ax1.get_ylim()
@@ -439,7 +439,7 @@ class Fit_With_Weighting:
         ax1.plot(self.xfit, self.pred, **self.fitting_options)
 
         equation = r'$Ae^{\alpha}+B$:'
-        alph_str = (r'$\alpha$ = (' + f'{self.alpha:.3g}' + '$\pm$ ' + f'{self.perr[1]:.3g}' + ') 1/ns')
+        alph_str = (r'$\alpha$ = (' + f'{self.alpha:.3g}' + '$\pm$ ' + f'{self.perr[1]:.3g}' + ') 1/s')
         a_str = (r'$A$ = (' + f'{self.a:.3g}' + '$\pm$ ' + f'{self.perr[0]:.3g}' + ') counts')
         b_str = r'$B$ = ' + f'{self.b:.3g} counts'
         ymin, ymax = ax1.get_ylim()
