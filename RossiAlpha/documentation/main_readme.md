@@ -35,7 +35,17 @@ The format of the file you want to analyze should be a .txt file with a list of 
     },
 ```
 * Open your terminal and navigate to the PyNoise directory
-* Type "python3 main.py" and hit enter (You should be prompted with a welcome message)
+* Type "python3 main.py" and hit enter (You should be prompted with a welcome message as shown below)
+```
+Welcome to the DNNG/PyNoise project.
+With this software we are taking radiation data from fission reactions (recorded by organic scintillators) and analyzing it using various methods and tools.
+Use this Python suite to analyze a single file or multiple across numerous folders.
+
+Would you like to use the default settings or import another .json file?
+d - use default settings
+i - import custom settings
+Select settings choice:
+```
 * Type "d" if you want to use the default settings or type "i" if you want to import the .json that created earlier
 * If you are using the default settings, type "r" to run the RossiAlpha analysis
 * If you are using the .json file from earlier, type "o" to run the RossiAlpha analysis
