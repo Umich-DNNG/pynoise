@@ -35,7 +35,7 @@ The format of the file you want to analyze should be a .txt file with a list of 
     },
 ```
 * Open your terminal and navigate to the PyNoise directory
-* Type "python3 main.py" and hit enter (You should be prompted with a welcome message as shown below)
+* Type "python3 main.py" and hit enter (you should be prompted with a welcome message as shown below)
 ```
 Welcome to the DNNG/PyNoise project.
 With this software we are taking radiation data from fission reactions (recorded by organic scintillators) and analyzing it using various methods and tools.
@@ -47,8 +47,42 @@ i - import custom settings
 Select settings choice:
 ```
 * Type "d" if you want to use the default settings or type "i" if you want to import the .json that created earlier
-* If you are using the default settings, type "r" to run the RossiAlpha analysis
-* If you are using the .json file from earlier, type "o" to run the RossiAlpha analysis
+* If you are using the default settings, type "r" to run the RossiAlpha analysis (example shown below)
+```
+Would you like to use the default settings or import another .json file?
+d - use default settings
+i - import custom settings
+Select settings choice: d
+
+Initializing program with default settings...
+Settings from default.json succesfully imported.
+
+Settings initialized. You can now begin using the program.
+
+----------------------------------------------------------
+
+You can utitilze any of the following functions:
+r - run Rossi Alpha analysis
+c - run Cohn Alpha Analysis
+f - run Feynman Y Analysis
+s - view or edit the program settings
+Leave the command blank or enter x to end the program.
+Enter a command: r
+```
+* If you are using the .json file from earlier, type "o" to run the RossiAlpha analysis (example shown below)
+```
+Would you like to use the default settings or import another .json file?
+d - use default settings
+i - import custom settings
+Select settings choice: i
+
+You have two import options:
+o - overwrite entire settings
+a - append settings to default
+Enter a command (or leave blank to cancel): o
+Overwrite mode selected.
+Enter a settings file (no .json extension): [ENTER YOUR JSON FILE NAME WITHOUT THE ".json" HERE]
+```
 * The results should either pop up on the screen, saved to a folder, or both.
 
 ### Settings Configurations
