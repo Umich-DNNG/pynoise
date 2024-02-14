@@ -317,7 +317,7 @@ def main():
             editor.print('You have made unsaved changes to the '
               + 'settings:\n')
             editor.print('Base settings: ' + editor.parameters.origin)
-            editor.print('Most recently appended settings: ' + editor.parameters.appended + '\n')
+            editor.print('Most recently appended settings: ' + (editor.parameters.appended if editor.parameters.appended != None else 'None') + '\n')
             for change in list:
                 editor.print(change)
             editor.print('\nDo you want to save your changes?')
