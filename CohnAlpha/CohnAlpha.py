@@ -17,7 +17,6 @@ def CAFit(f, A, alpha, c):
 class CohnAlpha:
     def __init__(self, 
                  list_data_array, 
-                 clean_pulses_switch: bool = True, 
                  dwell_time: float = 2.0e6, 
                  meas_time_range: list[float] = [1.5e11, 1.0e12]):
 
@@ -27,7 +26,6 @@ class CohnAlpha:
 
         Inputs:
             - list_data_array (Input script)
-            - clean_pulses_switch (whether to include rows where last column==1)
             - dwell_time (DESCRIPTION NEEDED)
             - meas_time_range (DESCRIPTION NEEDED)
 
@@ -37,7 +35,6 @@ class CohnAlpha:
 
         # Required Parameters
         self.list_data_array = list_data_array
-        self.clean_pulses_switch = clean_pulses_switch
         self.dwell_time = dwell_time
         self.meas_time_range = meas_time_range
 
@@ -140,7 +137,7 @@ class CohnAlpha:
          # Creating axis titles
         ax1.set_xlim([1, 200])
         ax1.set_xlabel('Frequency (Hz)')
-        ax1.set_ylabel('Intensity (V$^2$/Hz)')
+        ax1.set_ylabel('Counts$^2$/Hz')
 
         # Compute residuals
         # residuals = Pxx[1:-2] - CAFit(f[1:-2], *popt)
