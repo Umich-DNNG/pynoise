@@ -388,9 +388,23 @@ class Fit_With_Weighting:
             (self.bin_centers[-1]-self.bin_centers[0]))
         yfit = self.hist[self.fit_index] - c0
         exp_decay_p0 = [a0, b0]
+        '''
         popt, pcov = curve_fit(exp_decay_2_param, xfit, yfit, bounds=exp_decay_fit_bounds, 
                                p0=exp_decay_p0,maxfev=1e6,sigma=self.uncertainties[self.fit_index], 
                                absolute_sigma=True)
+        '''
+
+        # DEBUGGING --------------------------------------------------------------------------------------
+        print("xfit:", xfit)
+        print("yfit:", yfit)
+
+        popt, pcov = curve_fit(exp_decay_2_param, xfit, yfit, bounds=exp_decay_fit_bounds, 
+                               maxfev=1e6, sigma=self.uncertainties[self.fit_index], 
+                               absolute_sigma=True)
+        
+        print("Optimal parameters:", popt)
+        print("Covariance matrix:", pcov)
+        # ------------------------------------------------------------------------------------------------
         
 
         # Printing out optimization parameters
