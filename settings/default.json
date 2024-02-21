@@ -10,7 +10,7 @@
         "Quiet mode": false
     },
     "General Settings": {
-        "Number of folders": 10,
+        "Number of folders": null,
         "Verbose iterations": false,
         "Sort data": true,
         "Show plots": false
