@@ -1,3 +1,6 @@
+# Ignore testing files and folders
+testing*
+
 # Raw data and compiled executables that should not be on GitLab
 *.bin
 *.exe
