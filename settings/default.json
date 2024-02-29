@@ -1,6 +1,6 @@
 {
     "Input/Output Settings": {
-        "Input file/folder": "none",
+        "Input file/folder": "/Users/fdarby/Dropbox (University of Michigan)/ENGIN-Well-counter/MUSIC/Data/OSCAR/20210322_Wk4/20210324_08_RF3-46_CF_OS_60milspacer_closed_5secfiles_run1",
         "Time column": 0,
         "Channels column": null,
         "Save directory": "./data",
@@ -10,35 +10,38 @@
         "Quiet mode": false
     },
     "General Settings": {
-        "Number of folders": null,
+        "Number of folders": 7,
         "Verbose iterations": false,
         "Sort data": true,
-        "Show plots": false
+        "Show plots": true
     },
     "RossiAlpha Settings": {
-        "Time difference method": "aa",
+        "Time difference method": "cc",
         "Digital delay": 750,
-        "Reset time": 1000,
+        "Reset time": 5000,
         "Combine Calc and Binning": false,
-        "Bin width": 9,
+        "Bin width": 1,
         "Error Bar/Band": "band",
         "Fit minimum": 30,
         "Fit maximum": null
     },
     "CohnAlpha Settings": {
-        "Dwell time": 2e6,
+        "Dwell time": 2000000.0,
         "Meas time range": [
-            1.5e11,
-            1e12
+            150000000000.0,
+            1000000000000.0
         ],
-        "Font Size": 12, 
+        "Font Size": 12,
         "Annotation Font Weight": "bold",
         "Annotation Color": "black",
         "Annotation Background Color": "white",
         "nperseg": 4096
     },
     "FeynmanY Settings": {
-        "Tau range": [30, 3000],
+        "Tau range": [
+            30,
+            3000
+        ],
         "Increment amount": 30,
         "Plot scale": "linear"
     },
