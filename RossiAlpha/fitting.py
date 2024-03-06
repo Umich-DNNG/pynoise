@@ -87,6 +87,7 @@ class RossiHistogramFit:
         self.fitting_options = fitting_opts
         self.hist_visual_options = hist_visual_opts
         self.save_dir = save_dir
+
         '''
         Description:
             - Fitting an exponential curve onto the histogram.
@@ -131,7 +132,8 @@ class RossiHistogramFit:
 
         # Fitting distribution
         # Fitting the data using curve_fit
-        exp_decay_fit_bounds = ([0,-np.inf],[np.inf,0])
+        # exp_decay_fit_bounds = ([0,-np.inf],[np.inf,0])
+        exp_decay_fit_bounds = ([np.inf,0], [0,-np.inf])
         a0 = np.max(self.counts)
         c0 = np.mean(self.counts[-int(num_bins*0.05):])
         b0 = ((np.log(c0)-np.log(self.counts[0]))/
@@ -267,7 +269,7 @@ class RossiHistogramFit:
         ax1.bar(self.bin_centers, self.counts, width=0.8*(self.bin_centers[1]-self.bin_centers[0]), **self.hist_visual_options)
         ax1.plot(line_x, self.pred, **self.fitting_options)
         equation = r'$Ae^{\alpha}+B$:'
-        alph_str = (r'$\alpha$ = (' + f'{self.alpha / 1e9:.3g}' + '$\pm$ ' + f'{self.perr[1] / 1e9:.3g}' + ') 1/s')
+        alph_str = (r'$\alpha$ = (' + f'{self.alpha * 1e9:.3g}' + '$\pm$ ' + f'{self.perr[1] * 1e9:.3g}' + ') 1/s')
         a_str = (r'$A$ = (' + f'{self.a:.3g}' + '$\pm$ ' + f'{self.perr[0]:.3g}' + ') counts')
         b_str = r'$B$ = ' + f'{self.b:.3g} counts'
         ymin, ymax = ax1.get_ylim()
@@ -375,9 +377,15 @@ class Fit_With_Weighting:
 
         # Choosing region to fit
         self.fit_index = np.where((self.bin_centers >= self.fit_range[0]) &
-                             (self.bin_centers <= self.fit_range[1]))
-
+                                  (self.bin_centers <= self.fit_range[1]))
+    
         xfit = self.bin_centers[self.fit_index]
+
+        print("begin", self.fit_range[0])
+        print("end", self.fit_range[1])
+        print("fit_index", self.fit_index)
+        print("bin center", self.bin_centers)
+        print("xfit", xfit)
         
         # Fitting distribution
         # Fitting the data using curve_fit
@@ -387,19 +395,15 @@ class Fit_With_Weighting:
         b0 = ((np.log(c0 if c0 != 0 else 1e-10)-np.log(self.hist[0]))/
             (self.bin_centers[-1]-self.bin_centers[0]))
         yfit = self.hist[self.fit_index] - c0
+        # yfit = self.hist - c0
         exp_decay_p0 = [a0, b0]
-        '''
-        popt, pcov = curve_fit(exp_decay_2_param, xfit, yfit, bounds=exp_decay_fit_bounds, 
-                               p0=exp_decay_p0,maxfev=1e6,sigma=self.uncertainties[self.fit_index], 
-                               absolute_sigma=True)
-        '''
 
         # DEBUGGING --------------------------------------------------------------------------------------
         print("xfit:", xfit)
         print("yfit:", yfit)
 
         popt, pcov = curve_fit(exp_decay_2_param, xfit, yfit, bounds=exp_decay_fit_bounds, 
-                               maxfev=1e6, sigma=self.uncertainties[self.fit_index], 
+                               p0=exp_decay_p0,maxfev=1e6,sigma=self.uncertainties[self.fit_index], 
                                absolute_sigma=True)
         
         print("Optimal parameters:", popt)
@@ -453,7 +457,7 @@ class Fit_With_Weighting:
         ax1.plot(self.xfit, self.pred, **self.fitting_options)
 
         equation = r'$Ae^{\alpha}+B$:'
-        alph_str = (r'$\alpha$ = (' + f'{self.alpha / 1e9:.3g}' + '$\pm$ ' + f'{self.perr[1] / 1e9:.3g}' + ') 1/s')
+        alph_str = (r'$\alpha$ = (' + f'{self.alpha * 1e9:.3g}' + '$\pm$ ' + f'{self.perr[1] * 1e9:.3g}' + ') 1/s')
         a_str = (r'$A$ = (' + f'{self.a:.3g}' + '$\pm$ ' + f'{self.perr[0]:.3g}' + ') counts')
         b_str = r'$B$ = ' + f'{self.b:.3g} counts'
         ymin, ymax = ax1.get_ylim()
