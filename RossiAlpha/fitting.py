@@ -380,12 +380,6 @@ class Fit_With_Weighting:
                                   (self.bin_centers <= self.fit_range[1]))
     
         xfit = self.bin_centers[self.fit_index]
-
-        print("begin", self.fit_range[0])
-        print("end", self.fit_range[1])
-        print("fit_index", self.fit_index)
-        print("bin center", self.bin_centers)
-        print("xfit", xfit)
         
         # Fitting distribution
         # Fitting the data using curve_fit
@@ -395,10 +389,8 @@ class Fit_With_Weighting:
         b0 = ((np.log(c0 if c0 != 0 else 1e-10)-np.log(self.hist[0]))/
             (self.bin_centers[-1]-self.bin_centers[0]))
         yfit = self.hist[self.fit_index] - c0
-        # yfit = self.hist - c0
         exp_decay_p0 = [a0, b0]
 
-        # DEBUGGING --------------------------------------------------------------------------------------
         print("xfit:", xfit)
         print("yfit:", yfit)
 
@@ -408,7 +400,6 @@ class Fit_With_Weighting:
         
         print("Optimal parameters:", popt)
         print("Covariance matrix:", pcov)
-        # ------------------------------------------------------------------------------------------------
         
 
         # Printing out optimization parameters
