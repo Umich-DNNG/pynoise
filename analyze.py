@@ -367,7 +367,6 @@ class Analyzer:
         # If folder analysis:
         else:
             # For each file in the specified folder:
-            print('Input file/folder')
             for filename in os.listdir(io['Input file/folder']):
                 if len(filename) >= 14:
                     board = filename[0:8]
@@ -802,12 +801,11 @@ class Analyzer:
             while (os.path.exists(settings['Input/Output Settings']['Input file/folder'] + '/' + str( settings['General Settings']['Number of folders'] + 1))):
                 settings['General Settings']['Number of folders'] += 1
         if ogBinWidth is None:
-            # Maybe change to 1000
-            settings['RossiAlpha Settings']['Bin width'] = math.ceil(settings['RossiAlpha Settings']['Reset time'] / 50)
+            settings['RossiAlpha Settings']['Bin width'] = math.ceil(settings['RossiAlpha Settings']['Reset time'] / 1000)
             bestBinFound = False
             combinedTimeDifs = []
             bestAvgUncertainty = -1
-            uncertaintyCap = 0.1
+            uncertaintyCap = settings['RossiAlpha Settings']['Max avg relative bin err']
             print('Generating time differences...')
             for folder in tqdm(range(1, settings['General Settings']['Number of folders']+1)):
                 settings['Input/Output Settings']['Input file/folder'] = original + '/' + str(folder)
@@ -852,11 +850,11 @@ class Analyzer:
                 uncertainties[0] = self.replace_zeroes(uncertainties[0])
                 # Add the time difference centers and uncertainties to the total histogram.
                 avg_uncertainty = 0.0
+                total_counts_squared = 0
                 for j in range(0, len(RA_hist_total[0])):
-                    avg_uncertainty += uncertainties[0][j] / RA_hist_total[0][j]
-                avg_uncertainty /= len(RA_hist_total[0])
-                print('Current bin width: ' + str(settings['RossiAlpha Settings']['Bin width']) + '\nAverage uncertainty: ' + str(avg_uncertainty) + '\n')
-                # Try to make the step do a binary search?
+                    avg_uncertainty += uncertainties[0][j] * RA_hist_total[0][j]
+                    total_counts_squared += RA_hist_total[0][j] * RA_hist_total[0][j]
+                avg_uncertainty /= total_counts_squared
                 if avg_uncertainty < uncertaintyCap:
                     bestAvgUncertainty = settings['RossiAlpha Settings']['Bin width']
                     if settings['RossiAlpha Settings']['Bin width'] == 1:
