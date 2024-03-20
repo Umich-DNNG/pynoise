@@ -1,16 +1,18 @@
 {
     "Input/Output Settings": {
-        "Input file/folder": "/Users/fdarby/Dropbox (University of Michigan)/ENGIN-Well-counter/MUSIC/Data/OSCAR/20210322_Wk4/20210324_08_RF3-46_CF_OS_60milspacer_closed_5secfiles_run1",
+        "Input file/folder": "",
         "Time column": 0,
         "Channels column": null,
         "Save directory": "./data",
+        "Output name": "",
         "Save figures": false,
         "Save raw data": false,
+        "Save time differences": false,
         "Keep logs": false,
         "Quiet mode": false
     },
     "General Settings": {
-        "Number of folders": 7,
+        "Number of folders": null,
         "Verbose iterations": false,
         "Sort data": true,
         "Show plots": true
