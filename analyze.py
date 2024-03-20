@@ -334,8 +334,8 @@ class Analyzer:
                        reset:float,
                        method:str,
                        delay:int,
-                       quiet:bool,
-                       folder:int = 0):
+                       folder:int = 0,
+                       curFolder:int = 0):
         
         '''Create Rossi Alpha time differences.
         
@@ -352,46 +352,26 @@ class Analyzer:
         # Clear out the current time difference data and methods.
         self.RATimeDifs['Time differences'].clear()
         self.RATimeDifs['Time difference method'].clear()
-        # Create an empty data list.
-        data = []
-        # Load the data according to its file type.
-        if io['Input file/folder'].endswith(".txt"):
-            data = evt.createEventsListFromTxtFile(io['Input file/folder'],
-                                                   io['Time column'],
-                                                   io['Channels column'],
-                                                   True,
-                                                   quiet,
-                                                   True if folder != 0 else False)
-        elif io['Input file/folder'].endswith(".lmx"):
-            data = lmx.readLMXFile(io['Input file/folder'])
-        # If folder analysis:
-        else:
-            # For each file in the specified folder:
-            for filename in os.listdir(io['Input file/folder']):
-                if len(filename) >= 14:
-                    board = filename[0:8]
-                    ntxt = filename[len(filename)-6:]
-                    channel = filename[8:len(filename)-6]
-                    if board == 'board0ch' and ntxt == '_n.txt' and channel.isnumeric() and int(channel) >= 0:
-                        # Change the input file to this file.
-                        # Add the data from this file to the events list.
-                        data.extend(evt.createEventsListFromTxtFile(io['Input file/folder'] + "/" + filename,
-                                                                    io['Time column'],
-                                                                    int(channel),
-                                                                    False,
-                                                                    io['Quiet mode'],
-                                                                    True))
-        # Sort the data if applicable.
-        if sort:
-            data.sort(key=lambda Event: Event.time)
         # If methods is a list, create a time difference for each instance.
         if isinstance(method, list):
             for type in method:
-                self.RATimeDifs['Time differences'].append(dif.timeDifCalcs(data, reset, type, delay))
+                self.RATimeDifs['Time differences'].append(dif.timeDifCalcs(
+                    io=io,
+                    reset_time=reset, 
+                    method=type, 
+                    digital_delay=delay,
+                    folderNum=curFolder,
+                    sort_data=sort))
                 self.RATimeDifs['Time difference method'].append(type)
         # Otherwise, just create one with the given method.
         else:
-            self.RATimeDifs['Time differences'].append(dif.timeDifCalcs(data, reset, method, delay))
+            self.RATimeDifs['Time differences'].append(dif.timeDifCalcs(
+                io=io,
+                reset_time=reset, 
+                method=type, 
+                digital_delay=delay,
+                folderNum=curFolder,
+                sort_data=sort))
             self.RATimeDifs['Time difference method'].append(method)
         # For each time difs object, create the time differences.
         for i in range(0,len(self.RATimeDifs['Time differences'])):
@@ -448,7 +428,7 @@ class Analyzer:
                                  gen:dict,
                                  ra:dict,
                                  hist:dict,
-                                 folder:bool = False):
+                                 folder:int = 0):
 
         '''Simultaneously calculate the time 
         differences and construct a Rossi Histogram.
@@ -458,59 +438,39 @@ class Analyzer:
         - gen: the General Settings dictionary.
         - ra: the RossiAlpha Settings dictionary.
         - hist: the Histogram Visual Settings dictionary.
-        - folder: whether or not this is for folder analysis.'''
+        - folder: whether or not this is for folder analysis (0 means no folder).'''
 
 
         # Clear out all of the current data.
         self.RATimeDifs['Time differences'].clear()
         self.RATimeDifs['Time difference method'].clear()
         self.RAHist['Histogram'].clear()
-        # Create empty data and time difference lists.
-        data = []
         timeDifCalcs = []
-        # Load the data according to its file type.
-        if io['Input file/folder'].endswith(".txt"):
-            data = evt.createEventsListFromTxtFile(io['Input file/folder'],
-                                                   io['Time column'],
-                                                   io['Channels column'],
-                                                   True,
-                                                   io['Quiet mode'],
-                                                   folder)
-        elif io['Input file/folder'].endswith(".lmx"):
-            data =  lmx.readLMXFile(io['Input file/folder'])
-        # If folder analysis:
-        else:
-            # For each file in the specified folder:
-            for filename in os.listdir(io['Input file/folder']):
-                if len(filename) >= 14:
-                    board = filename[0:8]
-                    ntxt = filename[len(filename)-6:]
-                    channel = filename[8:len(filename)-6]
-                    if board == 'board0ch' and ntxt == '_n.txt' and channel.isnumeric() and int(channel) >= 0:
-                        # Change the input file to this file.
-                        # Add the data from this file to the events list.
-                        data.extend(evt.createEventsListFromTxtFile(io['Input file/folder'] + "/" + filename,
-                                                                    io['Time column'],
-                                                                    int(channel),
-                                                                    False,
-                                                                    io['Quiet mode'],
-                                                                    True))
-        # Sort the data if applicable.
-        if gen['Sort data']:
-            data.sort(key=lambda Event: Event.time)
         # If methods is a list, create a time difference for each instance.
         if isinstance(ra['Time difference method'], list):
             for type in ra['Time difference method']:
-                self.RATimeDifs['Time differences'].append(dif.timeDifCalcs(data, ra['Reset time'], type, ra['Digital delay']))
+                self.RATimeDifs['Time differences'].append(dif.timeDifCalcs(
+                    io=io,
+                    reset_time=ra['Reset time'], 
+                    method=type, 
+                    digital_delay=ra['Digital delay'],
+                    folderNum=folder,
+                    sort_data=gen['Sort data']))
                 self.RATimeDifs['Time difference method'].append(type)
         # Otherwise, just create one with the given method.
         else:
-            self.RATimeDifs['Time differences'].append(dif.timeDifCalcs(data, ra['Reset time'], ra['Time difference method'], ra['Digital delay']))
+            self.RATimeDifs['Time differences'].append(dif.timeDifCalcs(
+                io=io,
+                reset_time=ra['Reset time'], 
+                method=type, 
+                digital_delay=ra['Digital delay'],
+                folderNum=folder,
+                sort_data=gen['Sort data']))
             self.RATimeDifs['Time difference method'].append(ra['Time difference method'])
         # Simulatenously calculate the time differences and bin them.
         for i in range (0, len(timeDifCalcs)):
             input = io['Input file/folder']
-            if folder:
+            if folder != 0:
                 input = input[input[:input.rfind('/')].rfind('/')+1:].replace('/','-')
             else:
                 input = input[input.rfind('/')+1:]
@@ -520,7 +480,7 @@ class Analyzer:
                                                                                                   gen['Show plots'],
                                                                                                   io['Save directory'],
                                                                                                   hist,
-                                                                                                  folder,
+                                                                                                  folder!=0,
                                                                                                   gen['Verbose iterations'])
             self.RAHist['Histogram'].append(currentHist)
         # Save the current settings.
@@ -533,7 +493,7 @@ class Analyzer:
 
 
 
-    def plotSplit(self, settings: dict, folder: bool = False):
+    def plotSplit(self, settings: dict, folder: int = 0):
 
         '''Determines what combination of time difference 
         calculation and Rossi Histogram constructing to do.
@@ -553,7 +513,7 @@ class Analyzer:
         name = settings['Input/Output Settings']['Input file/folder']
         if folder:
             name = name[name[:name.rfind('/')].rfind('/')+1:].replace('/','-')
-            check['Number of folders'] = settings['General Settings']['Number of folders']
+            check['Number of folders'] = settings['RossiAlpha Settings']['Number of folders']
         else:
             name = name[name.rfind('/')+1:]   
         # If time differences have not yet been calculated or the 
@@ -573,8 +533,8 @@ class Analyzer:
                                     settings['RossiAlpha Settings']['Reset time'],
                                     settings['RossiAlpha Settings']['Time difference method'],
                                     settings['RossiAlpha Settings']['Digital delay'],
-                                    settings['Input/Output Settings']['Quiet mode'],
-                                    settings['General Settings']['Number of folders'] if folder else 0)
+                                    settings['RossiAlpha Settings']['Number of folders'] if folder != 0 else 0,
+                                    folder)
                 self.createPlot(name,
                                 settings['RossiAlpha Settings']['Bin width'],
                                 settings['RossiAlpha Settings']['Reset time'],
@@ -669,7 +629,7 @@ class Analyzer:
 
 
 
-    def fitSplit(self, settings:dict, folder:bool = False):
+    def fitSplit(self, settings:dict, folder:int = 0):
 
         '''Determines what combination of time difference 
         calculation and Rossi Histogram constructing to do.
@@ -793,13 +753,13 @@ class Analyzer:
         uncertainties = []
         # Store the original folder pathway.
         original = settings['Input/Output Settings']['Input file/folder']
-        numFolders = settings['General Settings']['Number of folders']
+        numFolders = settings['RossiAlpha Settings']['Number of folders']
         ogBinWidth = settings['RossiAlpha Settings']['Bin width']
         # If no number of folders given, just use all folders.
         if numFolders is None:
-            settings['General Settings']['Number of folders'] = 0
-            while (os.path.exists(settings['Input/Output Settings']['Input file/folder'] + '/' + str( settings['General Settings']['Number of folders'] + 1))):
-                settings['General Settings']['Number of folders'] += 1
+            settings['RossiAlpha Settings']['Number of folders'] = 0
+            while (os.path.exists(settings['Input/Output Settings']['Input file/folder'] + '/' + str( settings['RossiAlpha Settings']['Number of folders'] + 1))):
+                settings['RossiAlpha Settings']['Number of folders'] += 1
         if ogBinWidth is None:
             settings['RossiAlpha Settings']['Bin width'] = math.ceil(settings['RossiAlpha Settings']['Reset time'] / 1000)
             bestBinFound = False
@@ -807,22 +767,22 @@ class Analyzer:
             bestAvgUncertainty = -1
             uncertaintyCap = settings['RossiAlpha Settings']['Max avg relative bin err']
             print('Generating time differences...')
-            for folder in tqdm(range(1, settings['General Settings']['Number of folders']+1)):
+            for folder in tqdm(range(1, settings['RossiAlpha Settings']['Number of folders']+1)):
                 settings['Input/Output Settings']['Input file/folder'] = original + '/' + str(folder)
                 self.createTimeDifs(settings['Input/Output Settings'],
                                     settings['General Settings']['Sort data'],
                                     settings['RossiAlpha Settings']['Reset time'],
                                     settings['RossiAlpha Settings']['Time difference method'],
                                     settings['RossiAlpha Settings']['Digital delay'],
-                                    settings['Input/Output Settings']['Quiet mode'],
-                                    settings['General Settings']['Number of folders'])
+                                    settings['RossiAlpha Settings']['Number of folders'],
+                                    folder)
                 # If this is the first folder, initialize the histogram array.
                 combinedTimeDifs.append(self.RATimeDifs['Time differences'][-1])
             # Restore the original folder pathway.
             settings['Input/Output Settings']['Input file/folder'] = original
             print("Testing different bin widths...")
             while not bestBinFound:
-                for folder in range(1, settings['General Settings']['Number of folders']+1):
+                for folder in range(1, settings['RossiAlpha Settings']['Number of folders']+1):
                     self.RATimeDifs['Time differences'] = [combinedTimeDifs[folder-1].copy()]
                     # Loop for the number of folders specified.
                     self.createPlot("Doesn't matter",
@@ -846,7 +806,7 @@ class Analyzer:
                 RA_std_dev.append(np.std(RA_hist_array[0], axis=0, ddof=1))
                 RA_hist_total.append(np.sum(RA_hist_array[0], axis=0))
                 # Calculate the uncertainties and replace zeroes.
-                uncertainties.append(RA_std_dev[0] * settings['General Settings']['Number of folders'])
+                uncertainties.append(RA_std_dev[0] * settings['RossiAlpha Settings']['Number of folders'])
                 uncertainties[0] = self.replace_zeroes(uncertainties[0])
                 # Add the time difference centers and uncertainties to the total histogram.
                 avg_uncertainty = 0.0
@@ -879,14 +839,14 @@ class Analyzer:
             combinedTimeDifs.clear()
         self.RATimeDifs['Time differences'].clear()
         # Loop for the number of folders specified.
-        for folder in tqdm(range(1, settings['General Settings']['Number of folders']+1)):
+        for folder in tqdm(range(1, settings['RossiAlpha Settings']['Number of folders']+1)):
             # Add the folder number to the input.
             settings['Input/Output Settings']['Input file/folder'] = original + '/' + str(folder)
             # Conduct full analysis.
             if settings['General Settings']['Verbose iterations']:
-                self.fitSplit(settings, True)
+                self.fitSplit(settings, folder)
             else:
-                self.plotSplit(settings, True)
+                self.plotSplit(settings, folder)
             # If this is the first folder, initialize the histogram array.
             if folder == 1:
                 for histogram in self.RAHist['Histogram']:
@@ -970,7 +930,7 @@ class Analyzer:
             # Calculate the time difference centers.
             time_diff_centers.append(self.RAHist['Histogram'][i].bin_edges[1:] - np.diff(self.RAHist['Histogram'][i].bin_edges[:2]) / 2)
             # Calculate the uncertainties and replace zeroes.
-            uncertainties.append(RA_std_dev[i] * settings['General Settings']['Number of folders'])
+            uncertainties.append(RA_std_dev[i] * settings['RossiAlpha Settings']['Number of folders'])
             uncertainties[i] = self.replace_zeroes(uncertainties[i])
             # Add the time difference centers and uncertainties to the total histogram.
             RA_hist_total[i] = np.vstack((RA_hist_total[i], time_diff_centers[i], uncertainties[i]))
@@ -988,7 +948,7 @@ class Analyzer:
                 thisWeightedFit.plot_RA_and_fit(settings['Input/Output Settings']['Save figures'], 
                                                 settings['General Settings']['Show plots'],
                                                 settings['RossiAlpha Settings']['Error Bar/Band'],
-                                                settings['Input/Output Settings']['Input file/folder'][settings['Input/Output Settings']['Input file/folder'].rfind('/')+1:],
+                                                settings['Input/Output Settings']['Output name'],
                                                 self.RATimeDifs['Time difference method'][i])
                 # If saving raw data:
                 if settings['Input/Output Settings']['Save raw data'] == True:
@@ -1037,6 +997,6 @@ class Analyzer:
         if min_single:
             settings['RossiAlpha Settings']['Fit minimum'] = settings['RossiAlpha Settings']['Fit minimum'][0]
         settings['RossiAlpha Settings']['Bin width'] = ogBinWidth
-        settings['General Settings']['Number of folders'] = numFolders
+        settings['RossiAlpha Settings']['Number of folders'] = numFolders
         # Close all open plots.
         pyplot.close()

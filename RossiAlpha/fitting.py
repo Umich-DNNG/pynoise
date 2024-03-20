@@ -197,7 +197,7 @@ class RossiHistogramFit:
                          fitting_opts: dict, 
                          residual_opts: dict, 
                          hist_visual_opts: dict, 
-                         input: str, 
+                         outputName: str, 
                          method: str = 'aa', 
                          folder: bool = False, 
                          verbose: bool = False):
@@ -312,7 +312,7 @@ class RossiHistogramFit:
         # Adjusting layout and saving figure (optional)
         if self.save_fig and (not folder or verbose):
             fig.tight_layout()
-            save_filename = os.path.join(self.save_dir, 'fit_and_res_' + input + '_' + method.replace(' ','_') + '_' + str(self.fit_range[0]) + '-' + str(self.fit_range[1]) + '.png')
+            save_filename = os.path.join(self.save_dir, 'fit_and_res_' + outputName + '_' + method.replace(' ','_') + '_' + str(self.fit_range[0]) + '-' + str(self.fit_range[1]) + '.png')
             fig.savefig(save_filename, dpi=300, bbox_inches='tight')
 
         # Showing plot (optional)
@@ -417,7 +417,7 @@ class Fit_With_Weighting:
         self.xfit = xfit
 
        
-    def plot_RA_and_fit(self, save_fig: bool, show_plot: bool, errorBars: str, input: str, method:str = 'aa'):
+    def plot_RA_and_fit(self, save_fig: bool, show_plot: bool, errorBars: str, outputName: str, method:str = 'aa'):
 
         '''
         Description:
@@ -490,7 +490,7 @@ class Fit_With_Weighting:
         # Adjusting layout and saving figure (optional)
         if save_fig:
             fig.tight_layout()
-            save_filename = os.path.join(self.save_dir, 'weighted_fit_and_res_' + input + '_' + method.replace(' ','_') + '_' + str(self.fit_range[0]) + '-' + str(self.fit_range[1]) + '.png') 
+            save_filename = os.path.join(self.save_dir, 'weighted_fit_and_res_' + outputName + '_' + method.replace(' ','_') + '_' + str(self.fit_range[0]) + '-' + str(self.fit_range[1]) + '.png') 
             fig.savefig(save_filename, dpi=300, bbox_inches='tight')
         
         # Displaying the plot (optional)

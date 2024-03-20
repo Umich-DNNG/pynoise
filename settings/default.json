@@ -4,10 +4,11 @@
         "Time column": 0,
         "Channels column": null,
         "Save directory": "./data",
-        "Output name": "",
+        "Output name": "CurrentRun",
         "Save figures": false,
         "Save raw data": false,
         "Save time differences": false,
+        "Overwrite lower reset times": true,
         "Keep logs": false,
         "Quiet mode": false
     },
