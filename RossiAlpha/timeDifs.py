@@ -7,7 +7,10 @@ separated and combined histogram/time difference operations.'''
 # Necessary imports.
 import numpy as np
 from . import plots as plt
-from Event import Event
+import Event as evt
+import lmxReader as lmx
+import os
+import json
 
 
 
@@ -16,7 +19,7 @@ class timeDifCalcs:
     '''The tiem differences object that stores 
     events and calculates time differences.'''
 
-    def __init__(self, events: list[Event], reset_time: float = None, method: str = 'aa', digital_delay: int = None):
+    def __init__(self, io: dict, reset_time: float = None, method: str = 'aa', digital_delay: int = None, folderNum = 0, sort_data: bool = False):
         
         '''Initializes a time difference object. Autogenerates variables where necessary.
     
@@ -30,14 +33,12 @@ class timeDifCalcs:
         differences (assumes aa).'''
         
 
-        # Store events as a list.
-        self.events = events
         # If a reset time is given, use it.
         if reset_time != None:
             self.reset_time = float(reset_time)
-        # Otherwise, generate one.
+        # TODO: Otherwise, generate one.
         else:
-            self.reset_time = events[-1].time - events[0].time
+            self.reset_time = 0
         # Store the method of analysis.
         self.method = method
         # When considering digital delay, store given digital delay.
@@ -45,8 +46,73 @@ class timeDifCalcs:
             self.digital_delay = digital_delay
         # Initialize the blank time differences.
         self.timeDifs = None
+        self.export = io['Save time differences']
+        self.overwrite = io['Overwrite lower reset times']
+        self.outputFolder = io['Save directory']
+        self.outputName = io['Output name']
+        self.folderNum = folderNum
+        self.file_name = os.path.abspath(self.outputFolder) + '/' + self.outputName + '/' + (str(self.folderNum) + '/' if self.folderNum != 0 else '') + self.method + '/'
+        self.pregenerated = ''
+        if os.path.exists(self.file_name):
+            for time_dif_data in os.listdir(self.file_name):
+                if len(time_dif_data) > 3 and time_dif_data[-3:] == '.td' and time_dif_data[:-3].isnumeric() and int(time_dif_data[:-3]) >= self.reset_time:
+                    self.pregenerated = self.file_name + time_dif_data
+                    break
+        if self.pregenerated == '':
+            # Create empty data and time difference lists.
+            self.events = []
+            # Load the data according to its file type.
+            if io['Input file/folder'].endswith(".txt"):
+                self.events = evt.createEventsListFromTxtFile(io['Input file/folder'],
+                                                    io['Time column'],
+                                                    io['Channels column'],
+                                                    True,
+                                                    io['Quiet mode'],
+                                                    self.folderNum != 0)
+            elif io['Input file/folder'].endswith(".lmx"):
+                self.events =  lmx.readLMXFile(io['Input file/folder'])
+            # If folder analysis:
+            else:
+                # For each file in the specified folder:
+                for filename in os.listdir(io['Input file/folder']):
+                    if len(filename) >= 14:
+                        board = filename[0:8]
+                        ntxt = filename[len(filename)-6:]
+                        channel = filename[8:len(filename)-6]
+                        if board == 'board0ch' and ntxt == '_n.txt' and channel.isnumeric() and int(channel) >= 0:
+                            # Change the input file to this file.
+                            # Add the data from this file to the events list.
+                            self.events.extend(evt.createEventsListFromTxtFile(io['Input file/folder'] + "/" + filename,
+                                                                        io['Time column'],
+                                                                        int(channel),
+                                                                        False,
+                                                                        io['Quiet mode'],
+                                                                        True))
+            # Sort the data if applicable.
+            if sort_data:
+                self.events.sort(key=lambda Event: Event.time)
 
-
+    def exportTimeDifs(self):
+        if self.pregenerated == '':
+            file_check = os.path.abspath(self.outputFolder) + '/'
+            if not os.path.exists(file_check):
+                os.mkdir(file_check)
+            file_check += self.outputName + '/'
+            if not os.path.exists(file_check):
+                os.mkdir(file_check)
+            if self.folderNum != 0:
+                file_check += str(self.folderNum) + '/'
+                if not os.path.exists(file_check):
+                    os.mkdir(file_check)
+            file_check += self.method + '/'
+            if not os.path.exists(file_check):
+                os.mkdir(file_check)
+            if self.overwrite:
+                for time_dif_data in os.listdir(self.file_name):
+                    if len(time_dif_data) > 3 and time_dif_data[-3:] == '.td' and time_dif_data[:-3].isnumeric() and int(time_dif_data[:-3]) <= self.reset_time:
+                        os.remove(self.file_name + time_dif_data)
+            with open(self.file_name + str(int(self.reset_time)) + '.td','w') as file:
+                json.dump({"Time differences":self.timeDifs.tolist()},file,indent=2)
 
     def calculateTimeDifsFromEvents(self):
 
@@ -55,10 +121,14 @@ class timeDifCalcs:
 
         Outputs:
         - the calculated time differences.'''
-
-
+        
         # Construct the empty time differences array, store the total 
         # number of data points, and initialize the indexing variable.
+        
+        if self.pregenerated != '':
+            with open(self.pregenerated,'r') as file:
+                self.timeDifs = np.array([item for item in json.load(file)['Time differences'] if item <= self.reset_time])
+            return self.timeDifs
         time_diffs = np.array([])
         n = len(self.events)
         i = 0
@@ -102,6 +172,8 @@ class timeDifCalcs:
                 prevent = False
         # Store the time differences array.
         self.timeDifs = time_diffs
+        if self.export:
+            self.exportTimeDifs()
         # Return the time differences array.
         return self.timeDifs
     
