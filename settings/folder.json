@@ -11,11 +11,11 @@
         "Save raw data": false
     },
     "General Settings": {
+        "Number of folders": null,
         "Show plots": true,
         "Verbose iterations": false
     },
     "RossiAlpha Settings": {
-        "Number of folders": null,
         "Time difference method": ["dd"],
         "Bin width": null,
         "Max avg relative bin err": 0.1,

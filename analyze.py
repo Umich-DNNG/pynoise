@@ -513,7 +513,7 @@ class Analyzer:
         name = settings['Input/Output Settings']['Input file/folder']
         if folder:
             name = name[name[:name.rfind('/')].rfind('/')+1:].replace('/','-')
-            check['Number of folders'] = settings['RossiAlpha Settings']['Number of folders']
+            check['Number of folders'] = settings['General Settings']['Number of folders']
         else:
             name = name[name.rfind('/')+1:]   
         # If time differences have not yet been calculated or the 
@@ -533,7 +533,7 @@ class Analyzer:
                                     settings['RossiAlpha Settings']['Reset time'],
                                     settings['RossiAlpha Settings']['Time difference method'],
                                     settings['RossiAlpha Settings']['Digital delay'],
-                                    settings['RossiAlpha Settings']['Number of folders'] if folder != 0 else 0,
+                                    settings['General Settings']['Number of folders'] if folder != 0 else 0,
                                     folder)
                 self.createPlot(name,
                                 settings['RossiAlpha Settings']['Bin width'],
@@ -753,13 +753,13 @@ class Analyzer:
         uncertainties = []
         # Store the original folder pathway.
         original = settings['Input/Output Settings']['Input file/folder']
-        numFolders = settings['RossiAlpha Settings']['Number of folders']
+        numFolders = settings['General Settings']['Number of folders']
         ogBinWidth = settings['RossiAlpha Settings']['Bin width']
         # If no number of folders given, just use all folders.
         if numFolders is None:
-            settings['RossiAlpha Settings']['Number of folders'] = 0
-            while (os.path.exists(settings['Input/Output Settings']['Input file/folder'] + '/' + str( settings['RossiAlpha Settings']['Number of folders'] + 1))):
-                settings['RossiAlpha Settings']['Number of folders'] += 1
+            settings['General Settings']['Number of folders'] = 0
+            while (os.path.exists(settings['Input/Output Settings']['Input file/folder'] + '/' + str( settings['General Settings']['Number of folders'] + 1))):
+                settings['General Settings']['Number of folders'] += 1
         if ogBinWidth is None:
             settings['RossiAlpha Settings']['Bin width'] = math.ceil(settings['RossiAlpha Settings']['Reset time'] / 1000)
             bestBinFound = False
@@ -767,14 +767,14 @@ class Analyzer:
             bestAvgUncertainty = -1
             uncertaintyCap = settings['RossiAlpha Settings']['Max avg relative bin err']
             print('Generating time differences...')
-            for folder in tqdm(range(1, settings['RossiAlpha Settings']['Number of folders']+1)):
+            for folder in tqdm(range(1, settings['General Settings']['Number of folders']+1)):
                 settings['Input/Output Settings']['Input file/folder'] = original + '/' + str(folder)
                 self.createTimeDifs(settings['Input/Output Settings'],
                                     settings['General Settings']['Sort data'],
                                     settings['RossiAlpha Settings']['Reset time'],
                                     settings['RossiAlpha Settings']['Time difference method'],
                                     settings['RossiAlpha Settings']['Digital delay'],
-                                    settings['RossiAlpha Settings']['Number of folders'],
+                                    settings['General Settings']['Number of folders'],
                                     folder)
                 # If this is the first folder, initialize the histogram array.
                 combinedTimeDifs.append(self.RATimeDifs['Time differences'][-1])
@@ -782,7 +782,7 @@ class Analyzer:
             settings['Input/Output Settings']['Input file/folder'] = original
             print("Testing different bin widths...")
             while not bestBinFound:
-                for folder in range(1, settings['RossiAlpha Settings']['Number of folders']+1):
+                for folder in range(1, settings['General Settings']['Number of folders']+1):
                     self.RATimeDifs['Time differences'] = [combinedTimeDifs[folder-1].copy()]
                     # Loop for the number of folders specified.
                     self.createPlot("Doesn't matter",
@@ -806,7 +806,7 @@ class Analyzer:
                 RA_std_dev.append(np.std(RA_hist_array[0], axis=0, ddof=1))
                 RA_hist_total.append(np.sum(RA_hist_array[0], axis=0))
                 # Calculate the uncertainties and replace zeroes.
-                uncertainties.append(RA_std_dev[0] * settings['RossiAlpha Settings']['Number of folders'])
+                uncertainties.append(RA_std_dev[0] * settings['General Settings']['Number of folders'])
                 uncertainties[0] = self.replace_zeroes(uncertainties[0])
                 # Add the time difference centers and uncertainties to the total histogram.
                 avg_uncertainty = 0.0
@@ -839,7 +839,7 @@ class Analyzer:
             combinedTimeDifs.clear()
         self.RATimeDifs['Time differences'].clear()
         # Loop for the number of folders specified.
-        for folder in tqdm(range(1, settings['RossiAlpha Settings']['Number of folders']+1)):
+        for folder in tqdm(range(1, settings['General Settings']['Number of folders']+1)):
             # Add the folder number to the input.
             settings['Input/Output Settings']['Input file/folder'] = original + '/' + str(folder)
             # Conduct full analysis.
@@ -930,7 +930,7 @@ class Analyzer:
             # Calculate the time difference centers.
             time_diff_centers.append(self.RAHist['Histogram'][i].bin_edges[1:] - np.diff(self.RAHist['Histogram'][i].bin_edges[:2]) / 2)
             # Calculate the uncertainties and replace zeroes.
-            uncertainties.append(RA_std_dev[i] * settings['RossiAlpha Settings']['Number of folders'])
+            uncertainties.append(RA_std_dev[i] * settings['General Settings']['Number of folders'])
             uncertainties[i] = self.replace_zeroes(uncertainties[i])
             # Add the time difference centers and uncertainties to the total histogram.
             RA_hist_total[i] = np.vstack((RA_hist_total[i], time_diff_centers[i], uncertainties[i]))
@@ -997,6 +997,6 @@ class Analyzer:
         if min_single:
             settings['RossiAlpha Settings']['Fit minimum'] = settings['RossiAlpha Settings']['Fit minimum'][0]
         settings['RossiAlpha Settings']['Bin width'] = ogBinWidth
-        settings['RossiAlpha Settings']['Number of folders'] = numFolders
+        settings['General Settings']['Number of folders'] = numFolders
         # Close all open plots.
         pyplot.close()
