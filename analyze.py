@@ -321,6 +321,7 @@ class Analyzer:
 
         # Create a Cohn Alpha object with the given settings.
         CA_Object = ca.CohnAlpha(values,
+                                 caSet['Plot Counts Histogram'],
                                  caSet['Dwell time'],
                                  caSet['Meas time range'])
         # Conduct Cohn Alpha analysis with the given settings.
