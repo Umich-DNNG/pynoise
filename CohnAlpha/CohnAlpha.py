@@ -17,6 +17,7 @@ def CAFit(f, A, alpha, c):
 class CohnAlpha:
     def __init__(self, 
                  list_data_array,
+                 plot_counts_hist,
                  dwell_time: float = 2.0e6, 
                  meas_time_range: list[float] = [1.5e11, 1.0e12]):
 
@@ -37,6 +38,7 @@ class CohnAlpha:
         self.list_data_array = list_data_array
         self.dwell_time = dwell_time
         self.meas_time_range = meas_time_range
+        self.plot_counts_hist = plot_counts_hist
 
     def conduct_CPSD(self,
                     show_plot: bool = True,
@@ -326,9 +328,16 @@ class CohnAlpha:
         count_bins = np.diff(self.meas_time_range) / self.dwell_time
         
         # Generating corresponding histogram
-        counts_time_hist, _ = np.histogram(a=self.list_data_array, 
-                                        bins=int(count_bins), 
-                                        range=self.meas_time_range)
+        counts_time_hist, edges = np.histogram(a=self.list_data_array, 
+                                           bins=int(count_bins), 
+                                           range=self.meas_time_range)
+        
+        # Plotting counts histogram
+        if self.plot_counts_hist == True:
+            plt.plot(edges[:-1], counts_time_hist, marker='.', linestyle='', color='#162F65')
+            plt.xlabel('Times (Centered)')
+            plt.ylabel('Count')
+            plt.title('Cohn-Alpha Counts Histogram')
         
         # Creating evenly spaced start and stop endpoint for plotting
         timeline = np.linspace(start=self.meas_time_range[0], 
