@@ -297,7 +297,8 @@ class CohnAlpha:
                          caSet: dict = {},
                          sps: dict = {},
                          lfs: dict = {},
-                         scatter_opt: dict = {}):
+                         scatter_opt: dict = {},
+                         counts_hist_opt: dict = {}):
         
         '''
         Creating PSD plot from an array of data inputs.
@@ -329,14 +330,16 @@ class CohnAlpha:
         
         # Generating corresponding histogram
         counts_time_hist, edges = np.histogram(a=self.list_data_array, 
-                                           bins=int(count_bins), 
-                                           range=self.meas_time_range)
+                                               bins=int(count_bins), 
+                                               range=self.meas_time_range)
+        
+        edges_seconds = edges / 1e9
         
         # Plotting counts histogram
         if self.plot_counts_hist == True:
-            plt.plot(edges[:-1], counts_time_hist, marker='.', linestyle='', color='#162F65')
-            plt.xlabel('Times (Centered)')
-            plt.ylabel('Count')
+            plt.scatter(edges_seconds[:-1], counts_time_hist, **scatter_opt)
+            plt.xlabel('Time (s)')
+            plt.ylabel('Counts')
             plt.title('Cohn-Alpha Counts Histogram')
         
         # Creating evenly spaced start and stop endpoint for plotting
