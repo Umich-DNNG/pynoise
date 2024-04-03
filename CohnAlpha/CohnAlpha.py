@@ -336,11 +336,21 @@ class CohnAlpha:
         edges_seconds = edges / 1e9
         
         # Plotting counts histogram
-        if self.plot_counts_hist == True:
+        if self.plot_counts_hist:
             plt.scatter(edges_seconds[:-1], counts_time_hist, **scatter_opt)
             plt.xlabel('Time (s)')
             plt.ylabel('Counts')
             plt.title('Cohn-Alpha Counts Histogram')
+
+            # Saving counts histogram
+            if save_fig:
+                plt.tight_layout()
+                save_filename = os.path.join(save_dir, 'CACountsHist' + str(self.dwell_time) + '.png')
+                plt.savefig(save_filename, dpi=300, bbox_inches='tight')
+
+            # Showing plot (optional)
+            if show_plot:
+                plt.show()
         
         # Creating evenly spaced start and stop endpoint for plotting
         timeline = np.linspace(start=self.meas_time_range[0], 
@@ -402,11 +412,7 @@ class CohnAlpha:
         ax1.set_ylabel('Counts$^2$/Hz')
 
         # Compute residuals
-        # residuals = Pxx[1:-2] - CAFit(f[1:-2], *popt)
         residuals = ((CAFit(f[1:-2], *popt) - Pxx[1:-2]) / Pxx[1:-2]) * 100
-
-        # Computing residuals and plot in bottom subplot
-        # residuals_norm = residuals / np.max(np.abs(residuals))
 
         ax2.scatter(f[1:-2], residuals, **scatter_opt)  # Use f for residuals
         ax2.axhline(y=0, color='#162F65', linestyle='--')
@@ -416,7 +422,7 @@ class CohnAlpha:
         # Saving figure (optional)
         if save_fig:
             fig.tight_layout()
-            save_filename = os.path.join(save_dir, 'CohnAlpha')
+            save_filename = os.path.join(save_dir, 'CohnAlpha' + str(self.dwell_time) + '.png')
             fig.savefig(save_filename, dpi=300, bbox_inches='tight')
 
 
