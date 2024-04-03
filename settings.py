@@ -176,7 +176,91 @@ class Settings:
         # Return the list of changes for printing.
         return list
 
-
+    def updateTimeUnits(self):
+        inputUnits = self.settings['General Settings']['Input time units']
+        outputUnits = self.settings['General Settings']['Output time units']
+        match inputUnits:
+            case None:
+                inputUnits = 1
+            case 'seconds':
+                inputUnits = 1
+            case 's':
+                inputUnits = 1
+            case 'milli seconds':
+                inputUnits = 1e-3
+            case 'milliseconds':
+                inputUnits = 1e-3
+            case 'ms':
+                inputUnits = 1e-3
+            case 'micro seconds':
+                inputUnits = 1e-6
+            case 'microseconds':
+                inputUnits = 1e-6
+            case 'us':
+                inputUnits = 1e-6
+            case 'nano seconds':
+                inputUnits = 1e-9
+            case 'nanoseconds':
+                inputUnits = 1e-9
+            case 'ms':
+                inputUnits = 1e-9
+            case 'pico seconds':
+                inputUnits = 1e-12
+            case 'picoseconds':
+                inputUnits = 1e-12
+            case 'ps':
+                inputUnits = 1e-12
+            case 'femto seconds':
+                inputUnits = 1e-15
+            case 'femtoseconds':
+                inputUnits = 1e-15
+            case 'fs':
+                inputUnits = 1e-15
+            case _:
+                inputUnits = 1
+                print("WARNING: You have given an invalid input time unit value. Defaulting to seconds.")
+        self.settings['General Settings']['Input time units'] = inputUnits
+        match outputUnits:
+            case None:
+                outputUnits = 1
+            case 'seconds':
+                outputUnits = 1
+            case 's':
+                outputUnits = 1
+            case 'milli seconds':
+                outputUnits = 1e-3
+            case 'milliseconds':
+                outputUnits = 1e-3
+            case 'ms':
+                outputUnits = 1e-3
+            case 'micro seconds':
+                outputUnits = 1e-6
+            case 'microseconds':
+                outputUnits = 1e-6
+            case 'us':
+                outputUnits = 1e-6
+            case 'nano seconds':
+                outputUnits = 1e-9
+            case 'nanoseconds':
+                outputUnits = 1e-9
+            case 'ms':
+                outputUnits = 1e-9
+            case 'pico seconds':
+                outputUnits = 1e-12
+            case 'picoseconds':
+                outputUnits = 1e-12
+            case 'ps':
+                outputUnits = 1e-12
+            case 'femto seconds':
+                outputUnits = 1e-15
+            case 'femtoseconds':
+                outputUnits = 1e-15
+            case 'fs':
+                outputUnits = 1e-15
+            case _:
+                outputUnits = 1
+                print("WARNING: You have given an invalid output time unit value. Defaulting to seconds.")
+        self.settings['General Settings']['Output time units'] = outputUnits
 
     def append(self, path: str):
         
@@ -229,6 +313,7 @@ class Settings:
                                 self.sls_drop.remove(setting)
                     # Set the setting to its new value.
                     self.settings[group][setting] = parameters[group][setting]
+        self.updateTimeUnits()
         # Resort the dropdown menus if in gui mode.
         if self.gui_mode:
             self.sort_drops()
@@ -263,6 +348,7 @@ class Settings:
         # Load the new parameters from the json file.
         file = open(path, 'r')
         self.settings = json.load(file)
+        self.updateTimeUnits()
         file.close()
         # If in gui mode:
         if self.gui_mode:
