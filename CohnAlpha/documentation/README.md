@@ -78,6 +78,7 @@ Inputs:
 
 Output:
 - A figure where the top half represents the Cohn Alpha distribution and bottom half represents the corresponding residuals
+- A figure that represents the Cohn Alpha Counts Histogram plot
 
 Running through all Cohn Alpha analyses will produce an image that is similar to the following: 
 
