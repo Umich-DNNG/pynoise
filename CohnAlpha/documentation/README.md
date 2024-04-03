@@ -32,7 +32,6 @@ The format of the file you want to analyze should be a .txt file with a list of 
 The CohnAlpha program can be run with a variety of options that change the visual output and type of analysis being run. In the settings file, this is listed as the CohnAlpha Settings. The settings are as follows: 
 * Dwell time (*float*): This is the timing gate to record counts and the fluctuation between "dwells" are used to derive the distribution.
 * Meas time range (*list of type float (size=2)*): The meas time range set by two float values in a list that denotes start and end.
-* Clean pulses switch (*float*): This basically says whether or not the corresponding pulse was "good" (This is specific to the sample data, so it is not the default, but rather an addition).
 * Annotation Font Weight (*str*): Font weight of the annotation.
 * Annotation Color: Color of the annotation.
 * Annotation Background Color: Background color of the annotation.
@@ -62,7 +61,6 @@ The CAFit() function represents the Cohn Alpha Fitting Function that will be fed
 The class PowerSpectralDensity: __init__() function will initialize a CohnAlpha object
 Inputs:
 * list_data_array, 
-* clean_pulses_switch (default=True, meaning that this parameter is turned on by default)
 * dwell_time (default=2.0e6, meaning that the default value is 2,000,000)
 * meas_time_range (default=[1.5e11, 1.0e12], meaning that the default range is [1.5e11, 1.0e12])
 
@@ -83,4 +81,5 @@ Output:
 
 Running through all Cohn Alpha analyses will produce an image that is similar to the following: 
 
-<img src="./CohnAlpha.png" width="400" >
+<img src="./CohnAlpha2000000.0.png" width="400" >
+<img src="./CACountsHist2000000.0.png" width="400" >
