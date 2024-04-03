@@ -35,13 +35,14 @@
             150000000000.0,
             1000000000000.0
         ],
+        "Plot Counts Histogram": false,
         "Font Size": 12,
         "Annotation Font Weight": "bold",
         "Annotation Color": "black",
         "Annotation Background Color": "white",
         "nperseg": 4096
     },
-    "FeynmanY Settings": {
+    "FeynmanY Settings": { 
         "Tau range": [
             30,
             3000
