@@ -16,7 +16,9 @@
         "Number of folders": null,
         "Verbose iterations": false,
         "Sort data": true,
-        "Show plots": true
+        "Show plots": true,
+        "Input time units": null,
+        "Output time units": null
     },
     "RossiAlpha Settings": {
         "Time difference method": "cc",
