@@ -21,7 +21,8 @@ Our program takes files in the following format:
 
 A sample is shown belowm, where the first column specifies the channel the detection was recorded on, the second column is the time of detection, and the remaining columns contain data not relevant to our analysis:
 
-<img width="250" alt="Screen Shot 2024-04-10 at 1 27 47 PM" src="https://github.com/Umich-DNNG/pynoise/assets/112817120/1870dc54-4c94-4d01-a906-d93209eed329">
+<img width="250" alt="Screen Shot 2024-04-10 at 1 27 47 PM" src="https://github.com/Umich-DNNG/pynoise/assets/112817120/a62c3f9f-c198-4c24-b495-57cbe7938886">
+
 
 The columns for channel and time data can be in any order, but must be specified in the Input/Output Settings. There can also be no channel data, in which case this setting is null.
 
