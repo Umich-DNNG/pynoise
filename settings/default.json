@@ -21,9 +21,9 @@
         "Output time units": null
     },
     "RossiAlpha Settings": {
+        "Reset time": 5000,
         "Time difference method": "cc",
         "Digital delay": 750,
-        "Reset time": 5000,
         "Combine Calc and Binning": false,
         "Bin width": null,
         "Max avg relative bin err": 0.10,
