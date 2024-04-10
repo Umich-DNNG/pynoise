@@ -23,7 +23,7 @@ A sample is shown belowm, where the first column specifies the channel the detec
 
 <img width="250" alt="Screen Shot 2024-04-10 at 1 27 47 PM" src="https://github.com/Umich-DNNG/pynoise/assets/112817120/1870dc54-4c94-4d01-a906-d93209eed329">
 
-The columns for channel and time data can be in any order, but must be specified in the Input/Output Settings. There can also be no channel data, in which case this setting is specific as null.
+The columns for channel and time data can be in any order, but must be specified in the Input/Output Settings. There can also be no channel data, in which case this setting is null.
 
 For folder analysis, the individual file setup is the same. In the folder the user gives in the Input/Output Settings, the program searches for numbered folders up through the number specified by the "Number of folders" setting. In each of these folders, the program searches for files of the name "board0ch{channel#}_n.txt", where {channel#} is an integer representing which channel the file contains data for. For this reason, these files do not need to contain channel data themsevles. An example setup is shown below, where the files with a green check mark are those that our program uses:
 
