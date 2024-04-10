@@ -52,6 +52,11 @@ The RossiAlpha program can be run with a variety of options that change the visu
 * Fit maximum (*float*): the time difference at which to stop fitting an exponential curve to the histogram, in the units given by the "Input time units" setting.
     * If set to null, will fit all the way up to the reset time.
 
+```math
+SE = \frac{\sigma}{\sqrt{n}}
+```
+
+
 ### How To Run RossiAlpha Analysis
 Our program allows for modular analysis, allowing you to run each portion of the analysis independently. For example, this allows you to generate time differences once, then play around with plot settings to get a graph that fits your visual requirements. Navigate to the RossiAlpha menu by running the command specified in the main README and following the instructions given by the program. Upon specifying RossiAlpha analysis, you will reach this menu:
 
