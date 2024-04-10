@@ -99,7 +99,7 @@ The RossiAlpha program can be run with a variety of options that change the visu
 * Combine Calc and Binning (*bool*): if true, will build the histogram as the time differences are calculated.
 * Bin width (float): the width of each histogram bin, in the units given by the "Input time units" setting.
     * When doing folder analysis, the bin width can be set to null. In this case, the program will automate the bin width to be as small as possible while ensuring the maximum average relative bin error is no higher than the following setting.
-    * \sum_{i=1}^{100}i
+    * <!-- \sum_{i=1}^{100}i -->
 * Max avg relative bin err (float): the maximum average relative bin error, as described above. This is given as a fraction; for example, if you wanted your maximum average relative bin error to be 10%, you would enter 0.10.
 
 
