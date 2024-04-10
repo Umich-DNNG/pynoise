@@ -53,7 +53,7 @@ The RossiAlpha program can be run with a variety of options that change the visu
     * If set to null, will fit all the way up to the reset time.
 
 ```math
-SE = \frac{\sigma}{\sqrt{n}}
+SE = \left(\frac{\Sigma_{i=1}^n c_i\cdot e_i}{\Sigma_{i=1}^n c_i^2}/right)
 ```
 
 
