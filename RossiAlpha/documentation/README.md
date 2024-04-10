@@ -15,75 +15,16 @@ You will need the following inputs for the analysis:
 
 ### I/O FILE INFO
 
-The format of the file you want to analyze should be a .txt file with a list of time stamps of neutron detection times, separated by new lines. For folder analysis, the given folder should contain numbered folders that each contain data for analysis. A snippet of the sample data is shown below.
+Our program takes files in the following format:
+* Each detection is separated by a newline.
+* Each piece of information is separated by white-space.
+A sample is shown belowm, where the first column specifies the channel the detection was recorded on, the second column is the time of detection, and the remaining columns contain data not relevant to our analysis:
 
-<img src="./sample_data.png" width="400" >
+<img width="250" alt="Screen Shot 2024-04-10 at 1 27 47 PM" src="https://github.com/Umich-DNNG/pynoise/assets/112817120/1870dc54-4c94-4d01-a906-d93209eed329">
 
-### How To Run RossiAlpha
-* Create a .json file with the appropriate settings (default.json contains all the default settings)
-* Input the pathway of your input data directory into the "Input file/folder" setting under "Input/Output Settings" in the .json file that you created (as shown in the .json snippet below)
-```python
-"Input/Output Settings": {
-        "Input file/folder": INSERT PATHWAY HERE,
-        "Time column": 0,
-        "Channels column": null,
-        "Save directory": "./data",
-        "Save figures": false,
-        "Save raw data": false,
-        "Keep logs": false,
-        "Quiet mode": false
-    },
-```
-* Open your terminal and navigate to the PyNoise directory
-* Type "python3 main.py" and hit enter (you should be prompted with a welcome message as shown below)
-```
-Welcome to the DNNG/PyNoise project.
-With this software we are taking radiation data from fission reactions (recorded by organic scintillators) and analyzing it using various methods and tools.
-Use this Python suite to analyze a single file or multiple across numerous folders.
+The columns for channel and time data can be in any order, but must be specified in the Input/Output Settings. There can also be no channel data, in which case this setting is specific as null.
 
-Would you like to use the default settings or import another .json file?
-d - use default settings
-i - import custom settings
-Select settings choice:
-```
-* Type "d" if you want to use the default settings or type "i" if you want to import the .json that created earlier
-* If you are using the default settings, type "r" to run the RossiAlpha analysis (example shown below)
-```
-Would you like to use the default settings or import another .json file?
-d - use default settings
-i - import custom settings
-Select settings choice: d
-
-Initializing program with default settings...
-Settings from default.json succesfully imported.
-
-Settings initialized. You can now begin using the program.
-
-----------------------------------------------------------
-
-You can utitilze any of the following functions:
-r - run Rossi Alpha analysis
-c - run Cohn Alpha Analysis
-f - run Feynman Y Analysis
-s - view or edit the program settings
-Leave the command blank or enter x to end the program.
-Enter a command: r
-```
-* If you are using the .json file from earlier, type "o" to run the RossiAlpha analysis (example shown below)
-```
-Would you like to use the default settings or import another .json file?
-d - use default settings
-i - import custom settings
-Select settings choice: i
-
-You have two import options:
-o - overwrite entire settings
-a - append settings to default
-Enter a command (or leave blank to cancel): o
-Overwrite mode selected.
-Enter a settings file (no .json extension): [ENTER YOUR JSON FILE NAME WITHOUT THE ".json" HERE]
-```
-* The results should either pop up on the screen, saved to a folder, or both.
+For folder analysis,
 
 ### Settings Configurations
 
@@ -106,18 +47,17 @@ The RossiAlpha program can be run with a variety of options that change the visu
 * Fit maximum (*float*): the time difference at which to stop fitting an exponential curve to the histogram, in the units given by the "Input time units" setting.
     * If set to null, will fit all the way up to the reset time.
 
-### Running the RossiAlpha Method from the Main Driver
-<figure class="video_container">
- <video controls="true" allowfullscreen="true" style = "width: 500px;">
- <source src="./RossiAlphaDemo.mp4" type="video/mp4" >
- </video>
-</figure>
+### How To Run RossiAlpha Analysis
+Our program allows for modular analysis, allowing you to run each portion of the analysis independently. For example, this allows you to generate time differences once, then play around with plot settings to get a graph that fits your visual requirements. Navigate to the RossiAlpha menu by running the command specified in the main README and following the instructions given by the program. Upon specifying RossiAlpha analysis, you will reach this menu:
 
-### Driver
-```raDriver.py``` is used to run all analysis pertaining to the Rossi Alpha method, and is called from the main driver. **Trying to call raDriver independently will not work**. The driver has been designed modularly, so that analysis at any stage can be done without having to run through the entire process. There are 5 main options:
-* m - run the entire program through the [main driver](#main)
-* t - calculate [time differences](#time-difference-calculator)
-* p - create [plots](#rossihistogram) of the time difference data
-* f - [fit](#fitting) the data to an exponential curve
-* s - view or edit the program [settings](#settings-configurations)
-* Leave the command blank to end the program.
+```python
+What analysis would you like to perform?
+m - run the entire program through the main driver
+t - calculate time differences
+p - create plots of the time difference data
+f - fit the data to an exponential curve
+s - view or edit the program settings
+Leave the command blank or enter x to return to the main menu.
+```
+
+You can then select which analysis you need. If you request a plot but there are no current time differences, the program will automatically generate them for you.
