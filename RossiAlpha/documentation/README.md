@@ -11,8 +11,7 @@ This section of the PyNoise suite is for Rossi Alpha Algorithm analysis. This dr
 
 You will need the following inputs for the analysis:
 * A single file or folder of data that will be analyzed.
-* A settings configuration file (see the settings section for more information).
-   * Please review the SETTINGS.md to see the list of relevant settings for RossiAlpha analysis.
+* A settings configuration file (Please review SETTINGS.md for the list of relevant settings for RossiAlpha analysis.).
 
 ### I/O FILE INFO
 
