@@ -54,7 +54,7 @@ The RossiAlpha program can be run with a variety of options that change the visu
 ### How To Run RossiAlpha Analysis
 Our program allows for modular analysis, allowing you to run each portion of the analysis independently. For example, this allows you to generate time differences once, then play around with plot settings to get a graph that fits your visual requirements. Navigate to the RossiAlpha menu by running the command specified in the main README and following the instructions given by the program. Upon specifying RossiAlpha analysis, you will reach this menu:
 
-```python
+```
 What analysis would you like to perform?
 m - run the entire program through the main driver
 t - calculate time differences
