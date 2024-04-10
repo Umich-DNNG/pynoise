@@ -46,7 +46,9 @@ The RossiAlpha program can be run with a variety of options that change the visu
 * Bin width (float): the width of each histogram bin, in the units given by the "Input time units" setting.
     * When doing folder analysis, the bin width can be set to null. In this case, the program will automate the bin width to be as small as possible while ensuring the maximum average relative bin error (MARBE) is no higher than the following setting.
     * The MARBE is  calculated as follows:
-```math MARBE = \frac{\Sigma_{i=1}^n c_i\cdot e_i}{\Sigma_{i=1}^n c_i^2} ```
+```math
+MARBE = \frac{\Sigma_{i=1}^n c_i\cdot e_i}{\Sigma_{i=1}^n c_i^2}
+```
       Where ```math c_i```is the number of counts for the ```math i^th``` bin, and ```math e_i``` is the error for the ```math i^th``` bin
 * Max avg relative bin err (*float*): the MARBE, as described above. This is given as a fraction; for example, if you wanted your maximum average relative bin error to be 10%, you would enter 0.10.
 * Error Bar/Band (*"bar" or "band"*): whether the error should be represented as a bar or a band on the histogram.
