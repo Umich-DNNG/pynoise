@@ -108,3 +108,13 @@ The editor class for modifying settings is also accessible from the CohnAlphaDri
 
 <img src="./CohnAlpha2000000.0.png" width="400" >
 <img src="./CACountsHist2000000.0.png" width="400" >
+
+
+
+
+
+![CohnAlpha2000000 0](https://github.com/Umich-DNNG/pynoise/assets/90876107/f65da224-49e0-4b89-9c43-ffebd9bcd565)
+![CACountsHist2000000 0](https://github.com/Umich-DNNG/pynoise/assets/90876107/b8536e43-9d1f-4153-9ede-1ddc1a342bfa)
+
+
+
