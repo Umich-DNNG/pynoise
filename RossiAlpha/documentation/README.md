@@ -88,19 +88,19 @@ Enter a settings file (no .json extension): [ENTER YOUR JSON FILE NAME WITHOUT T
 ### Settings Configurations
 
 The RossiAlpha program can be run with a variety of options that change the visual output and type of analysis being run. In the settings file, this is listed as the RossiAlpha Settings. The settings are as follows: 
-* Time difference method (*string*): This refers to the way you want the time differences generated. the options are:  
-    * any_and_all: Considers all time differences within the reset time.
-    * any_and_all cross_correlations: Considers all time differences except those from the same detector.
-    * any_and_all cross_correlations no_repeat: Considers all time differences except those from the same channel and doesn't consider more than one detection from each detector within the same reset period.
-    * any_and_all cross_correlations no_repeat digital_delay: Considers all time differences except those from the same channel and doesn't consider more than one detection from each detector within the same reset period and adds a digital delay when considering detections from the same detector within the same reset period.
-    * **NOTE: the last three options are only valid for folder analysis. For single file analysis, any_and_all must be chosen.**
-* digital delay (*int*): The amount of digital delay, if applicable (see above).
-* **Histogram Generation Settings**: Settings specific to generating RossiAlpha histograms:
-    * Reset time (*int*): The maximum time difference recorded.
-    * Bin width (*int*): The width of the histogram bins.
-    * Error bar/band (*string*): For folder analysis, the type of visual used to show residuals of the overall line of best fit. Valid values are bar, band, and none.
-* **Fit Region Settings**: Settings specific to applying the line of best fit to Rossi Alpha histograms:
-    * Minimum cutoff (*int*): The value at which to start applying the line fitting algorithm.
+* Reset time (float): the maximum time difference to consider during analysis, in the units given by the "Input time units" setting.
+* Time difference method (*string or list*): This refers to the way you want the time differences generated. the options are:  
+    * "aa" (representing any and all): Considers all time differences within the reset time.
+    * "cc" (representing cross correlations): Considers all time differences except those from the same detector/channel.
+    * "dd" (representing digital delay): Follows cross correlation analysis and considers a digital delay for each detector between each detection time.
+    * You can only run methods involving cross correlation ("cc" and "dd") when you have specified a time column in the Input/Output Settings.
+    * These options can be given alone or can be given as a list. For example, if you wanted to run all three types of analysis, you would put ["aa", "cc", "dd"] in the settings file.
+* Digital delay (*int*): The amount of digital delay, if applicable (see above).
+* Combine Calc and Binning (*bool*): if true, will build the histogram as the time differences are calculated.
+* Bin width (float): the width of each histogram bin, in the units given by the "Input time units" setting.
+    * When doing folder analysis, the bin width can be set to null. In this case, the program will automate the bin width to be as small as possible while ensuring the maximum average relative bin error is no higher than the following setting.
+    * \sum_{i=1}^{100}i
+* Max avg relative bin err (float): the maximum average relative bin error, as described above. This is given as a fraction; for example, if you wanted your maximum average relative bin error to be 10%, you would enter 0.10.
 
 
 ### Running the RossiAlpha Method from the Main Driver
