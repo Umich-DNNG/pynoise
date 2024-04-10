@@ -22,11 +22,22 @@ The format of the file you want to analyze should be a .txt file with a list of 
 ### **Settings**
 The CohnAlpha program can be run with a variety of options that change the visual output and type of analysis being run. In the settings file, this is listed as the CohnAlpha Settings. 
 
-The settings needed to run the analysis are as follows: 
-* Dwell time (*float*): This is the timing gate to record counts and the fluctuation between "dwells" are used to derive the distribution.
-* Meas time range (*list of type float (size=2)*): The measurement time range set by two float values in a list that denotes start and end.
+"Input/Output Settings": 
+* "Input file/folder" (*str): Input data pathway.
 
-All the other settings are related to visual output changes that can be adjusted. A .json snippet example is shown below. You can reference the matplotlib website to check out available setting options here: [Maplotlib Website](https://matplotlib.org/stable/api/pyplot_summary.html)
+"General Settings":
+* "Show plots": Boolean setting controlling whether you want to show plots.
+
+"CohnAlpha Settings":
+* "Dwell time": This is the timing gate to record counts and the fluctuation between "dwells" are used to derive the distribution.
+* "Meas time range": The measurement time range set by two float values in a list that denotes start and end.
+* "Plot Counts Histogram": Boolean setting controlling whether you want to plot the Cohn Alpha counts histogram.
+* The rest of the settings are the visual settings that can be adjusted.
+
+"Scatter Plot Settings"
+* These are the visual settings that can be adjusted.
+
+A .json snippet example is shown below. You can reference the matplotlib website to check out available setting options here: [Maplotlib Website](https://matplotlib.org/stable/api/pyplot_summary.html)
 
 ```python
 "Input/Output Settings": {
