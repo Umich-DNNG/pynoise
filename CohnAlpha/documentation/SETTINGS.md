@@ -1,4 +1,4 @@
-### **Settings**
+# Cohna Alpha Settings
 The CohnAlpha program can be run with a variety of options that change the visual output and type of analysis being run. Here are the breakdown of the subsettings related to the CohnAlpha analysis:
 
 "Input/Output Settings": 
