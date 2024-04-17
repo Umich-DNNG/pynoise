@@ -147,7 +147,6 @@ Leave the command blank or enter x to return to the main menu.
 ### **Output**
 - A figure where the top half represents the Cohn Alpha distribution and bottom half represents the corresponding residuals
 - A figure that represents the Cohn Alpha Counts Histogram plot
-CohnAlpha/documentation/README.md
 
 <img width="500" alt="Screenshot 2024-04-17 at 1 56 48 PM" src="https://github.com/Umich-DNNG/pynoise/assets/90876107/82f29960-4a8b-490a-b247-e09f645d5570">
 <img width="500" alt="Screenshot 2024-04-17 at 1 56 52 PM" src="https://github.com/Umich-DNNG/pynoise/assets/90876107/652f8bba-06d7-44a3-a478-88a7d2754a41">
