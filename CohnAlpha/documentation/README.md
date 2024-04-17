@@ -1,4 +1,4 @@
-# Cohn Alpha Method
+<img width="1033" alt="Screenshot 2024-04-17 at 1 56 48 PM" src="https://github.com/Umich-DNNG/pynoise/assets/90876107/3991b78e-ed07-43e4-b092-e3f89d725c6f"># Cohn Alpha Method
 
 This section of the PyNoise suite is for Cohn Alpha (aka Power Spectral Density) Algorithm analysis. If you are unfamiliar with the Power Spectral Density method, please familiarize yourself before using this package and reading the README file.
 
@@ -107,6 +107,9 @@ The editor class for modifying settings is also accessible from the CohnAlphaDri
 - A figure that represents the Cohn Alpha Counts Histogram plot
 CohnAlpha/documentation/README.md
 
-![CohnAlpha2000000 0](https://github.com/Umich-DNNG/pynoise/assets/90876107/f65da224-49e0-4b89-9c43-ffebd9bcd565)
-![CACountsHist2000000 0](https://github.com/Umich-DNNG/pynoise/assets/90876107/b8536e43-9d1f-4153-9ede-1ddc1a342bfa)
+<img width="500" alt="Screenshot 2024-04-17 at 1 56 48 PM" src="https://github.com/Umich-DNNG/pynoise/assets/90876107/82f29960-4a8b-490a-b247-e09f645d5570">
+<img width="500" alt="Screenshot 2024-04-17 at 1 56 52 PM" src="https://github.com/Umich-DNNG/pynoise/assets/90876107/652f8bba-06d7-44a3-a478-88a7d2754a41">
+
+
+
 
