@@ -25,7 +25,7 @@ Furthermore, sample data inputs can be found with this link: [Google Drive - Sam
 
 
 ### **Settings**
-The CohnAlpha program can be run with a variety of options that change the visual output and type of analysis being run. In the settings file, this is listed as the CohnAlpha Settings. 
+The CohnAlpha program can be run with a variety of options that change the visual output and type of analysis being run. Here are the breakdown of the subsettings related to the CohnAlpha analysis:
 
 "Input/Output Settings": 
 * "Input file/folder" (*str): Input data pathway.
