@@ -16,7 +16,12 @@ Additionally, you will need the following:
 
 ### **I/O FILE INFO**
 
-The format of the file you want to analyze should be a .txt file with a list of inputs separated by new lines. Sample data inputs can be found with this link: [Google Drive - Sample Data](https://drive.google.com/drive/folders/1jEswA6AqeNLgGJW6iXs1Ti7XEXad9D0w)
+The format of the file you want to analyze should be a .txt file with a list of inputs separated by new lines. A sample snippet of an input file is shown below.
+
+<img width="243" alt="Screenshot 2024-04-17 at 1 59 33 PM" src="https://github.com/Umich-DNNG/pynoise/assets/90876107/530ffa80-0cdb-4a53-97c5-521d40cd7132">
+
+
+Furthermore, sample data inputs can be found with this link: [Google Drive - Sample Data](https://drive.google.com/drive/folders/1jEswA6AqeNLgGJW6iXs1Ti7XEXad9D0w)
 
 
 ### **Settings**
