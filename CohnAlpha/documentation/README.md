@@ -1,4 +1,4 @@
-<img width="1033" alt="Screenshot 2024-04-17 at 1 56 48 PM" src="https://github.com/Umich-DNNG/pynoise/assets/90876107/3991b78e-ed07-43e4-b092-e3f89d725c6f"># Cohn Alpha Method
+# Cohn Alpha Method
 
 This section of the PyNoise suite is for Cohn Alpha (aka Power Spectral Density) Algorithm analysis. If you are unfamiliar with the Power Spectral Density method, please familiarize yourself before using this package and reading the README file.
 
