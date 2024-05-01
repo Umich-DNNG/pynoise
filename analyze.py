@@ -369,7 +369,7 @@ class Analyzer:
             self.RATimeDifs['Time differences'].append(dif.timeDifCalcs(
                 io=io,
                 reset_time=reset, 
-                method=type, 
+                method=method, 
                 digital_delay=delay,
                 folderNum=curFolder,
                 sort_data=sort))
