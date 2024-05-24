@@ -223,7 +223,7 @@ class Editor:
                         # Display options.
                         self.print('You have two input options:')
                         self.print('a - append settings')
-                        self.print('o - overwrite the entire settings; every setting in imported file must be defined')
+                        self.print('o - overwrite the entire settings')
                         # If there's currently something in the command queue, 
                         # take that as the input and remove it from the queue.
                         if len(queue) != 0:

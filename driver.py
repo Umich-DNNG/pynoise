@@ -130,7 +130,7 @@ def main():
                     # Display options.
                     editor.print('\nYou have two import options:')
                     editor.print('a - append settings to default')
-                    editor.print('o - overwrite entire settings; every setting in imported file must be defined')
+                    editor.print('o - overwrite entire settings')
                     # If there's currently something in the command queue, 
                     # take that as the input and remove it from the queue.
                     if len(queue) != 0:
@@ -219,7 +219,7 @@ def main():
     editor.print('----------------------------------------------------------\n')
 
     # update user's text editor preference
-    #editor.text_editor = editor.parameters.settings['General Settings']['Text editor']
+    editor.text_editor = editor.parameters.settings['General Settings']['Text editor']
     
     # Continue running the program until the user is done.
     while selection != '' and selection != 'x':
