@@ -129,8 +129,8 @@ def main():
                 while opt != '' and opt != 'x' and opt != 'o' and opt != 'a':
                     # Display options.
                     editor.print('\nYou have two import options:')
-                    editor.print('o - overwrite entire settings')
                     editor.print('a - append settings to default')
+                    editor.print('o - overwrite entire settings; every setting in imported file must be defined')
                     # If there's currently something in the command queue, 
                     # take that as the input and remove it from the queue.
                     if len(queue) != 0:
