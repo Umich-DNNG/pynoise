@@ -33,7 +33,7 @@ NOTE: tkinter should be a package included in your Python installation — howev
 
 ### Settings Configurations
 
-To allow for a wide range of graphing/analysis options, there is a settings system that can be changed before or during runtime. Please consult the documentation in the settings folder, or use the default settings provided.
+To allow for a wide range of graphing/analysis options, there is a settings system that can be changed before or during runtime. Please consult the [documentation](https://github.com/Umich-DNNG/pynoise/blob/master/settings/README.md) in the settings folder, or use the default settings provided.
 
 ### Running PyNoise
 

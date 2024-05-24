@@ -31,7 +31,7 @@ For folder analysis, the individual file setup is the same. In the folder the us
 <img width="621" alt="Screen Shot 2024-04-10 at 1 38 37 PM" src="https://github.com/Umich-DNNG/pynoise/assets/112817120/d01a938b-42a5-4459-a609-d4d3f4ad9041">
 
 ### How To Run RossiAlpha Analysis
-Our program allows for modular analysis, allowing you to run each portion of the analysis independently. For example, this allows you to generate time differences once, then play around with plot settings to get a graph that fits your visual requirements. Navigate to the RossiAlpha menu by running the command specified in the main README and following the instructions given by the program. Upon specifying RossiAlpha analysis, you will reach this menu:
+Our program allows for modular analysis (when using a single file), allowing you to run each portion of the analysis independently. For example, this allows you to generate time differences once, then play around with plot settings to get a graph that fits your visual requirements. Navigate to the RossiAlpha menu by running the command specified in the main README and following the instructions given by the program. Upon specifying RossiAlpha analysis, you will reach this menu:
 
 ```
 What analysis would you like to perform?
@@ -44,3 +44,5 @@ Leave the command blank or enter x to return to the main menu.
 ```
 
 You can then select which analysis you need. If you request a plot but there are no current time differences, the program will automatically generate them for you.
+
+Note: if using a folder of data, can ONLY run the entire program, not the individual modular analysis options.
