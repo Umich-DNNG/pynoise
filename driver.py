@@ -217,6 +217,10 @@ def main():
     # Display confirmation.
     editor.print('Settings initialized. You can now begin using the program.\n')
     editor.print('----------------------------------------------------------\n')
+
+    # update user's text editor preference
+    #editor.text_editor = editor.parameters.settings['General Settings']['Text editor']
+    
     # Continue running the program until the user is done.
     while selection != '' and selection != 'x':
         # Display options.

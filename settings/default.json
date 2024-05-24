@@ -1,31 +1,32 @@
 {
     "Input/Output Settings": {
-        "Input file/folder": "/mnt/c/Users/holym/Dropbox (University of Michigan)/MUSIC/Data/OSCAR/20210222_Wk2/20210222_01_RF3-24_CF_OS_Closed",
+        "Input file/folder": "",
         "Time column": 0,
         "Channels column": null,
         "Save directory": "./data",
         "Output name": "CurrentRun",
         "Save figures": false,
         "Save raw data": false,
-        "Save time differences": true,
+        "Save time differences": false,
         "Overwrite lower reset times": true,
         "Keep logs": false,
         "Quiet mode": false
     },
     "General Settings": {
-        "Number of folders": 90,
+        "Number of folders": null,
         "Verbose iterations": false,
         "Sort data": true,
         "Show plots": true,
         "Input time units": null,
-        "Output time units": null
+        "Output time units": null,
+        "Text editor": "vim"
     },
     "RossiAlpha Settings": {
         "Reset time": 5000,
-        "Time difference method": "aa",
+        "Time difference method": "cc",
         "Digital delay": 750,
         "Combine Calc and Binning": false,
-        "Bin width": 10,
+        "Bin width": null,
         "Max avg relative bin err": 0.10,
         "Error Bar/Band": "band",
         "Fit minimum": 30,

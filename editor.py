@@ -23,7 +23,9 @@ class Editor:
 
         # Create a blank settings object, blank log path, and 
         # gets the working directory for making absolute paths.
+        # initial editor is vim, can be changed to nano
         self.parameters = set.Settings()
+        self.text_editor = 'vim'
         self.history = None
         os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
@@ -123,7 +125,7 @@ class Editor:
 
 
         # Create an editor using the os environ function.
-        EDITOR = os.environ.get('EDITOR', 'vim')
+        EDITOR = os.environ.get('EDITOR', self.text_editor)
         # Open the file in append mode.
         with open(file,'a') as settings:
             # If appending settings, prefill the file.
