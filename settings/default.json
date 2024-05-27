@@ -18,7 +18,8 @@
         "Sort data": true,
         "Show plots": true,
         "Input time units": null,
-        "Output time units": null
+        "Output time units": null,
+        "Text editor": "vim"
     },
     "RossiAlpha Settings": {
         "Reset time": 5000,
