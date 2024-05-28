@@ -26,7 +26,7 @@
         "Time difference method": "aa",
         "Digital delay": 750,
         "Combine Calc and Binning": false,
-        "Bin width": null,
+        "Bin width": 10,
         "Max avg relative bin err": 0.10,
         "Error Bar/Band": "band",
         "Fit minimum": 30,
