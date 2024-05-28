@@ -44,3 +44,21 @@ Leave the command blank or enter x to return to the main menu.
 ```
 
 You can then select which analysis you need. If you request a plot but there are no current time differences, the program will automatically generate them for you.
+
+
+### Default Settings
+A quick description of the default settings used by the Rossi-Alpha method. For more information on the Rossi-Alpha settings, please check the Rossi-Alpha settings documentation [here](https://github.com/Umich-DNNG/pynoise/blob/master/RossiAlpha/documentation/SETTINGS.md)
+
+```
+"RossiAlpha Settings": {
+    "Reset time": 5000,
+    "Time difference method": "aa",
+    "Digital delay": 750,
+    "Combine Calc and Binning": false,
+    "Bin width": 10,
+    "Max avg relative bin err": 0.10,
+    "Error Bar/Band": "band",
+    "Fit minimum": 30,
+    "Fit maximum": null
+},
+```
