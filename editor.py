@@ -23,7 +23,9 @@ class Editor:
 
         # Create a blank settings object, blank log path, and 
         # gets the working directory for making absolute paths.
+        # initial editor is vim, can be changed to nano
         self.parameters = set.Settings()
+        self.text_editor = 'vim'
         self.history = None
         os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
@@ -123,7 +125,7 @@ class Editor:
 
 
         # Create an editor using the os environ function.
-        EDITOR = os.environ.get('EDITOR', 'vim')
+        EDITOR = os.environ.get('EDITOR', self.text_editor)
         # Open the file in append mode.
         with open(file,'a') as settings:
             # If appending settings, prefill the file.
@@ -220,8 +222,8 @@ class Editor:
                     while opt != '' and opt != 'o' and opt != 'a':
                         # Display options.
                         self.print('You have two input options:')
-                        self.print('o - overwrite the entire settings')
                         self.print('a - append settings')
+                        self.print('o - overwrite the entire settings')
                         # If there's currently something in the command queue, 
                         # take that as the input and remove it from the queue.
                         if len(queue) != 0:

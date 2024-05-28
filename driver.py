@@ -129,8 +129,8 @@ def main():
                 while opt != '' and opt != 'x' and opt != 'o' and opt != 'a':
                     # Display options.
                     editor.print('\nYou have two import options:')
-                    editor.print('o - overwrite entire settings')
                     editor.print('a - append settings to default')
+                    editor.print('o - overwrite entire settings')
                     # If there's currently something in the command queue, 
                     # take that as the input and remove it from the queue.
                     if len(queue) != 0:
@@ -217,6 +217,10 @@ def main():
     # Display confirmation.
     editor.print('Settings initialized. You can now begin using the program.\n')
     editor.print('----------------------------------------------------------\n')
+
+    # update user's text editor preference
+    editor.text_editor = editor.parameters.settings['General Settings']['Text editor']
+    
     # Continue running the program until the user is done.
     while selection != '' and selection != 'x':
         # Display options.
