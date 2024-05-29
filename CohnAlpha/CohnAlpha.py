@@ -1,5 +1,5 @@
 import numpy as np                     # For processing data
-import matplotlib.pyplot as plt        # For plotting data summaries
+import matplotlib.pyplot as pyplot        # For plotting data summaries
 from scipy.optimize import curve_fit   # For fitting the curve
 from scipy import signal               # For welch (fourier transform)
 import os                              # For saving figures
@@ -36,8 +36,9 @@ class CohnAlpha:
 
         # Required Parameters
         self.list_data_array = list_data_array
-        self.dwell_time = dwell_time
         self.meas_time_range = meas_time_range
+        self.dwell_time = dwell_time
+        self.fs = 0
         self.plot_counts_hist = plot_counts_hist
 
     def conduct_CPSD(self,
@@ -104,7 +105,7 @@ class CohnAlpha:
                             stop=self.meas_time_range[1],
                             num=int(count_bins))/1e9
 
-        '''fig1, ax1 = plt.subplots()
+        '''fig1, ax1 = pyplot.subplots()
         ax1.plot(timeline, counts_time_hist, '.', label="TBD")
         ax1.plot(timeline, counts_time_hist2, '.', label="TBD")
 
@@ -115,7 +116,7 @@ class CohnAlpha:
         # Plot counts over time histogram (ensure constant or near constant)
         i=0
         for ch in [0,1]:
-            fig1, ax1 = plt.subplots()
+            fig1, ax1 = pyplot.subplots()
             ax1.plot(timeline, counts_time_hist[i,:], '.', label="TBD")
 
             ax1.set_ylabel('Counts')
@@ -168,7 +169,7 @@ class CohnAlpha:
                                         maxfev=100000
                                         )'''
         
-        fig2, ax2 = plt.subplots()
+        fig2, ax2 = pyplot.subplots()
         ax2.semilogx(f[1:-2], Pxy[1:-2], '.', **sps)
         ax2.semilogx(f[1:-2], CAFit(f[1:-2], *popt), **lfs)
         ymin, ymax = ax2.get_ylim()
@@ -187,15 +188,15 @@ class CohnAlpha:
                     color='black', backgroundcolor='white')
         # ax2.text(1.5, ymin+0.1*dy, alph_str)
 
-        # ax2.set_title(plt_title)
+        # ax2.set_title(pyplot_title)
         ax2.legend(loc='upper right')
 
         ax2.grid()
 
         '''
         # Plotting the auto-power-spectral-density distribution and fit
-        figauto1, (axauto1, axauto2) = plt.subplots(nrows=2, sharex=True, figsize=(8, 6), gridspec_kw={'height_ratios': [2, 1]})
-        figauto2, (axauto3, axauto4) = plt.subplots(nrows=2, sharex=True, figsize=(8, 6), gridspec_kw={'height_ratios': [2, 1]})
+        figauto1, (axauto1, axauto2) = pyplot.subplots(nrows=2, sharex=True, figsize=(8, 6), gridspec_kw={'height_ratios': [2, 1]})
+        figauto2, (axauto3, axauto4) = pyplot.subplots(nrows=2, sharex=True, figsize=(8, 6), gridspec_kw={'height_ratios': [2, 1]})
 
         # Creating a plot with semilogarithmic (log-scale) x-axis 
         axauto1.semilogx(f1[1:-2], Pxx1[1:-2], '.', **sps)
@@ -283,22 +284,14 @@ class CohnAlpha:
 
         # Showing plots (optional)
         if show_plot:
-            plt.show()
+            pyplot.show()
         '''
-        plt.show()
+        pyplot.show()
 
         return f, Pxy, popt, pcov    
 
 
-    def conductCohnAlpha(self, 
-                         show_plot: bool = True, 
-                         save_fig: bool = True, 
-                         save_dir: str = './', 
-                         caSet: dict = {},
-                         sps: dict = {},
-                         lfs: dict = {},
-                         scatter_opt: dict = {},
-                         counts_hist_opt: dict = {}):
+    def conductCohnAlpha(self, settings: dict = {}):
         
         '''
         Creating PSD plot from an array of data inputs.
@@ -306,10 +299,8 @@ class CohnAlpha:
         Visual settings can also be adjusted.
 
         Inputs:
-            - self (all the private variables in PowerSpectralDensity() object)
-            - show_plot (whether to show plot) default is True
-            - save_fig (whether to save figure) default is True
-            - save_dir (figure save directory) default if root folder
+            - self: all the private variables in PowerSpectralDensity() object
+            - settings: the current user runtime settings
 
         Outputs: 
             - f (DESCRIPTION NEEDED)
@@ -318,52 +309,12 @@ class CohnAlpha:
             - pcov (DESCRIPTION NEEDED)
         '''
 
-        # Annotation Parameters
-        self.annotate_font_weight = caSet['Annotation Font Weight']
-        self.annotate_color = caSet['Annotation Color']
-        self.annotate_background_color = caSet['Annotation Background Color']
-        self.annotate_font_size = caSet['Font Size']
-
+        counts_time_hist = self.plotHistogram(settings)
         
-        # Making count of bins over time histogram
-        count_bins = np.diff(self.meas_time_range) / self.dwell_time
-        
-        # Generating corresponding histogram
-        counts_time_hist, edges = np.histogram(a=self.list_data_array, 
-                                               bins=int(count_bins), 
-                                               range=self.meas_time_range)
-        
-        edges_seconds = edges / 1e9
-        
-        # Plotting counts histogram
-        if self.plot_counts_hist:
-            plt.scatter(edges_seconds[:-1], counts_time_hist, **scatter_opt)
-            plt.xlabel('Time (s)')
-            plt.ylabel('Counts')
-            plt.title('Cohn-Alpha Counts Histogram')
-
-            # Saving counts histogram
-            if save_fig:
-                plt.tight_layout()
-                save_filename = os.path.join(save_dir, 'CACountsHist' + str(self.dwell_time) + '.png')
-                plt.savefig(save_filename, dpi=300, bbox_inches='tight')
-
-            # Showing plot (optional)
-            if show_plot:
-                plt.show()
-        
-        # Creating evenly spaced start and stop endpoint for plotting
-        timeline = np.linspace(start=self.meas_time_range[0], 
-                            stop=self.meas_time_range[1],
-                            num=int(count_bins))/1e9
-        
-        # Calculating power spectral density distribution from counts over time hist (Get frequency of counts samples)
-        fs = 1 / (timeline[3]-timeline[2])
-        
-        # Apply welch approximation of the fourier transform, convertig counts over time to a frequency distribution
-        f, Pxx = signal.welch(x=counts_time_hist, 
-                            fs=fs, 
-                            nperseg=caSet['nperseg'], 
+        # Apply welch approximation of the fourier transform, converting counts over time to a frequency distribution
+        f, Pxx = signal.welch(x=counts_time_hist,
+                            fs=self.fs, 
+                            nperseg=settings['CohnAlpha Settings']['nperseg'], 
                             window='boxcar')
         
         # Fitting distribution with expected equation (Ignore start & end points that are incorrect due to welch endpoint assumptions)
@@ -378,11 +329,11 @@ class CohnAlpha:
                     str(np.around(pcov[1,1]*2*np.pi, decimals=2)))
         
         # Plotting the auto-power-spectral-density distribution and fit
-        fig, (ax1, ax2) = plt.subplots(nrows=2, sharex=True, figsize=(8, 6), gridspec_kw={'height_ratios': [2, 1]})
+        fig, (ax1, ax2) = pyplot.subplots(nrows=2, sharex=True, figsize=(8, 6), gridspec_kw={'height_ratios': [2, 1]})
 
         # Creating a plot with semilogarithmic (log-scale) x-axis 
-        ax1.semilogx(f[1:-2], Pxx[1:-2], '.', **sps)
-        ax1.semilogx(f[1:-2], CAFit(f[1:-2], *popt), **lfs)
+        ax1.semilogx(f[1:-2], Pxx[1:-2], '.', **settings['Semilog Plot Settings'])
+        ax1.semilogx(f[1:-2], CAFit(f[1:-2], *popt), **settings['Line Fitting Settings'])
         
         # Setting minimum and maximum for y
         ymin, ymax = ax1.get_ylim()
@@ -414,22 +365,71 @@ class CohnAlpha:
         # Compute residuals
         residuals = ((CAFit(f[1:-2], *popt) - Pxx[1:-2]) / Pxx[1:-2]) * 100
 
-        ax2.scatter(f[1:-2], residuals, **scatter_opt)  # Use f for residuals
+        ax2.scatter(f[1:-2], residuals, **settings['Scatter Plot Settings'])  # Use f for residuals
         ax2.axhline(y=0, color='#162F65', linestyle='--')
         ax2.set_xlabel('Frequency (Hz)')
         ax2.set_ylabel('Percent difference (%)')
         
         # Saving figure (optional)
-        if save_fig:
+        if settings['Input/Output Settings']['Save figures']:
             fig.tight_layout()
-            save_filename = os.path.join(save_dir, 'CohnAlpha' + str(self.dwell_time) + '.png')
+            save_filename = os.path.join(settings['Input/Output Settings']['Save directory'], 'CohnAlpha' + str(self.dwell_time) + '.png')
             fig.savefig(save_filename, dpi=300, bbox_inches='tight')
 
 
         # Showing plot (optional)
-        if show_plot:
-            plt.show()
+        if settings['General Settings']['Show plots']:
+            pyplot.show()
         
         # Outputting the PSD distribution and fit
         return f, Pxx, popt, pcov
+    
+    
+    def plotHistogram(self, settings: dict = {}):
+        # Annotation Parameters
+        self.annotate_font_weight = settings['CohnAlpha Settings']['Annotation Font Weight']
+        self.annotate_color = settings['CohnAlpha Settings']['Annotation Color']
+        self.annotate_background_color = settings['CohnAlpha Settings']['Annotation Background Color']
+        self.annotate_font_size = settings['CohnAlpha Settings']['Font Size']
+
+        
+        # Making count of bins over time histogram
+        count_bins = np.diff(self.meas_time_range) / self.dwell_time
+        
+        # Generating corresponding histogram
+        counts_time_hist, edges = np.histogram(a=self.list_data_array, 
+                                               bins=int(count_bins), 
+                                               range=self.meas_time_range)
+        
+        edges_seconds = edges / 1e9
+        
+        # Plotting counts histogram
+        if self.plot_counts_hist:
+            pyplot.scatter(edges_seconds[:-1], counts_time_hist, **settings['Scatter Plot Settings'])
+            pyplot.xlabel('Time (s)')
+            pyplot.ylabel('Counts')
+            pyplot.title('Cohn-Alpha Counts Histogram')
+
+            # Saving counts histogram
+            if settings['Input/Output Settings']['Save figures']:
+                pyplot.tight_layout()
+                save_filename = os.path.join(settings['Input/Output Settings']['Save directory'], 'CACountsHist' + str(self.dwell_time) + '.png')
+                pyplot.savefig(save_filename, dpi=300, bbox_inches='tight')
+
+            # Showing plot (optional)
+            if settings['General Settings']['Show plots']:
+                pyplot.show()
+
+            pyplot.close()
+        
+        # Creating evenly spaced start and stop endpoint for plotting
+        timeline = np.linspace(start=self.meas_time_range[0], 
+                            stop=self.meas_time_range[1],
+                            num=int(count_bins))/1e9
+        
+        # Calculating power spectral density distribution from counts over time hist (Get frequency of counts samples)
+        self.fs = 1 / (timeline[3]-timeline[2])
+
+        return counts_time_hist
+
     # ---------------------------------------------------------------------------------------------------   

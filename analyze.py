@@ -45,7 +45,8 @@ class Analyzer:
         self.RABestFit = {'Best fit': [],
                           'Fit minimum': [],
                           'Fit maximum': []}
-        self.CohnAlpha = {}
+        self.CohnAlpha = {'CA_Object': None,
+            'Histogram': []}
         self.FeynmanY = {}
 
 
@@ -295,37 +296,63 @@ class Analyzer:
 
 
 
-    def conductCohnAlpha(self,
-                         input:str,
-                         output:str,
-                         show:bool,
-                         save:bool,
-                         caSet:dict,
-                         sps:dict,
-                         lfs:dict,
-                         scatter_plot_settings:dict):
+    def conductCohnAlpha(self, settings: dict = {}):
 
         '''Runs Cohn Alpha analysis.
         
         Inputs:
-        - input: the file path.
-        - output: the save directory.
-        - show: whether or not to show plots.
-        - save: whether or not to save plots.
-        - caSet: the CohnAlpha Settings.
-        - sps: the Semilog Plot Settings.
-        - lfs: the Line Fitting Settings.'''
-        
-        # Load the values from the specified file into an NP array.
-        values = np.loadtxt(input, usecols=0, dtype=float)
+        - settings: the current user's runtime settings'''
 
-        # Create a Cohn Alpha object with the given settings.
-        CA_Object = ca.CohnAlpha(values,
-                                 caSet['Plot Counts Histogram'],
-                                 caSet['Dwell time'],
-                                 caSet['Meas time range'])
+        # Check if Power Spectral Density object exists
+        # If exists, no need to create, otherwise need to create a new Power Spectral Density object
+        if self.CohnAlpha['CA_Object'] is None:
+            self.CohnAlpha['CA_Object'] = self.genCohnAlphaObject(settings)
+
         # Conduct Cohn Alpha analysis with the given settings.
-        CA_Object.conductCohnAlpha(show, save, output, caSet, sps, lfs, scatter_plot_settings)
+        # TODO: use the modular functions
+        self.CohnAlpha['CA_Object'].conductCohnAlpha(settings)
+    
+
+
+    def plotCohnAlphaHist(self, settings: dict = {}):
+        '''Creates a Cohn Alpha Counts Histogram
+        Created Histogram is saved in the Analyzer class
+        
+        Inputs:
+        - settings: the current user's runtime settings'''
+
+        if self.CohnAlpha['CA_Object'] is None:
+            self.CohnAlpha['CA_Object'] = self.genCohnAlphaObject(settings)
+        
+        self.CohnAlpha['Histogram'].clear()
+
+        self.CohnAlpha['Histogram'].insert(0, self.CohnAlpha['CA_Object'].plotHistogram(settings))
+        
+        
+
+
+
+
+
+    def genCohnAlphaObject(self, settings: dict = {}):
+        '''Creates a Cohn Alpha object
+        
+        Inputs:
+        - settings: the current user's runtime settings'''
+
+        # Load the values from the specified file into an NP array.
+        try:
+            values = np.loadtxt(settings['Input/Output Settings']['Input file/folder'], usecols=0, dtype=float)
+        except FileNotFoundError:
+            print('File could not be found. Please double-check input path as well as filename.')
+            print('Returning back to the Cohn Alpha Driver')
+            return None
+
+
+        return ca.CohnAlpha(values,
+                                 settings['CohnAlpha Settings']['Plot Counts Histogram'],
+                                 settings['CohnAlpha Settings']['Dwell time'],
+                                 settings['CohnAlpha Settings']['Meas time range'])
 
 
 
