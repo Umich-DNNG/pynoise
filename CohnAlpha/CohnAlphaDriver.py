@@ -27,7 +27,8 @@ def main(editorIn: edit.Editor, queue: list[str]):
         editor.print('You can utilize any of the following functions:')
         editor.print('m - run the entire program through the main driver')
         editor.print('p - plot histogram of provided time data')
-        editor.print('w - perform welch approximation of the fourier transform and plot power spectral density curve')
+        editor.print('w - perform welch approximation of the fourier transform')
+        editor.print('f - fit and plot power spectral density curve')
         editor.print('s - view or edit the program settings')
         editor.print('Leave the command blank or enter x to return to the main menu.')
         if len(queue) != 0:
@@ -41,6 +42,7 @@ def main(editorIn: edit.Editor, queue: list[str]):
             selection = input('Enter a command: ')
 
         CA_Object = None
+        overwrite = True
 
         # if running analysis and not changing settings, then ensure that the input file path is valid
         # if not valid then lock user here unless changing settings
@@ -58,46 +60,43 @@ def main(editorIn: edit.Editor, queue: list[str]):
                     editor.log('Ran the entire Cohn Alpha on file ' 
                                 + editor.parameters.settings['Input/Output Settings']['Input file/folder'] 
                                 + '.\n')
-            # Plot 
+            # Plot Counts Histogram
             case 'p':
-                editor.print('\nPlotting the Cohn Alpha Histogram...')
-
                 # If generated histogram is found, ask users if willing to overwrite
                 # Otherwise generate Histogram and save Histogram in analyzer.CohnAlpha dict
                 if analyzer.CohnAlpha['Histogram'] != []:
-
                     # Ask user if willing to overwrite histogram that exists in memory
                     editor.print('WARNING: There is an already stored histogram '
                         + 'in this runtime. Do you want to erase it?')
-                    
-                    # If there's currently something in the command queue, 
-                    # take that as the input and remove it from the queue.
-                    if len(queue) != 0:
-                        auto = queue[0]
-                        queue.pop(0)
-                        if auto != 'y':
-                            editor.print('Running automated return command...')
-                        else:
-                            editor.print('Running automated command y...')
+                    editor.print('If not erasing, the program will simply display the histogram in memory')
 
-                    # Otherwise, prompt the user.
-                    # Display confirmation for overwriting and for cancel
-                    else:
-                        auto = input('Enter y to continue and anything else to abort: ')
+                    auto = input('Enter y to continue and anything else to display: ')
                     if auto == 'y':
-                        editor.log('Currently stored time histogram erased.\n')
-                        selection = 'not blank'
+                        editor.log('Currently stored time histogram erased.')
+                        overwrite = True
                     else:
-                        editor.print('Cancelling overwrite...\n')
-                        selection = 'blank'
-                if selection != 'blank':
-
-                    analyzer.plotCohnAlphaHist(editor.parameters.settings)
+                        editor.print('Cancelling overwrite...')
+                        editor.print('Displaying Histogram')
+                        overwrite = False
+                if selection == 'p':
+                    editor.print('\nPlotting the Cohn Alpha Histogram...')
+                    analyzer.plotCohnAlphaHist(settings=editor.parameters.settings, overwrite=overwrite)
                     editor.log('Generated Cohn Alpha Histogram on file '
                             + editor.parameters.settings['Input/Output Settings']['Input file/folder'] 
                             + '.\n')
+            # Apply Welch Approximation of Fourier Transformation
+            # If no histogram in memory, will generate ahead of time
             case 'w':
-                  editor.print('Sorry, has not yet been implemented currently. Will be implemented soon!\n')
+                    editor.print('Applying the Welch Approximation...')
+                    analyzer.applyWelchApprox(settings=editor.parameters.settings)
+
+                    editor.log('Calculated alpha and uncertainty value on '
+                            + editor.parameters.settings['Input/Output Settings']['Input file/folder'] 
+                            + '.\n')
+            case 'f':
+                    editor.print('Fitting Power Spectral Density Curve...')
+                    analyzer.fitPSDCurve(settings=editor.parameters.settings)
+                    editor.log('')
             # View and/or edit program settings.
             case 's':
                 editor.print('')
@@ -112,3 +111,26 @@ def main(editorIn: edit.Editor, queue: list[str]):
                 print('ERROR: Unrecognized command ' + selection 
                         + '. Please review the list of appriopriate inputs.\n')
     return editor, queue
+
+
+def helperAutoFunc(queue, editor, selection):
+    # If there's currently something in the command queue, 
+    # take that as the input and remove it from the queue.
+    if len(queue) != 0:
+        auto = queue[0]
+        queue.pop(0)
+        if auto != 'y':
+            editor.print('Running automated return command...')
+        else:
+            editor.print('Running automated command y...')
+
+    # Otherwise, prompt the user.
+    # Display confirmation for overwriting and for cancel
+    else:
+        auto = input('Enter y to continue and anything else to abort: ')
+    if auto == 'y':
+        editor.log('Currently stored time histogram erased.')
+        selection = 'p'
+    else:
+        editor.print('Cancelling overwrite...')
+        selection = 'blank'

@@ -15,8 +15,8 @@ from RossiAlpha import plots as plt
 from RossiAlpha import timeDifs as dif
 from CohnAlpha import CohnAlpha as ca
 from FeynmanY import feynman as fey
-from tkinter import *
-from tqdm import tqdm
+from tkinter import * # GUI
+from tqdm import tqdm # used for loading bar
 
 
 
@@ -46,7 +46,9 @@ class Analyzer:
                           'Fit minimum': [],
                           'Fit maximum': []}
         self.CohnAlpha = {'CA_Object': None,
-            'Histogram': []}
+                          'Histogram': [],
+                          'Welch Result': [],
+                          'PSD Fit Curve': []}
         self.FeynmanY = {}
 
 
@@ -296,41 +298,106 @@ class Analyzer:
 
 
 
-    def conductCohnAlpha(self, settings: dict = {}):
+    def conductCohnAlpha(self, settings: dict = {}, overwrite:bool = True):
 
         '''Runs Cohn Alpha analysis.
         
         Inputs:
         - settings: the current user's runtime settings'''
 
-        # Check if Power Spectral Density object exists
-        # If exists, no need to create, otherwise need to create a new Power Spectral Density object
-        if self.CohnAlpha['CA_Object'] is None:
-            self.CohnAlpha['CA_Object'] = self.genCohnAlphaObject(settings)
-
-        # Conduct Cohn Alpha analysis with the given settings.
-        # TODO: use the modular functions
-        self.CohnAlpha['CA_Object'].conductCohnAlpha(settings)
+        # Run PSDCurve (runs entire method if overwrite is true)
+        self.fitPSDCurve(settings=settings, overwrite=True)
     
 
 
-    def plotCohnAlphaHist(self, settings: dict = {}):
-        '''Creates a Cohn Alpha Counts Histogram
+    def plotCohnAlphaHist(self, settings:dict = {}, overwrite:bool = True):
+        
+        '''
+        Creates a Cohn Alpha Counts Histogram
         Created Histogram is saved in the Analyzer class
         
         Inputs:
-        - settings: the current user's runtime settings'''
+        - settings: the current user's runtime settings
+        - overwrite: if overwriting the current information in memory
+        '''
 
         if self.CohnAlpha['CA_Object'] is None:
             self.CohnAlpha['CA_Object'] = self.genCohnAlphaObject(settings)
         
+        # if overwriting or no histogram in memory, then clear and generate new histogram
+        # if not overwriting and histogram in memory exists, then do not generate
+        if not overwrite and self.CohnAlpha['Histogram'] != []:
+
+            # If show plots enabled, then show the plot before returning
+            # TODO: currently not working. Shows image inside of a plot. Need to fix
+            # if settings['General Settings']['Show plots']:
+            #     imgFilePath = os.path.join(settings['Input/Output Settings']['Save directory'], 'CACountsHist' + str(self.CohnAlpha['CA_Object'].dwell_time) + '.png')
+            #     img = pyplot.imread(imgFilePath)
+            #     pyplot.imshow(img)
+            #     pyplot.show()
+            #     pyplot.close()
+            return
+
+
         self.CohnAlpha['Histogram'].clear()
+        self.CohnAlpha['Histogram'].append(self.CohnAlpha['CA_Object'].plotCountsHistogram(settings))
 
-        self.CohnAlpha['Histogram'].insert(0, self.CohnAlpha['CA_Object'].plotHistogram(settings))
+    
+
+    def applyWelchApprox(self, settings:dict = {}, overwrite:bool = True, showPlot:bool = False):
         
+        '''
+        Applies the Welch Approximation transformation
+        Frequencies as well as Power Spectral Density is saved in Analyzer class
+        Will generate any required missing information
+        
+        Inputs:
+        - settings: the current user's runtime settings
+        - overwrite: if overwriting the current information in memory
+        '''
+
+        # Ensure that histogram exists
+        self.plotCohnAlphaHist(settings=settings, overwrite=overwrite)
+
+        # If overwriting or no data exists, then clear and generate
+        # If not overwriting and data exists, then don't clear and return early
+        if not (overwrite or self.CohnAlpha['Welch Result'] == []):
+            return
+
+        self.CohnAlpha['Welch Result'].clear()
+
+        # Generate a graph for each histogram
+        # TODO: double check with Flynn the behavior for folder analysis
+        for hist in self.CohnAlpha['Histogram']:
+            welchResultDict = self.CohnAlpha['CA_Object'].welchApproxFourierTrans(hist, settings)
+            self.CohnAlpha['Welch Result'].append(welchResultDict)
+
+
+
+    def fitPSDCurve(self, settings:dict = {}, overwrite:bool = True):        
+        
+        '''
+        Fits a Power Spectral Density Curve onto a 
+        Transformed graph is saved into the Analyzer class
+        
+        Will run entire method if required information is missing
+        
+        Inputs:
+        - settings: the current user's runtime settings
+        '''
+        
+        # ensure necessary data exists
+        self.applyWelchApprox(settings=settings, overwrite=overwrite)
+
+        # if overwriting or no data exists, then generate best fit
+        # if not overwriting and data exists, then do not generate
+        if not (overwrite or self.CohnAlpha['PSD Fit Curve'] == []):
+            return
         
 
-
+        dict_list = self.CohnAlpha['Welch Result']
+        for dict in dict_list:
+            self.CohnAlpha['CA_Object'].fitPSDCurve(settings=settings, welchResultDict=dict)
 
 
 

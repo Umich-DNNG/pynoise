@@ -310,82 +310,23 @@ class CohnAlpha:
         '''
 
         counts_time_hist = self.plotHistogram(settings)
-        
-        # Apply welch approximation of the fourier transform, converting counts over time to a frequency distribution
-        f, Pxx = signal.welch(x=counts_time_hist,
-                            fs=self.fs, 
-                            nperseg=settings['CohnAlpha Settings']['nperseg'], 
-                            window='boxcar')
-        
-        # Fitting distribution with expected equation (Ignore start & end points that are incorrect due to welch endpoint assumptions)
-        popt, pcov = curve_fit(CAFit, 
-                            f[1:-2], 
-                            Pxx[1:-2],
-                            p0=[Pxx[2], 25, 0.001],
-                            bounds=(0, np.inf),
-                            maxfev=100000)
-        
-        print('alpha = ' + str(np.around(popt[1]*2*np.pi, decimals=2)) + ', uncertainty = '+ 
-                    str(np.around(pcov[1,1]*2*np.pi, decimals=2)))
-        
-        # Plotting the auto-power-spectral-density distribution and fit
-        fig, (ax1, ax2) = pyplot.subplots(nrows=2, sharex=True, figsize=(8, 6), gridspec_kw={'height_ratios': [2, 1]})
-
-        # Creating a plot with semilogarithmic (log-scale) x-axis 
-        ax1.semilogx(f[1:-2], Pxx[1:-2], '.', **settings['Semilog Plot Settings'])
-        ax1.semilogx(f[1:-2], CAFit(f[1:-2], *popt), **settings['Line Fitting Settings'])
-        
-        # Setting minimum and maximum for y
-        ymin, ymax = ax1.get_ylim()
-        dy = ymax-ymin
-
-        # Constructing alpha string
-        alph_str = (r'$\alpha$ = (' +
-            '{:.2e}'.format(np.around(popt[1]*2*np.pi, decimals=2)) + '$\pm$ ' + 
-            '{:.2e}'.format(np.around(pcov[1,1]*2*np.pi, decimals=2)) + ') 1/s')
-        
-        # Annotating the plots
-        ax1.annotate(alph_str, 
-                     xy=(1.5, ymin+0.1*dy), 
-                     xytext=(1.5, ymin+0.1*dy),
-                     fontsize=self.annotate_font_size, 
-                     fontweight=self.annotate_font_weight,
-                     color=self.annotate_color, 
-                     backgroundcolor=self.annotate_background_color)
-        
-        # Creating title and legend
-        ax1.set_title('Cohn Alpha Graph')
-        ax1.legend(loc='upper right')
-
-         # Creating axis titles
-        ax1.set_xlim([1, 200])
-        ax1.set_xlabel('Frequency (Hz)')
-        ax1.set_ylabel('Counts$^2$/Hz')
-
-        # Compute residuals
-        residuals = ((CAFit(f[1:-2], *popt) - Pxx[1:-2]) / Pxx[1:-2]) * 100
-
-        ax2.scatter(f[1:-2], residuals, **settings['Scatter Plot Settings'])  # Use f for residuals
-        ax2.axhline(y=0, color='#162F65', linestyle='--')
-        ax2.set_xlabel('Frequency (Hz)')
-        ax2.set_ylabel('Percent difference (%)')
-        
-        # Saving figure (optional)
-        if settings['Input/Output Settings']['Save figures']:
-            fig.tight_layout()
-            save_filename = os.path.join(settings['Input/Output Settings']['Save directory'], 'CohnAlpha' + str(self.dwell_time) + '.png')
-            fig.savefig(save_filename, dpi=300, bbox_inches='tight')
-
-
-        # Showing plot (optional)
-        if settings['General Settings']['Show plots']:
-            pyplot.show()
-        
-        # Outputting the PSD distribution and fit
-        return f, Pxx, popt, pcov
+        return self.welchApproximationFourierTransformation(settings, counts_time_hist)
+            
     
-    
-    def plotHistogram(self, settings: dict = {}):
+    def plotCountsHistogram(self, settings: dict = {}):
+        
+        '''
+        Creating Counts Histogram from data
+        Saving and showing the histogram can be turned on or off in the settings
+        Visual Settings can also be adjusted in the settings
+
+        Inputs:
+            - self: all the private variables in PowerSpectralDensity() object
+            - settings: the current user runtime settings
+
+        Output:
+            - count_times_hist: the histogram saved in array format
+        '''
         # Annotation Parameters
         self.annotate_font_weight = settings['CohnAlpha Settings']['Annotation Font Weight']
         self.annotate_color = settings['CohnAlpha Settings']['Annotation Color']
@@ -400,6 +341,8 @@ class CohnAlpha:
         counts_time_hist, edges = np.histogram(a=self.list_data_array, 
                                                bins=int(count_bins), 
                                                range=self.meas_time_range)
+        
+        print(counts_time_hist)
         
         edges_seconds = edges / 1e9
         
@@ -431,5 +374,154 @@ class CohnAlpha:
         self.fs = 1 / (timeline[3]-timeline[2])
 
         return counts_time_hist
+    
+    def welchApproxFourierTrans(self, counts_time_hist, settings:dict = {}):
+
+        '''
+        Creating Cohn Alpha Scatterplot from data
+        Saving and showing the scatterplot can be turned on or off in the settings
+        Visual Settings can also be adjusted in the settings
+
+        Inputs:
+            - self: all the private variables in PowerSpectralDensity() object
+            - count_times_hist: the histogram to be converted to a frequency distribution
+            - settings: the current user runtime settings
+
+        Output:
+            - welchResultDict: a dictionary containing the results of Welch's Approximation
+        '''
+
+        # Apply welch approximation of the fourier transform, converting counts over time to a frequency distribution
+        f, Pxx = signal.welch(x=counts_time_hist,
+                            fs=self.fs, 
+                            nperseg=settings['CohnAlpha Settings']['nperseg'], 
+                            window='boxcar')                    
+        
+        welchResultDict = {'f': f,
+            'Pxx': Pxx}
+        
+        # Plotting the auto-power-spectral-density distribution and fit
+        fig, ax = pyplot.subplots(figsize=(8, 6))
+
+        # Creating a plot with semilogarithmic (log-scale) x-axis 
+        ax.semilogx(f[1:-2], Pxx[1:-2], '.', **settings['Semilog Plot Settings'])
+
+        # Creating title and legend
+        ax.set_title('Cohn Alpha Scatter Plot')
+
+        # Creating axis titles
+        ax.set_xlim([1, 200])
+        ax.set_xlabel('Frequency (Hz)')
+        ax.set_ylabel('Counts$^2$/Hz')
+
+        # Saving figure (optional)
+        if settings['Input/Output Settings']['Save figures']:
+            fig.tight_layout()
+            save_filename = os.path.join(settings['Input/Output Settings']['Save directory'], 'CAScatterPlot' + str(self.dwell_time) + '.png')
+            fig.savefig(save_filename, dpi=300, bbox_inches='tight')
+
+
+        # Showing plot (optional)
+        if settings['General Settings']['Show plots']:
+            pyplot.show()
+        
+        # Return values needed to be saved for the fitting
+        return welchResultDict
+        
+
+    def fitPSDCurve(self, settings:dict = {}, welchResultDict:dict = {}):
+
+        '''
+        Fits Power Spectral Density onto provided scatterplot
+        Saving and showing the graph can be turned on or off in the settings
+        Visual Settings can also be adjusted in the settings
+
+        Inputs:
+            - self: all the private variables in PowerSpectralDensity() object
+            - settings: the current user runtime settings
+            - welchResultDict: the dict that contains the result of Welch's Approximation
+
+        Output:
+            - dict: contains the fitted curve
+        '''
+
+        f = welchResultDict['f']
+        Pxx = welchResultDict['Pxx']
+
+        # Fitting distribution with expected equation (Ignore start & end points that are incorrect due to welch endpoint assumptions)
+        popt, pcov = curve_fit(CAFit, 
+                            f[1:-2], 
+                            Pxx[1:-2],
+                            p0=[Pxx[2], 25, 0.001],
+                            bounds=(0, np.inf),
+                            maxfev=100000)
+
+        # save Alpha and Uncertainty values
+        alpha = np.around(popt[1]*2*np.pi, decimals=2)
+        uncertainty = np.around(pcov[1,1]*2*np.pi, decimals=2)
+    
+        # Display Alpha and Uncertainty values, store within Welch Approx
+        print('alpha = ' + str(alpha) + ', uncertainty = '+ 
+                    str(uncertainty))
+
+        
+        # Plotting the auto-power-spectral-density distribution and fit
+        fig, (ax1, ax2) = pyplot.subplots(nrows=2, sharex=True, figsize=(8, 6), gridspec_kw={'height_ratios': [2, 1]})
+
+        # Creating a plot with semilogarithmic (log-scale) x-axis 
+        ax1.semilogx(f[1:-2], Pxx[1:-2], '.', **settings['Semilog Plot Settings'])
+        ax1.semilogx(f[1:-2], CAFit(f[1:-2], *popt), **settings['Line Fitting Settings'])
+        
+        # Setting minimum and maximum for y
+        ymin, ymax = ax1.get_ylim()
+        dy = ymax-ymin
+
+        # Constructing alpha string
+        alph_str = (r'$\alpha$ = (' +
+            '{:.2e}'.format(np.around(popt[1]*2*np.pi, decimals=2)) + '$\pm$ ' + 
+            '{:.2e}'.format(np.around(pcov[1,1]*2*np.pi, decimals=2)) + ') 1/s')
+        
+        # Annotating the plots
+        ax1.annotate(alph_str, 
+                     xy=(1.5, ymin+0.1*dy), 
+                     xytext=(1.5, ymin+0.1*dy),
+                     fontsize=self.annotate_font_size, 
+                     fontweight=self.annotate_font_weight,
+                     color=self.annotate_color, 
+                     backgroundcolor=self.annotate_background_color)
+        
+        # Creating title and legend
+        ax1.set_title('Cohn Alpha Graph')
+        ax1.legend(loc='upper right')
+
+        # Creating axis titles
+        ax1.set_xlim([1, 200])
+        ax1.set_xlabel('Frequency (Hz)')
+        ax1.set_ylabel('Counts$^2$/Hz')
+
+        # Compute residuals
+        residuals = ((CAFit(f[1:-2], *popt) - Pxx[1:-2]) / Pxx[1:-2]) * 100
+
+        ax2.scatter(f[1:-2], residuals, **settings['Scatter Plot Settings'])  # Use f for residuals
+        ax2.axhline(y=0, color='#162F65', linestyle='--')
+        ax2.set_xlabel('Frequency (Hz)')
+        ax2.set_ylabel('Percent difference (%)')
+        
+        # Saving figure (optional)
+        if settings['Input/Output Settings']['Save figures']:
+            fig.tight_layout()
+            save_filename = os.path.join(settings['Input/Output Settings']['Save directory'], 'CohnAlpha' + str(self.dwell_time) + '.png')
+            fig.savefig(save_filename, dpi=300, bbox_inches='tight')
+
+
+        # Showing plot (optional)
+        if settings['General Settings']['Show plots']:
+            pyplot.show()
+        
+        # Outputting the PSD distribution and fit
+        return {'popt': popt,
+                'pcov': pcov,
+                'alpha': alpha,
+                'uncertainty': uncertainty}
 
     # ---------------------------------------------------------------------------------------------------   
