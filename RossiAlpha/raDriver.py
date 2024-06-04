@@ -81,6 +81,13 @@ def main(editor: edit.Editor, queue: list[str] = []):
                     + ' than one folder specified or \"null\" for the setting.\n')
                 selection = 'blank'
                 continue
+            # If input is a file and the bin width is not specified for anything other than computing time differences
+            if (name.count('.') > 0 and editor.parameters.settings['RossiAlpha Settings']['Bin width'] == None
+                and (selection == 'm' or selection == 'f' or selection == 'p')):
+                print('ERROR: Using RossiAlpha on a file to generate plots of the time difference data and/or'
+                    + ' fit the data to an exponetial curve requires the bin width to be specified.\n')
+                selection = 'blank'
+                continue
             # For full analysis:
             elif selection == 'm':
                 # If input is a file and the bin width is not specified:
@@ -161,22 +168,20 @@ def main(editor: edit.Editor, queue: list[str] = []):
                 if selection != 'blank':
                     # Display progress.
                     editor.print('Creating new time differences...')
-                    # Create the time differences.
-                    analyzer.createTimeDifs(editor.parameters.settings['Input/Output Settings'],
-                                            editor.parameters.settings['General Settings']['Sort data'],
-                                            editor.parameters.settings['RossiAlpha Settings']['Reset time'],
-                                            editor.parameters.settings['RossiAlpha Settings']['Time difference method'],
-                                            editor.parameters.settings['RossiAlpha Settings']['Digital delay'],
-                                            editor.parameters.settings['Input/Output Settings']['Quiet mode'],
-                                            name.count('.') == 0)
+                    successful = True
+                    # Create the time differences for folder analysis.
+                    if name.count('.') == 0:
+                        successful = analyzer.folderTimeDifs(editor.parameters.settings)
+                    # Create the time differences for file analysis.
+                    else:
+                        analyzer.createTimeDifs(editor.parameters.settings['Input/Output Settings'],
+                                                editor.parameters.settings['General Settings']['Sort data'],
+                                                editor.parameters.settings['RossiAlpha Settings']['Reset time'],
+                                                editor.parameters.settings['RossiAlpha Settings']['Time difference method'],
+                                                editor.parameters.settings['RossiAlpha Settings']['Digital delay'])
                     # Display success.
-                    editor.log('New time differences created.\n')
-            # If input is a file and the bin width is not specified:
-            if name.count('.') > 0 and editor.parameters.settings['RossiAlpha Settings']['Bin width'] == None:
-                print('ERROR: Using RossiAlpha on a file to generate plots of the time difference data and/or'
-                    + ' fit the data to an exponetial curve requires the bin width to be specified.\n')
-                selection = 'blank'
-                continue
+                    if successful:
+                        editor.log('New time differences created.\n')
             # Make a histogram of the time differences.
             elif selection == 'p':
                 # If plot is already stored:
@@ -208,10 +213,14 @@ def main(editor: edit.Editor, queue: list[str] = []):
                 if selection != 'blank':
                     # Display progress.
                     editor.print('Creating new histogram...')
-                    # Plot the histogram.
-                    analyzer.plotSplit(editor.parameters.settings)
+                    successful = True
+                    # Plot the histogram for a folder.
+                    if name.count('.') == 0:
+                        successful = analyzer.folderHist(editor.parameters.settings)
+                    else:
+                        analyzer.plotSplit(editor.parameters.settings)
                     # Display success.
-                    editor.log('New histogram created.\n')
+                    if successful: editor.log('New histogram created.\n')
             # Create a line of best fit for the histogram:
             else:
                 # If line is already stored:
@@ -244,9 +253,14 @@ def main(editor: edit.Editor, queue: list[str] = []):
                     # Display progress.
                     editor.print('Creating new best fit and residual...')
                     # Split on the best fit.
-                    analyzer.fitSplit(editor.parameters.settings, name.count('.') == 0)
+                    successful = True
+                    if name.count('.') == 0:
+                        successful = analyzer.folderFit(editor.parameters.settings)
+                    else:
+                        analyzer.fitSplit(editor.parameters.settings, name.count('.') == 0)
                     # Display success.
-                    editor.log('New best fit and residual created.\n')
+                    if successful:
+                        editor.log('New best fit and residual created.\n')
         # View and/or edit program settings.
         elif selection == 's':
             editor.print('')
