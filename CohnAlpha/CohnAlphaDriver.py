@@ -31,76 +31,69 @@ def main(editorIn: edit.Editor, queue: list[str]):
         editor.print('f - fit and plot power spectral density curve')
         editor.print('s - view or edit the program settings')
         editor.print('Leave the command blank or enter x to return to the main menu.')
-        if len(queue) != 0:
-            selection = queue[0]
-            queue.pop(0)
-            if selection == '':
-                editor.print('Running automated return command...')
-            else:
-                editor.print('Running automated command ' + selection + '...')
-        else:
-            selection = input('Enter a command: ')
-
-        CA_Object = None
-        overwrite = True
+        selection = helperAutoFunc(queue)
 
         # if running analysis and not changing settings, then ensure that the input file path is valid
-        # if not valid then lock user here unless changing settings
-        if (selection != 's' and not os.path.isfile(editor.parameters.settings['Input/Output Settings']['Input file/folder'])
+        # if input file path is not valid then lock user here unless changing settings or going back
+        if (selection != 's' and selection != 'x' and selection != '' 
+            and not os.path.isfile(editor.parameters.settings['Input/Output Settings']['Input file/folder'])
             and not os.path.isdir(editor.parameters.settings['Input/Output Settings']['Input file/folder'])):
                     editor.print('ERROR: You currently have no input file/folder defined or the input file/folder cannot be found. '
                           + 'Please ensure input path is correct before running any analysis.\n')
                     continue
         
+        overwrite = True
         match selection:
             # Run entire Cohn-Alpha method
             case 'm':
                     editor.print('\nRunning the entire Cohn Alpha analysis...')
-                    analyzer.conductCohnAlpha(editor.parameters.settings)
+                    analyzer.fitPSDCurve(editor.parameters.settings, overwrite=True)
                     editor.log('Ran the entire Cohn Alpha on file ' 
                                 + editor.parameters.settings['Input/Output Settings']['Input file/folder'] 
-                                + '.\n')
+                                + '\n')
             # Plot Counts Histogram
             case 'p':
+                # If data exists, ask if user willing to overwrite
+                # if overwriting, run function
+                # Otherwise, do nothing
+                if analyzer.CohnAlpha['Histogram'] != []:
+                    overwrite = overwriteHelperFunction(queue=queue, key='Histogram', overwrite=overwrite)
 
-                # TODO: currently showing an image does not work. Need to fix
-                # If generated histogram is found, ask users if willing to overwrite
-                # Otherwise generate Histogram and save Histogram in analyzer.CohnAlpha dict
-                # if analyzer.CohnAlpha['Histogram'] != []:
-                #     # Ask user if willing to overwrite histogram that exists in memory
-                #     editor.print('WARNING: There is an already stored histogram '
-                #         + 'in this runtime. Do you want to erase it?')
-                #     editor.print('If not erasing, the program will simply display the histogram in memory')
-
-                #     auto = input('Enter y to continue and anything else to display: ')
-                #     if auto == 'y':
-                #         editor.log('Currently stored time histogram erased.')
-                #         overwrite = True
-                #     else:
-                #         editor.print('Cancelling overwrite...')
-                #         editor.print('Displaying Histogram')
-                #         overwrite = False
-                # if selection == 'p':
-                # helperAutoFunc(queue=queue, editor=editor, overwrite=overwrite)
-
-                editor.print('\nPlotting the Cohn Alpha Histogram...')
-                analyzer.plotCohnAlphaHist(settings=editor.parameters.settings, overwrite=overwrite)
-                editor.log('Generated Cohn Alpha Histogram on file '
-                        + editor.parameters.settings['Input/Output Settings']['Input file/folder'] 
-                        + '.\n')
+                if overwrite == True:
+                    editor.print('\nPlotting the Cohn Alpha Histogram...')
+                    analyzer.plotCohnAlphaHist(settings=editor.parameters.settings, overwrite=overwrite)
+                    editor.log('Generated Cohn Alpha Histogram on file '
+                            + editor.parameters.settings['Input/Output Settings']['Input file/folder'] 
+                            + '.\n')
             # Apply Welch Approximation of Fourier Transformation
-            # If no histogram in memory, will generate ahead of time
             case 'w':
-                    editor.print('Applying the Welch Approximation...')
-                    analyzer.applyWelchApprox(settings=editor.parameters.settings)
+                # If data exists, ask if user willing to overwrite
+                # if overwriting, run function
+                # Otherwise, do nothing
+                if analyzer.CohnAlpha['Welch Result'] != []:
+                    overwrite = overwriteHelperFunction(queue=queue, key='Welch Result', overwrite=overwrite)
 
+                if overwrite == True:
+                    editor.print('\nApplying the Welch Approximation...')
+                    analyzer.applyWelchApprox(settings=editor.parameters.settings)
                     editor.log('Calculated alpha and uncertainty value on '
                             + editor.parameters.settings['Input/Output Settings']['Input file/folder'] 
                             + '.\n')
+            # Fit Power Spectral Density Curve
             case 'f':
-                    editor.print('Fitting Power Spectral Density Curve...')
+                # If data exists, ask if user willing to overwrite
+                # if overwriting, run function
+                # Otherwise, do nothing
+                if analyzer.CohnAlpha['PSD Fit Curve'] != []:
+                    overwrite = overwriteHelperFunction(queue=queue, key='PSD Fit Curve', overwrite=overwrite)
+
+                if overwrite == True:
+                    editor.print('\nFitting Power Spectral Density Curve...')
                     analyzer.fitPSDCurve(settings=editor.parameters.settings)
-                    editor.log('')
+                    editor.log('Fitted Power Spectral Density Curve on '
+                            + editor.parameters.settings['Input/Output Settings']['Input file/folder'] 
+                            + '.\n')
+                    
             # View and/or edit program settings.
             case 's':
                 editor.print('')
@@ -117,24 +110,62 @@ def main(editorIn: edit.Editor, queue: list[str]):
     return editor, queue
 
 
-def helperAutoFunc(queue, editor, overwrite):
+def helperAutoFunc(queue):
+    if len(queue) != 0:
+            selection = queue[0]
+            queue.pop(0)
+            editor.print('Running automated command ' + selection + '...')
+    else:
+        selection = input('Enter a command: ')
     # If there's currently something in the command queue, 
     # take that as the input and remove it from the queue.
-    if len(queue) != 0:
-        auto = queue[0]
-        queue.pop(0)
-        if auto != 'y':
-            editor.print('Running automated return command...')
-        else:
-            editor.print('Running automated command y...')
 
-    # Otherwise, prompt the user.
-    # Display confirmation for overwriting and for cancel
-    else:
-        auto = input('Enter y to continue and anything else to display: ')
-    if auto == 'y':
-        editor.log('Currently stored time histogram erased.')
-        overwrite = True
+    return selection
+            
+
+
+def overwriteHelperFunction(queue, overwrite:bool, key:str = ""):
+
+    if 'Histogram' == key:
+        displayString = ' There is an already stored histogram '
+    elif 'Welch Result' == key:
+        displayString = 'There are already stored frequency and power spectral density values '
+    elif 'PSD Fit Curve' == key:
+        displayString = 'There is an already stored best fit curve '
+
+    if analyzer.CohnAlpha[key] != []:
+        editor.print('WARNING: '
+            + displayString
+            + 'in this runtime. Do you want to overwrite?')
+        
+    selection = helperAutoFunc(queue=queue)
+    if selection == 'y':
+        editor.log('Currently stored data erased.')
+        return True
     else:
         editor.print('Cancelling overwrite...')
-        overwrite = False
+        return False
+    
+
+# TODO: currently showing an image does not work. Need to fix or decide on another idea
+# Shows the plot within another graph
+# def displayImage():
+    # return
+
+    # If generated histogram is found, ask users if willing to overwrite
+    # Otherwise generate Histogram and save Histogram in analyzer.CohnAlpha dict
+    # if analyzer.CohnAlpha['Histogram'] != []:
+    #     # Ask user if willing to overwrite histogram that exists in memory
+    #     editor.print('WARNING: There is an already stored histogram '
+    #         + 'in this runtime. Do you want to erase it?')
+    #     editor.print('If not erasing, the program will simply display the histogram in memory')
+
+    #     auto = input('Enter y to continue and anything else to display: ')
+    #     if auto == 'y':
+    #         editor.log('Currently stored time histogram erased.')
+    #         overwrite = True
+    #     else:
+    #         editor.print('Cancelling overwrite...')
+    #         editor.print('Displaying Histogram')
+    #         overwrite = False
+    # helperAutoFunc(queue=queue, editor=editor, overwrite=overwrite)
