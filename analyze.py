@@ -323,20 +323,20 @@ class Analyzer:
 
         if self.CohnAlpha['CA_Object'] is None:
             self.CohnAlpha['CA_Object'] = self.genCohnAlphaObject(settings)
-        
+            
+        # TODO: currently displaying an image is not working. Shows image inside of a plot. Need to fix
         # if overwriting or no histogram in memory, then clear and generate new histogram
         # if not overwriting and histogram in memory exists, then do not generate
-        if not overwrite and self.CohnAlpha['Histogram'] != []:
+        #if not overwrite and self.CohnAlpha['Histogram'] != []:
 
             # If show plots enabled, then show the plot before returning
-            # TODO: currently not working. Shows image inside of a plot. Need to fix
             # if settings['General Settings']['Show plots']:
             #     imgFilePath = os.path.join(settings['Input/Output Settings']['Save directory'], 'CACountsHist' + str(self.CohnAlpha['CA_Object'].dwell_time) + '.png')
             #     img = pyplot.imread(imgFilePath)
             #     pyplot.imshow(img)
             #     pyplot.show()
             #     pyplot.close()
-            return
+            # return
 
 
         self.CohnAlpha['Histogram'].clear()
@@ -408,12 +408,8 @@ class Analyzer:
         - settings: the current user's runtime settings'''
 
         # Load the values from the specified file into an NP array.
-        try:
-            values = np.loadtxt(settings['Input/Output Settings']['Input file/folder'], usecols=0, dtype=float)
-        except FileNotFoundError:
-            print('File could not be found. Please double-check input path as well as filename.')
-            print('Returning back to the Cohn Alpha Driver')
-            return None
+        values = np.loadtxt(settings['Input/Output Settings']['Input file/folder'], usecols=0, dtype=float)
+        
 
 
         return ca.CohnAlpha(values,

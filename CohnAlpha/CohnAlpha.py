@@ -1,8 +1,11 @@
 import numpy as np                     # For processing data
-import matplotlib.pyplot as pyplot        # For plotting data summaries
+import matplotlib.pyplot as pyplot     # For plotting data summaries
 from scipy.optimize import curve_fit   # For fitting the curve
 from scipy import signal               # For welch (fourier transform)
+from pathlib import Path               # Currently strings for pathnames are not working, attempting to use pathlib/Path
 import os                              # For saving figures
+import json                            # For saving np arrays as json
+import h5py                            # For saving data in .hdf5 format                       
 
 
 # ------------ Power Spectral Density Fitting Function ----------------------------------------------
@@ -341,9 +344,6 @@ class CohnAlpha:
         counts_time_hist, edges = np.histogram(a=self.list_data_array, 
                                                bins=int(count_bins), 
                                                range=self.meas_time_range)
-        
-        print(counts_time_hist)
-        
         edges_seconds = edges / 1e9
         
         # Plotting counts histogram
@@ -353,12 +353,22 @@ class CohnAlpha:
             pyplot.ylabel('Counts')
             pyplot.title('Cohn-Alpha Counts Histogram')
 
+
             # Saving counts histogram
             if settings['Input/Output Settings']['Save figures']:
                 pyplot.tight_layout()
-                save_filename = os.path.join(settings['Input/Output Settings']['Save directory'], 'CACountsHist' + str(self.dwell_time) + '.png')
-                pyplot.savefig(save_filename, dpi=300, bbox_inches='tight')
+                save_img_filename = os.path.join(settings['Input/Output Settings']['Save directory'], 'CACountsHist' + str(int(self.dwell_time)) + '.png')
+                pyplot.savefig(save_img_filename, dpi=300, bbox_inches='tight')
 
+                # Saving counts histogram raw data
+                if settings['Input/Output Settings']['Save raw data']:
+                    outputDir = os.path.abspath(settings['Input/Output Settings']['Save directory'])
+                    outputPath = Path(outputDir)
+                    fileName = 'CACountsHist' + str(int(self.dwell_time)) + '.json'
+                    outputPath = outputPath / fileName
+                    with open(outputPath, "w+") as file:
+                        json.dump({"Histogram Data": counts_time_hist.tolist()}, file, indent=2)
+                
             # Showing plot (optional)
             if settings['General Settings']['Show plots']:
                 pyplot.show()
