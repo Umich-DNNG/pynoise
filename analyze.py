@@ -295,19 +295,35 @@ class Analyzer:
                          ('Input file', io['Input file/folder'])],
                         filename,
                         io['Save directory'])
+            
+
+    # Deprecated Function
+    # better to call FitPSDCurve(); does the same with more options
+    # def conductCohnAlpha(self, settings: dict = {}, overwrite:bool = True):
+    #     '''Runs Cohn Alpha analysis.
+    #     Inputs:
+    #     - settings: the current user's runtime settings'''
+    #     # Run PSDCurve (runs entire method if overwrite is true)
+    #     self.fitPSDCurve(settings=settings, overwrite=True)
 
 
 
-    def conductCohnAlpha(self, settings: dict = {}, overwrite:bool = True):
-
-        '''Runs Cohn Alpha analysis.
+    def genCohnAlphaObject(self, settings: dict = {}):
+        '''Creates a Cohn Alpha object
         
         Inputs:
         - settings: the current user's runtime settings'''
 
-        # Run PSDCurve (runs entire method if overwrite is true)
-        self.fitPSDCurve(settings=settings, overwrite=True)
-    
+        # Load the values from the specified file into an NP array.
+        values = np.loadtxt(settings['Input/Output Settings']['Input file/folder'], usecols=0, dtype=float)
+        
+
+
+        return ca.CohnAlpha(values,
+                                 settings['CohnAlpha Settings']['Plot Counts Histogram'],
+                                 settings['CohnAlpha Settings']['Dwell time'],
+                                 settings['CohnAlpha Settings']['Meas time range'])
+
 
 
     def plotCohnAlphaHist(self, settings:dict = {}, overwrite:bool = True):
@@ -322,13 +338,14 @@ class Analyzer:
         '''
 
         if self.CohnAlpha['CA_Object'] is None:
+            print("Reading in data...")
             self.CohnAlpha['CA_Object'] = self.genCohnAlphaObject(settings)
+            print("Finished reading in data")
             
         # TODO: currently displaying an image is not working. Shows image inside of a plot. Need to fix
         # if overwriting or no histogram in memory, then clear and generate new histogram
         # if not overwriting and histogram in memory exists, then do not generate
-        #if not overwrite and self.CohnAlpha['Histogram'] != []:
-
+        if not overwrite and self.CohnAlpha['Histogram'] != []:
             # If show plots enabled, then show the plot before returning
             # if settings['General Settings']['Show plots']:
             #     imgFilePath = os.path.join(settings['Input/Output Settings']['Save directory'], 'CACountsHist' + str(self.CohnAlpha['CA_Object'].dwell_time) + '.png')
@@ -336,15 +353,14 @@ class Analyzer:
             #     pyplot.imshow(img)
             #     pyplot.show()
             #     pyplot.close()
-            # return
-
+            return
 
         self.CohnAlpha['Histogram'].clear()
         self.CohnAlpha['Histogram'].append(self.CohnAlpha['CA_Object'].plotCountsHistogram(settings))
+ 
 
-    
 
-    def applyWelchApprox(self, settings:dict = {}, overwrite:bool = True, showPlot:bool = False):
+    def applyWelchApprox(self, settings:dict = {}, overwrite:bool = True):
         
         '''
         Applies the Welch Approximation transformation
@@ -361,7 +377,7 @@ class Analyzer:
 
         # If overwriting or no data exists, then clear and generate
         # If not overwriting and data exists, then don't clear and return early
-        if not (overwrite or self.CohnAlpha['Welch Result'] == []):
+        if not overwrite and self.CohnAlpha['Welch Result'] != []:
             return
 
         self.CohnAlpha['Welch Result'].clear()
@@ -397,25 +413,8 @@ class Analyzer:
 
         dict_list = self.CohnAlpha['Welch Result']
         for dict in dict_list:
-            self.CohnAlpha['CA_Object'].fitPSDCurve(settings=settings, welchResultDict=dict)
-
-
-
-    def genCohnAlphaObject(self, settings: dict = {}):
-        '''Creates a Cohn Alpha object
-        
-        Inputs:
-        - settings: the current user's runtime settings'''
-
-        # Load the values from the specified file into an NP array.
-        values = np.loadtxt(settings['Input/Output Settings']['Input file/folder'], usecols=0, dtype=float)
-        
-
-
-        return ca.CohnAlpha(values,
-                                 settings['CohnAlpha Settings']['Plot Counts Histogram'],
-                                 settings['CohnAlpha Settings']['Dwell time'],
-                                 settings['CohnAlpha Settings']['Meas time range'])
+            PSDFitCurveDict = self.CohnAlpha['CA_Object'].fitPSDCurve(settings=settings, welchResultDict=dict)
+            self.CohnAlpha['PSD Fit Curve'].append(PSDFitCurveDict)
 
 
 

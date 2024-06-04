@@ -348,32 +348,34 @@ class CohnAlpha:
         
         # Plotting counts histogram
         if self.plot_counts_hist:
+            print("Plotting Histogram...")
             pyplot.scatter(edges_seconds[:-1], counts_time_hist, **settings['Scatter Plot Settings'])
             pyplot.xlabel('Time (s)')
             pyplot.ylabel('Counts')
             pyplot.title('Cohn-Alpha Counts Histogram')
 
-
+            # Showing plot
+            if settings['General Settings']['Show plots']:
+                pyplot.show()            
+                pyplot.close()
+            
             # Saving counts histogram
             if settings['Input/Output Settings']['Save figures']:
                 pyplot.tight_layout()
-                save_img_filename = os.path.join(settings['Input/Output Settings']['Save directory'], 'CACountsHist' + str(int(self.dwell_time)) + '.png')
+                absPath = os.path.abspath(settings['Input/Output Settings']['Save directory'])
+                save_img_filename = os.path.join(absPath, 'CACountsHist' + str(int(self.dwell_time)) + '.png')
                 pyplot.savefig(save_img_filename, dpi=300, bbox_inches='tight')
+                print('Histogram saved at ' + save_img_filename)
 
                 # Saving counts histogram raw data
                 if settings['Input/Output Settings']['Save raw data']:
                     outputDir = os.path.abspath(settings['Input/Output Settings']['Save directory'])
                     outputPath = Path(outputDir)
-                    fileName = 'CACountsHist' + str(int(self.dwell_time)) + '.json'
+                    fileName = 'CACountsHist' + str(int(self.dwell_time)) + '.hist'
                     outputPath = outputPath / fileName
                     with open(outputPath, "w+") as file:
                         json.dump({"Histogram Data": counts_time_hist.tolist()}, file, indent=2)
-                
-            # Showing plot (optional)
-            if settings['General Settings']['Show plots']:
-                pyplot.show()
 
-            pyplot.close()
         
         # Creating evenly spaced start and stop endpoint for plotting
         timeline = np.linspace(start=self.meas_time_range[0], 
@@ -382,7 +384,6 @@ class CohnAlpha:
         
         # Calculating power spectral density distribution from counts over time hist (Get frequency of counts samples)
         self.fs = 1 / (timeline[3]-timeline[2])
-
         return counts_time_hist
     
     def welchApproxFourierTrans(self, counts_time_hist, settings:dict = {}):
@@ -408,7 +409,7 @@ class CohnAlpha:
                             window='boxcar')                    
         
         welchResultDict = {'f': f,
-            'Pxx': Pxx}
+                           'Pxx': Pxx}
         
         # Plotting the auto-power-spectral-density distribution and fit
         fig, ax = pyplot.subplots(figsize=(8, 6))
