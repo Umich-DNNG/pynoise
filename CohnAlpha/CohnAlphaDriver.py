@@ -48,8 +48,8 @@ def main(editorIn: edit.Editor, queue: list[str]):
         # if not valid then lock user here unless changing settings
         if (selection != 's' and not os.path.isfile(editor.parameters.settings['Input/Output Settings']['Input file/folder'])
             and not os.path.isdir(editor.parameters.settings['Input/Output Settings']['Input file/folder'])):
-                    editor.print('ERROR: You currently have no input file or folder defined. '
-                          + 'Please make sure to specify one before running any analysis.\n')
+                    editor.print('ERROR: You currently have no input file/folder defined or the input file/folder cannot be found. '
+                          + 'Please ensure input path is correct before running any analysis.\n')
                     continue
         
         match selection:
@@ -62,28 +62,32 @@ def main(editorIn: edit.Editor, queue: list[str]):
                                 + '.\n')
             # Plot Counts Histogram
             case 'p':
+
+                # TODO: currently showing an image does not work. Need to fix
                 # If generated histogram is found, ask users if willing to overwrite
                 # Otherwise generate Histogram and save Histogram in analyzer.CohnAlpha dict
-                if analyzer.CohnAlpha['Histogram'] != []:
-                    # Ask user if willing to overwrite histogram that exists in memory
-                    editor.print('WARNING: There is an already stored histogram '
-                        + 'in this runtime. Do you want to erase it?')
-                    editor.print('If not erasing, the program will simply display the histogram in memory')
+                # if analyzer.CohnAlpha['Histogram'] != []:
+                #     # Ask user if willing to overwrite histogram that exists in memory
+                #     editor.print('WARNING: There is an already stored histogram '
+                #         + 'in this runtime. Do you want to erase it?')
+                #     editor.print('If not erasing, the program will simply display the histogram in memory')
 
-                    auto = input('Enter y to continue and anything else to display: ')
-                    if auto == 'y':
-                        editor.log('Currently stored time histogram erased.')
-                        overwrite = True
-                    else:
-                        editor.print('Cancelling overwrite...')
-                        editor.print('Displaying Histogram')
-                        overwrite = False
-                if selection == 'p':
-                    editor.print('\nPlotting the Cohn Alpha Histogram...')
-                    analyzer.plotCohnAlphaHist(settings=editor.parameters.settings, overwrite=overwrite)
-                    editor.log('Generated Cohn Alpha Histogram on file '
-                            + editor.parameters.settings['Input/Output Settings']['Input file/folder'] 
-                            + '.\n')
+                #     auto = input('Enter y to continue and anything else to display: ')
+                #     if auto == 'y':
+                #         editor.log('Currently stored time histogram erased.')
+                #         overwrite = True
+                #     else:
+                #         editor.print('Cancelling overwrite...')
+                #         editor.print('Displaying Histogram')
+                #         overwrite = False
+                # if selection == 'p':
+                # helperAutoFunc(queue=queue, editor=editor, overwrite=overwrite)
+
+                editor.print('\nPlotting the Cohn Alpha Histogram...')
+                analyzer.plotCohnAlphaHist(settings=editor.parameters.settings, overwrite=overwrite)
+                editor.log('Generated Cohn Alpha Histogram on file '
+                        + editor.parameters.settings['Input/Output Settings']['Input file/folder'] 
+                        + '.\n')
             # Apply Welch Approximation of Fourier Transformation
             # If no histogram in memory, will generate ahead of time
             case 'w':
@@ -113,7 +117,7 @@ def main(editorIn: edit.Editor, queue: list[str]):
     return editor, queue
 
 
-def helperAutoFunc(queue, editor, selection):
+def helperAutoFunc(queue, editor, overwrite):
     # If there's currently something in the command queue, 
     # take that as the input and remove it from the queue.
     if len(queue) != 0:
@@ -127,10 +131,10 @@ def helperAutoFunc(queue, editor, selection):
     # Otherwise, prompt the user.
     # Display confirmation for overwriting and for cancel
     else:
-        auto = input('Enter y to continue and anything else to abort: ')
+        auto = input('Enter y to continue and anything else to display: ')
     if auto == 'y':
         editor.log('Currently stored time histogram erased.')
-        selection = 'p'
+        overwrite = True
     else:
         editor.print('Cancelling overwrite...')
-        selection = 'blank'
+        overwrite = False
