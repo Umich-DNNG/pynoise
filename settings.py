@@ -243,7 +243,7 @@ class Settings:
                 outputUnits = 1e-9
             case 'nanoseconds':
                 outputUnits = 1e-9
-            case 'ms':
+            case 'ns':
                 outputUnits = 1e-9
             case 'pico seconds':
                 outputUnits = 1e-12
