@@ -109,7 +109,7 @@ def main(editor: edit.Editor, queue: list[str] = []):
                 # If input is a folder:
                 else:
                     # Run full analysis on the folder.
-                    successful = analyzer.fullFolder(editor.parameters.settings)
+                    successful = analyzer.folderFit(editor.parameters.settings)
                     # Display success if successful.
                     if successful:
                         editor.log('Ran the entire RossiAlpha method on folder ' 
