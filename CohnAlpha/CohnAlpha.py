@@ -4,8 +4,8 @@ from scipy.optimize import curve_fit   # For fitting the curve
 from scipy import signal               # For welch (fourier transform)
 from pathlib import Path               # Currently strings for pathnames are not working, attempting to use pathlib/Path
 import os                              # For saving figures
-import json                            # For saving np arrays as json
-import h5py                            # For saving data in .hdf5 format                       
+import math                            # To compare floats and assign correct time units string
+#import h5py                            # For saving data in .hdf5 format                       
 
 
 # ------------ Power Spectral Density Fitting Function ----------------------------------------------
@@ -335,21 +335,33 @@ class CohnAlpha:
         self.annotate_color = settings['CohnAlpha Settings']['Annotation Color']
         self.annotate_background_color = settings['CohnAlpha Settings']['Annotation Background Color']
         self.annotate_font_size = settings['CohnAlpha Settings']['Font Size']
-
         
         # Making count of bins over time histogram
         count_bins = np.diff(self.meas_time_range) / self.dwell_time
         
+        # TODO: need to ensure that:
+        # input file/folder is the same
+        # May need to check meas time range too
+        # Don't have to check dwell time, stored in the file name
+
+        # read in histogram data
+        counts_time_hist = []
+        edges_seconds = []
+        counts_time_hist, edges_seconds = readInHistogram(settings, edges_seconds, counts_time_hist)
+
+        # If unable to read in data/no data exists
         # Generating corresponding histogram
-        counts_time_hist, edges = np.histogram(a=self.list_data_array, 
-                                               bins=int(count_bins), 
-                                               range=self.meas_time_range)
-        edges_seconds = edges / 1e9
-        
+        if counts_time_hist is None or edges_seconds is None:
+            counts_time_hist, edges = np.histogram(a=self.list_data_array, 
+                                                bins=int(count_bins), 
+                                                range=self.meas_time_range)
+            edges_seconds = edges / 1e9
+            edges_seconds = edges_seconds[:-1]
+
         # Plotting counts histogram
         if self.plot_counts_hist:
             print("Plotting Histogram...")
-            pyplot.scatter(edges_seconds[:-1], counts_time_hist, **settings['Scatter Plot Settings'])
+            pyplot.scatter(edges_seconds, counts_time_hist, **settings['Scatter Plot Settings'])
             pyplot.xlabel('Time (s)')
             pyplot.ylabel('Counts')
             pyplot.title('Cohn-Alpha Counts Histogram')
@@ -363,7 +375,7 @@ class CohnAlpha:
             if settings['Input/Output Settings']['Save figures']:
                 pyplot.tight_layout()
                 absPath = os.path.abspath(settings['Input/Output Settings']['Save directory'])
-                save_img_filename = os.path.join(absPath, 'CACountsHist' + str(int(self.dwell_time)) + '.png')
+                save_img_filename = os.path.join(absPath, 'CACountsHist' + str(self.dwell_time) + '.png')
                 pyplot.savefig(save_img_filename, dpi=300, bbox_inches='tight')
                 print('Histogram saved at ' + save_img_filename)
 
@@ -373,8 +385,13 @@ class CohnAlpha:
                     outputPath = Path(outputDir)
                     fileName = 'CACountsHist' + str(int(self.dwell_time)) + '.hist'
                     outputPath = outputPath / fileName
+                    timeUnits = settings['General Settings']['Output time units']
+                    timeUnits = convertTimeUnitsToStr(timeUnits)
                     with open(outputPath, "w+") as file:
-                        json.dump({"Histogram Data": counts_time_hist.tolist()}, file, indent=2)
+                        file.write("%-10s %s\n" % ("counts", "time(" + timeUnits + ')'))
+                        for column1, column2 in zip(edges_seconds, counts_time_hist):
+                            file.write("%-10s %s\n" % (column1, column2))
+                    
 
         
         # Creating evenly spaced start and stop endpoint for plotting
@@ -406,11 +423,11 @@ class CohnAlpha:
         f, Pxx = signal.welch(x=counts_time_hist,
                             fs=self.fs, 
                             nperseg=settings['CohnAlpha Settings']['nperseg'], 
-                            window='boxcar')                    
-        
+                            window='boxcar')        
+
         welchResultDict = {'f': f,
                            'Pxx': Pxx}
-        
+
         # Plotting the auto-power-spectral-density distribution and fit
         fig, ax = pyplot.subplots(figsize=(8, 6))
 
@@ -535,4 +552,54 @@ class CohnAlpha:
                 'alpha': alpha,
                 'uncertainty': uncertainty}
 
-    # ---------------------------------------------------------------------------------------------------   
+# ---------------------------------------------------------------------------------------------------   
+
+# Helper Functions
+def convertTimeUnitsToStr(units):
+    # femtoseconds
+    if (math.isclose(a=units, b=1e-15, abs_tol=1e-15)):
+        return 'fs'
+    # picoseconds
+    if (math.isclose(a=units, b=1e-12, abs_tol=1e-12)):
+        return 'ps'    
+    # nano seconds
+    if (math.isclose(a=units, b=1e-9, abs_tol=1e-9)):
+        return 'ns'
+    # microseconds
+    if (math.isclose(a=units, b=1e-6, abs_tol=1e-6)):
+        return 'us'
+    # milliseconds
+    if (math.isclose(a=units, b=1e-3, abs_tol=1e-3)):
+        return 'ms'
+    # seconds
+    if (math.isclose(a=units, b=1, abs_tol=1)):
+        return 's'
+    
+def readInHistogram(settings, counts_time_hist, edges):
+    # create path to open file
+    fileName = 'CACountsHist' + str(settings['CohnAlpha Settings']['Dwell time']) + '.hist'
+    absPath = os.path.abspath(settings['Input/Output Settings']['Save directory'])
+    absPath = Path(absPath)
+    absPath = absPath / fileName
+
+    # open file
+    # skip header, store in case needed
+    # read in data
+    try:
+        with open(absPath, 'r') as file:
+            headerLine = next(file)
+            for line in file:
+                splitLines = line.split()
+                counts_time_hist.append(splitLines[1])
+                edges.append(splitLines[0])
+
+        edges = np.array(edges, dtype=np.float64)
+        counts_time_hist = np.array(counts_time_hist, dtype=np.int64)
+
+        return (counts_time_hist, edges)
+    # If histogram data unable to be found
+    # Then return false and generate the data
+    except FileNotFoundError:
+        print("Existing Histogram Data could not be found.")
+        print("Generating Histogram Data...")
+        return (None, None)
