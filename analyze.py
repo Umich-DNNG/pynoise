@@ -320,7 +320,6 @@ class Analyzer:
 
 
         return ca.CohnAlpha(values,
-                                 settings['CohnAlpha Settings']['Plot Counts Histogram'],
                                  settings['CohnAlpha Settings']['Dwell time'],
                                  settings['CohnAlpha Settings']['Meas time range'])
 
@@ -338,25 +337,33 @@ class Analyzer:
         '''
 
         if self.CohnAlpha['CA_Object'] is None:
-            print("Reading in data...")
+            print("Reading in input file/folder data...")
             self.CohnAlpha['CA_Object'] = self.genCohnAlphaObject(settings)
-            print("Finished reading in data")
-            
-        # TODO: currently displaying an image is not working. Shows image inside of a plot. Need to fix
+            print("Finished reading input file/folder data")
+
         # if overwriting or no histogram in memory, then clear and generate new histogram
         # if not overwriting and histogram in memory exists, then do not generate
         if not overwrite and self.CohnAlpha['Histogram'] != []:
+            return False
+            
+            # TODO: currently displaying an image is not working. Shows image inside of a plot. Need to fix
             # If show plots enabled, then show the plot before returning
             # if settings['General Settings']['Show plots']:
-            #     imgFilePath = os.path.join(settings['Input/Output Settings']['Save directory'], 'CACountsHist' + str(self.CohnAlpha['CA_Object'].dwell_time) + '.png')
-            #     img = pyplot.imread(imgFilePath)
-            #     pyplot.imshow(img)
-            #     pyplot.show()
-            #     pyplot.close()
-            return
+                # imgFilePath = os.path.join(settings['Input/Output Settings']['Save directory'], 'CACountsHist' + str(self.CohnAlpha['CA_Object'].dwell_time) + '.png')
+                # img = pyplot.imread(imgFilePath)
+                # pyplot.imshow(img)
+                # pyplot.show()
+                # pyplot.close()
 
+
+        # clear dependent data
         self.CohnAlpha['Histogram'].clear()
+        self.CohnAlpha['Welch Result'].clear()
+        self.CohnAlpha['PSD Fit Curve'].clear()
+
+        print('\nPlotting the Cohn Alpha Histogram...')
         self.CohnAlpha['Histogram'].append(self.CohnAlpha['CA_Object'].plotCountsHistogram(settings))
+        return True
  
 
 
@@ -378,15 +385,19 @@ class Analyzer:
         # If overwriting or no data exists, then clear and generate
         # If not overwriting and data exists, then don't clear and return early
         if not overwrite and self.CohnAlpha['Welch Result'] != []:
-            return
+            return False
 
         self.CohnAlpha['Welch Result'].clear()
+        self.CohnAlpha['PSD Fit Curve'].clear()
 
         # Generate a graph for each histogram
         # TODO: double check with Flynn the behavior for folder analysis
+        print('\nApplying the Welch Approximation...')
         for hist in self.CohnAlpha['Histogram']:
             welchResultDict = self.CohnAlpha['CA_Object'].welchApproxFourierTrans(hist, settings)
             self.CohnAlpha['Welch Result'].append(welchResultDict)
+        
+        return True
 
 
 
@@ -407,14 +418,18 @@ class Analyzer:
 
         # if overwriting or no data exists, then generate best fit
         # if not overwriting and data exists, then do not generate
-        if not (overwrite or self.CohnAlpha['PSD Fit Curve'] == []):
-            return
+        if not overwrite and self.CohnAlpha['PSD Fit Curve'] != []:
+            return False
         
-
+        self.CohnAlpha['PSD Fit Curve'].clear()
+        
+        print('\nFitting Power Spectral Density Curve...')
         dict_list = self.CohnAlpha['Welch Result']
         for dict in dict_list:
             PSDFitCurveDict = self.CohnAlpha['CA_Object'].fitPSDCurve(settings=settings, welchResultDict=dict)
             self.CohnAlpha['PSD Fit Curve'].append(PSDFitCurveDict)
+        
+        return True
 
 
 
