@@ -43,6 +43,8 @@ def main(editorIn: edit.Editor, queue: list[str]):
                     continue
         
         overwrite = True
+        # NOTE: currently overwrite not doing anything, as program doesn't have capabilities to overwrite data
+        # the program will either instantly load in data with the correct settings, or generate the data
         match selection:
             # Run entire Cohn-Alpha method
             case 'm':
