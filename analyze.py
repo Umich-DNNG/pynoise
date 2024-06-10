@@ -316,12 +316,11 @@ class Analyzer:
 
         # Load the values from the specified file into an NP array.
         values = np.loadtxt(settings['Input/Output Settings']['Input file/folder'], usecols=0, dtype=float)
-        
-
 
         return ca.CohnAlpha(values,
-                                 settings['CohnAlpha Settings']['Dwell time'],
-                                 settings['CohnAlpha Settings']['Meas time range'])
+                            settings['CohnAlpha Settings']['Dwell time'],
+                            settings['CohnAlpha Settings']['Meas time range'],
+                            settings['Input/Output Settings']['Quiet mode'])
 
 
 
@@ -337,9 +336,7 @@ class Analyzer:
         '''
 
         if self.CohnAlpha['CA_Object'] is None:
-            print("Reading in input file/folder data...")
             self.CohnAlpha['CA_Object'] = self.genCohnAlphaObject(settings)
-            print("Finished reading input file/folder data")
 
         if not overwrite:
             return False
@@ -375,7 +372,7 @@ class Analyzer:
         # print('\nPlotting the Cohn Alpha Histogram...')
         # self.CohnAlpha['Histogram'].append(self.CohnAlpha['CA_Object'].plotCountsHistogram(settings))
         # return True
- 
+
 
 
     def applyWelchApprox(self, settings:dict = {}, overwrite:bool = True):
@@ -395,8 +392,6 @@ class Analyzer:
 
         if not overwrite:
             return False
-        
-        print('\nApplying the Welch Approximation...')
         self.CohnAlpha['CA_Object'].welchApproxFourierTrans(settings)
         return True
 
@@ -436,9 +431,7 @@ class Analyzer:
 
         if not overwrite:
             return False
-        
-
-        print('\nFitting Power Spectral Density Curve...')
+    
         self.CohnAlpha['CA_Object'].fitPSDCurve(settings=settings)
         return True
 

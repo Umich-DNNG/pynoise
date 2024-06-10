@@ -21,7 +21,8 @@ class CohnAlpha:
     def __init__(self, 
                  list_data_array,
                  dwell_time: float = 2.0e6, 
-                 meas_time_range: list[float] = [1.5e11, 1.0e12]):
+                 meas_time_range: list[float] = [1.5e11, 1.0e12],
+                 quiet: bool = False):
 
         '''
         Description:
@@ -41,6 +42,9 @@ class CohnAlpha:
         self.meas_time_range = meas_time_range
         self.dwell_time = dwell_time
         self.fs = 0
+        self.quiet = quiet
+        
+        self.print("Finished reading input file/folder data")
 
     def conduct_CPSD(self,
                     show_plot: bool = True,
@@ -291,7 +295,6 @@ class CohnAlpha:
 
         return f, Pxy, popt, pcov    
 
-
     def conductCohnAlpha(self, settings: dict = {}):
         
         '''
@@ -317,48 +320,6 @@ class CohnAlpha:
 
         # counts_time_hist = self.plotHistogram(settings)
         # return self.welchApproximationFourierTransformation(settings, counts_time_hist)
-            
-    def constructPathName(self, settings:dict={}, type:str=""):
-        '''Helper function to help construct filename
-            Also used to determine if file exists or not
-
-        method has 3 possible values:
-            "Histogram": finds histogram data
-            "Welch Result": finds scatterplot data
-            "PSD Fit Curve": finds fitted graph data
-
-        Input:
-            settings: the current user's runtime settings
-            method: the type of data to be found (scatterplot, histogram, etc)
-
-        Output:
-            Path(): the absolute path to the data. Can be converted to string via str(Path())
-        '''
-
-        map = {
-            'Histogram': 'hist',
-            'Graph': 'graph'
-        }
-        # grab input file's name
-        inputFileName = os.path.abspath(settings['Input/Output Settings']['Input file/folder'])
-        inputFileName = Path(inputFileName).stem
-
-        # construct fileName
-        fileName = "ca"
-        fileName = fileName + "_" + map[type]
-        fileName = fileName + "_" + str(settings['CohnAlpha Settings']['Dwell time'])
-
-        timeRangeStart = str(settings['CohnAlpha Settings']['Meas time range'][0])
-        timeRangeEnd = str(settings['CohnAlpha Settings']['Meas time range'][1])
-        fileName = fileName + "_" + timeRangeStart + "-" + timeRangeEnd
-        fileName = fileName + "_" + str(settings['CohnAlpha Settings']['nperseg']) + ".csv"
-
-        # construct output directory
-        outputPath = os.path.abspath(settings['Input/Output Settings']['Save directory'])
-        outputPath = Path(outputPath)
-        outputPath = outputPath / fileName
-
-        return outputPath
 
     def plotCountsHistogram(self, settings: dict = {}):
         
@@ -414,7 +375,7 @@ class CohnAlpha:
 
         # Plotting counts histogram
         if settings['General Settings']['Show plots']:
-            print("Plotting Histogram...")
+            self.print("Plotting Histogram...")
             pyplot.scatter(edges_seconds, counts_time_hist, **settings['Scatter Plot Settings'])
             pyplot.xlabel('Time (s)')
             pyplot.ylabel('Counts')
@@ -427,7 +388,7 @@ class CohnAlpha:
                 absPath = os.path.abspath(settings['Input/Output Settings']['Save directory'])
                 save_img_filename = os.path.join(absPath, 'CACountsHist' + str(self.dwell_time) + '.png')
                 pyplot.savefig(save_img_filename, dpi=300, bbox_inches='tight')
-                # print('Histogram Image saved at ' + save_img_filename)
+                # self.print('Histogram Image saved at ' + save_img_filename)
 
             pyplot.close()
         # Saving counts histogram raw data
@@ -439,7 +400,7 @@ class CohnAlpha:
                           settings=settings,
                           method='Histogram',
                           outputPath=path)
-            # print('Histogram Data saved at ' + str(outputPath))
+            # self.print('Histogram Data saved at ' + str(outputPath))
 
         # Creating evenly spaced start and stop endpoint for plotting
         timeline = np.linspace(start=self.meas_time_range[0], 
@@ -465,6 +426,9 @@ class CohnAlpha:
         Output:
             - welchResultDict: a dict, contains the frequency and the power spectral density
         '''
+
+        
+        self.print('\nApplying the Welch Approximation...')
 
         # Read in existing data if exists
         # re-format lists to numpy arrays
@@ -530,7 +494,7 @@ class CohnAlpha:
             fig.tight_layout()
             save_filename = os.path.join(settings['Input/Output Settings']['Save directory'], 'CAScatterPlot' + str(self.dwell_time) + '.png')
             fig.savefig(save_filename, dpi=300, bbox_inches='tight')
-            # print('Scatterplot Image saved at ' + save_filename)
+            # self.print('Scatterplot Image saved at ' + save_filename)
 
 
         # Showing plot (optional)
@@ -548,7 +512,7 @@ class CohnAlpha:
                           settings=settings,
                           method='Welch Result',
                           outputPath=path)
-            # print('Scatterplot Data saved at ' + str(outputPath))
+            # self.print('Scatterplot Data saved at ' + str(outputPath))
 
         return (f, Pxx)
         
@@ -570,6 +534,7 @@ class CohnAlpha:
         '''
 
 
+        self.print('\nFitting Power Spectral Density Curve...')
         f = []
         Pxx = []
         residuals = []
@@ -619,7 +584,7 @@ class CohnAlpha:
         uncertainty = np.around(pcov[1,1]*2*np.pi, decimals=2)
     
         # Display Alpha and Uncertainty values, store within Welch Approx
-        print('alpha = ' + str(alpha) + ', uncertainty = '+ 
+        self.print('alpha = ' + str(alpha) + ', uncertainty = '+ 
                     str(uncertainty))
 
         
@@ -693,7 +658,7 @@ class CohnAlpha:
                           settings=settings,
                           method='PSD Fit Curve',
                           outputPath=path)
-            # print('Fitted Curve Data saved at ' + str(outputPath))
+            # self.print('Fitted Curve Data saved at ' + str(outputPath))
         
         # Outputting the PSD distribution and fit
         return {'popt': popt,
@@ -701,6 +666,10 @@ class CohnAlpha:
                 'alpha': alpha,
                 'uncertainty': uncertainty}
     
+    def print(self, message):
+        if self.quiet:
+            return
+        print(message)
 
     def readInFile(self, x, y, residuals, popt, pcov, method:str = "", inputPath:str=""):
         # open file
@@ -718,15 +687,15 @@ class CohnAlpha:
                         x.append(splitLines[0])
                         y.append(splitLines[1])
 
-                    print ("Existing Data found at " + str(inputPath))
+                    self.print ("Existing Data found at " + str(inputPath))
                     return
                 else:
                     # check number of columns in the file
                     # if 5 columns, continue and read in data (fitted graph data)
                     # if not 5 columns, then read in scatterplot data recursively, generate rest of data
                     if numCols != 5:
-                        print("Scatterplot Data Found instead of Fitted Graph Data")
-                        print("Generating Fitted Graph Data")
+                        self.print("Scatterplot Data Found instead of Fitted Graph Data")
+                        self.print("Generating Fitted Graph Data")
                         self.readInFile(x=x,
                                         y=y,
                                         residuals=residuals,
@@ -752,18 +721,58 @@ class CohnAlpha:
                         x.append(splitLines[0])
                         y.append(splitLines[1])
                         residuals.append(splitLines[2])
-                    print ("Existing Data found at " + str(inputPath))
+                    self.print ("Existing Data found at " + str(inputPath))
                     return
         # If graph data unable to be found
         # Then return false and generate the data
         except FileNotFoundError:
             # TODO: print current settings as well
-            print("Existing Data with current settings could not be found")
-            print("Data must be stored within the save directory listed in the settings.")
-            print("Generating Data...")
+            self.print("Existing Data with current settings could not be found")
+            self.print("Data must be stored within the save directory listed in the settings.")
+            self.print("Generating Data...")
             return
-    
+            
+    def constructPathName(self, settings:dict={}, type:str=""):
+        '''Helper function to help construct filename
+            Also used to determine if file exists or not
 
+        method has 3 possible values:
+            "Histogram": finds histogram data
+            "Welch Result": finds scatterplot data
+            "PSD Fit Curve": finds fitted graph data
+
+        Input:
+            settings: the current user's runtime settings
+            method: the type of data to be found (scatterplot, histogram, etc)
+
+        Output:
+            Path(): the absolute path to the data. Can be converted to string via str(Path())
+        '''
+
+        map = {
+            'Histogram': 'hist',
+            'Graph': 'graph'
+        }
+        # grab input file's name
+        inputFileName = os.path.abspath(settings['Input/Output Settings']['Input file/folder'])
+        inputFileName = Path(inputFileName).stem
+
+        # construct fileName
+        fileName = "ca"
+        fileName = fileName + "_" + map[type]
+        fileName = fileName + "_" + str(settings['CohnAlpha Settings']['Dwell time'])
+
+        timeRangeStart = str(settings['CohnAlpha Settings']['Meas time range'][0])
+        timeRangeEnd = str(settings['CohnAlpha Settings']['Meas time range'][1])
+        fileName = fileName + "_" + timeRangeStart + "-" + timeRangeEnd
+        fileName = fileName + "_" + str(settings['CohnAlpha Settings']['nperseg']) + ".csv"
+
+        # construct output directory
+        outputPath = os.path.abspath(settings['Input/Output Settings']['Save directory'])
+        outputPath = Path(outputPath)
+        outputPath = outputPath / fileName
+
+        return outputPath
 # ---------------------------------------------------------------------------------------------------   
 
 # Helper Functions
