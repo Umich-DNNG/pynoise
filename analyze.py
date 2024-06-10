@@ -341,29 +341,40 @@ class Analyzer:
             self.CohnAlpha['CA_Object'] = self.genCohnAlphaObject(settings)
             print("Finished reading input file/folder data")
 
-        # if overwriting or no histogram in memory, then clear and generate new histogram
-        # if not overwriting and histogram in memory exists, then do not generate
-        if not overwrite and self.CohnAlpha['Histogram'] != []:
+        if not overwrite:
             return False
-            
-            # TODO: currently displaying an image is not working. Shows image inside of a plot. Need to fix
-            # If show plots enabled, then show the plot before returning
-            # if settings['General Settings']['Show plots']:
-                # imgFilePath = os.path.join(settings['Input/Output Settings']['Save directory'], 'CACountsHist' + str(self.CohnAlpha['CA_Object'].dwell_time) + '.png')
-                # img = pyplot.imread(imgFilePath)
-                # pyplot.imshow(img)
-                # pyplot.show()
-                # pyplot.close()
 
-
-        # clear dependent data
-        self.CohnAlpha['Histogram'].clear()
-        self.CohnAlpha['Welch Result'].clear()
-        self.CohnAlpha['PSD Fit Curve'].clear()
-
-        print('\nPlotting the Cohn Alpha Histogram...')
-        self.CohnAlpha['Histogram'].append(self.CohnAlpha['CA_Object'].plotCountsHistogram(settings))
+        self.CohnAlpha['CA_Object'].plotCountsHistogram(settings)
         return True
+
+
+        # OLD CODE
+        # LEAVING HERE FOR NOW
+        # WOULD SAVE DATA IN MEMORY, preferably grab data from disk when needed is better
+
+        # # if overwriting or no histogram in memory, then clear and generate new histogram
+        # # if not overwriting and histogram in memory exists, then do not generate
+        # if not overwrite and self.CohnAlpha['Histogram'] != []:
+        #     return False
+            
+        #     # TODO: currently displaying an image is not working. Shows image inside of a plot. Need to fix
+        #     # If show plots enabled, then show the plot before returning
+        #     # if settings['General Settings']['Show plots']:
+        #         # imgFilePath = os.path.join(settings['Input/Output Settings']['Save directory'], 'CACountsHist' + str(self.CohnAlpha['CA_Object'].dwell_time) + '.png')
+        #         # img = pyplot.imread(imgFilePath)
+        #         # pyplot.imshow(img)
+        #         # pyplot.show()
+        #         # pyplot.close()
+
+
+        # # clear dependent data
+        # self.CohnAlpha['Histogram'].clear()
+        # self.CohnAlpha['Welch Result'].clear()
+        # self.CohnAlpha['PSD Fit Curve'].clear()
+
+        # print('\nPlotting the Cohn Alpha Histogram...')
+        # self.CohnAlpha['Histogram'].append(self.CohnAlpha['CA_Object'].plotCountsHistogram(settings))
+        # return True
  
 
 
@@ -382,22 +393,29 @@ class Analyzer:
         # Ensure that histogram exists
         self.plotCohnAlphaHist(settings=settings, overwrite=overwrite)
 
-        # If overwriting or no data exists, then clear and generate
-        # If not overwriting and data exists, then don't clear and return early
-        if not overwrite and self.CohnAlpha['Welch Result'] != []:
+        if not overwrite:
             return False
-
-        self.CohnAlpha['Welch Result'].clear()
-        self.CohnAlpha['PSD Fit Curve'].clear()
-
-        # Generate a graph for each histogram
-        # TODO: double check with Flynn the behavior for folder analysis
-        print('\nApplying the Welch Approximation...')
-        for hist in self.CohnAlpha['Histogram']:
-            welchResultDict = self.CohnAlpha['CA_Object'].welchApproxFourierTrans(hist, settings)
-            self.CohnAlpha['Welch Result'].append(welchResultDict)
         
+        print('\nApplying the Welch Approximation...')
+        self.CohnAlpha['CA_Object'].welchApproxFourierTrans(settings)
         return True
+
+        # OLD CODE
+
+
+        # # If overwriting or no data exists, then clear and generate
+        # # If not overwriting and data exists, then don't clear and return early
+        # if not overwrite and self.CohnAlpha['Welch Result'] != []:
+        #     return False
+
+        # self.CohnAlpha['Welch Result'].clear()
+        # self.CohnAlpha['PSD Fit Curve'].clear()
+
+        # # Generate a graph for each histogram
+        # # TODO: double check with Flynn the behavior for folder analysis
+        # for hist in self.CohnAlpha['Histogram']:
+        #     welchResultDict = self.CohnAlpha['CA_Object'].welchApproxFourierTrans(hist, settings)
+        #     self.CohnAlpha['Welch Result'].append(welchResultDict)
 
 
 
@@ -416,20 +434,29 @@ class Analyzer:
         # ensure necessary data exists
         self.applyWelchApprox(settings=settings, overwrite=overwrite)
 
-        # if overwriting or no data exists, then generate best fit
-        # if not overwriting and data exists, then do not generate
-        if not overwrite and self.CohnAlpha['PSD Fit Curve'] != []:
+        if not overwrite:
             return False
         
-        self.CohnAlpha['PSD Fit Curve'].clear()
-        
+
         print('\nFitting Power Spectral Density Curve...')
-        dict_list = self.CohnAlpha['Welch Result']
-        for dict in dict_list:
-            PSDFitCurveDict = self.CohnAlpha['CA_Object'].fitPSDCurve(settings=settings, welchResultDict=dict)
-            self.CohnAlpha['PSD Fit Curve'].append(PSDFitCurveDict)
-        
+        self.CohnAlpha['CA_Object'].fitPSDCurve(settings=settings)
         return True
+
+        # OLD CODE
+
+        # # if overwriting or no data exists, then generate best fit
+        # # if not overwriting and data exists, then do not generate
+        # if not overwrite and self.CohnAlpha['PSD Fit Curve'] != []:
+        #     return False
+        
+        # self.CohnAlpha['PSD Fit Curve'].clear()
+        
+        # dict_list = self.CohnAlpha['Welch Result']
+        # for dict in dict_list:
+        #     PSDFitCurveDict = self.CohnAlpha['CA_Object'].fitPSDCurve(settings=settings, welchResultDict=dict)
+        #     self.CohnAlpha['PSD Fit Curve'].append(PSDFitCurveDict)
+        
+        # return True
 
 
 

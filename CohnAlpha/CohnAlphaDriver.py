@@ -42,7 +42,7 @@ def main(editorIn: edit.Editor, queue: list[str]):
                           + 'Please ensure input path is correct before running any analysis.\n')
                     continue
         
-        overwrite = False
+        overwrite = True
         match selection:
             # Run entire Cohn-Alpha method
             case 'm':
