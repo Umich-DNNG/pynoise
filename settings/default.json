@@ -1,15 +1,15 @@
 {
     "Input/Output Settings": {
-        "Input file/folder": "./data/input/stilbene_2in_CROCUS_20cm_offset_north.txt",
+        "Input file/folder": "",
         "Time column": 0,
         "Channels column": null,
         "Save directory": "./data",
         "Output name": "CurrentRun",
-        "Save figures": true,
+        "Save figures": false,
         "Save raw data": false,
-        "Save time differences": true,
+        "Save time differences": false,
         "Overwrite lower reset times": true,
-        "Keep logs": true,
+        "Keep logs": false,
         "Quiet mode": false
     },
     "General Settings": {
@@ -19,14 +19,14 @@
         "Show plots": true,
         "Input time units": null,
         "Output time units": null,
-        "Text editor": "nano"
+        "Text editor": "vim"
     },
     "RossiAlpha Settings": {
         "Reset time": 5000,
-        "Time difference method": "aa",
+        "Time difference method": "cc",
         "Digital delay": 750,
         "Combine Calc and Binning": false,
-        "Bin width": 10,
+        "Bin width": null,
         "Max avg relative bin err": 0.10,
         "Error Bar/Band": "band",
         "Fit minimum": 30,
@@ -38,7 +38,7 @@
             150000000000.0,
             1000000000000.0
         ],
-        "Plot Counts Histogram": true,
+        "Plot Counts Histogram": false,
         "Font Size": 12,
         "Annotation Font Weight": "bold",
         "Annotation Color": "black",
