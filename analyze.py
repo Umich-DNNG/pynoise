@@ -870,13 +870,17 @@ class Analyzer:
 
 
 
-    def fullFolder(self, settings: dict, window: Tk = None):
+    def fullFolder(self, settings: dict, window: Tk = None) -> bool:
 
         '''Conduct RossiAlpha analysis on a folder of files.
         
         Inputs:
         - settings: the dictionary that contains all of the runtime settings.
-        - window: the gui window, if in gui mode.'''
+        - window: the gui window, if in gui mode.
+        
+        Outputs:
+        - bool: true if the folder analysis completed, false otherwise.
+        '''
 
         RA_hist_array = []
         RA_std_dev = []
@@ -892,6 +896,9 @@ class Analyzer:
             settings['General Settings']['Number of folders'] = 0
             while (os.path.exists(settings['Input/Output Settings']['Input file/folder'] + '/' + str( settings['General Settings']['Number of folders'] + 1))):
                 settings['General Settings']['Number of folders'] += 1
+        if (settings['General Settings']['Number of folders'] <= 1):
+            print('ERROR: Running RossiAlpha method on a folder with \"null\" number of folders requires more than 1 folder in the path.\n')
+            return False
         if ogBinWidth is None:
             settings['RossiAlpha Settings']['Bin width'] = math.ceil(settings['RossiAlpha Settings']['Reset time'] / 1000)
             bestBinFound = False
@@ -1132,3 +1139,4 @@ class Analyzer:
         settings['General Settings']['Number of folders'] = numFolders
         # Close all open plots.
         pyplot.close()
+        return True

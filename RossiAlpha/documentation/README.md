@@ -19,14 +19,14 @@ Our program takes files in the following format:
 * Each detection is separated by a newline.
 * Each piece of information is separated by white-space.
 
-A sample is shown belowm, where the first column specifies the channel the detection was recorded on, the second column is the time of detection, and the remaining columns contain data not relevant to our analysis:
+A sample is shown below, where the first column specifies the channel the detection was recorded on, the second column is the time of detection, and the remaining columns contain data not relevant to our analysis:
 
 <img width="250" alt="Screen Shot 2024-04-10 at 1 27 47 PM" src="https://github.com/Umich-DNNG/pynoise/assets/112817120/a62c3f9f-c198-4c24-b495-57cbe7938886">
 
 
-The columns for channel and time data can be in any order, but must be specified in the Input/Output Settings. There can also be no channel data, in which case this setting is null.
+The columns for channel and time data can be in any order, but must be specified in the Input/Output Settings. There can also be no channel data, in which case this setting is `null`. The columns should follow zero-based numbering.
 
-For folder analysis, the individual file setup is the same. In the folder the user gives in the Input/Output Settings, the program searches for numbered folders up through the number specified by the "Number of folders" setting. In each of these folders, the program searches for files of the name "board0ch{channel#}_n.txt", where {channel#} is an integer representing which channel the file contains data for. For this reason, these files do not need to contain channel data themsevles. An example setup is shown below, where the files with a green check mark are those that our program uses:
+For folder analysis, the individual file setup is the same. In the folder the user gives in the Input/Output Settings, the program searches for numbered folders from 1 up through the number specified by the "Number of folders" setting. The "Number of folders" setting may also be `null`, in which case the analysis will utilize all folders sequentially numbered 1, 2, 3, and so on until it reaches a gap. In each of these folders, the program searches for files of the name "board0ch{channel#}_n.txt", where {channel#} is an integer representing which channel the file contains data for. For this reason, these files do not need to contain channel data themselves. An example setup is shown below, where the files with a green check mark are those that our program uses:
 
 <img width="621" alt="Screen Shot 2024-04-10 at 1 38 37 PM" src="https://github.com/Umich-DNNG/pynoise/assets/112817120/d01a938b-42a5-4459-a609-d4d3f4ad9041">
 

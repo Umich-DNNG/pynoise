@@ -64,14 +64,31 @@ def main(editor: edit.Editor, queue: list[str] = []):
                       + 'folder defined or the specified input file/'
                       + 'directory does not exist. Please make sure '
                       + 'to adjust this before running any analysis.\n')
+                selection = 'blank'
+                continue
             # Ensure the user is using a valid time difference method.
             if (editor.parameters.settings['RossiAlpha Settings']['Time difference method'] != 'aa' 
                 and editor.parameters.settings['RossiAlpha Settings']['Time difference method'] != ['aa']
                 and editor.parameters.settings['Input/Output Settings']['Channels column'] == None
                 and name.count('.') > 0):
-                print('ERROR: When using methods other than any and all, you must specify a column.\n')
+                print('ERROR: When using methods other than any and all for a file analysis, you must specify a channels column.\n')
+                selection = 'blank'
+                continue
+            # if is a folder and number of folders is specified, it must be more than one folder
+            if (name.count('.') == 0 and editor.parameters.settings["General Settings"]["Number of folders"] != None 
+                and editor.parameters.settings["General Settings"]["Number of folders"] <= 1):
+                print('ERROR: Running RossiAlpha method on a folder of folders requires either more' 
+                    + ' than one folder specified or \"null\" for the setting.\n')
+                selection = 'blank'
+                continue
             # For full analysis:
             elif selection == 'm':
+                # If input is a file and the bin width is not specified:
+                if name.count('.') > 0 and editor.parameters.settings['RossiAlpha Settings']['Bin width'] == None:
+                    print('ERROR: Using RossiAlpha on a file to generate plots of the time difference data and/or'
+                        + ' fit the data to an exponetial curve requires the bin width to be specified.\n')
+                    selection = 'blank'
+                    continue
                 # Display progress.
                 editor.print('Running the entire RossiAlpha method...')
                 # If input is file:
@@ -85,11 +102,15 @@ def main(editor: edit.Editor, queue: list[str] = []):
                 # If input is a folder:
                 else:
                     # Run full analysis on the folder.
-                    analyzer.fullFolder(editor.parameters.settings)
-                    # Display success.
-                    editor.log('Ran the entire RossiAlpha method on folder ' 
-                        + editor.parameters.settings['Input/Output Settings']['Input file/folder'] 
-                        + '.\n')
+                    successful = analyzer.fullFolder(editor.parameters.settings)
+                    # Display success if successful.
+                    if successful:
+                        editor.log('Ran the entire RossiAlpha method on folder ' 
+                            + editor.parameters.settings['Input/Output Settings']['Input file/folder'] 
+                            + '.\n')
+                    else:
+                        selection = 'blank'
+                        continue
             # For time difference calculation:
             elif selection == 't':
                 # If time differences already exist.
@@ -150,6 +171,12 @@ def main(editor: edit.Editor, queue: list[str] = []):
                                             name.count('.') == 0)
                     # Display success.
                     editor.log('New time differences created.\n')
+            # If input is a file and the bin width is not specified:
+            if name.count('.') > 0 and editor.parameters.settings['RossiAlpha Settings']['Bin width'] == None:
+                print('ERROR: Using RossiAlpha on a file to generate plots of the time difference data and/or'
+                    + ' fit the data to an exponetial curve requires the bin width to be specified.\n')
+                selection = 'blank'
+                continue
             # Make a histogram of the time differences.
             elif selection == 'p':
                 # If plot is already stored:
@@ -185,7 +212,7 @@ def main(editor: edit.Editor, queue: list[str] = []):
                     analyzer.plotSplit(editor.parameters.settings)
                     # Display success.
                     editor.log('New histogram created.\n')
-            # Create a line of best fit fot the histogram:
+            # Create a line of best fit for the histogram:
             else:
                 # If line is already stored:
                 if analyzer.RABestFit['Best fit'] is not None:
