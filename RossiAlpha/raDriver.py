@@ -66,6 +66,15 @@ def main(editor: edit.Editor, queue: list[str] = []):
                       + 'to adjust this before running any analysis.\n')
                 selection = 'blank'
                 continue
+            # if no save directory is specified, use the input folder or the file's parent folder
+            if editor.parameters.settings['Input/Output Settings']['Save directory'] is None:
+                # if input is a folder, set save directory to it
+                if name.count('.') == 0:
+                    editor.parameters.settings['Input/Output Settings']['Save directory'] = editor.parameters.settings['Input/Output Settings']['Input file/folder']
+                # else, set the save directory to the input's parent folder
+                else:
+                    editor.parameters.settings['Input/Output Settings']['Save directory'] = (editor.parameters.settings['Input/Output Settings']['Input file/folder']
+                                                                                             [:editor.parameters.settings['Input/Output Settings']['Input file/folder'].rfind('/')])
             # Ensure the user is using a valid time difference method.
             if (editor.parameters.settings['RossiAlpha Settings']['Time difference method'] != 'aa' 
                 and editor.parameters.settings['RossiAlpha Settings']['Time difference method'] != ['aa']

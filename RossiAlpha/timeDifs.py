@@ -16,7 +16,7 @@ import json
 
 class timeDifCalcs:
     
-    '''The tiem differences object that stores 
+    '''The time differences object that stores 
     events and calculates time differences.'''
 
     def __init__(self, io: dict, reset_time: float = None, method: str = 'aa', digital_delay: int = None, folderNum = 0, sort_data: bool = False):
@@ -49,7 +49,18 @@ class timeDifCalcs:
         self.export = io['Save time differences']
         self.overwrite = io['Overwrite lower reset times']
         self.outputFolder = io['Save directory']
-        self.outputName = io['Output name']
+        name = io['Input file/folder']
+        # if is a folder analysis, retrieve the name of the folder. 
+        # When this function is called on a folder, the input file/folder was changed to the user inputted folder name + "/" + the current folder number
+        # TODO: change calling logic to not have to do this?
+        if folderNum is not 0:
+            temp = name[:name.rfind('/')]
+            name = temp[temp.rfind('/')+1:]
+        # if is a file, retrieve the name of just the file
+        else:
+            name = name[name.rfind('/')+1:]
+        self.outputName = 'output_rossi_time_difs_' + name
+        # self.outputName = io['Output name']
         self.folderNum = folderNum
         self.file_name = os.path.abspath(self.outputFolder) + '/' + self.outputName + '/' + (str(self.folderNum) + '/' if self.folderNum != 0 else '') + self.method + '/'
         self.pregenerated = ''
