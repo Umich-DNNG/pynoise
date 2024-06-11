@@ -360,6 +360,9 @@ class Fit_With_Weighting:
         # Line fitting variables
         self.xfit = None
 
+    # def __init__(self, fitMin: int, fitEnd: int, saveDir: str = './data'):
+    #     self.fit_range = [fitMin, fitEnd]
+    #     self.save_dir = saveDir
 
     def fit_RA_hist_weighting(self):
 
@@ -416,8 +419,8 @@ class Fit_With_Weighting:
         
         self.xfit = xfit
 
-       
-    def plot_RA_and_fit(self, save_fig: bool, show_plot: bool, errorBars: str, outputName: str, method:str = 'aa'):
+
+    def plot_RA_and_fit(self, save_fig: bool, show_plot: bool, errorBars: str, method:str = 'aa'):
 
         '''
         Description:
@@ -490,7 +493,7 @@ class Fit_With_Weighting:
         # Adjusting layout and saving figure (optional)
         if save_fig:
             fig.tight_layout()
-            save_filename = os.path.join(self.save_dir, 'weighted_fit_and_res_' + outputName + '_' + method.replace(' ','_') + '_' + str(self.fit_range[0]) + '-' + str(self.fit_range[1]) + '.png') 
+            save_filename = os.path.join(self.save_dir, 'weighted_fit_and_res_' + method.replace(' ','_') + '_' + str(self.fit_range[0]) + '-' + str(self.fit_range[1]) + '.png') 
             fig.savefig(save_filename, dpi=300, bbox_inches='tight')
         
         # Displaying the plot (optional)

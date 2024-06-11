@@ -12,6 +12,7 @@ The RossiAlpha program can be run with a variety of options that change the visu
 * `Bin width` (*float*): the width of each histogram bin, in the units given by the "Input time units" setting.
     * File analysis does not calculate a bin width. You must supply one.
     * When doing folder analysis, the bin width can be set to null. In this case, the program will automate the bin width to be as small as possible while ensuring the Maximum Average Relative Bin Error (MARBE) is no higher than the following setting.
+        * Note: MARBE is not fully implemented to compute a different bin width for each analysis, if a list is given. It will default to the first time difference method in the list.
     * The MARBE is calculated as follows:
 $`
 MARBE = \frac{\Sigma_{i=1}^n c_i\cdot e_i}{\Sigma_{i=1}^n c_i^2}

@@ -89,7 +89,7 @@ class Analyzer:
 
 
         # Name the file appropriately with the method name and current time.
-        fileName = (output + '/raw_data_' + name + '.csv')
+        fileName = (output + '/output_' + name + '.csv')
         # Open the new file.
         file = open(os.path.abspath(fileName),'w')
         # Initialize variables.
@@ -229,7 +229,7 @@ class Analyzer:
             # If in verbose mode:
             if verbose:
                 # Save the raw data if desired..
-                if io['Save raw data']:
+                if io['Save outputs']:
                     self.export({'Count': (range(0,len(counts)), 0),
                                  'Frequency': (counts,0)},
                                  [('Tau',tau)],
@@ -276,7 +276,7 @@ class Analyzer:
                                scatter_opt=sps,
                                type='Y2')
         # If saving raw dta:
-        if io['Save raw data']:
+        if io['Save outputs']:
             # Create a proper file name.
             if verbose:
                 filename = 'FYFull'
@@ -328,15 +328,14 @@ class Analyzer:
         CA_Object.conductCohnAlpha(show, save, output, caSet, sps, lfs, scatter_plot_settings)
 
 
-
     def createTimeDifs(self,
-                       io:dict,
-                       sort:bool,
-                       reset:float,
-                       method:str,
-                       delay:int,
-                       folder:int = 0,
-                       curFolder:int = 0):
+                        io:dict,
+                        sort:bool,
+                        reset:float,
+                        method:str,
+                        delay:int,
+                        folder:int = 0,
+                        curFolder:int = 0):
         
         '''Create Rossi Alpha time differences.
         
@@ -356,23 +355,21 @@ class Analyzer:
         # If methods is a list, create a time difference for each instance.
         if isinstance(method, list):
             for type in method:
-                self.RATimeDifs['Time differences'].append(dif.timeDifCalcs(
-                    io=io,
-                    reset_time=reset, 
-                    method=type, 
-                    digital_delay=delay,
-                    folderNum=curFolder,
-                    sort_data=sort))
+                self.RATimeDifs['Time differences'].append(dif.timeDifCalcs(io=io,
+                                                                            reset_time=reset, 
+                                                                            method=type, 
+                                                                            digital_delay=delay,
+                                                                            folderNum=curFolder,
+                                                                            sort_data=sort))
                 self.RATimeDifs['Time difference method'].append(type)
         # Otherwise, just create one with the given method.
         else:
-            self.RATimeDifs['Time differences'].append(dif.timeDifCalcs(
-                io=io,
-                reset_time=reset, 
-                method=method, 
-                digital_delay=delay,
-                folderNum=curFolder,
-                sort_data=sort))
+            self.RATimeDifs['Time differences'].append(dif.timeDifCalcs(io=io,
+                                                                        reset_time=reset, 
+                                                                        method=method, 
+                                                                        digital_delay=delay,
+                                                                        folderNum=curFolder,
+                                                                        sort_data=sort))
             self.RATimeDifs['Time difference method'].append(method)
         # For each time difs object, create the time differences.
         for i in range(0,len(self.RATimeDifs['Time differences'])):
@@ -383,7 +380,6 @@ class Analyzer:
         self.RATimeDifs['Number of folders'] = folder
         self.RATimeDifs['Digital delay'] = delay
         self.RATimeDifs['Reset time'] = reset
-        
 
 
     def createPlot(self,
@@ -678,7 +674,7 @@ class Analyzer:
         # Close all currently open plots.
         pyplot.close()
         # If exporting raw data:
-        if settings['Input/Output Settings']['Save raw data'] == True:
+        if settings['Input/Output Settings']['Save outputs'] == True:
             # Initialize variables.
             begin = []
             end = []
@@ -758,6 +754,64 @@ class Analyzer:
         return True, numFolders
 
 
+    def folderTimeDifs(self, settings: dict, window: Tk = None) -> bool:
+        '''Create Rossi Alpha time differences for folders
+        
+        Inputs:
+        - settings: the dictionary that contains all of the runtime settings.
+        - window: the gui window, if in gui mode.
+
+        Outputs:
+        - bool: true if analysis was successful, false otherwise
+        '''
+        numFolders = settings['General Settings']['Number of folders']
+        original = settings['Input/Output Settings']['Input file/folder']
+        if isinstance(settings['RossiAlpha Settings']['Time difference method'], list):
+            numSets = len(settings['RossiAlpha Settings']['Time difference method'])
+        else:
+            numSets = 1
+        # hold a list of all the time difference data across all folders
+        # the first numSets indices hold each folder data individually within the index for each time diff method
+        # the last numSet indicies holds the combined folder data within the index for each time diff method
+        combinedTimeDifs = [[] for _ in range(numSets * 2)]
+        # calculate number of folders if was not specified
+        if numFolders is None:
+            successful, numFolders = self.calcFolderNum(settings['Input/Output Settings']['Input file/folder'])
+            if not successful: return False
+        print("Calculating time differences...")
+        for folder in tqdm(range(1, numFolders + 1)):
+            # Add the folder number to the input.
+            settings['Input/Output Settings']['Input file/folder'] = original + '/' + str(folder)
+            # check if the folder exists. if not, abort
+            if not os.path.isdir(settings['Input/Output Settings']['Input file/folder']):
+                print('ERROR: Folder ', settings['Input/Output Settings']['Input file/folder'], ' does not exist on this path. Please review the RossiAlpha documentation.')
+                print('Aborting...\n')
+                original = settings['Input/Output Settings']['Input file/folder']
+                return False
+            self.createTimeDifs(settings['Input/Output Settings'],
+                                settings['General Settings']['Sort data'],
+                                settings['RossiAlpha Settings']['Reset time'],
+                                settings['RossiAlpha Settings']['Time difference method'],
+                                settings['RossiAlpha Settings']['Digital delay'],
+                                numFolders,
+                                folder)
+            for i in range(numSets):
+                combinedTimeDifs[i].append(self.RATimeDifs['Time differences'][i])
+                combinedTimeDifs[i + numSets].extend(self.RATimeDifs['Time differences'][i])
+        self.RATimeDifs['Time differences'].clear()
+        self.RATimeDifs['Time difference method'].clear()
+        for i in range(len(combinedTimeDifs)):
+            self.RATimeDifs['Time differences'].append(combinedTimeDifs[i])
+        # append the time difference methods; since it stores each individual folder's time differences and the combined, append each method twice
+        for _ in range(2):
+            for i in range(numSets):
+                self.RATimeDifs['Time difference method'].append(settings['RossiAlpha Settings']['Time difference method'][i])
+        # TODO: gui
+        # reset file name to original path
+        original = settings['Input/Output Settings']['Input file/folder']
+        return True
+
+
     def folderMARBE(self, numFolders: int, settings: dict, window: Tk = None):
         '''Function to automatically compute bin width using MARBE when a bin width is not specified for folder analysis
         Automatic bin width calculation is not supported for multiple time difference methods at once; it will default to the
@@ -777,8 +831,6 @@ class Analyzer:
         uncertainties = []
         settings['RossiAlpha Settings']['Bin width'] = math.ceil(settings['RossiAlpha Settings']['Reset time'] / 1000)
         bestBinFound = False
-        # TODO: temp var; delete after multiple time diff method MARBE at once is supported; hold the method used for time diff analysis for multiple method
-        method = ''
         if isinstance(settings['RossiAlpha Settings']['Time difference method'], list):
             numSets = len(settings['RossiAlpha Settings']['Time difference method'])
         else:
@@ -791,35 +843,17 @@ class Analyzer:
         uncertaintyCap = settings['RossiAlpha Settings']['Max avg relative bin err']
         print('Generating time differences...')
         # TODO: provide support for MARBE for multiple time diff methods at once
-        for folder in tqdm(range(1, numFolders)):
-            # Add the folder number to the input.
-            settings['Input/Output Settings']['Input file/folder'] = original + '/' + str(folder)
-            # check if the folder exists. if not, abort
-            if not os.path.isdir(settings['Input/Output Settings']['Input file/folder']):
-                print('ERROR: Folder ', settings['Input/Output Settings']['Input file/folder'], ' does not exist on this path. Please review the RossiAlpha documentation.')
-                print('Aborting...\n')
-                original = settings['Input/Output Settings']['Input file/folder']
-                return False
-            self.createTimeDifs(settings['Input/Output Settings'],
-                                settings['General Settings']['Sort data'],
-                                settings['RossiAlpha Settings']['Reset time'],
-                                settings['RossiAlpha Settings']['Time difference method'],
-                                settings['RossiAlpha Settings']['Digital delay'],
-                                numFolders,
-                                folder)
-            timeDifsMARBE.append(self.RATimeDifs['Time differences'][0])
-            for i in range(numSets):
-                combinedTimeDifs[i].extend(self.RATimeDifs['Time differences'][i])
+        self.folderTimeDifs(settings, window)
+        timeDifsMARBE.copy(self.RATimeDifs['Time differences'][0])
         # Restore the original folder pathway.
         settings['Input/Output Settings']['Input file/folder'] = original
         #TODO: delete after implementing functionality
-        if len(timeDifMethods) > 1:
+        if isinstance(settings['RossiAlpha Settings']['Time difference method'], list):
+            settings['RossiAlpha Settings']['Time difference method'] = settings['RossiAlpha Settings']['Time difference method'][0]
             print('Automatic bin width calculation is currently only supported for 1 time difference method at a time.', 
                     'Defaulting to', 
-                    method,
+                    settings['RossiALpha Settings']['Time difference methodd'][0],
                     'method for the bin width calculation portion.')
-            method = settings['RossiAlpha Settings']['Time difference method'][0]
-            settings['RossiAlpha Settings']['Time difference method'] = method
         print("Testing different bin widths...")
         # hold all time diffs data temporarily
         self.RATimeDifs['Time differences'].clear()
@@ -883,57 +917,6 @@ class Analyzer:
         self.RATimeDifs['Time differences'] = combinedTimeDifs
 
 
-    def folderTimeDifs(self, settings: dict, window: Tk = None) -> bool:
-        '''Create Rossi Alpha time differences for folders
-        
-        Inputs:
-        - settings: the dictionary that contains all of the runtime settings.
-        - window: the gui window, if in gui mode.
-
-        Outputs:
-        - bool: true if analysis was successful, false otherwise
-        '''
-        numFolders = settings['General Settings']['Number of folders']
-        original = settings['Input/Output Settings']['Input file/folder']
-        if isinstance(settings['RossiAlpha Settings']['Time difference method'], list):
-            numSets = len(settings['RossiAlpha Settings']['Time difference method'])
-        else:
-            numSets = 1
-        # hold a list of all the time difference data across all folders
-        combinedTimeDifs = [[] for _ in range(numSets)]
-        # calculate number of folders if was not specified
-        if numFolders is None:
-            successful, numFolders = self.calcFolderNum(settings['Input/Output Settings']['Input file/folder'])
-            if not successful: return False
-        for folder in tqdm(range(1, numFolders + 1)):
-            # Add the folder number to the input.
-            settings['Input/Output Settings']['Input file/folder'] = original + '/' + str(folder)
-            # check if the folder exists. if not, abort
-            if not os.path.isdir(settings['Input/Output Settings']['Input file/folder']):
-                print('ERROR: Folder ', settings['Input/Output Settings']['Input file/folder'], ' does not exist on this path. Please review the RossiAlpha documentation.')
-                print('Aborting...\n')
-                original = settings['Input/Output Settings']['Input file/folder']
-                return False
-            self.createTimeDifs(settings['Input/Output Settings'],
-                                settings['General Settings']['Sort data'],
-                                settings['RossiAlpha Settings']['Reset time'],
-                                settings['RossiAlpha Settings']['Time difference method'],
-                                settings['RossiAlpha Settings']['Digital delay'],
-                                numFolders,
-                                folder)
-            for i in range(numSets):
-                combinedTimeDifs[i].extend(self.RATimeDifs['Time differences'][i])
-        self.RATimeDifs['Time differences'].clear()
-        self.RATimeDifs['Time difference method'].clear()
-        for i in range(numSets):
-            self.RATimeDifs['Time differences'].append(combinedTimeDifs[i])
-            self.RATimeDifs['Time difference method'].append(settings['RossiAlpha Settings']['Time difference method'][i])
-        # TODO: gui
-        # reset file name to original path
-        original = settings['Input/Output Settings']['Input file/folder']
-        return True
-
-
     def makeFolderHist(self, numFolders: int, settings: dict, window: Tk = None):
         '''Helper to create a histogram for a folder input.
 
@@ -953,32 +936,101 @@ class Analyzer:
         ogWidth = settings['RossiAlpha Settings']['Bin width']
         # Get the name of the input.
         name = settings['Input/Output Settings']['Input file/folder']
-        original = name
+        original = settings['Input/Output Settings']['Input file/folder']
         name = name[name[:name.rfind('/')].rfind('/')+1:].replace('/','-')
         # Compute a bin width if one is not provided using MARBE, and get the time differences
         if ogWidth is None:
             self.folderMARBE(numFolders, settings)
-        # if a bin width is provided, calculate the time differences
+        # if a bin width is provided, just calculate the time differences
         else:
             self.folderTimeDifs(settings, window)
         # Restore the original folder pathway.
         settings['Input/Output Settings']['Input file/folder'] = original
         self.RAHist['Histogram'].clear()
-        # create plot(s)
-        for i in range(numHistograms):
-            self.RAHist['Histogram'].append(plt.RossiHistogram(self.RATimeDifs['Time differences'][i], 
-                                                               settings['RossiAlpha Settings']['Bin width'], 
-                                                               settings['RossiAlpha Settings']['Reset time']))
-        # TODO: clean up plot function to correctly handle the bools for saving/showing, instead of this gymnastics
-        for i in range(numHistograms):
-            self.RAHist['Histogram'][i].plot(name, 
-                      self.RATimeDifs['Time difference method'][i],
-                      settings['Input/Output Settings']['Save figures'], 
-                      settings['General Settings']['Show plots'], 
-                      settings['Input/Output Settings']['Save directory'], 
-                      settings['Histogram Visual Settings'], 
-                      True, 
-                      settings['General Settings']['Verbose iterations'])
+        self.RAHist['Bin width'] = settings['RossiAlpha Settings']['Bin width']
+        uncertainties = [[] for _ in range(numHistograms)]
+        stdDev = [[] for _ in range(numHistograms)]
+        # if in verbose mode, create histograms of all subfolders 
+        if settings['General Settings']['Verbose iterations']:
+            for i in range(numHistograms):
+                if isinstance(settings['RossiAlpha Settings']['Time difference method'], list):
+                    method = settings['RossiAlpha Settings']['Time difference method'][i]
+                else:
+                    method = settings['RossiAlpha Settings']['Time difference method']
+                print("Creating plots for each subfolder for method " + method + "...")
+                for j in tqdm(range(numFolders)):
+                    self.RAHist['Histogram'].append(plt.RossiHistogram(self.RATimeDifs['Time differences'][i][j], 
+                                                                        settings['RossiAlpha Settings']['Bin width'], 
+                                                                        settings['RossiAlpha Settings']['Reset time']))
+                    self.RAHist['Histogram'][j].plot((name + "-" + str(j + 1)), 
+                                                        method,
+                                                        settings['Input/Output Settings']['Save figures'], 
+                                                        settings['General Settings']['Show plots'], 
+                                                        settings['Input/Output Settings']['Save directory'], 
+                                                        settings['Histogram Visual Settings'], 
+                                                        True, 
+                                                        settings['General Settings']['Verbose iterations']) 
+                    # if exporting data
+                    if settings['Input/Output Settings']['Save outputs']:
+                        # # calculate uncertainty for the full export file
+                        stdDev[i].append(np.std(self.RAHist['Histogram'][-1].counts, axis=0, ddof=1))
+                        uncertainties[i].append(stdDev[i][-1] * numFolders)
+                        uncertainties[i] = self.replace_zeroes(uncertainties[i])
+                        # Initialize variables.
+                        begin = []
+                        end = []
+                        # Construct the beginning and ending bin edges lists.
+                        for k in range(len(self.RAHist['Histogram'][-1].bin_edges)-1):
+                            begin.append(self.RAHist['Histogram'][-1].bin_edges[k])
+                            end.append(self.RAHist['Histogram'][-1].bin_edges[k+1])
+                        fileName = 'rossi_hist_' + name + '-' + str(j + 1) + '_' + method + '_' + str(self.RAHist['Histogram'][-1].bin_width) + '_' + str(settings['RossiAlpha Settings']['Reset time'])
+                        self.export({'Bin beginning': (begin,0),
+                                'Bin ending': (end,0),
+                                'Measured Count': (self.RAHist['Histogram'][-1].counts,0)},
+                                [('Time difference method',method),
+                                ('Input file', (original + '/' + str(j + 1)))],
+                                fileName,
+                                settings['Input/Output Settings']['Save directory'])
+                    pyplot.close()
+                self.RAHist['Histogram'].clear()
+        # create the histograms of combined data
+        print("Creating histogram(s) of combined data...")
+        for i in tqdm(range(numHistograms)):
+            if isinstance(settings['RossiAlpha Settings']['Time difference method'], list):
+                    method = settings['RossiAlpha Settings']['Time difference method'][i]
+            else:
+                method = settings['RossiAlpha Settings']['Time difference method']
+            self.RAHist['Histogram'].append(plt.RossiHistogram(self.RATimeDifs['Time differences'][i + numHistograms], 
+                                                                settings['RossiAlpha Settings']['Bin width'], 
+                                                                settings['RossiAlpha Settings']['Reset time']))
+            # TODO: clean up plot function to correctly handle the bools for saving/showing, instead of this gymnastics
+            self.RAHist['Histogram'][-1].plot(name, 
+                                            method,
+                                            settings['Input/Output Settings']['Save figures'], 
+                                            settings['General Settings']['Show plots'], 
+                                            settings['Input/Output Settings']['Save directory'], 
+                                            settings['Histogram Visual Settings'], 
+                                            False, 
+                                            settings['General Settings']['Verbose iterations'])
+            # if exporting data
+            if settings['Input/Output Settings']['Save outputs']:
+                # Initialize variables.
+                begin = []
+                end = []
+                # Construct the beginning and ending bin edges lists.
+                for k in range(len(self.RAHist['Histogram'][-1].bin_edges)-1):
+                    begin.append(self.RAHist['Histogram'][-1].bin_edges[k])
+                    end.append(self.RAHist['Histogram'][-1].bin_edges[k+1])
+                fileName = 'rossi_hist_' + name + '_' + method + '_' + str(self.RAHist['Histogram'][-1].bin_width) + '_' + str(settings['RossiAlpha Settings']['Reset time'])
+                self.export({'Bin beginning': (begin,0),
+                        'Bin ending': (end,0),
+                        'Measured Count': (self.RAHist['Histogram'][-1].counts,0),
+                        },
+                        [('Time difference method',method),
+                        ('Number of folders', numFolders),
+                        ('Input file', original)],
+                        fileName,
+                        settings['Input/Output Settings']['Save directory'])
         pyplot.close()
         # restore original bin width if it was changed--redundant if it was not
         settings['RossiAlpha Settings']['Bin width'] = ogWidth
@@ -1003,7 +1055,7 @@ class Analyzer:
         return successful
 
 
-    def makeFolderFit(self, numFolders: int, settings: dict, window: Tk = None, full: bool = False):
+    def makeFolderFit(self, numFolders: int, settings: dict, full: bool = False, window: Tk = None):
         '''Construct best fit plot for a folder analysis.
 
         Inputs:
@@ -1041,7 +1093,7 @@ class Analyzer:
             # Close all open plots.
             pyplot.close()
             # If exporting raw data for individual folders:
-            if settings['Input/Output Settings']['Save raw data'] == True and settings['General Settings']['Verbose iterations'] == True:
+            if settings['Input/Output Settings']['Save outputs'] == True and settings['General Settings']['Verbose iterations'] == True:
                 # Initialize variables.
                 begin = []
                 end = []
@@ -1053,9 +1105,7 @@ class Analyzer:
                 for i in range(0,len(self.RABestFit['Best fit'])):
                     name = settings['Input/Output Settings']['Input file/folder']
                     name = name[name[:name.rfind('/')].rfind('/')+1:].replace('/','-')
-                    name += ('_' + str(self.RATimeDifs['Time difference method'][int(i/numRanges)])
-                        + '_' + str(self.RABestFit['Fit minimum'][i % numRanges])
-                        + '-' + str(self.RABestFit['Fit maxmimum'][i % numRanges]))
+                    fileName = 'rossi_fit_' + name + '_' + self.RATimeDifs['Time difference method'][int(i/numRanges)] + '_' + str(self.RABestFit['Fit minimum'][i % numRanges]) + '-' + str(self.RABestFit['Fit maximum'][i % numRanges]) + '_' + str(self.RAHist['Histogram'][-1].bin_width) + '_' + str(settings['RossiAlpha Settings']['Reset time'])
                     # Export the beginning and ends of bins, measured counts, 
                     # Fit counts, residual, fit parameters, and file name.
                     self.export({'Bin beginning': (begin,0),
@@ -1063,17 +1113,10 @@ class Analyzer:
                                 'Measured Count': (self.RAHist['Histogram'][int(i/numRanges)].counts,0),
                                 'Fit count': (self.RABestFit['Best fit'][i].pred,self.RABestFit['Best fit'][i].fit_index[0][0]),
                                 'Percent error': (self.RABestFit['Best fit'][i].residuals,self.RABestFit['Best fit'][i].fit_index[0][0])},
-                                [('A', self.RABestFit['Best fit'][i].a),
-                                ('A uncertainty', self.RABestFit['Best fit'][i].perr[0]),
-                                ('Alpha', self.RABestFit['Best fit'][i].alpha),
-                                ('Alpha uncertainty', self.RABestFit['Best fit'][i].perr[1]),
-                                ('B', self.RABestFit['Best fit'][i].b),
-                                ('Fit minimum',self.RABestFit['Fit minimum'][i % numRanges]),
-                                ('Fit maximum',self.RABestFit['Fit maximum'][i % numRanges]),
-                                ('Time difference method',self.RATimeDifs['Time difference method'][int(i/numRanges)]),
+                                [('Time difference method',self.RATimeDifs['Time difference method'][int(i/numRanges)]),
                                 ('Bin width',self.RAHist['Histogram'][int(i/numRanges)].bin_width),
                                 ('Input file', settings['Input/Output Settings']['Input file/folder'])],
-                                'RAFolder' + str(folder),
+                                fileName,
                                 settings['Input/Output Settings']['Save directory'])
             # If in gui mode:
             if window != None:
@@ -1131,10 +1174,9 @@ class Analyzer:
                 thisWeightedFit.plot_RA_and_fit(settings['Input/Output Settings']['Save figures'], 
                                                 settings['General Settings']['Show plots'],
                                                 settings['RossiAlpha Settings']['Error Bar/Band'],
-                                                settings['Input/Output Settings']['Output name'],
                                                 self.RATimeDifs['Time difference method'][i])
                 # If saving raw data:
-                if settings['Input/Output Settings']['Save raw data'] == True:
+                if settings['Input/Output Settings']['Save outputs'] == True:
                     begin = []
                     end = []
                     # Fill out the beginning and ending of each bin.
@@ -1168,6 +1210,7 @@ class Analyzer:
                                 ('Input file', settings['Input/Output Settings']['Input file/folder'])],
                                 name,
                                 settings['Input/Output Settings']['Save directory'])
+                    
         if isinstance(auto, bool):
             if auto:
                 settings['RossiAlpha Settings']['Fit maximum'] = None
@@ -1186,12 +1229,23 @@ class Analyzer:
         return True
 
 
-    def folderFit(self, settings: dict, window: Tk = None):
+    def folderFit(self, settings: dict, full: bool = False, window: Tk = None):
+        '''
+        Function to fit the data to an exponentional curve
+
+        Inputs:
+        - settings: dictionary holding all the runtime settings
+        - full: a bool indicating if this is was called using option m or f
+        - window: the gui window, if applicable
+
+        Outputs:
+        - successful: a bool indicating if the analysis was successful or not
+        '''
         numFolders = settings['General Settings']['Number of folders']
         # If no number of folders given, compute number of folders.
         if numFolders is None:
             successful, numFolders = self.calcFolderNum(settings['Input/Output Settings']['Input file/folder'])
             if not successful: return False
-        successful = self.makeFolderFit(numFolders, settings, window)
+        successful = self.makeFolderFit(numFolders, settings, full, window)
         return successful
 
