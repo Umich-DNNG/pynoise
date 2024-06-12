@@ -9,7 +9,6 @@ testing*
 *.png
 *.npy
 *.pdf
-*.txt
 *.csv
 
 # Python software default outputs
