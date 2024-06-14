@@ -45,10 +45,7 @@ class Analyzer:
         self.RABestFit = {'Best fit': [],
                           'Fit minimum': [],
                           'Fit maximum': []}
-        self.CohnAlpha = {'CA_Object': None,
-                          'Histogram': [],
-                          'Welch Result': [],
-                          'PSD Fit Curve': []}
+        self.CohnAlpha = None
         self.FeynmanY = {}
 
 
@@ -298,13 +295,13 @@ class Analyzer:
             
 
     # Deprecated Function
-    # better to call FitPSDCurve(); does the same with more options
+    # better to call fitCohnAlpha(); does the same with more options
     # def conductCohnAlpha(self, settings: dict = {}, overwrite:bool = True):
     #     '''Runs Cohn Alpha analysis.
     #     Inputs:
     #     - settings: the current user's runtime settings'''
     #     # Run PSDCurve (runs entire method if overwrite is true)
-    #     self.fitPSDCurve(settings=settings, overwrite=True)
+    #     self.fitCohnAlpha(settings=settings, overwrite=True)
 
 
 
@@ -315,10 +312,10 @@ class Analyzer:
         - settings: the current user's runtime settings'''
 
         # Load the values from the specified file into an NP array.
+        # Create and return Cohn Alpha object
         values = np.loadtxt(settings['Input/Output Settings']['Input file/folder'], usecols=0, dtype=float)
 
         return ca.CohnAlpha(values,
-                            settings['CohnAlpha Settings']['Dwell time'],
                             settings['CohnAlpha Settings']['Meas time range'],
                             settings['Input/Output Settings']['Quiet mode'])
 
@@ -335,13 +332,13 @@ class Analyzer:
         - overwrite: if overwriting the current information in memory
         '''
 
-        if self.CohnAlpha['CA_Object'] is None:
-            self.CohnAlpha['CA_Object'] = self.genCohnAlphaObject(settings)
+        if self.CohnAlpha is None:
+            self.CohnAlpha = self.genCohnAlphaObject(settings)
 
         if not overwrite:
             return False
 
-        self.CohnAlpha['CA_Object'].plotCountsHistogram(settings)
+        self.CohnAlpha.plotCountsHistogram(settings)
         return True
 
 
@@ -392,7 +389,8 @@ class Analyzer:
 
         if not overwrite:
             return False
-        self.CohnAlpha['CA_Object'].welchApproxFourierTrans(settings)
+        
+        self.CohnAlpha.welchApproxFourierTrans(settings)
         return True
 
         # OLD CODE
@@ -414,7 +412,7 @@ class Analyzer:
 
 
 
-    def fitPSDCurve(self, settings:dict = {}, overwrite:bool = True):        
+    def fitCohnAlpha(self, settings:dict = {}, overwrite:bool = True):        
         
         '''
         Fits a Power Spectral Density Curve onto a 
@@ -432,7 +430,7 @@ class Analyzer:
         if not overwrite:
             return False
     
-        self.CohnAlpha['CA_Object'].fitPSDCurve(settings=settings)
+        self.CohnAlpha['CA_Object'].fitCohnAlpha(settings=settings)
         return True
 
         # OLD CODE
@@ -446,7 +444,7 @@ class Analyzer:
         
         # dict_list = self.CohnAlpha['Welch Result']
         # for dict in dict_list:
-        #     PSDFitCurveDict = self.CohnAlpha['CA_Object'].fitPSDCurve(settings=settings, welchResultDict=dict)
+        #     PSDFitCurveDict = self.CohnAlpha['CA_Object'].fitCohnAlpha(settings=settings, welchResultDict=dict)
         #     self.CohnAlpha['PSD Fit Curve'].append(PSDFitCurveDict)
         
         # return True

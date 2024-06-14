@@ -41,15 +41,16 @@ def main(editorIn: edit.Editor, queue: list[str]):
                     editor.print('ERROR: You currently have no input file/folder defined or the input file/folder cannot be found. '
                           + 'Please ensure input path is correct before running any analysis.\n')
                     continue
-        
-        overwrite = True
+
         # NOTE: currently overwrite not doing anything, as program doesn't have capabilities to overwrite data
         # the program will either instantly load in data with the correct settings, or generate the data
+        overwrite = True
+
         match selection:
             # Run entire Cohn-Alpha method
             case 'm':
                     editor.print('\nRunning the entire Cohn Alpha analysis...')
-                    analyzer.fitPSDCurve(editor.parameters.settings, overwrite=True)
+                    analyzer.fitCohnAlpha(editor.parameters.settings, overwrite=True)
                     editor.log('Ran the entire Cohn Alpha on file ' 
                                 + editor.parameters.settings['Input/Output Settings']['Input file/folder'] 
                                 + '\n')
@@ -58,8 +59,8 @@ def main(editorIn: edit.Editor, queue: list[str]):
                 # If data exists, ask if user willing to overwrite
                 # if overwriting, run function
                 # Otherwise, do nothing
-                if analyzer.CohnAlpha['Histogram'] != []:
-                    overwrite = overwriteHelperFunction(queue=queue, key='Histogram')
+                # if analyzer.CohnAlpha['Histogram'] != []:
+                    # overwrite = overwriteHelperFunction(queue=queue, key='Histogram')
 
                 if analyzer.plotCohnAlphaHist(settings=editor.parameters.settings, overwrite=overwrite):
                     editor.log('Generated Cohn Alpha Histogram on file '
@@ -70,8 +71,8 @@ def main(editorIn: edit.Editor, queue: list[str]):
                 # If data exists, ask if user willing to overwrite
                 # if overwriting, run function
                 # Otherwise, do nothing
-                if analyzer.CohnAlpha['Welch Result'] != []:
-                    overwrite = overwriteHelperFunction(queue=queue, key='Welch Result')
+                # if analyzer.CohnAlpha['Welch Result'] != []:
+                #     overwrite = overwriteHelperFunction(queue=queue, key='Welch Result')
 
                 if analyzer.applyWelchApprox(settings=editor.parameters.settings, overwrite=overwrite):
                     editor.log('Calculated frequency and power spectral density values on '
@@ -82,10 +83,10 @@ def main(editorIn: edit.Editor, queue: list[str]):
                 # If data exists, ask if user willing to overwrite
                 # if overwriting or no data exists, run function
                 # Otherwise, do nothing
-                if analyzer.CohnAlpha['PSD Fit Curve'] != []:
-                    overwrite = overwriteHelperFunction(queue=queue, key='PSD Fit Curve')
+                # if analyzer.CohnAlpha['PSD Fit Curve'] != []:
+                #     overwrite = overwriteHelperFunction(queue=queue, key='PSD Fit Curve')
 
-                if analyzer.fitPSDCurve(settings=editor.parameters.settings, overwrite=overwrite):
+                if analyzer.fitCohnAlpha(settings=editor.parameters.settings, overwrite=overwrite):
                     editor.log('Fitted Power Spectral Density Curve on '
                             + editor.parameters.settings['Input/Output Settings']['Input file/folder'] 
                             + '.\n')

@@ -3,6 +3,7 @@ import matplotlib.pyplot as pyplot     # For plotting data summaries
 from scipy.optimize import curve_fit   # For fitting the curve
 from scipy import signal               # For welch (fourier transform)
 from pathlib import Path               # Currently strings for pathnames are not working, attempting to use pathlib/Path
+import datastream as ds
 import os                              # For saving figures
 import math                            # To compare floats and assign correct time units string
 #import h5py                            # For saving data in .hdf5 format                       
@@ -20,7 +21,6 @@ def CAFit(f, A, alpha, c):
 class CohnAlpha:
     def __init__(self, 
                  list_data_array,
-                 dwell_time: float = 2.0e6, 
                  meas_time_range: list[float] = [1.5e11, 1.0e12],
                  quiet: bool = False):
 
@@ -37,12 +37,14 @@ class CohnAlpha:
             - PowerSpectralDensity() object
         '''
 
+        # set quiet variable first for print statements
+        self.quiet = quiet
+        self.print("Reading in input file/folder data...")
+
         # Required Parameters
         self.list_data_array = list_data_array
         self.meas_time_range = meas_time_range
-        self.dwell_time = dwell_time
         self.fs = 0
-        self.quiet = quiet
         
         self.print("Finished reading input file/folder data")
 
@@ -298,7 +300,7 @@ class CohnAlpha:
     def conductCohnAlpha(self, settings: dict = {}):
         
         '''
-        Deprecated Function. Just call FitPSDCurve() instead
+        Deprecated Function. Just call fitCohnAlpha() instead
 
 
         Creating PSD plot from an array of data inputs.
@@ -341,34 +343,39 @@ class CohnAlpha:
         self.annotate_background_color = settings['CohnAlpha Settings']['Annotation Background Color']
         self.annotate_font_size = settings['CohnAlpha Settings']['Font Size']
         
+
+        # calculate dwell time
+        # change from Hz --> seconds --> nanoseconds
+        dwell_time = 1 / (2 * settings['CohnAlpha Settings']['Frequency Maximum'])
+        dwell_time = dwell_time * 1e9
+
         # Making count of bins over time histogram
-        count_bins = np.diff(self.meas_time_range) / self.dwell_time
+        count_bins = np.diff(self.meas_time_range) / dwell_time
 
         # read in histogram data
         # reformat lists to numpy arrays
         counts_time_hist = []
         edges_seconds = []
 
-        inputPath = self.constructPathName(settings=settings,
-                                           type="Histogram")
-        
+        ds.importAnalysis(
+            data={
+                'Time(s)': edges_seconds,
+                'Counts': counts_time_hist
+            },
+            name='ca_hist_s',
+            output=settings['Input/Output Settings']['Save directory']
+        )
 
-        self.readInFile(x=edges_seconds, 
-                        y=counts_time_hist,
-                        residuals=[],
-                        popt=[],
-                        pcov=[],
-                        method='Histogram',
-                        inputPath=inputPath)
-        
         counts_time_hist = np.array(counts_time_hist, dtype=np.int64)
         edges_seconds = np.array(edges_seconds, dtype=np.float64)
 
+
+        # TODO: find minimum/maximum frequency values that result in the same dwell_time and nperseg values
         # If unable to read in data/no data exists
         # Generating corresponding histogram
         if counts_time_hist.size == 0 or edges_seconds.size == 0:
-            counts_time_hist, edges = np.histogram(a=self.list_data_array, 
-                                                   bins=int(count_bins), 
+            counts_time_hist, edges = np.histogram(a=self.list_data_array,
+                                                   bins=int(count_bins),
                                                    range=self.meas_time_range)
             edges_seconds = edges / 1e9
             edges_seconds = edges_seconds[:-1]
@@ -380,27 +387,37 @@ class CohnAlpha:
             pyplot.xlabel('Time (s)')
             pyplot.ylabel('Counts')
             pyplot.title('Cohn-Alpha Counts Histogram')
-            pyplot.show()
             
             # Saving counts histogram
+            # histogram file name: CACountsHist_[freq min]_[freq_max]_[time units].png
+            # TODO: start to use settings and time units setting, currently hard coding in seconds
+            # NOTE: if saving figure and showing plot, must first save plot
+            # otherwise matplotlib saves a blank plot
             if settings['Input/Output Settings']['Save figures']:
                 pyplot.tight_layout()
                 absPath = os.path.abspath(settings['Input/Output Settings']['Save directory'])
-                save_img_filename = os.path.join(absPath, 'CACountsHist' + str(self.dwell_time) + '.png')
+                frequencyString = f"{settings['CohnAlpha Settings']['Frequency Minimum']}_{settings['CohnAlpha Settings']['Frequency Maximum']}_s"
+                save_img_filename = os.path.join(absPath, 'CACountsHist_' + frequencyString + '.png')
                 pyplot.savefig(save_img_filename, dpi=300, bbox_inches='tight')
                 # self.print('Histogram Image saved at ' + save_img_filename)
 
+            pyplot.show()
             pyplot.close()
         # Saving counts histogram raw data
         if settings['Input/Output Settings']['Save raw data']:
-            path = self.constructPathName(settings=settings, type="Histogram")
-            exportRawData(x=edges_seconds,
-                          y=counts_time_hist,
-                          residuals=None,
-                          settings=settings,
-                          method='Histogram',
-                          outputPath=path)
-            # self.print('Histogram Data saved at ' + str(outputPath))
+            ds.exportAnalysis(
+                data={
+                    'Time(s)': (edges_seconds.tolist(), 0),
+                    'Counts': (counts_time_hist.tolist(), 0)
+                },
+                singles=[],
+                name='ca_hist_s',
+                output=settings['Input/Output Settings']['Save directory']
+            )
+
+            # output save location
+            outputPath = os.path.abspath(settings['Input/Output Settings']['Save directory'])
+            self.print('Histogram Data saved at ' + str(outputPath))
 
         # Creating evenly spaced start and stop endpoint for plotting
         timeline = np.linspace(start=self.meas_time_range[0], 
@@ -435,18 +452,11 @@ class CohnAlpha:
         f = []
         Pxx = []
 
-        inputPath = self.constructPathName(settings=settings,type="Graph")
-
-        self.readInFile(x=f, 
-                        y=Pxx, 
-                        residuals=None,
-                        popt=[],
-                        pcov=[],
-                        method='Welch Result',
-                        inputPath=inputPath)
+        # ds.importAnalysis()
 
         f = np.array(f, dtype=np.float64)
         Pxx = np.array(Pxx, dtype=np.float64)
+
         
         # If existing data does not exist
         # Apply welch approximation of the fourier transform, converting counts over time to a frequency distribution
@@ -454,15 +464,16 @@ class CohnAlpha:
             edges_seconds = []
             counts_time_hist = []
 
+            dwell_time = 1 / (2 * settings['CohnAlpha Settings']['Frequency Maximum'])
+            nperseg = 1 / (dwell_time * settings['CohnAlpha Settings']['Frequency Minimum'])
+            print(int(nperseg))
+
+            if not checkPowerOfTwo(nperseg=int(nperseg)):
+                self.print('WARNING: calculated nperseg is not a power of 2')
+
             # first attempt to read in file
-            inputPath = self.constructPathName(settings=settings,type="Histogram")
-            self.readInFile(x=edges_seconds,
-                            y=counts_time_hist,
-                            residuals=None,
-                            popt=[],
-                            pcov=[],
-                            method="Histogram",
-                            inputPath=inputPath)
+            # ds.importAnalysis()
+
             counts_time_hist = np.array(counts_time_hist, dtype=np.int64)
 
             # if no existing data found for the histogram
@@ -470,8 +481,8 @@ class CohnAlpha:
             if counts_time_hist.size == 0:
                 edges_seconds, counts_time_hist = self.plotCountsHistogram(settings=settings)
             f, Pxx = signal.welch(x=counts_time_hist,
-                                fs=self.fs, 
-                                nperseg=settings['CohnAlpha Settings']['nperseg'], 
+                                fs=self.fs,
+                                nperseg=int(nperseg), 
                                 window='boxcar')
             
 
@@ -492,7 +503,7 @@ class CohnAlpha:
         # Saving figure (optional)
         if settings['Input/Output Settings']['Save figures']:
             fig.tight_layout()
-            save_filename = os.path.join(settings['Input/Output Settings']['Save directory'], 'CAScatterPlot' + str(self.dwell_time) + '.png')
+            save_filename = os.path.join(settings['Input/Output Settings']['Save directory'], 'CAScatterPlot' + '.png')
             fig.savefig(save_filename, dpi=300, bbox_inches='tight')
             # self.print('Scatterplot Image saved at ' + save_filename)
 
@@ -505,19 +516,22 @@ class CohnAlpha:
         
         # Saving scatter plot data (optional)
         if settings['Input/Output Settings']['Save raw data']:
-            path = self.constructPathName(settings=settings, type="Graph")
-            exportRawData(x=f,
-                          y=Pxx,
-                          residuals=None,
-                          settings=settings,
-                          method='Welch Result',
-                          outputPath=path)
+            ds.exportAnalysis(
+                data={
+                    'Frequency (Hz)': (f.tolist(), 0),
+                    'Counts^2/Hz': (Pxx.tolist(), 0)
+                },
+                singles=[],
+                name='ca_graph_s',
+                output=settings['Input/Output Settings']['Save directory']
+            )
+            # outputPath = os.path.abspath(settings['Input/Output Settings']['Save directory'])
             # self.print('Scatterplot Data saved at ' + str(outputPath))
 
         return (f, Pxx)
         
 
-    def fitPSDCurve(self, settings:dict = {}):
+    def fitCohnAlpha(self, settings:dict = {}):
 
         '''
         Fits Power Spectral Density onto provided scatterplot
@@ -533,7 +547,8 @@ class CohnAlpha:
             - dict: contains the fitted curve
         '''
 
-
+        # initialize lists
+        # read in files
         self.print('\nFitting Power Spectral Density Curve...')
         f = []
         Pxx = []
@@ -541,15 +556,7 @@ class CohnAlpha:
         popt = []
         pcov = []
 
-        inputPath = self.constructPathName(settings=settings,type="Graph")
-
-        self.readInFile(x=f,
-                        y=Pxx,
-                        residuals=residuals,
-                        popt=popt,
-                        pcov=pcov,
-                        method='PSD Fit Curve',
-                        inputPath=inputPath)
+        # ds.importAnalysis()
 
 
         # convert lists to proper numpy array
@@ -647,17 +654,22 @@ class CohnAlpha:
         
         pyplot.close()
 
-        # TODO: save together with scatter plot data
         if settings['Input/Output Settings']['Save raw data']:
-            path = self.constructPathName(settings=settings,type='Graph')
-            exportRawData(x=f,
-                          y=Pxx,
-                          residuals=residuals,
-                          popt=popt,
-                          pcov=pcov,
-                          settings=settings,
-                          method='PSD Fit Curve',
-                          outputPath=path)
+            ds.exportAnalysis(
+                data={
+                    'Frequency (Hz)': (f.tolist(), 0),
+                    'Counts^2/Hz': (Pxx.tolist(), 0),
+                    'Residuals': (residuals.tolist(), 0)
+                },
+                singles=[('optimal a', popt[0]),
+                         ('optimal alpha', popt[1]),
+                         ('optimal c', popt[2]),
+                         ('alpha', alpha),
+                         ('uncertainty', uncertainty)],
+                name='ca_graph_s',
+                output=settings['Input/Output Settings']['Save directory']
+            )
+            # outputPath = os.path.abspath(settings['Input/Output Settings']['Save directory'])
             # self.print('Fitted Curve Data saved at ' + str(outputPath))
         
         # Outputting the PSD distribution and fit
@@ -666,113 +678,12 @@ class CohnAlpha:
                 'alpha': alpha,
                 'uncertainty': uncertainty}
     
+
     def print(self, message):
         if self.quiet:
             return
         print(message)
 
-    def readInFile(self, x, y, residuals, popt, pcov, method:str = "", inputPath:str=""):
-        # open file
-        # skip header, store in case needed
-        # read in data
-        try:
-            with open(inputPath, 'r') as file:
-                headerLine = next(file)
-                headerLine = headerLine.split(',')
-                numCols = len(headerLine)
-                if method != 'PSD Fit Curve':
-                    # read in file
-                    for line in file:
-                        splitLines = line.split(',')
-                        x.append(splitLines[0])
-                        y.append(splitLines[1])
-
-                    self.print ("Existing Data found at " + str(inputPath))
-                    return
-                else:
-                    # check number of columns in the file
-                    # if 5 columns, continue and read in data (fitted graph data)
-                    # if not 5 columns, then read in scatterplot data recursively, generate rest of data
-                    if numCols != 5:
-                        self.print("Scatterplot Data Found instead of Fitted Graph Data")
-                        self.print("Generating Fitted Graph Data")
-                        self.readInFile(x=x,
-                                        y=y,
-                                        residuals=residuals,
-                                        popt=popt,
-                                        pcov=pcov,
-                                        method="Welch Result",
-                                        inputPath=inputPath)
-                        return
-                    # read in first 3 lines separately for popt and pcov
-                    for i in range(3):
-                        line = next(file)
-                        splitLines = line.split(',')
-                        x.append(splitLines[0])
-                        y.append(splitLines[1])
-                        residuals.append(splitLines[2])
-                        popt.append(splitLines[3])
-                        pcov_arr = []
-                        pcov_arr.extend([splitLines[4], splitLines[5], splitLines[6]])
-                        pcov.append(np.array(pcov_arr,dtype=np.float64))
-                    # read in the rest of the file
-                    for line in file:
-                        splitLines = line.split(',')
-                        x.append(splitLines[0])
-                        y.append(splitLines[1])
-                        residuals.append(splitLines[2])
-                    self.print ("Existing Data found at " + str(inputPath))
-                    return
-        # If graph data unable to be found
-        # Then return false and generate the data
-        except FileNotFoundError:
-            # TODO: print current settings as well
-            self.print("Existing Data with current settings could not be found")
-            self.print("Data must be stored within the save directory listed in the settings.")
-            self.print("Generating Data...")
-            return
-            
-    def constructPathName(self, settings:dict={}, type:str=""):
-        '''Helper function to help construct filename
-            Also used to determine if file exists or not
-
-        method has 3 possible values:
-            "Histogram": finds histogram data
-            "Welch Result": finds scatterplot data
-            "PSD Fit Curve": finds fitted graph data
-
-        Input:
-            settings: the current user's runtime settings
-            method: the type of data to be found (scatterplot, histogram, etc)
-
-        Output:
-            Path(): the absolute path to the data. Can be converted to string via str(Path())
-        '''
-
-        map = {
-            'Histogram': 'hist',
-            'Graph': 'graph'
-        }
-        # grab input file's name
-        inputFileName = os.path.abspath(settings['Input/Output Settings']['Input file/folder'])
-        inputFileName = Path(inputFileName).stem
-
-        # construct fileName
-        fileName = "ca"
-        fileName = fileName + "_" + map[type]
-        fileName = fileName + "_" + str(settings['CohnAlpha Settings']['Dwell time'])
-
-        timeRangeStart = str(settings['CohnAlpha Settings']['Meas time range'][0])
-        timeRangeEnd = str(settings['CohnAlpha Settings']['Meas time range'][1])
-        fileName = fileName + "_" + timeRangeStart + "-" + timeRangeEnd
-        fileName = fileName + "_" + str(settings['CohnAlpha Settings']['nperseg']) + ".csv"
-
-        # construct output directory
-        outputPath = os.path.abspath(settings['Input/Output Settings']['Save directory'])
-        outputPath = Path(outputPath)
-        outputPath = outputPath / fileName
-
-        return outputPath
 # ---------------------------------------------------------------------------------------------------   
 
 # Helper Functions
@@ -795,34 +706,22 @@ def convertTimeUnitsToStr(units):
     # seconds
     if (math.isclose(a=units, b=1, abs_tol=1)):
         return 's'
-     
 
-def exportRawData(x, y, residuals=None, popt:list=[], pcov:list=[], settings:dict={}, method:str="", outputPath:str=""):
 
-    # open file
-    # write header
-    # then write data
-    with open(outputPath, "w+") as file:
-        if method == 'Histogram':
-            # convert time units to string
-            timeUnits = settings['General Settings']['Output time units']
-            timeUnits = convertTimeUnitsToStr(timeUnits)
-            file.write("%s,%s\n" % ("counts", "time(" + timeUnits + ')'))
-            for x, y in zip(x, y):
-                file.write("%s,%s\n" % (x, y))
 
-        elif method == 'Welch Result':
-            file.write("%s,%s\n" % ('Frequency(Hz)', 'Counts^2/Hz'))
-            for x, y in zip(x, y):
-                file.write("%s,%s\n" % (x, y))
+def checkPowerOfTwo(value):
+    '''Function to check if value is a power of 2 or not
+    Returns True if a power of 2, otherwise returns False
+    
+    Input:
+    - value (int): the value to be checked'''
+    while (value > 1):
+        value = value / 2
 
-        elif method == 'PSD Fit Curve':
-            # write alpha and uncertainty first, then write the graph points
-            file.write("%s,%s,%s,%s,%s\n" % ('Frequency(Hz)', 'Counts^2/Hz', 'Residuals', 'popt', 'pcov'))
-            for i in range(3):
-                pcov_str = f"{pcov[i][0]},{pcov[i][1]},{pcov[i][2]}"
-                file.write("%s,%s,%s,%s,%s\n" % (x[i], y[i], residuals[i], popt[i], pcov_str))
-            for x, y, residuals, in zip(x[3:], y[3:], residuals[3:]):
-                file.write("%s,%s,%s\n" % (x, y, residuals))
+    if value == 1:
+        return True
+    if value < 1:
+        return False
+    
 
-    return outputPath
+def plot()
