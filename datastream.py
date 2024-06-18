@@ -60,9 +60,8 @@ def importAnalysis(data: dict[str:tuple],
 
             # if singles is a list, populate list, otherwise ignore singles
             if singles is not None:
-
                 # start at singles column
-                # grab column in addition to value
+                # grab column header in addition to value
                 # append to singles list
                 for header, value in zip(headerLine[numDataColumns:], singleLine[numDataColumns:]):
                     singles.append((header, value))
@@ -70,34 +69,22 @@ def importAnalysis(data: dict[str:tuple],
             # add information from 1st line to each of the lists in the dict
             # exclude singles information
             # use headerLine's values as keys
+            # add entire column, whitespace and empty string removed later
             for colNum in range(numDataColumns):
-                startRow = data[headerLine[colNum]][1]
-                stopRow = data[headerLine[colNum]][2]
-
-                # if startRow and stopRow <= 0, append entire column
-                # otherwise ensure in correct range [startRow, stopRow)
-                if startRow <= 0 and stopRow <= 0:
-                    data[headerLine[colNum]][0].append(singleLine[colNum])
-                
-                elif rowNum >= startRow and rowNum < stopRow:
-                    data[headerLine[colNum]][0].append(line[colNum])
+                data[headerLine[colNum]].append(singleLine[colNum])
 
             # iterate through the rest of the file
             # use headerLine's values as keys
+            # add every value to lists, whitespace and empty string removed later
             for rowNum, line in enumerate(tqdm(file)):
                 line = line.strip().split(',')
                 for colNum in range(numDataColumns):
-                    list = data[headerLine[colNum]][0]
-                    startRow = data[headerLine[colNum]][1]
-                    stopRow  = data[headerLine[colNum]][2]
+                    data[headerLine[colNum]].append(line[colNum])
 
-                    # if starting row and stopping row are <= 0, then append without question
-                    # otherwise check if in range of [starting row, stopping row)
-                    if startRow <= 0 and stopRow <= 0:
-                        list.append(line[colNum])
-
-                    elif rowNum >= startRow and rowNum < stopRow:
-                        list.append(line[colNum])
+        # clean up lists, removing empty strings and whitespace entries
+        # '[:]' used to modify list in place
+        for inputList in data.values():
+            inputList[:] = [x for x in inputList if x.strip()]
 
         print("Finished reading in analysis data")
         return True
