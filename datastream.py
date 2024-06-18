@@ -2,43 +2,56 @@ import os
 from tqdm import tqdm
 
 
-def importAnalysis(data: dict[str:[]],
+def importAnalysis(data: dict[str:tuple],
                    name: str,
                    singles:list = None,
-                   output: str = './data'):
-    '''Importing analysis data from a csv file. The imported data
-    will be stored in the data dict. The name of the columns
-    in the csv file should match the name of the keys in the dict.
+                   input: str = './data'):
+
+    '''
+    Importing analysis data from a csv file. The imported data
+    will be stored in the data dict. 
+    
+    
+    The name of the columns in the csv file should match the keys in the dict.
+    The value of the dict should be a tuple, in the format (list, starting int, stopping int)
+    Information from rows [starting int, stopping int) will be read into the list.
+    If both the first and the second int are set to a value <= 0,
+    then the function will read until end of file.
     Singles should be an empty list to be populated with tuples.
     The tuple's first value will be the single's column header,
     the second value will be the value of the single.
-    Note: if singles == None, assuming no singles value to be imported
+    If singles == None, assuming no singles value to be imported.
+    
+    
+    The function assumes that all columns of data will be read.
+    Function will crash if len(data.keys()) != # of header columns
+
     
     Inputs:
-    - dict: a dictionary that contains all the 
-    list data to be outputted to the csv file. 
-    Each key will be the name of the column, and 
-    the value stored will be a tuple. The first 
-    value is the list of data, and the second is 
-    the row to start displaying the list at.
+    - dict: a dictionary. Each key will be the name of the column.
+    The value stored should be a tuple, in the form of (list, starting int, stopping int)
+    The list is used to store input data.
+    Information from rows [starting int, stopping int) will be read into the lists.
+    If starting int == stopping int <= 0, then the entire column will be read.
     - single: a list of single values to display on the top row. 
     Each list value will contain a tuple, whose first entry is 
     the name of the value and whose second entry is the value.
     - method: the name of the method of analysis.
-    - output: the output directory. If not given, defaults to ./data.'''
+    - input: the input directory. If not given, defaults to ./data.'''
 
     # construct import file name
-    fileName = (output + '/output_' + name + '.csv')
+    fileName = (input + '/output_' + name + '.csv')
     # open file
-    # if file does not exist, print message then return
     try:
         with open(fileName, 'r') as file:
+
             print("reading in analysis data...")
+
             # grab header as well as 1st line of data
             headerLine = next(file)
             singleLine = next(file)
 
-            # split string into list separating by comma via split()
+            # split string into list, separating by comma via split()
             # removing newlines via strip()
             # calculate number of data columns
             headerLine = headerLine.strip().split(',')
@@ -50,29 +63,57 @@ def importAnalysis(data: dict[str:[]],
             # otherwise if singles is a list, populate list
             if singles is not None:
                 # start at singles column
-                # grab header information in addition to value
-                # append to return list
-                for tuple in zip(headerLine[numDataColumns:], singleLine[numDataColumns:]):
-                    singles.append(tuple)
+                # grab column in addition to value
+                # append to singles list
+                for header, value in zip(headerLine[numDataColumns:], singleLine[numDataColumns:]):
+                    singles.append((header, value))
 
             # add information from 1st line to each of the lists in the dict
             # exclude singles information
-            for i in range(numDataColumns):
-                # use headerLine as key
+            for colNum in range(numDataColumns):
+                startRow = data[headerLine[colNum]][1]
+                stopRow = data[headerLine[colNum]][2]
 
-                data[headerLine[i]].append(singleLine[i])
+                # if startRow and stopRow <= 0, append entire column
+                if startRow <= 0 and stopRow <= 0:
+                    # use headerLine as key
+                    data[headerLine[colNum]][0].append(singleLine[colNum])
+                
+                # otherwise ensure in correct range [startRow, stopRow)
+                elif rowNum >= startRow and rowNum < stopRow:
+                    data[headerLine[colNum]][0].append(line[colNum])
 
             # iterate through the rest of the file
-            # use headerLine as key and append values
-            for i, line in enumerate(tqdm(file)):
+            # use headerLine 
+            for rowNum, line in enumerate(tqdm(file)):
                 line = line.strip().split(',')
-                for i in range(numDataColumns):
-                    data[headerLine[i]].append(line[i])
+                for colNum in range(numDataColumns):
+                    list = data[headerLine[colNum]][0]
+                    startRow = data[headerLine[colNum]][1]
+                    stopRow  = data[headerLine[colNum]][2]
+
+                    # if starting row and stopping row are <= 0, then append without question
+                    if startRow <= 0 and stopRow <= 0:
+                        list.append(line[colNum])
+
+                    # otherwise check if in range of [starting row, stopping row)
+                    elif rowNum >= startRow and rowNum < stopRow:
+                        list.append(line[colNum])
 
         print("Finished reading in analysis data")
+        return True
+    # if file does not exist, print message then return
     except FileNotFoundError:
         print("Analysis data could not be found")
         print("Generating analysis data from input file")
+        return False
+
+    except IndexError:
+        print("An error occurred while reading in analysis data")
+        print("Generating analysis data from input file")
+        return False
+
+    
 
 def exportAnalysis(data: dict[str:tuple], 
             singles: list[tuple], 
