@@ -306,18 +306,13 @@ class Analyzer:
 
 
     def genCohnAlphaObject(self, settings: dict = {}):
-        '''Creates a Cohn Alpha object
+        '''Creates and returns a Cohn Alpha object
         
         Inputs:
         - settings: the current user's runtime settings'''
 
-        # Load the values from the specified file into an NP array.
         # Create and return Cohn Alpha object
-        values = np.loadtxt(settings['Input/Output Settings']['Input file/folder'], usecols=0, dtype=float)
-
-        return ca.CohnAlpha(values,
-                            settings['CohnAlpha Settings']['Meas time range'],
-                            settings['Input/Output Settings']['Quiet mode'])
+        return ca.CohnAlpha(settings=settings)
 
 
 
@@ -385,7 +380,7 @@ class Analyzer:
         '''
 
         # Ensure that histogram exists
-        self.plotCohnAlphaHist(settings=settings, overwrite=overwrite)
+        self.plotCohnAlphaHist(settings=settings, overwrite=False)
 
         if not overwrite:
             return False
@@ -425,12 +420,12 @@ class Analyzer:
         '''
         
         # ensure necessary data exists
-        self.applyWelchApprox(settings=settings, overwrite=overwrite)
+        self.applyWelchApprox(settings=settings, overwrite=False)
 
         if not overwrite:
             return False
     
-        self.CohnAlpha['CA_Object'].fitCohnAlpha(settings=settings)
+        self.CohnAlpha.fitCohnAlpha(settings=settings)
         return True
 
         # OLD CODE
