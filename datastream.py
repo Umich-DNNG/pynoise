@@ -40,28 +40,27 @@ def importAnalysis(data: dict[str:tuple],
     - input: the input directory. If not given, defaults to ./data.'''
 
     # construct import file name
+    # attempt to open file
     fileName = (input + '/output_' + name + '.csv')
-    # open file
     try:
         with open(fileName, 'r') as file:
-
             print("reading in analysis data...")
-
             # grab header as well as 1st line of data
+            # used to populate singles
             headerLine = next(file)
             singleLine = next(file)
 
-            # split string into list, separating by comma via split()
+            # split string into list
             # removing newlines via strip()
+            # separating by comma via split()
             # calculate number of data columns
             headerLine = headerLine.strip().split(',')
             singleLine = singleLine.strip().split(',')
-
             numDataColumns = len(data.keys())
 
-            # if singles is None, then skip
-            # otherwise if singles is a list, populate list
+            # if singles is a list, populate list, otherwise ignore singles
             if singles is not None:
+
                 # start at singles column
                 # grab column in addition to value
                 # append to singles list
@@ -70,21 +69,21 @@ def importAnalysis(data: dict[str:tuple],
 
             # add information from 1st line to each of the lists in the dict
             # exclude singles information
+            # use headerLine's values as keys
             for colNum in range(numDataColumns):
                 startRow = data[headerLine[colNum]][1]
                 stopRow = data[headerLine[colNum]][2]
 
                 # if startRow and stopRow <= 0, append entire column
+                # otherwise ensure in correct range [startRow, stopRow)
                 if startRow <= 0 and stopRow <= 0:
-                    # use headerLine as key
                     data[headerLine[colNum]][0].append(singleLine[colNum])
                 
-                # otherwise ensure in correct range [startRow, stopRow)
                 elif rowNum >= startRow and rowNum < stopRow:
                     data[headerLine[colNum]][0].append(line[colNum])
 
             # iterate through the rest of the file
-            # use headerLine 
+            # use headerLine's values as keys
             for rowNum, line in enumerate(tqdm(file)):
                 line = line.strip().split(',')
                 for colNum in range(numDataColumns):
@@ -93,22 +92,33 @@ def importAnalysis(data: dict[str:tuple],
                     stopRow  = data[headerLine[colNum]][2]
 
                     # if starting row and stopping row are <= 0, then append without question
+                    # otherwise check if in range of [starting row, stopping row)
                     if startRow <= 0 and stopRow <= 0:
                         list.append(line[colNum])
 
-                    # otherwise check if in range of [starting row, stopping row)
                     elif rowNum >= startRow and rowNum < stopRow:
                         list.append(line[colNum])
 
         print("Finished reading in analysis data")
         return True
-    # if file does not exist, print message then return
+    
+    # file does not exist error
+    # return false and inform users something went wrong
     except FileNotFoundError:
         print("Analysis data could not be found")
         print("Generating analysis data from input file")
         return False
 
+    # out of bounds error (for lists), accessed inaccessible memory
+    # return false and inform users something went wrong
     except IndexError:
+        print("An error occurred while reading in analysis data")
+        print("Generating analysis data from input file")
+        return False
+    
+    # key error (for dicts), provided incorrect keys
+    # return false and inform users something went wrong
+    except KeyError:
         print("An error occurred while reading in analysis data")
         print("Generating analysis data from input file")
         return False
