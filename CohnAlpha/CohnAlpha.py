@@ -348,7 +348,6 @@ class CohnAlpha:
         Output:
             - count_times_hist: the histogram saved in array format
         '''
-        
 
         # calculate dwell time
         # change from Hz --> seconds --> nanoseconds
@@ -366,8 +365,8 @@ class CohnAlpha:
         # import data from disk
         importResults = ds.importAnalysis(
             data={
-                'Time(s)': (edges_seconds, 0, 0),
-                'Counts': (counts_time_hist, 0, 0)
+                'Time(s)': edges_seconds,
+                'Counts': counts_time_hist
             },
             name='ca_hist_s',
             input=settings['Input/Output Settings']['Save directory'])
@@ -440,8 +439,8 @@ class CohnAlpha:
 
         importResults = ds.importAnalysis(
                     data={
-                        'Frequency(Hz)': (f, 0, 0),
-                        'Counts^2/Hz': (Pxx, 0, 0)
+                        'Frequency(Hz)': f,
+                        'Counts^2/Hz': Pxx
                     },
                     name='ca_graph_s',
                     input=settings['Input/Output Settings']['Save directory'])
@@ -467,8 +466,8 @@ class CohnAlpha:
             # import data from disk
             importResults = ds.importAnalysis(
                 data={
-                    'Time(s)': (edges_seconds, 0, 0),
-                    'Counts': (counts_time_hist, 0, 0)
+                    'Time(s)': edges_seconds,
+                    'Counts': counts_time_hist
                 },
                 name='ca_hist_s',
                 input=settings['Input/Output Settings']['Save directory'])
@@ -478,7 +477,7 @@ class CohnAlpha:
 
             # if no existing data found for the histogram
             # Apply welch approximation of the fourier transform, converting counts over time to a frequency distribution
-            if not importResults == 0:
+            if not importResults:
                 edges_seconds, counts_time_hist = self.plotCountsHistogram(settings=settings)
             f, Pxx = signal.welch(x=counts_time_hist,
                                 fs=self.fs,
@@ -532,41 +531,41 @@ class CohnAlpha:
 
         importResults = ds.importAnalysis(
             data={
-                'Frequency(Hz)': (f, 0, 0),
-                'Counts^2/Hz': (Pxx, 0, 0),
-                'Residuals': (residuals, 0, 0)
+                'Frequency(Hz)': f,
+                'Counts^2/Hz': Pxx,
+                'Residuals': residuals
             },
             singles=singlesPopt,
             name='ca_graph_s',
             input=settings['Input/Output Settings']['Save directory'])
-    
-        # remove empty strings in residuals
-        residuals = [x for x in residuals if x.strip()]
 
         popt = []
 
         # modify singles' list of tuples
+        # change to list of only the values, leaving behind column header information
         # grab value from each tuple
-        while singlesPopt != []:
-            popt.append(singlesPopt.pop(0)[1])
-
-        # assign uncertainty and alpha values
-        # grab from end of list
-        uncertainty = np.float64(popt.pop(len(popt) - 1))
-        alpha = np.float64(popt.pop(len(popt) - 1))
-
+        # only do it if import worked properly
+        if importResults:
+            while singlesPopt != []:
+                popt.append(singlesPopt.pop(0)[1])          
+            # assign uncertainty and alpha values
+            # grab from end of list
+            # i.e. [x, y, z, alpha, uncertainty] --> [x, y, z, alpha] --> [x, y, z]
+            uncertainty = np.float64(popt.pop(len(popt) - 1))
+            alpha = np.float64(popt.pop(len(popt) - 1))
 
         # convert lists to proper numpy array
         f = np.array(f, dtype=np.float64)
         Pxx = np.array(Pxx, dtype=np.float64)
+        residuals = np.array(residuals, dtype=np.float64)
         popt = np.array(popt,dtype=np.float64)
 
         # if no existing data is found
         # re-generate scatterplot data, fitting data
         # Ignore start & end points that are incorrect due to welch endpoint assumptions
+        # Fitting distribution with expected equation
         if not importResults:
             f, Pxx = self.welchApproxFourierTrans(settings=settings)
-            # Fitting distribution with expected equation
             popt, pcov = curve_fit(CAFit,
                                 f[1:-2],
                                 Pxx[1:-2],
@@ -574,13 +573,33 @@ class CohnAlpha:
                                 bounds=(0, np.inf),
                                 maxfev=100000)
             
-            # save Alpha and Uncertainty values
             alpha = np.around(popt[1]*2*np.pi, decimals=2)
             uncertainty = np.around(pcov[1,1]*2*np.pi, decimals=2)
+            residuals = ((CAFit(f[1:-2], *popt) - Pxx[1:-2]) / Pxx[1:-2]) * 100
 
         # Display Alpha and Uncertainty values, store within Welch Approx
         self.print('alpha = ' + str(alpha) + ', uncertainty = '+ 
                     str(uncertainty))
+        
+        
+        kwDict = {
+            'optimal a': popt[0],
+            'optimal alpha': popt[1],
+            'optimal c': popt[2],
+            'alpha': alpha,
+            'uncertainty': uncertainty
+        }
+
+        # TODO: place plotting function here
+        self.plot(x=f, y=Pxx, residuals=residuals, method='fit', settings=settings, **kwDict)
+
+        return
+        # also construct kwargs here
+        # return 'TODO COME BACK TO HERE'
+        # TODO: another TODO so I can see this easier
+
+        
+
 
         
         # Plotting the auto-power-spectral-density distribution and fit
@@ -592,16 +611,17 @@ class CohnAlpha:
         ax[0].semilogx(f[1:-2], CAFit(f[1:-2], *popt), **settings['Line Fitting Settings'])
 
 
-        
         # Setting minimum and maximum for y
         ymin, ymax = ax[0].get_ylim()
         dy = ymax-ymin
+
 
         # Constructing alpha string
         alph_str = (r'$\alpha$ = (' +
             '{:.2e}'.format(alpha) + '$\pm$ ' + 
             '{:.2e}'.format(uncertainty) + ') 1/s')
-        
+
+
         # Annotating the plots
         ax[0].annotate(alph_str, 
                      xy=(1.5, ymin+0.1*dy), 
@@ -610,18 +630,18 @@ class CohnAlpha:
                      fontweight=self.annotate_font_weight,
                      color=self.annotate_color, 
                      backgroundcolor=self.annotate_background_color)
-        
+
+
         # Creating title and legend
         ax[0].set_title('Cohn Alpha Graph')
         ax[0].legend(loc='upper right')
+
 
         # Creating axis titles
         ax[0].set_xlim([1, 200])
         ax[0].set_xlabel('Frequency(Hz)')
         ax[0].set_ylabel('Counts$^2$/Hz')
 
-        # Compute residuals
-        residuals = ((CAFit(f[1:-2], *popt) - Pxx[1:-2]) / Pxx[1:-2]) * 100
 
         # Use f for residuals
         ax[1].scatter(f[1:-2], residuals, **settings['Scatter Plot Settings'])
@@ -673,6 +693,7 @@ class CohnAlpha:
         print(message)
         
     def plot(self, x, y, residuals = None, method:str = '', settings:dict = {}, **kwargs):
+
         '''
         Cohn Alpha Plotting Function
         x, y should both be numpy arrays to plot the x,y values
@@ -710,29 +731,24 @@ class CohnAlpha:
             gridSpecDict['height_ratios']= [2, 1]
 
 
-        # plot counts histogram
-        # TODO: apparently pyplot.subplots() and pyplot.scatter() do NOT work together
-        # Need to find a way to plot counts histogram using subplots
-        # documentation link: https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.subplots.html
-        # shows how to do a scatterplot in addition with other plots
-
+        # initialize plot
         fig, ax = pyplot.subplots(nrows=nRows,sharex=shareX, gridspec_kw=gridSpecDict)
 
         # fit creates a numpy array, modify data structure to be a numpy array
         if method != 'fit':
             ax = np.array([ax, ax])
 
+        # set axis labelx
         ax[0].set_xlabel(xLabel)
         ax[0].set_ylabel(yLabel)
         ax[0].set_title(graphTitle)
 
-        # if histogram, call scatter
+        # if histogram, plot histogram values
         if method == 'hist':
             ax[0].scatter(x=x,
                     y=y,
                     **settings['Scatter Plot Settings'])
 
-            
         # if scatterplot or fitting, then:
         # change scaling of x-axis to log scaling via semilogx()
         # plot points onto graph
@@ -747,16 +763,23 @@ class CohnAlpha:
             # calculate and ddisplay alpha and uncertainty values
             # construct alpha string
             if method == 'fit':
+                popt = []
+                popt.append(kwargs['optimal a'])
+                popt.append(kwargs['optimal alpha'])
+                popt.append(kwargs['optimal c'])
                 ax[0].semilogx(x[1:-2], CAFit(y[1:-2], *popt), **settings['Line Fitting Settings'])                
-                
                 ax[0].legend(loc='upper right')
                 ax[1].scatter(x[1:-2], residuals, **settings['Scatter Plot Settings'])
                 ax[1].axhline(y=0, color='#162F65', linestyle='--')
                 ax[1].set_xlabel(xLabel)
                 ax[1].set_ylabel(y2Label)
-                
-                alpha = np.around(popt[1]*2*np.pi, decimals=2)
-                uncertainty = np.around(pcov[1,1]*2*np.pi, decimals=2)
+
+                # NOTE: should be able to pass in alpha and uncertainty through **kwargs
+                # don't need below code
+                # alpha = np.around(popt[1]*2*np.pi, decimals=2)
+                # uncertainty = np.around(pcov[1,1]*2*np.pi, decimals=2)
+                alpha = kwargs['alpha']
+                uncertainty = kwargs['uncertainty']
                 self.print('alpha = ' + str(alpha) + ', uncertainty = ' + 
                     str(uncertainty))
                 
@@ -791,12 +814,7 @@ class CohnAlpha:
         # close graph after showing graph
         self.print("Plotting...")
         pyplot.show()
-        
         pyplot.close()
-
-
-
-
 
 # ---------------------------------------------------------------------------------------------------   
 
@@ -826,9 +844,11 @@ def convertTimeUnitsToStr(units):
 def checkPowerOfTwo(value):
     '''Function to check if value is a power of 2 or not
     Returns True if a power of 2, otherwise returns False
+    Note: make value an integer, otherwise cannot properly calculate
     
     Input:
     - value (int): the value to be checked'''
+
     while (value > 1):
         value = value / 2
 
