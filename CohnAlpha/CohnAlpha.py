@@ -581,7 +581,8 @@ class CohnAlpha:
         self.print('alpha = ' + str(alpha) + ', uncertainty = '+ 
                     str(uncertainty))
         
-        
+        self.print(popt)
+
         kwDict = {
             'optimal a': popt[0],
             'optimal alpha': popt[1],
@@ -767,6 +768,7 @@ class CohnAlpha:
                 popt.append(kwargs['optimal a'])
                 popt.append(kwargs['optimal alpha'])
                 popt.append(kwargs['optimal c'])
+                popt = np.array(popt,dtype=np.float64)
                 ax[0].semilogx(x[1:-2], CAFit(y[1:-2], *popt), **settings['Line Fitting Settings'])                
                 ax[0].legend(loc='upper right')
                 ax[1].scatter(x[1:-2], residuals, **settings['Scatter Plot Settings'])
