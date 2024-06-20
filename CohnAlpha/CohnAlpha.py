@@ -580,8 +580,6 @@ class CohnAlpha:
         # Display Alpha and Uncertainty values, store within Welch Approx
         self.print('alpha = ' + str(alpha) + ', uncertainty = '+ 
                     str(uncertainty))
-        
-        self.print(popt)
 
         kwDict = {
             'optimal a': popt[0],
@@ -591,13 +589,11 @@ class CohnAlpha:
             'uncertainty': uncertainty
         }
 
-        # TODO: place plotting function here
-        self.plot(x=f, y=Pxx, residuals=residuals, method='fit', settings=settings, **kwDict)
-
-        return
-        # also construct kwargs here
-        # return 'TODO COME BACK TO HERE'
-        # TODO: another TODO so I can see this easier
+        # TODO: need to change quite a few things
+        # plotting() function finished, need to create separate fitting function instead
+        # use plot to place the initial data points, then use fit to place the fitted curve
+        # call curve_fit and everything inside the fit function
+        # self.plot(x=f, y=Pxx, method='fit', settings=settings)
 
         
 
@@ -693,12 +689,11 @@ class CohnAlpha:
             return
         print(message)
         
-    def plot(self, x, y, residuals = None, method:str = '', settings:dict = {}, **kwargs):
+    def plot(self, x, y, method:str = '', settings:dict = {}):
 
         '''
         Cohn Alpha Plotting Function
         x, y should both be numpy arrays to plot the x,y values
-        residuals, popt, and pcov are only used for fitting, otherwise set to None
         method should have 3 possible values, either: 'hist', 'scatter', or 'fit'
         settings are user's current runtime settings
 
@@ -713,12 +708,12 @@ class CohnAlpha:
         # x-axis label, y-axis label, graph title, residual's y-axis label
         # if not using residuals, then residual's y-axis label is set to None
         map = {
-            'hist': ('Time(s)', 'Counts', 'Cohn-Alpha Counts Histogram', None),
-            'scatter': ('Frequency(Hz)', 'Counts^2/Hz', 'Cohn-Alpha Scatter Plot', None),
-            'fit': ('Frequency(Hz)', 'Counts^2/Hz', 'Cohn-Alpha Graph', 'Percent difference (%)')
+            'hist': ('Time(s)', 'Counts', 'Cohn-Alpha Counts Histogram'),
+            'scatter': ('Frequency(Hz)', 'Counts^2/Hz', 'Cohn-Alpha Scatter Plot'),
+            'fit': ('Frequency(Hz)', 'Counts^2/Hz', 'Cohn-Alpha Graph')
         }
         
-        xLabel, yLabel, graphTitle, y2Label = map[method]
+        xLabel, yLabel, graphTitle = map[method]
 
         # initialize variables for hist and scatterplot settings
         nRows = 1
@@ -758,54 +753,19 @@ class CohnAlpha:
             ax[0].semilogx(x[1:-2], y[1:-2], '.', **settings['Semilog Plot Settings'])
             ax[0].set_xlim([1, 200])
             
-            # if fitting, then do addition changes:
-            # plot the fitted curve
-            # plot the residuals
-            # calculate and ddisplay alpha and uncertainty values
-            # construct alpha string
+            # if fitting, then return
+            # call fit() to fit the curve, then show the plot
             if method == 'fit':
-                popt = []
-                popt.append(kwargs['optimal a'])
-                popt.append(kwargs['optimal alpha'])
-                popt.append(kwargs['optimal c'])
-                popt = np.array(popt,dtype=np.float64)
-                ax[0].semilogx(x[1:-2], CAFit(y[1:-2], *popt), **settings['Line Fitting Settings'])                
-                ax[0].legend(loc='upper right')
-                ax[1].scatter(x[1:-2], residuals, **settings['Scatter Plot Settings'])
-                ax[1].axhline(y=0, color='#162F65', linestyle='--')
-                ax[1].set_xlabel(xLabel)
-                ax[1].set_ylabel(y2Label)
+                return (fig, ax)
 
-                # NOTE: should be able to pass in alpha and uncertainty through **kwargs
-                # don't need below code
-                # alpha = np.around(popt[1]*2*np.pi, decimals=2)
-                # uncertainty = np.around(pcov[1,1]*2*np.pi, decimals=2)
-                alpha = kwargs['alpha']
-                uncertainty = kwargs['uncertainty']
-                self.print('alpha = ' + str(alpha) + ', uncertainty = ' + 
-                    str(uncertainty))
-                
-                ymin, ymax = ax[0].get_ylim()
-                dy = ymax - ymin
-                alph_str = (r'$\alpha$ = (' +
-                            '{:.2e}'.format(alpha) + '$\pm$ ' +
-                            '{:.2e}'.format(uncertainty) + ') 1/s')
-                ax[0].annotate(alph_str,
-                               xy=(1.5, ymin+0.1*dy),
-                               xytext=(1.5, ymin+0.1*dy),
-                               fontsize=self.annotate_font_size,
-                               fontweight=self.annotate_font_weight,
-                               color=self.annotate_color,
-                               backgroundcolor=self.annotate_background_color)
-
-        # reduce padding in the figure
-        fig.tight_layout()
 
         # Saving figure
         # file name: CA_[method]_[freq min]_[freq_max]_[time units].png
         # TODO: start to use settings and time units setting, currently hard coding in seconds
         # NOTE: if saving figure and showing plot: must first save plot, otherwise matplotlib saves a blank plot
         if settings['Input/Output Settings']['Save figures']:
+            # reduce padding in the figure
+            fig.tight_layout()
             absPath = os.path.abspath(settings['Input/Output Settings']['Save directory'])
             frequencyString = f"{settings['CohnAlpha Settings']['Frequency Minimum']}_{settings['CohnAlpha Settings']['Frequency Maximum']}_s"
             save_img_filename = os.path.join(absPath, 'CA_' + method + '_' + frequencyString + '.png')
@@ -817,6 +777,56 @@ class CohnAlpha:
         self.print("Plotting...")
         pyplot.show()
         pyplot.close()
+
+
+    def fit(self, fig, ax, fitEquation, **kwargs):
+
+        '''
+        Fitting Function; assumes plot() has been called with method='fit' 
+        Fits scatterplot with Power Spectral Density Curve
+
+        Inputs:
+            self: (TODO: ADD DESCRIPTION)
+            fig: the figure returned by pyplot.subplots()
+            ax: the axes returned by pyplot.subplots()
+            fitEquation: the equation that will be used by curve_fit() to fit the graph
+            kwargs: (TODO: ADD DESCRIPTION)
+        '''
+        'Percent difference (%)'
+        popt = []
+        popt.append(kwargs['optimal a'])
+        popt.append(kwargs['optimal alpha'])
+        popt.append(kwargs['optimal c'])
+        popt = np.array(popt,dtype=np.float64)
+        ax[0].semilogx(x[1:-2], CAFit(y[1:-2], *popt), **settings['Line Fitting Settings'])                
+        ax[0].legend(loc='upper right')
+        ax[1].scatter(x[1:-2], residuals, **settings['Scatter Plot Settings'])
+        ax[1].axhline(y=0, color='#162F65', linestyle='--')
+        ax[1].set_xlabel(xLabel)
+        ax[1].set_ylabel(y2Label)
+
+        # NOTE: should be able to pass in alpha and uncertainty through **kwargs
+        # don't need below code
+        # alpha = np.around(popt[1]*2*np.pi, decimals=2)
+        # uncertainty = np.around(pcov[1,1]*2*np.pi, decimals=2)
+        alpha = kwargs['alpha']
+        uncertainty = kwargs['uncertainty']
+        self.print('alpha = ' + str(alpha) + ', uncertainty = ' + 
+            str(uncertainty))
+        
+        ymin, ymax = ax[0].get_ylim()
+        dy = ymax - ymin
+        alph_str = (r'$\alpha$ = (' +
+                    '{:.2e}'.format(alpha) + '$\pm$ ' +
+                    '{:.2e}'.format(uncertainty) + ') 1/s')
+        ax[0].annotate(alph_str,
+                        xy=(1.5, ymin+0.1*dy),
+                        xytext=(1.5, ymin+0.1*dy),
+                        fontsize=self.annotate_font_size,
+                        fontweight=self.annotate_font_weight,
+                        color=self.annotate_color,
+                        backgroundcolor=self.annotate_background_color)
+
 
 # ---------------------------------------------------------------------------------------------------   
 

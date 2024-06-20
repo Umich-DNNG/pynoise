@@ -16,7 +16,6 @@ def initCohnAlphaObject(settings: dict = {}):
     # otherwise return
     if caObj is not None:
         return False
-
     caObj = ca.CohnAlpha(settings=settings)
 
     return True
@@ -33,9 +32,7 @@ def plotCohnAlphaHist(settings:dict = {}):
     - overwrite: if overwriting the current information in memory
     '''
 
-
     initCohnAlphaObject(settings)
-
     caObj.plotCountsHistogram(settings)
     return True
 
@@ -52,7 +49,6 @@ def applyWelchApprox(settings:dict = {}):
     - overwrite: if overwriting the current information in memory
     '''
 
-    # Ensure that histogram exists
     plotCohnAlphaHist(settings=settings)
     
     caObj.welchApproxFourierTrans(settings)
