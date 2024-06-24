@@ -244,7 +244,7 @@ class CohnAlpha:
         Output:
             - dict: contains the fitted curve
 
-        --------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------
         Old docstring:
         Creating PSD plot from an array of data inputs.
         Saving and showing the plot can be turned on or off.
@@ -323,19 +323,24 @@ class CohnAlpha:
         self.print('alpha = ' + str(alpha) + ', uncertainty = '+ 
                     str(uncertainty))
 
-        kwDict = {
-            'optimal a': popt[0],
-            'optimal alpha': popt[1],
-            'optimal c': popt[2],
-            'alpha': alpha,
-            'uncertainty': uncertainty
-        }
-
         # TODO: need to change quite a few things
         # plotting() function finished, need to create separate fitting function instead
         # use plot to place the initial data points, then use fit to place the fitted curve
         # call curve_fit and everything inside the fit function
-        # self.plot(x=f, y=Pxx, method='fit', settings=settings)
+        fig, ax = self.plot(x=f, y=Pxx, method='fit', settings=settings)
+
+        kwDict = {
+            'fig': fig,
+            'ax': ax,
+            'optimal a': popt[0],
+            'optimal alpha': popt[1],
+            'optimal c': popt[2],
+            'alpha': alpha,
+            'uncertainty': uncertainty}
+        
+        self.fit(x=f, y=Pxx, residuals=residuals, settings=settings, **kwDict)
+
+        return
 
 
         
@@ -494,6 +499,7 @@ class CohnAlpha:
             # points have already been plotted, need to fit a curve
             # fit() will fit the curve and show plot
             if method == 'fit':
+                # TODO: maybe call fit() instead?
                 return (fig, ax)
 
 
@@ -516,89 +522,66 @@ class CohnAlpha:
         pyplot.show()
         pyplot.close()
 
-        # return tuple to be consistent with method == 'fit'
-        return None, None
-
-# ---------------------------------------------------------------------------------------------------   
-
-# Helper Functions
-def convertTimeUnitsToStr(units):
-    # femtoseconds
-    if (math.isclose(a=units, b=1e-15, abs_tol=1e-15)):
-        return 'fs'
-    # picoseconds
-    if (math.isclose(a=units, b=1e-12, abs_tol=1e-12)):
-        return 'ps'    
-    # nano seconds
-    if (math.isclose(a=units, b=1e-9, abs_tol=1e-9)):
-        return 'ns'
-    # microseconds
-    if (math.isclose(a=units, b=1e-6, abs_tol=1e-6)):
-        return 'us'
-    # milliseconds
-    if (math.isclose(a=units, b=1e-3, abs_tol=1e-3)):
-        return 'ms'
-    # seconds
-    if (math.isclose(a=units, b=1, abs_tol=1)):
-        return 's'
+    def fit(self, x, y, residuals, settings:dict = {}, **kwargs):
 
 
+        '''
+        Fitting Function; assumes plot() has been called with method='fit' 
+        Fits scatterplot with Power Spectral Density Curve
 
-def checkPowerOfTwo(value):
-    '''Function to check if value is a power of 2 or not
-    Returns True if a power of 2, otherwise returns False
-    Note: make value an integer, otherwise cannot properly calculate
-    
-    Input:
-    - value (int): the value to be checked'''
+        Inputs:
+            self: (TODO: ADD DESCRIPTION)
+            fig: the figure returned by pyplot.subplots()
+            ax: the axes returned by pyplot.subplots()
+            fitEquation: the equation that will be used by curve_fit() to fit the graph
+            kwargs: (TODO: ADD DESCRIPTION)
+        '''
+        'Percent difference (%)'
 
-    while (value > 1):
-        value = value / 2
+        alpha = kwargs['alpha']
+        uncertainty = kwargs['uncertainty']
+        fig = kwargs['fig']
+        ax = kwargs['ax']
 
-            '''
-            Fitting Function; assumes plot() has been called with method='fit' 
-            Fits scatterplot with Power Spectral Density Curve
+        popt, pcov = curve_fit(CAFit,
+                            x[1:-2],
+                            y[1:-2],
+                            p0=[y[2], 25, 0.001],
+                            bounds=(0, np.inf),
+                            maxfev=100000)
+        
+        ax[0].semilogx(x[1:-2], CAFit(y[1:-2], *popt), **settings['Line Fitting Settings'])                
+        ax[0].legend(loc='upper right')
+        ax[1].scatter(x[1:-2], residuals, **settings['Scatter Plot Settings'])
+        ax[1].axhline(y=0, color='#162F65', linestyle='--')
+        ax[1].set_xlabel('Frequency(Hz)')
+        ax[1].set_ylabel('Percent difference (%)')
 
-            Inputs:
-                self: (TODO: ADD DESCRIPTION)
-                fig: the figure returned by pyplot.subplots()
-                ax: the axes returned by pyplot.subplots()
-                fitEquation: the equation that will be used by curve_fit() to fit the graph
-                kwargs: (TODO: ADD DESCRIPTION)
-            '''
-            'Percent difference (%)'
-            popt = []
-            popt.append(kwargs['optimal a'])
-            popt.append(kwargs['optimal alpha'])
-            popt.append(kwargs['optimal c'])
-            popt = np.array(popt,dtype=np.float64)
-            ax[0].semilogx(x[1:-2], CAFit(y[1:-2], *popt), **settings['Line Fitting Settings'])                
-            ax[0].legend(loc='upper right')
-            ax[1].scatter(x[1:-2], residuals, **settings['Scatter Plot Settings'])
-            ax[1].axhline(y=0, color='#162F65', linestyle='--')
-            ax[1].set_xlabel(xLabel)
-            ax[1].set_ylabel(y2Label)
+        self.print('alpha = ' + str(alpha) + ', uncertainty = ' + 
+            str(uncertainty))
+        
+        ymin, ymax = ax[0].get_ylim()
+        dy = ymax - ymin
+        alph_str = (r'$\alpha$ = (' +
+                    '{:.2e}'.format(alpha) + '$\pm$ ' +
+                    '{:.2e}'.format(uncertainty) + ') 1/s')
 
-            # NOTE: should be able to pass in alpha and uncertainty through **kwargs
-            # don't need below code
-            # alpha = np.around(popt[1]*2*np.pi, decimals=2)
-            # uncertainty = np.around(pcov[1,1]*2*np.pi, decimals=2)
-            alpha = kwargs['alpha']
-            uncertainty = kwargs['uncertainty']
-            self.print('alpha = ' + str(alpha) + ', uncertainty = ' + 
-                str(uncertainty))
-            
-            ymin, ymax = ax[0].get_ylim()
-            dy = ymax - ymin
-            alph_str = (r'$\alpha$ = (' +
-                        '{:.2e}'.format(alpha) + '$\pm$ ' +
-                        '{:.2e}'.format(uncertainty) + ') 1/s')
-            ax[0].annotate(alph_str,
-                            xy=(1.5, ymin+0.1*dy),
-                            xytext=(1.5, ymin+0.1*dy),
-                            fontsize=self.annotate_font_size,
-                            fontweight=self.annotate_font_weight,
-                            color=self.annotate_color,
-                            backgroundcolor=self.annotate_background_color)
+        ax[0].annotate(alph_str,
+                        xy=(1.5, ymin+0.1*dy),
+                        xytext=(1.5, ymin+0.1*dy),
+                        fontsize=self.annotate_font_size,
+                        fontweight=self.annotate_font_weight,
+                        color=self.annotate_color,
+                        backgroundcolor=self.annotate_background_color)
+        
+        # Saving figure (optional)
+        if settings['Input/Output Settings']['Save figures']:
+            fig.tight_layout()
+            frequencyString = f"{settings['CohnAlpha Settings']['Frequency Minimum']}_{settings['CohnAlpha Settings']['Frequency Maximum']}_s"
+            save_filename = os.path.join(settings['Input/Output Settings']['Save directory'], 'fittedCohnAlpha_' + frequencyString + '.png')
+            fig.savefig(save_filename, dpi=300, bbox_inches='tight')
+
+        pyplot.show()
+        pyplot.close()
 
 # ---------------------------------------------------------------------------------------------------
