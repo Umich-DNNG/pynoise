@@ -9,13 +9,14 @@ def initCohnAlphaObject(settings: dict = {}):
     Inputs:
     - settings: the current user's runtime settings'''
 
-    # must set variable global before using
+    # NOTE: must declare variable as global before reference otherwise Python complains
     global caObj
     
     # if uninitialized then set variable
     # otherwise return
     if caObj is not None:
         return False
+    
     caObj = ca.CohnAlpha(settings=settings)
 
     return True

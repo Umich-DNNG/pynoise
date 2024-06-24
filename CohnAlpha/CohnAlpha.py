@@ -136,7 +136,7 @@ class CohnAlpha:
         # Calculating power spectral density distribution from counts over time hist (Get frequency of counts samples)
         # Save into class, for future functions to use
         self.fs = 1 / (timeline[3]-timeline[2])
-        return (edges_seconds, counts_time_hist)
+        return edges_seconds, counts_time_hist
     
     def welchApproxFourierTrans(self, settings:dict = {}):
 
@@ -337,7 +337,8 @@ class CohnAlpha:
         # call curve_fit and everything inside the fit function
         # self.plot(x=f, y=Pxx, method='fit', settings=settings)
 
-       
+
+        
         # Plotting the auto-power-spectral-density distribution and fit
         fig, ax = pyplot.subplots(nrows=2, sharex=True, figsize=(8, 6), gridspec_kw={'height_ratios': [2, 1]})
 
@@ -437,15 +438,9 @@ class CohnAlpha:
         settings are user's current runtime settings
 
         '''
-        # TODO: use kwargs to construct popt and grab alpha and uncertainty values
-        # useful links:
-        # passing kwargs to function: https://stackoverflow.com/questions/1496346/passing-a-list-of-kwargs
-        # how to use kwargs within function: https://stackoverflow.com/questions/1098549/proper-way-to-use-kwargs-in-python
 
         # grab axis titles and graph name from map
-        # return tuple order:
-        # x-axis label, y-axis label, graph title, residual's y-axis label
-        # if not using residuals, then residual's y-axis label is set to None
+        # return tuple order: x-axis label, y-axis label, graph title
         map = {
             'hist': ('Time(s)', 'Counts', 'Cohn-Alpha Counts Histogram'),
             'scatter': ('Frequency(Hz)', 'Counts^2/Hz', 'Cohn-Alpha Scatter Plot'),
@@ -469,11 +464,14 @@ class CohnAlpha:
         # initialize plot
         fig, ax = pyplot.subplots(nrows=nRows,sharex=shareX, gridspec_kw=gridSpecDict)
 
-        # fit creates a numpy array, modify data structure to be a numpy array
+        # small data manipulation to make code organization easier
+        # if nrows > 1 (used above in pyplot.subplots() when method == 'fit'), ax becomes list
+        # if nrows == 1 (used above in pyplot.subplots() when method != 'fit'), ax becomes a single variable
+        # turn single variable into list for code consistency
         if method != 'fit':
             ax = np.array([ax, ax])
 
-        # set axis labelx
+        # set axis labels
         ax[0].set_xlabel(xLabel)
         ax[0].set_ylabel(yLabel)
         ax[0].set_title(graphTitle)
@@ -485,7 +483,7 @@ class CohnAlpha:
                     **settings['Scatter Plot Settings'])
 
         # if scatterplot or fitting, then:
-        # change scaling of x-axis to log scaling via semilogx()
+        # change scaling of x-axis to log scaling
         # plot points onto graph
         # update limit of x-axis
         else:
@@ -493,7 +491,8 @@ class CohnAlpha:
             ax[0].set_xlim([1, 200])
             
             # if fitting, then return
-            # call fit() to fit the curve, then show the plot
+            # points have already been plotted, need to fit a curve
+            # fit() will fit the curve and show plot
             if method == 'fit':
                 return (fig, ax)
 
@@ -517,9 +516,44 @@ class CohnAlpha:
         pyplot.show()
         pyplot.close()
 
-        def fit(self, fig, ax, fitEquation, **kwargs):
+        # return tuple to be consistent with method == 'fit'
+        return None, None
 
-            return
+# ---------------------------------------------------------------------------------------------------   
+
+# Helper Functions
+def convertTimeUnitsToStr(units):
+    # femtoseconds
+    if (math.isclose(a=units, b=1e-15, abs_tol=1e-15)):
+        return 'fs'
+    # picoseconds
+    if (math.isclose(a=units, b=1e-12, abs_tol=1e-12)):
+        return 'ps'    
+    # nano seconds
+    if (math.isclose(a=units, b=1e-9, abs_tol=1e-9)):
+        return 'ns'
+    # microseconds
+    if (math.isclose(a=units, b=1e-6, abs_tol=1e-6)):
+        return 'us'
+    # milliseconds
+    if (math.isclose(a=units, b=1e-3, abs_tol=1e-3)):
+        return 'ms'
+    # seconds
+    if (math.isclose(a=units, b=1, abs_tol=1)):
+        return 's'
+
+
+
+def checkPowerOfTwo(value):
+    '''Function to check if value is a power of 2 or not
+    Returns True if a power of 2, otherwise returns False
+    Note: make value an integer, otherwise cannot properly calculate
+    
+    Input:
+    - value (int): the value to be checked'''
+
+    while (value > 1):
+        value = value / 2
 
             '''
             Fitting Function; assumes plot() has been called with method='fit' 
