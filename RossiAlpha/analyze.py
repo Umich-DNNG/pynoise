@@ -1,6 +1,9 @@
 '''The class for constructing and calculating time 
 difference objects for RossiAlpha analysis. Supports 
-separated and combined histogram/time difference operations.'''
+separated and combined histogram/time difference operations.
+
+Imported as "td" (time difference)
+'''
 
 
 
@@ -12,7 +15,138 @@ import lmxReader as lmx
 import os
 import json
 
+from tkinter import *               # for the gui--TODO: implement
+from tqdm import tqdm               # for the progress bar
+import math                         # used in the unmaintained MARBE functions
+from . import rossiAlpha as ra      # to import some of the functions used across the entire rossi alpha method
 
+# to allow for importing global files
+import sys
+ogPath = sys.path.copy()
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), os.pardir)))
+import analyze                      # to import functions used across all methods
+sys.path = ogPath
+
+
+# ----------------driving the calculations of the timeDifCalcs class objects----------------
+
+
+def createTimeDifs(timeDifs:dict, settings:dict, curFolder:int = 0):
+    
+    '''Create Rossi Alpha time differences for files or for a subfolder
+    
+    Inputs:
+    - timeDifs: the calling class's dictionary of time differences 
+    - settings: the dictionary holding the runtime settings
+    - curFolder: the current folder being analyzed'''
+    
+
+    # Clear out the current time difference data and methods.
+    timeDifs['Time differences'].clear()
+    timeDifs['Time difference method'].clear()
+    # If methods is a list, create a time difference for each instance.
+    if isinstance(settings['RossiAlpha Settings']['Time difference method'], list):
+        for method in settings['RossiAlpha Settings']['Time difference method']:
+            timeDifs['Time differences'].append(timeDifCalcs(
+                                                            io=settings['Input/Output Settings'],
+                                                            reset_time=settings['RossiAlpha Settings']['Reset time'], 
+                                                            method=method, 
+                                                            digital_delay=settings['RossiAlpha Settings']['Digital delay'],
+                                                            folderNum=curFolder,
+                                                            sort_data=settings['General Settings']['Sort data']))
+            timeDifs['Time difference method'].append(method)
+    # Otherwise, just create one with the given method.
+    else:
+        timeDifs['Time differences'].append(timeDifCalcs(
+                                                        io=settings['Input/Output Settings'],
+                                                        reset_time=settings['RossiAlpha Settings']['Reset time'], 
+                                                        method=settings['RossiAlpha Settings']['Time difference method'], 
+                                                        digital_delay=settings['RossiAlpha Settings']['Digital delay'],
+                                                        folderNum=curFolder,
+                                                        sort_data=settings['General Settings']['Sort data']))
+        timeDifs['Time difference method'].append(settings['RossiAlpha Settings']['Time difference method'])
+    # For each time difs object, compute the time differences.
+    for i in range(0,len(timeDifs['Time differences'])):
+        timeDifs['Time differences'][i] = timeDifs['Time differences'][i].calculateTimeDifsFromEvents()
+    setTimeDifIdentifiers(settings, timeDifs)
+    print(timeDifs['Time differences'][0])
+
+
+def folderAnalyzer(timeDifs: dict, settings: dict, numFolders: int, window: Tk = None) -> bool:
+    '''Create Rossi Alpha time differences for folders
+
+    The indicies will hold each subfolder's data within the index for a given time difference method
+
+    Inputs:
+    - timeDifs: the dictionary from the calling function that will contain the time difference data
+    - settings: the dictionary that contains all of the runtime settings.
+    - numFolders
+    - window: the gui window, if in gui mode.
+
+    Outputs:
+    - bool: true if analysis was successful, false otherwise
+    '''
+
+    original = settings['Input/Output Settings']['Input file/folder']
+    numSets = ra.getNumSets(settings)
+    
+    # hold a list of all the time difference data across all folders
+    combinedTimeDifs = [[] for _ in range(numSets)]
+    
+    # iterate through all of the folders (1-based indexing)
+    for folder in tqdm(range(1, numFolders + 1)):
+
+        # Add the folder number to the input.
+        settings['Input/Output Settings']['Input file/folder'] = original + '/' + str(folder)
+
+        # check if the folder exists. if not, abort
+        if not os.path.isdir(settings['Input/Output Settings']['Input file/folder']):
+            print('ERROR: Folder ', settings['Input/Output Settings']['Input file/folder'], ' does not exist on this path. Please review the RossiAlpha documentation.')
+            print('Aborting...\n')
+            settings['Input/Output Settings']['Input file/folder'] = original
+            return False
+        
+        # compute the time difs for this subfolder and add to the list
+        createTimeDifs(timeDifs, settings, folder)
+        for i in range(numSets):
+            combinedTimeDifs[i].append(timeDifs['Time differences'][i])
+    
+    # set the class object to the calculated combined time differences
+    timeDifs['Time differences'].clear()
+    timeDifs['Time difference method'].clear()
+    for i in range(len(combinedTimeDifs)):
+        timeDifs['Time differences'].append(combinedTimeDifs[i])
+    # append the time difference methods
+    for i in range(numSets):
+        if isinstance(settings['RossiAlpha Settings']['Time difference method'], list):
+            timeDifs['Time difference method'].append(settings['RossiAlpha Settings']['Time difference method'][i])
+        else:
+            timeDifs['Time difference method'].append(settings['RossiAlpha Settings']['Time difference method'])
+    
+    # TODO: gui
+
+    # reset file name to original path
+    settings['Input/Output Settings']['Input file/folder'] = original
+    setTimeDifIdentifiers(settings, timeDifs, numFolders)
+    return True
+
+def setTimeDifIdentifiers(settings: dict, timeDifs: dict, numFolders: int = 0):
+    '''
+    Sets the of the time difference dictionary for future validity checks
+    
+    Inputs:
+    - settings: dictionary holding runtime settings
+    - timeDifs: the dictionary from the calling function that will contain the time difference data
+    - numFOlders: integer indicating number of folders
+    '''
+    timeDifs['Input file/folder'] = settings['Input/Output Settings']['Input file/folder']
+    timeDifs['Number of folders'] = numFolders
+    timeDifs['Sort data'] = settings['General Settings']['Sort data']
+    timeDifs['Digital delay'] = settings['RossiAlpha Settings']['Digital delay']
+    timeDifs['Reset time'] = settings['RossiAlpha Settings']['Reset time']
+    
+
+# ------------------------ class for time difference calculations ----------------------------
 
 class timeDifCalcs:
     
@@ -53,7 +187,7 @@ class timeDifCalcs:
         # if is a folder analysis, retrieve the name of the folder. 
         # When this function is called on a folder, the input file/folder was changed to the user inputted folder name + "/" + the current folder number
         # TODO: change calling logic to not have to do this?
-        if folderNum is not 0:
+        if folderNum != 0:
             temp = name[:name.rfind('/')]
             name = temp[temp.rfind('/')+1:]
         # if is a file, retrieve the name of just the file
@@ -189,7 +323,7 @@ class timeDifCalcs:
         return self.timeDifs
     
 
-
+    # NOTE: this function is not currently maintained
     def calculateTimeDifsAndBin(self, 
                                 input:str,
                                 bin_width:int = None, 
@@ -284,3 +418,123 @@ class timeDifCalcs:
         rossiHistogram.plotFromHist(input,self.method,plot_opts,save_fig,show_plot,save_dir,folder,verbose)
         # Return the rossiHistogram object and related NP arrays.
         return rossiHistogram, histogram, bin_centers, bin_edges
+
+
+
+
+
+#------------------------ functions for MARBE ----------------------------------------
+#------------ NOTE: these are not currently maintained -------------------------------
+
+def computeMARBE(timeDifs: dict, hist: dict, settings: dict, numFolders: int):
+    '''
+    Executes the trial and error portion of MARBE calculation
+    '''
+    RA_hist_array = []
+    RA_std_dev = []
+    RA_hist_total = []
+    uncertainties = []
+    settings['RossiAlpha Settings']['Bin width'] = math.ceil(settings['RossiAlpha Settings']['Reset time'] / 1000)
+    bestBinFound = False
+    # TODO: temp; delete after impl multiple time diff method MARBE; 
+    # hold a list of time difference data for the first time diff method listed
+    # (which is the one used for MARBE calculations)
+    timeDifsMARBE = []
+    timeDifsMARBE.copy(timeDifs['Time differences'][0])
+    bestAvgUncertainty = -1
+    uncertaintyCap = settings['RossiAlpha Settings']['Max avg relative bin err']
+    timeDifs['Time differences'].clear()
+    while not bestBinFound:
+        for folder in range(1, numFolders+1):
+            timeDifs['Time differences'] = [timeDifsMARBE[0][folder-1].copy()]
+            # Loop for the number of folders specified.
+            plt.createPlot("Doesn't matter",   # TODO: change call
+                            False,
+                            False,
+                            "Doesn't matter",
+                            {},
+                            True,
+                            False)
+            # If this is the first folder, initialize the histogram array.
+            if folder == 1:
+                for histogram in hist['Histogram']:
+                    RA_hist_array.append(histogram.counts)
+            # Otherwise, add the counts to the histogram array.
+            else:
+                for i in range(0, len(hist['Histogram'])):
+                    RA_hist_array[i] = np.vstack((RA_hist_array[i], hist['Histogram'][i].counts))
+        # Compute the histogram standard deviation and total.
+        RA_std_dev.append(np.std(RA_hist_array[0], axis=0, ddof=1))
+        RA_hist_total.append(np.sum(RA_hist_array[0], axis=0))
+        # Calculate the uncertainties and replace zeroes.
+        uncertainties.append(RA_std_dev[0] * numFolders)
+        uncertainties[0] = analyze.replace_zeroes(uncertainties[0])
+        # Add the time difference centers and uncertainties to the total histogram.
+        avg_uncertainty = 0.0
+        total_counts_squared = 0
+        for j in range(0, len(RA_hist_total[0])):
+            avg_uncertainty += uncertainties[0][j] * RA_hist_total[0][j]
+            total_counts_squared += RA_hist_total[0][j] * RA_hist_total[0][j]
+        avg_uncertainty /= total_counts_squared
+        if avg_uncertainty < uncertaintyCap:
+            bestAvgUncertainty = settings['RossiAlpha Settings']['Bin width']
+            if settings['RossiAlpha Settings']['Bin width'] == 1:
+                bestBinFound = True
+            else:
+                settings['RossiAlpha Settings']['Bin width'] -= 1
+        else:
+            if settings['RossiAlpha Settings']['Bin width'] == bestAvgUncertainty - 1:
+                settings['RossiAlpha Settings']['Bin width'] = bestAvgUncertainty
+                bestBinFound = True
+            else:
+                if settings['RossiAlpha Settings']['Reset time'] / (settings['RossiAlpha Settings']['Bin width'] + 1) < 4:
+                    bestBinFound = True
+                else:
+                    settings['RossiAlpha Settings']['Bin width'] += 1 
+        
+        # clean up histogram memory
+        hist['Histogram'].clear()
+
+
+def prepMARBE(timeDifs: dict, hist: dict, settings: dict, numFolders: int, window: Tk = None):
+    '''Function to prepare for automatic bin width computation using MARBE when a bin width is not specified for folder analysis
+    
+    NOTE: Automatic bin width calculation is not properly supported for multiple time difference methods at once; it will
+    default to the method listed first in the settings
+    
+    Inputs:
+    - numFolders: int, holds the number of folders
+    - settings: dict holding all the runtime settings
+    - window: the gui window, if applicable
+    '''
+    # TODO: temp variable, delete when multiple method MARBE is supported; hold original methods
+    timeDifMethods = settings['RossiAlpha Settings']['Time difference method']
+    original = settings['Input/Output Settings']['Input file/folder']
+
+    # TODO: determine if is valid first
+    print('Generating time differences...')
+    # TODO: provide support for MARBE for multiple time diff methods at once
+    folderAnalyzer(settings, window)
+
+    # Restore the original folder pathway.
+    settings['Input/Output Settings']['Input file/folder'] = original
+
+    #TODO: delete after implementing functionality
+    if isinstance(settings['RossiAlpha Settings']['Time difference method'], list):
+        settings['RossiAlpha Settings']['Time difference method'] = settings['RossiAlpha Settings']['Time difference method'][0]
+        print('Automatic bin width calculation is currently only supported for 1 time difference method at a time.', 
+                    'Defaulting to', 
+                    settings['RossiALpha Settings']['Time difference method'],
+                    'method for the bin width calculation portion.')
+    print("Testing different bin widths...")
+    # hold all time diffs data temporarily
+    combinedTimeDifs = timeDifs['Time differences'].copy()
+        
+    # compute MARBE
+    computeMARBE(timeDifs, hist, settings, numFolders)
+
+    print('Best bin width for your settings is ' + str(settings['RossiAlpha Settings']['Bin width']) + '\n')
+    # TODO: delete after implementing multiple time diff method MARBE at once; holds original time diff settings
+    settings['RossiAlpha Settings']['Time difference method'] = timeDifMethods
+    # restore the original computed time diffs
+    timeDifs['Time differences'] = combinedTimeDifs
