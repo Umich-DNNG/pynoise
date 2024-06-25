@@ -325,6 +325,8 @@ class CohnAlpha:
         if settings['Input/Output Settings']['Save raw data']:
             # TODO: change output name to save
             # nameString = f
+            # TODO: change output name to save
+            # nameString = f
             ds.exportAnalysis(
                 data={
                     'Frequency(Hz)': (f.tolist(), 0),
@@ -369,6 +371,7 @@ class CohnAlpha:
         # grab axis titles and graph name from map
         # return tuple order: x-axis label, y-axis label, graph title
         # return tuple order: x-axis label, y-axis label, graph title
+        # return tuple order: x-axis label, y-axis label, graph title
         map = {
             'hist': ('Time(s)', 'Counts', 'Cohn-Alpha Counts Histogram'),
             'scatter': ('Frequency(Hz)', 'Counts^2/Hz', 'Cohn-Alpha Scatter Plot'),
@@ -394,9 +397,11 @@ class CohnAlpha:
         fig, ax = pyplot.subplots(nrows=nRows,sharex=shareX, gridspec_kw=gridSpecDict)
 
         # small data manipulation, makes code cleaner
+        # small data manipulation, makes code cleaner
         if method != 'fit':
             ax = np.array([ax, ax])
 
+        # set axis labels
         # set axis labels
         # set axis labels
         ax[0].set_xlabel(xLabel)
@@ -417,7 +422,10 @@ class CohnAlpha:
             ax[0].semilogx(x[1:-2], y[1:-2], '.', **settings['Semilog Plot Settings'])
             ax[0].set_xlim([1, 200])
 
+
             # if fitting, then return
+            # points have already been plotted, need to fit a curve
+            # fit() will fit the curve and show plot
             # points have already been plotted, need to fit a curve
             # fit() will fit the curve and show plot
             # points have already been plotted, need to fit a curve
