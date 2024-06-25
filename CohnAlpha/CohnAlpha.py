@@ -323,6 +323,8 @@ class CohnAlpha:
             returnValue = self.plot(x=f, y=Pxx, residuals=residuals, method='fit', settings=settings)
 
         if settings['Input/Output Settings']['Save raw data']:
+            # TODO: change output name to save
+            # nameString = f
             ds.exportAnalysis(
                 data={
                     'Frequency(Hz)': (f.tolist(), 0),
@@ -366,6 +368,7 @@ class CohnAlpha:
 
         # grab axis titles and graph name from map
         # return tuple order: x-axis label, y-axis label, graph title
+        # return tuple order: x-axis label, y-axis label, graph title
         map = {
             'hist': ('Time(s)', 'Counts', 'Cohn-Alpha Counts Histogram'),
             'scatter': ('Frequency(Hz)', 'Counts^2/Hz', 'Cohn-Alpha Scatter Plot'),
@@ -390,13 +393,11 @@ class CohnAlpha:
         # initialize plot
         fig, ax = pyplot.subplots(nrows=nRows,sharex=shareX, gridspec_kw=gridSpecDict)
 
-        # small data manipulation to make code organization easier
-        # if nrows > 1 (used above in pyplot.subplots() when method == 'fit'), ax becomes list
-        # if nrows == 1 (used above in pyplot.subplots() when method != 'fit'), ax becomes a single variable
-        # turn single variable into list for code consistency
+        # small data manipulation, makes code cleaner
         if method != 'fit':
             ax = np.array([ax, ax])
 
+        # set axis labels
         # set axis labels
         ax[0].set_xlabel(xLabel)
         ax[0].set_ylabel(yLabel)
@@ -415,8 +416,10 @@ class CohnAlpha:
         else:
             ax[0].semilogx(x[1:-2], y[1:-2], '.', **settings['Semilog Plot Settings'])
             ax[0].set_xlim([1, 200])
-            
+
             # if fitting, then return
+            # points have already been plotted, need to fit a curve
+            # fit() will fit the curve and show plot
             # points have already been plotted, need to fit a curve
             # fit() will fit the curve and show plot
             if method == 'fit':
