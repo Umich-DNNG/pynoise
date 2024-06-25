@@ -33,6 +33,7 @@ def plotCohnAlphaHist(settings:dict = {}):
     - overwrite: if overwriting the current information in memory
     '''
 
+    # ensure caObj is initialized
     initCohnAlphaObject(settings)
     caObj.plotCountsHistogram(settings)
     return True
@@ -49,9 +50,8 @@ def applyWelchApprox(settings:dict = {}):
     - settings: the current user's runtime settings
     - overwrite: if overwriting the current information in memory
     '''
-
-    plotCohnAlphaHist(settings=settings)
-    
+    # ensure caObj is initialized
+    initCohnAlphaObject(settings)
     caObj.welchApproxFourierTrans(settings)
     return True
 
@@ -68,8 +68,7 @@ def fitCohnAlpha(settings:dict = {}):
     - settings: the current user's runtime settings
     '''
     
-    # ensure necessary data exists
-    applyWelchApprox(settings=settings)
-
+    # ensure caObj is initialized
+    initCohnAlphaObject(settings)
     caObj.fitCohnAlpha(settings=settings)
     return True
