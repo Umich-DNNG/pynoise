@@ -95,7 +95,7 @@ class CohnAlpha:
                 'Time(s)': edges_seconds,
                 'Counts': counts_time_hist
             },
-            name='ca_hist_s',
+            name=f"ca_hist_{settings['CohnAlpha Settings']['Frequency Minimum']}_{settings['CohnAlpha Settings']['Frequency Maximum']}_s",
             input=settings['Input/Output Settings']['Save directory'])
         
         counts_time_hist = np.array(counts_time_hist, dtype=np.int64)
@@ -173,7 +173,7 @@ class CohnAlpha:
                         'Frequency(Hz)': f,
                         'Counts^2/Hz': Pxx
                     },
-                    name='ca_graph_s',
+                    name=f"{settings['CohnAlpha Settings']['Frequency Minimum']}_{settings['CohnAlpha Settings']['Frequency Maximum']}_s",
                     input=settings['Input/Output Settings']['Save directory'])
 
         f = np.array(f, dtype=np.float64)
@@ -276,7 +276,7 @@ class CohnAlpha:
                 'Residuals': residuals
             },
             singles=singles,
-            name='ca_graph_s',
+            name=f"ca_graph_{settings['CohnAlpha Settings']['Frequency Minimum']}_{settings['CohnAlpha Settings']['Frequency Maximum']}_s",
             input=settings['Input/Output Settings']['Save directory'])
 
         # change to list of only the values, leaving behind column header information
@@ -295,7 +295,6 @@ class CohnAlpha:
         f = np.array(f, dtype=np.float64)
         Pxx = np.array(Pxx, dtype=np.float64)
         residuals = np.array(residuals, dtype=np.float64)
-        popt = np.array(popt,dtype=np.float64)
 
         # if no existing data is found
         # re-generate scatterplot data, fitting data
@@ -320,7 +319,10 @@ class CohnAlpha:
         # will call fit() as well to fit the curve
         # plot() will return the dict containing popt, alpha, uncertainty
         if settings['General Settings']['Show plots']:
-            returnValue = self.plot(x=f, y=Pxx, residuals=residuals, method='fit', settings=settings)
+            kwDict = {'popt': popt,
+                      'alpha': alpha,
+                      'uncertainty': uncertainty}
+            returnValue = self.plot(x=f, y=Pxx, residuals=residuals, method='fit', settings=settings, **kwDict)
 
         if settings['Input/Output Settings']['Save raw data']:
             # TODO: change output name to save
@@ -358,7 +360,7 @@ class CohnAlpha:
             return
         print(message)
         
-    def plot(self, x, y, residuals = None, method:str = '', settings:dict = {}):
+    def plot(self, x, y, residuals = None, method:str = '', settings:dict = {}, **kwargs):
 
         '''
         Cohn Alpha Plotting Function
@@ -431,7 +433,14 @@ class CohnAlpha:
             # points have already been plotted, need to fit a curve
             # fit() will fit the curve and show plot
             if method == 'fit':
-                returnValue = self.fit(x=x, y=y, residuals=residuals, fig=fig, ax=ax, settings=settings)
+                returnValue = self.fit(x=x,
+                                       y=y,
+                                       residuals=residuals,
+                                       ax=ax,
+                                       popt=kwargs['popt'],
+                                       alpha=kwargs['alpha'],
+                                       uncertainty=kwargs['uncertainty']
+                                       settings=settings)
 
 
         # Saving figure
@@ -456,7 +465,7 @@ class CohnAlpha:
         return returnValue
 
 
-    def fit(self, x, y, residuals, fig, ax, settings:dict = {}):
+    def fit(self, x, y, residuals, ax, popt = None, alpha = None, uncertainty = None, settings:dict = {}):
 
         '''
         Fitting Function, plots fitted curve
@@ -471,15 +480,16 @@ class CohnAlpha:
             kwargs: (TODO: ADD DESCRIPTION)
         '''
 
-        popt, pcov = curve_fit(CAFit,
-                            x[1:-2],
-                            y[1:-2],
-                            p0=[y[2], 25, 0.001],
-                            bounds=(0, np.inf),
-                            maxfev=100000)
-        
-        alpha = np.around(popt[1]*2*np.pi, decimals=2)
-        uncertainty = np.around(pcov[1,1]*2*np.pi, decimals=2)
+        if popt is None or alpha is None or uncertainty is None:
+            popt, pcov = curve_fit(CAFit,
+                                x[1:-2],
+                                y[1:-2],
+                                p0=[y[2], 25, 0.001],
+                                bounds=(0, np.inf),
+                                maxfev=100000)
+            
+            alpha = np.around(popt[1]*2*np.pi, decimals=2)
+            uncertainty = np.around(pcov[1,1]*2*np.pi, decimals=2)
 
         # Display Alpha and Uncertainty values, store within Welch Approx
         self.print('alpha = ' + str(alpha) + ', uncertainty = '+ 
