@@ -8,6 +8,8 @@ import datastream as ds                # for importing/exporting analysis
 import os                              # For saving figures
 
 
+# original alpha and uncertainty values: alpha = 160.84, uncertainty = 28.29
+
 # ------------ Power Spectral Density Fitting Function ----------------------------------------------
 def CAFit(f, A, alpha, c):
     '''
@@ -158,9 +160,8 @@ class CohnAlpha:
         Output:
             - welchResultDict: a dict, contains the frequency and the power spectral density
         '''
-
-        self.print('\n')        
-        self.print('Applying the Welch Approximation...')
+        
+        self.print('\nApplying the Welch Approximation...')
 
         # Read in existing data if exists
         # re-format lists to numpy arrays
