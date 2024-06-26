@@ -1,12 +1,12 @@
 {
     "Input/Output Settings": {
-        "Input file/folder": "./data/input/stilbene_2in_CROCUS_20cm_offset_east.txt",
+        "Input file/folder": "",
         "Time column": 0,
         "Channels column": null,
         "Save directory": "./data",
         "Output name": "CurrentRun",
-        "Save figures": true,
-        "Save raw data": true,
+        "Save figures": false,
+        "Save raw data": false,
         "Save time differences": false,
         "Overwrite lower reset times": true,
         "Keep logs": false,
@@ -19,7 +19,7 @@
         "Show plots": true,
         "Input time units": null,
         "Output time units": null,
-        "Text editor": "nano"
+        "Text editor": "vim"
     },
     "RossiAlpha Settings": {
         "Reset time": 5000,
@@ -33,16 +33,17 @@
         "Fit maximum": null
     },
     "CohnAlpha Settings": {
-        "Frequency Minimum": 0.1220703125,
-        "Frequency Maximum": 250.0,
+        "Dwell time": 2000000.0,
         "Meas time range": [
             150000000000.0,
             1000000000000.0
         ],
+        "Plot Counts Histogram": false,
         "Font Size": 12,
         "Annotation Font Weight": "bold",
         "Annotation Color": "black",
-        "Annotation Background Color": "white"
+        "Annotation Background Color": "white",
+        "nperseg": 4096
     },
     "FeynmanY Settings": { 
         "Tau range": [
