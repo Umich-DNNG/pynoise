@@ -33,7 +33,8 @@
         "Fit maximum": null
     },
     "CohnAlpha Settings": {
-        "Dwell time": 2000000.0,
+        "Frequency Minimum": 0.1220703125,
+        "Frequency Maximum": 250.0,
         "Meas time range": [
             150000000000.0,
             1000000000000.0
@@ -42,8 +43,7 @@
         "Font Size": 12,
         "Annotation Font Weight": "bold",
         "Annotation Color": "black",
-        "Annotation Background Color": "white",
-        "nperseg": 4096
+        "Annotation Background Color": "white"
     },
     "FeynmanY Settings": { 
         "Tau range": [
