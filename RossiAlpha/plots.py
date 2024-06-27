@@ -2,7 +2,204 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 
+import math
+import tkinter as Tk
+from . import analyze as td
+from . import rossiAlpha as ra
+import tqdm
+
+# to allow for importing global files
+import sys
+ogPath = sys.path.copy()
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), os.pardir)))
+import analyze as globalAnalyze                      # to import functions used across all methods
+sys.path = ogPath
+
 plt.ioff()
+
+
+
+
+
+def createPlot(timeDifs: dict,
+                hist: dict,
+                settings: dict,
+                input:str,
+                folder:bool = False):
+    
+    '''Create a Rossi Alpha histogram. Assumes 
+    that time differences are already calculated.
+    
+    Inputs:
+    - timeDifs: time difference being passed in from the storing calling class
+    - hist: the dictionary containing histogram data; from the calling class
+    - settings: dictionary holding the runtime settings
+    - input: the name of the file
+    - folder: whether or not this is for folder analysis.'''
+    
+
+    # Clear out the current histogram data.
+    hist['Histogram'].clear()
+    # Create a RossiHistogram object for each time difference.
+    for time_dif in timeDifs['Time differences']:
+        hist['Histogram'].append(RossiHistogram(time_dif, 
+                                                settings['RossiAlpha Settings']['Bin width'], 
+                                                settings['RossiAlpha Settings']['Reset time']))
+    # Plot each histogram.
+    for i in range(0, len(hist['Histogram'])):
+        hist['Histogram'][i].plot(input, 
+                                    timeDifs['Time difference method'][i], 
+                                    settings['Input/Output Settings']['Save figures'], 
+                                    settings['General Settings']['Show plots'], 
+                                    settings['Input/Output Settings']['Save directory'], 
+                                    settings['Histogram Visual Settings'],
+                                    folder,
+                                    settings['General Settings']['Verbose iterations'])
+    # Store the current setting.
+    hist['Bin width'] = settings['RossiAlpha Settings']['Bin width']
+
+
+def calcUncertainty(hist: dict, total: list, numFolders: int):
+    '''
+    For a folder, calculates the uncertainty given the combined histogram data
+
+    Inputs:
+    - hist: dictionary holding histogram data from the class object. Will have uncertainty added to the object
+    - total: list containing the histogram data to be used for uncertainty calculations
+    - numFolders: int indicating the number of folders
+    '''
+    stdDev = []
+    combinedData = []
+    centers = []
+    for i in range(0, len(total[-1])):
+        # Compute the histogram standard deviation and total.
+        stdDev.append(np.std(total[-1][i], axis=0, ddof=1))
+        combinedData.append(np.sum(total[-1][i], axis=0))
+        # Calculate the time difference centers.
+        centers.append(hist['Histogram'][i].bin_edges[1:] - np.diff(hist['Histogram'][i].bin_edges[:2]) / 2)
+        # Calculate the uncertainties and replace zeroes.
+        hist['Uncertainty'].append(stdDev[i] * numFolders)
+        hist['Uncertainty'][i] = globalAnalyze.replace_zeroes(hist['Uncertainty'][i])
+        # Add the time difference centers and uncertainties to the total histogram.
+        combinedData[i] = np.vstack((combinedData[i], centers[i], hist['Uncertainty'][i]))
+    print(hist['Uncertainty'])
+    return combinedData
+
+
+def subfolderPlots(timeDifs: dict, hist: dict, settings: dict, numFolders: int):
+    '''
+    For a folder, computes the data for a subfolder and uncertainty data.
+
+    Inputs:
+    - timeDifs: dictionary holding the time difference data
+    - hist: dictionary holding histogram data
+    - settings: dictionary holding runtime settings
+    - numFolders: int indicating the number of folders
+
+    
+    '''
+    numHistograms = ra.getNumSets(settings)
+
+    totalHist = []
+
+    name = settings['Input/Output Settings']['Input file/folder']
+    name = name[name[:name.rfind('/')].rfind('/')+1:].replace('/','-')
+    for i in range(numHistograms):
+        if isinstance(settings['RossiAlpha Settings']['Time difference method'], list):
+            method = settings['RossiAlpha Settings']['Time difference method'][i]
+        else:
+            method = settings['RossiAlpha Settings']['Time difference method']
+        # complete computations for each folder
+        for folder in range(numFolders):
+            hist['Histogram'].append(RossiHistogram(timeDifs['Time differences'][i][folder], 
+                                                                settings['RossiAlpha Settings']['Bin width'], 
+                                                                settings['RossiAlpha Settings']['Reset time']))
+
+            if settings['General Settings']['Verbose iterations']:
+                hist['Histogram'][0].plot((name + "-" + str(folder + 1)),
+                                            method,
+                                            settings['Input/Output Settings']['Save figures'], 
+                                            settings['General Settings']['Show plots'], 
+                                            settings['Input/Output Settings']['Save directory'], 
+                                            settings['Histogram Visual Settings'], 
+                                            True, 
+                                            settings['General Settings']['Verbose iterations'])
+                # export outputs in csv format
+                if settings['Input/Output Settings']['Save outputs']:
+                    begin, end = ra.computeBinEdges(hist) 
+                    fileName = 'rossi_hist_' + name + '-' + str(folder + 1) + '_' + method + '_' + str(hist['Histogram'][folder].bin_width) + '_' + str(settings['RossiAlpha Settings']['Reset time'])
+                    globalAnalyze.export({'Bin beginning': (begin,0),
+                                        'Bin ending': (end,0),
+                                        'Measured Count': (hist['Histogram'][0].counts,0)},
+                                        [('Time difference method',method),
+                                        ('Input file', (name + '/' + str(j + 1)))],
+                                        fileName,
+                                        settings['Input/Output Settings']['Save directory'])
+            # if verbose iterations is not on, then "plot" to be able to retrieve the counts for the uncertainty calculations
+            else:
+                hist['Histogram'][0].plot((name + "-" + str(folder + 1)),
+                                            method,
+                                            False, 
+                                            False, 
+                                            settings['Input/Output Settings']['Save directory'], 
+                                            settings['Histogram Visual Settings'], 
+                                            True, 
+                                            False)
+            plt.close()
+            # Create the  this is the first folder, initialize the histogram array.
+            if folder == 1:
+                for histogram in hist['Histogram']:
+                    totalHist.append(histogram.counts)
+            # Otherwise, add the counts to the histogram array.
+            else:
+                for j in range(0, len(hist['Histogram'])):
+                    totalHist[j] = np.vstack((totalHist[j], hist['Histogram'][j].counts))
+            hist['Histogram'].clear()
+    totalHist = calcUncertainty(hist, totalHist, numFolders)
+    return totalHist
+
+
+def folderHistogram(timeDifs: dict, hist: dict, numFolders: int, settings: dict, window: Tk = None):
+    '''Create a histogram for a folder input.
+
+    Inputs: 
+    - numFolders: int, number of folders to be analyzed.
+    - settings: the dictionary containing all the runtime settings
+    - window: the gui window, if in gui mode
+
+    Outputs:
+    - bool: true if successful, false otherwise
+    '''
+    numHistograms = ra.getNumSets(settings)
+    
+    ogWidth = settings['RossiAlpha Settings']['Bin width']
+
+    # Get the name of the input.
+    original = settings['Input/Output Settings']['Input file/folder']
+    name = settings['Input/Output Settings']['Input file/folder']
+    name = name[name[:name.rfind('/')].rfind('/')+1:].replace('/','-')
+    
+
+    # Restore the original folder pathway.
+    settings['Input/Output Settings']['Input file/folder'] = original
+
+    hist['Histogram'].clear()
+    hist['Bin width'] = settings['RossiAlpha Settings']['Bin width']
+    # compile subfolder data, including exporting if in verbose mode
+    combined = subfolderPlots(timeDifs, hist, settings, numFolders)
+    
+    for i in range(0, len(combined)):
+        hist['Histogram'].append(RossiHistogram(combined[i],
+                                                settings['RossiAlpha Settings']['Bin width'],
+                                                settings['RossiAlpha Settings']['Reset time']))
+    # todo
+
+    plt.close()
+    # restore original bin width if it was changed--redundant if it was not
+    settings['RossiAlpha Settings']['Bin width'] = ogWidth
+    return True
+
+
 
 class RossiHistogram:
     def __init__(self, time_diffs = None, bin_width: int = None, reset_time: int = None):
@@ -131,6 +328,7 @@ class RossiHistogram:
         self.bin_edges = bin_edges
         self.title = 'Histogram Using '
 
+    # NOTE: this function is not currently maintained
     def plotFromHist(self, input: str, method: str = 'aa', plot_opts: dict = None, save_fig: bool = False, show_plot: bool = True, save_dir:str= None, folder: bool = False, verbose: bool = False):
         '''Description: Used to plot the histogram when the time differences were calculated simulatenously while being binned. 
         
@@ -177,3 +375,4 @@ class RossiHistogram:
             plt.show()
 
         
+#--------------------------------------

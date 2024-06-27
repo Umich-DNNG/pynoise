@@ -8,7 +8,7 @@ def exp_decay_3_param(x, a, b, c):
     '''
     Description:
         - Exponential decay function with 3 parameters including offset
-
+ 
     Inputs:
         - x (time differences: x-axis)
         - a (coefficient constant)
