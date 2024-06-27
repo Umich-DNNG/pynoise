@@ -6,6 +6,7 @@ from scipy import signal               # For welch (fourier transform)
 from pathlib import Path               # path manipulation
 import datastream as ds                # for importing/exporting analysis
 import os                              # For saving figures
+import hdf5_test as test
 
 
 # original alpha and uncertainty values: alpha = 160.84, uncertainty = 28.29
@@ -142,6 +143,20 @@ class CohnAlpha:
         # Calculating power spectral density distribution from counts over time hist (Get frequency of counts samples)
         # Save into class, for future functions to use
         self.fs = 1 / (timeline[3]-timeline[2])
+
+        # NOTE: TESTING .hdf5 CODE HERE
+        npArrays = [counts_time_hist, edges_seconds]
+        keys = ['counts_time_hist', 'edges_seconds']
+        fileName = 'hdf5_hist_test'
+        test.writeData(npArrays=npArrays, keys=keys, fileName=fileName)
+
+        datasetHolder = test.readData(fileName=fileName)
+
+        for dataList in datasetHolder:
+            print(type(dataList))
+        
+        print(counts_time_hist - datasetHolder[0])
+
         return edges_seconds, counts_time_hist
     
     def welchApproxFourierTrans(self, settings:dict = {}, showSubPlots:bool = True):
