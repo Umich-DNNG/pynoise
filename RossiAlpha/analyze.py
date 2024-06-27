@@ -69,7 +69,6 @@ def createTimeDifs(timeDifs:dict, settings:dict, curFolder:int = 0):
     for i in range(0,len(timeDifs['Time differences'])):
         timeDifs['Time differences'][i] = timeDifs['Time differences'][i].calculateTimeDifsFromEvents()
     setTimeDifIdentifiers(settings, timeDifs)
-    print(timeDifs['Time differences'][0])
 
 
 def folderAnalyzer(timeDifs: dict, settings: dict, numFolders: int, window: Tk = None) -> bool:
