@@ -179,10 +179,13 @@ def main():
                     # Otherwise, prompt the user.
                     else:
                         file = input('Enter a settings file (no .json extension): ')
+                    # Change directory to settings
                     # Add .json extension.
+                    file = './settings/' + file
                     file = file + '.json'
+                    file = os.path.abspath(file)
                     # If file exists.
-                    if os.path.isfile(os.path.abspath(file)):
+                    if os.path.isfile(file):
                         # Display progress.
                         editor.print('Importing settings from ' + file + '...')
                         # Append settings.
