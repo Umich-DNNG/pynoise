@@ -5,7 +5,6 @@ from scipy.optimize import curve_fit   # For fitting the curve
 from scipy import signal               # For welch (fourier transform)
 from pathlib import Path               # path manipulation
 import os                              # For saving figures
-import hdf5_test as test
 
 
 # original alpha and uncertainty values: alpha = 160.84, uncertainty = 28.29
@@ -108,6 +107,7 @@ class CohnAlpha:
 
         # If unable to read in data or no data exists
         # generate corresponding histogram
+        importResults = False
         if not importResults:
             counts_time_hist, edges_ns = np.histogram(a=self.list_data_array,
                                                     bins=int(count_bins),
@@ -169,7 +169,8 @@ class CohnAlpha:
             - welchResultDict: a dict, contains the frequency and the power spectral density
         '''
         
-        self.print('\nApplying the Welch Approximation...')
+        
+        self.print('\nApplying Welch Approximation...')
 
         # Read in existing data if exists
         # re-format lists to numpy arrays
@@ -192,6 +193,7 @@ class CohnAlpha:
         
         # If existing data does not exist
         # read in histogram information from disk
+        importResults = False
         if not importResults:
             dwell_time = 1 / (2 * settings['CohnAlpha Settings']['Frequency Maximum'])
             nperseg = 1 / (dwell_time * settings['CohnAlpha Settings']['Frequency Minimum'])
@@ -202,7 +204,7 @@ class CohnAlpha:
             
             # initialize counts histogram list
             # generate frequency and power spectral densities
-            edges_seconds, counts_time_hist = self.plotCountsHistogram(settings=settings, showSubPlots=False)
+            edges_seconds, counts_time_hist = self.plotCountsHistogram(settings=settings, showSubPlots=True)
             f, Pxx = signal.welch(x=counts_time_hist,
                                 fs=self.fs,
                                 nperseg=int(nperseg), 
@@ -313,7 +315,7 @@ class CohnAlpha:
 
         # Fitting distribution with expected equation
         if not importResults:
-            f, Pxx = self.welchApproxFourierTrans(settings=settings, showSubPlots=False)
+            f, Pxx = self.welchApproxFourierTrans(settings=settings, showSubPlots=True)
             # Ignore start & end points that are incorrect due to welch endpoint assumptions
             popt, pcov = curve_fit(CAFit,
                                 f[1:-2],

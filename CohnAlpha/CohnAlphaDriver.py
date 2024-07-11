@@ -58,7 +58,7 @@ def main(editorIn: edit.Editor, queue: list[str]):
                             + '.\n')
             # Apply Welch Approximation of Fourier Transformation
             case 'w':
-                editor.print('\Applying Welch Approximation...')
+                editor.print('\nApplying Welch Approximation...')
                 if caInterface.applyWelchApprox(settings=editor.parameters.settings):
                     editor.log('Calculated frequency and power spectral density values on '
                             + editor.parameters.settings['Input/Output Settings']['Input file/folder'] 
