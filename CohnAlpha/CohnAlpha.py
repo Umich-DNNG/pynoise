@@ -4,7 +4,6 @@ import matplotlib.pyplot as pyplot     # For plotting data summaries
 from scipy.optimize import curve_fit   # For fitting the curve
 from scipy import signal               # For welch (fourier transform)
 from pathlib import Path               # path manipulation
-import datastream as ds                # for importing/exporting analysis
 import os                              # For saving figures
 import hdf5_test as test
 
