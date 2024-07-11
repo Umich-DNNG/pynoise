@@ -11,6 +11,7 @@ testing*
 *.pdf
 *.txt
 *.csv
+*.h5
 
 # Python software default outputs
 *__pycache__/
