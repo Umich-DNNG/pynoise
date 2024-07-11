@@ -93,16 +93,19 @@ class CohnAlpha:
         counts_time_hist = []
         edges_seconds = []
 
-        importResults = ds.importAnalysis(
-            data={
-                'Time(s)': edges_seconds,
-                'Counts': counts_time_hist
-            },
-            name=f"ca_hist_{settings['CohnAlpha Settings']['Frequency Minimum']}_{settings['CohnAlpha Settings']['Frequency Maximum']}_s",
-            input=settings['Input/Output Settings']['Save directory'])
         
-        counts_time_hist = np.array(counts_time_hist, dtype=np.int64)
-        edges_seconds = np.array(edges_seconds, dtype=np.float64)
+        # TODO: Start using the new .hdf5 import/export functionality
+
+        # importResults = ds.importAnalysis(
+        #     data={
+        #         'Time(s)': edges_seconds,
+        #         'Counts': counts_time_hist
+        #     },
+        #     name=f"ca_hist_{settings['CohnAlpha Settings']['Frequency Minimum']}_{settings['CohnAlpha Settings']['Frequency Maximum']}_s",
+        #     input=settings['Input/Output Settings']['Save directory'])
+        
+        # counts_time_hist = np.array(counts_time_hist, dtype=np.int64)
+        # edges_seconds = np.array(edges_seconds, dtype=np.float64)
 
         # If unable to read in data or no data exists
         # generate corresponding histogram
@@ -118,22 +121,26 @@ class CohnAlpha:
             self.plot_ca(x=edges_seconds,y=counts_time_hist, method='hist', settings=settings)
 
         # Saving counts histogram raw data
-        if settings['Input/Output Settings']['Save raw data']:
-            ds.exportAnalysis(
-                data={
-                    'Time(s)': (edges_seconds.tolist(), 0),
-                    'Counts': (counts_time_hist.tolist(), 0)
-                },
-                singles=[],
-                name= f"ca_hist_{settings['CohnAlpha Settings']['Frequency Minimum']}_{settings['CohnAlpha Settings']['Frequency Maximum']}_s",
-                output=settings['Input/Output Settings']['Save directory']
-            )
 
-            # output save location
-            # save histogram path to check for existence later
-            outputPath = os.path.abspath(settings['Input/Output Settings']['Save directory'])
-            self.histOutputName = outputPath
-            self.print('Histogram Data saved at ' + str(outputPath))
+        
+        # TODO: Start using the new .hdf5 import/export functionality
+
+        # if settings['Input/Output Settings']['Save raw data']:
+        #     ds.exportAnalysis(
+        #         data={
+        #             'Time(s)': (edges_seconds.tolist(), 0),
+        #             'Counts': (counts_time_hist.tolist(), 0)
+        #         },
+        #         singles=[],
+        #         name= f"ca_hist_{settings['CohnAlpha Settings']['Frequency Minimum']}_{settings['CohnAlpha Settings']['Frequency Maximum']}_s",
+        #         output=settings['Input/Output Settings']['Save directory']
+        #     )
+
+        #     # output save location
+        #     # save histogram path to check for existence later
+        #     outputPath = os.path.abspath(settings['Input/Output Settings']['Save directory'])
+        #     self.histOutputName = outputPath
+        #     self.print('Histogram Data saved at ' + str(outputPath))
 
         # Creating evenly spaced start and stop endpoint for plotting
         timeline = np.linspace(start=self.meas_time_range[0], 
@@ -170,16 +177,18 @@ class CohnAlpha:
         f = []
         Pxx = []
 
-        importResults = ds.importAnalysis(
-                    data={
-                        'Frequency(Hz)': f,
-                        'Counts^2/Hz': Pxx
-                    },
-                    name=f"{settings['CohnAlpha Settings']['Frequency Minimum']}_{settings['CohnAlpha Settings']['Frequency Maximum']}_s",
-                    input=settings['Input/Output Settings']['Save directory'])
+        # TODO: Start using the new .hdf5 import/export functionality
 
-        f = np.array(f, dtype=np.float64)
-        Pxx = np.array(Pxx, dtype=np.float64)
+        # importResults = ds.importAnalysis(
+        #             data={
+        #                 'Frequency(Hz)': f,
+        #                 'Counts^2/Hz': Pxx
+        #             },
+        #             name=f"{settings['CohnAlpha Settings']['Frequency Minimum']}_{settings['CohnAlpha Settings']['Frequency Maximum']}_s",
+        #             input=settings['Input/Output Settings']['Save directory'])
+
+        # f = np.array(f, dtype=np.float64)
+        # Pxx = np.array(Pxx, dtype=np.float64)
 
         
         # If existing data does not exist
@@ -204,18 +213,21 @@ class CohnAlpha:
             self.plot_ca(x=f, y=Pxx, method='scatter', settings=settings)
         
         # Saving scatter plot data (optional)
-        if settings['Input/Output Settings']['Save raw data']:
-            ds.exportAnalysis(
-                data={
-                    'Frequency(Hz)': (f.tolist(), 0),
-                    'Counts^2/Hz': (Pxx.tolist(), 0)
-                },
-                singles=[],
-                name=f"ca_graph_{settings['CohnAlpha Settings']['Frequency Minimum']}_{settings['CohnAlpha Settings']['Frequency Maximum']}_s",
-                output=settings['Input/Output Settings']['Save directory']
-            )
-            outputPath = os.path.abspath(settings['Input/Output Settings']['Save directory'])
-            self.print('Scatterplot Data saved at ' + str(outputPath))
+        
+        # TODO: Start using the new .hdf5 import/export functionality
+
+        # if settings['Input/Output Settings']['Save raw data']:
+        #     ds.exportAnalysis(
+        #         data={
+        #             'Frequency(Hz)': (f.tolist(), 0),
+        #             'Counts^2/Hz': (Pxx.tolist(), 0)
+        #         },
+        #         singles=[],
+        #         name=f"ca_graph_{settings['CohnAlpha Settings']['Frequency Minimum']}_{settings['CohnAlpha Settings']['Frequency Maximum']}_s",
+        #         output=settings['Input/Output Settings']['Save directory']
+        #     )
+        #     outputPath = os.path.abspath(settings['Input/Output Settings']['Save directory'])
+        #     self.print('Scatterplot Data saved at ' + str(outputPath))
 
         return (f, Pxx)
         
@@ -269,18 +281,23 @@ class CohnAlpha:
 
         # create list to store tuple information
         singles = []
-        importResults = ds.importAnalysis(
-            data={
-                'Frequency(Hz)': f,
-                'Counts^2/Hz': Pxx,
-                'Residuals': residuals
-            },
-            singles=singles,
-            name=f"ca_graph_{settings['CohnAlpha Settings']['Frequency Minimum']}_{settings['CohnAlpha Settings']['Frequency Maximum']}_s",
-            input=settings['Input/Output Settings']['Save directory'])
+        
+        # TODO: Start using the new .hdf5 import/export functionality
+
+        # importResults = ds.importAnalysis(
+        #     data={
+        #         'Frequency(Hz)': f,
+        #         'Counts^2/Hz': Pxx,
+        #         'Residuals': residuals
+        #     },
+        #     singles=singles,
+        #     name=f"ca_graph_{settings['CohnAlpha Settings']['Frequency Minimum']}_{settings['CohnAlpha Settings']['Frequency Maximum']}_s",
+        #     input=settings['Input/Output Settings']['Save directory'])
 
         # singles.pop(0)[1] removes the first value of the list, as well as grabs the 2nd tuple value of the element
         # store in popt
+        
+        importResults = False
         if importResults:
             while singles != []:
                 popt.append(np.float64(singles.pop(0)[1]))
@@ -319,27 +336,28 @@ class CohnAlpha:
                       'uncertainty': uncertainty}
             self.plot_ca(x=f, y=Pxx, residuals=residuals, method='fit', settings=settings, **kwDict)
 
-        if settings['Input/Output Settings']['Save raw data']:
+        # if settings['Input/Output Settings']['Save raw data']:
             # TODO: change output name to save
+            
+            # TODO: Start using the new .hdf5 import/export functionality
+
             # nameString = f
-            # TODO: change output name to save
-            # nameString = f
-            ds.exportAnalysis(
-                data={
-                    'Frequency(Hz)': (f.tolist(), 0),
-                    'Counts^2/Hz': (Pxx.tolist(), 0),
-                    'Residuals': (residuals.tolist(), 0)
-                },
-                singles=[('optimal a', popt[0]),
-                         ('optimal alpha', popt[1]),
-                         ('optimal c', popt[2]),
-                         ('alpha', alpha),
-                         ('uncertainty', uncertainty)],
-                name=f"ca_graph_{settings['CohnAlpha Settings']['Frequency Minimum']}_{settings['CohnAlpha Settings']['Frequency Maximum']}_s",
-                output=settings['Input/Output Settings']['Save directory']
-            )
-            outputPath = os.path.abspath(settings['Input/Output Settings']['Save directory'])
-            self.print('Fitted Curve Data saved at ' + str(outputPath))
+            # ds.exportAnalysis(
+            #     data={
+            #         'Frequency(Hz)': (f.tolist(), 0),
+            #         'Counts^2/Hz': (Pxx.tolist(), 0),
+            #         'Residuals': (residuals.tolist(), 0)
+            #     },
+            #     singles=[('optimal a', popt[0]),
+            #              ('optimal alpha', popt[1]),
+            #              ('optimal c', popt[2]),
+            #              ('alpha', alpha),
+            #              ('uncertainty', uncertainty)],
+            #     name=f"ca_graph_{settings['CohnAlpha Settings']['Frequency Minimum']}_{settings['CohnAlpha Settings']['Frequency Maximum']}_s",
+            #     output=settings['Input/Output Settings']['Save directory']
+            # )
+            # outputPath = os.path.abspath(settings['Input/Output Settings']['Save directory'])
+            # self.print('Fitted Curve Data saved at ' + str(outputPath))
 
         return popt, alpha, uncertainty
 
