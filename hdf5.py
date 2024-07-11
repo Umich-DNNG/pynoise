@@ -46,11 +46,11 @@ def readHDF5Data(path: list, settings: dict, fileName:str = 'pynoise', settingsN
     Inputs:
     - path: list containing the path to the data destinataion
     - settings: dictionary containing runtimee settings
-    - fileName: string name of the h5 file to read from
-    - settingsNama: string path to settings file--not required if fileName is not pynoise
+    - fileName: string name of the h5 file to read from. 'pynoise' has a specific format to search, all other files follow user paths
+    - settingsName: string path to settings file--not required if fileName is not pynoise
 
     Outputs:
-    data; a dictionary of the data at the destination
+    data: a dictionary of the data at the destination
     '''
     fileName = fileName + '.h5'
     filePath = os.path.join(settings['Input/Output Settings']['Save directory'], fileName)
