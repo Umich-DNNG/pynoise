@@ -13,8 +13,8 @@ def writeHDF5Data(npArrays, keys, path: list, settings: dict, fileName:str = "py
     - keys: the keys for each of the data set. Assuming parallel list with npArrays
     - path: list containing the path to where the npArray will be stored. Ex: [RossiAlpha, histogram] or [input file/folder, rossialpha, td method, reset time]
     - settings: dict of runtime settings
-    - fileName: string name of the hdf5 file. Either 'pynoise' or 'processing_data'
-    - settingsNama: string of the path to settings file--not required if fileName is not pynoise
+    - fileName: string name of the hdf5 file. 'pynoise' has a specific starting format before following user format, while all others just follow user format
+    - settingsName: string of the path to settings file--not required if fileName is not pynoise
     '''
 
     # numFolders + reset time + td method
@@ -162,11 +162,11 @@ def findMatchingSettings(group, settings):
             # any slashes must be sanitized
             subkey = subkey.replace('/', '-')
             # skip over any "null" settings values
-            if subvalue is None:
+            if subvalue is not None:
                 continue
             valueGroup.create_dataset(subkey, data=subvalue)
         
-        return group
+    return group
 
 
 def compareSettings(settings, group):
