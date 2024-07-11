@@ -162,7 +162,7 @@ def findMatchingSettings(group, settings):
             # any slashes must be sanitized
             subkey = subkey.replace('/', '-')
             # skip over any "null" settings values
-            if subvalue is not None:
+            if subvalue is None:
                 continue
             valueGroup.create_dataset(subkey, data=subvalue)
         
