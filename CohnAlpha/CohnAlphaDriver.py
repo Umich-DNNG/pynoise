@@ -7,12 +7,11 @@ Created on Thu Jun  1 11:42:16 2023
 
 
 import editor as edit
-import analyze as alz
+from CohnAlpha import CohnAlphaInterface as caInterface
 import os
 
 
 editor: edit.Editor = None
-analyzer = alz.Analyzer()
 
 
 def main(editorIn: edit.Editor, queue: list[str]):
@@ -41,51 +40,33 @@ def main(editorIn: edit.Editor, queue: list[str]):
                     editor.print('ERROR: You currently have no input file/folder defined or the input file/folder cannot be found. '
                           + 'Please ensure input path is correct before running any analysis.\n')
                     continue
-        
-        overwrite = True
-        # NOTE: currently overwrite not doing anything, as program doesn't have capabilities to overwrite data
-        # the program will either instantly load in data with the correct settings, or generate the data
+
         match selection:
             # Run entire Cohn-Alpha method
             case 'm':
-                    editor.print('\nRunning the entire Cohn Alpha analysis...')
-                    analyzer.fitPSDCurve(editor.parameters.settings, overwrite=True)
-                    editor.log('Ran the entire Cohn Alpha on file ' 
-                                + editor.parameters.settings['Input/Output Settings']['Input file/folder'] 
-                                + '\n')
+                editor.print('\nRunning the entire Cohn Alpha analysis...')
+                caInterface.fitCohnAlpha(editor.parameters.settings)
+                editor.log('Ran the entire Cohn Alpha on file ' 
+                            + editor.parameters.settings['Input/Output Settings']['Input file/folder'] 
+                            + '\n')
             # Plot Counts Histogram
             case 'p':
-                # If data exists, ask if user willing to overwrite
-                # if overwriting, run function
-                # Otherwise, do nothing
-                if analyzer.CohnAlpha['Histogram'] != []:
-                    overwrite = overwriteHelperFunction(queue=queue, key='Histogram')
-
-                if analyzer.plotCohnAlphaHist(settings=editor.parameters.settings, overwrite=overwrite):
+                editor.print('\nPlotting Counts Histogram...')
+                if caInterface.plotCohnAlphaHist(settings=editor.parameters.settings):
                     editor.log('Generated Cohn Alpha Histogram on file '
                             + editor.parameters.settings['Input/Output Settings']['Input file/folder'] 
                             + '.\n')
             # Apply Welch Approximation of Fourier Transformation
             case 'w':
-                # If data exists, ask if user willing to overwrite
-                # if overwriting, run function
-                # Otherwise, do nothing
-                if analyzer.CohnAlpha['Welch Result'] != []:
-                    overwrite = overwriteHelperFunction(queue=queue, key='Welch Result')
-
-                if analyzer.applyWelchApprox(settings=editor.parameters.settings, overwrite=overwrite):
+                editor.print('\nApplying Welch Approximation...')
+                if caInterface.applyWelchApprox(settings=editor.parameters.settings):
                     editor.log('Calculated frequency and power spectral density values on '
                             + editor.parameters.settings['Input/Output Settings']['Input file/folder'] 
                             + '.\n')
             # Fit Power Spectral Density Curve
             case 'f':
-                # If data exists, ask if user willing to overwrite
-                # if overwriting or no data exists, run function
-                # Otherwise, do nothing
-                if analyzer.CohnAlpha['PSD Fit Curve'] != []:
-                    overwrite = overwriteHelperFunction(queue=queue, key='PSD Fit Curve')
-
-                if analyzer.fitPSDCurve(settings=editor.parameters.settings, overwrite=overwrite):
+                editor.print('\nFitting Power Spectral Density Curve...')
+                if caInterface.fitCohnAlpha(settings=editor.parameters.settings):
                     editor.log('Fitted Power Spectral Density Curve on '
                             + editor.parameters.settings['Input/Output Settings']['Input file/folder'] 
                             + '.\n')
@@ -119,6 +100,9 @@ def helperAutoFunc(queue):
     return selection
             
 
+#------------------------------------------------------------------------------
+# NOT MAINTAINED
+#------------------------------------------------------------------------------
 
 def overwriteHelperFunction(queue, key:str = ""):
 
@@ -129,7 +113,7 @@ def overwriteHelperFunction(queue, key:str = ""):
     elif 'PSD Fit Curve' == key:
         displayString = 'There is an already stored best fit curve '
 
-    if analyzer.CohnAlpha[key] != []:
+    if caInterface.CohnAlpha[key] != []:
         editor.print('WARNING: '
             + displayString
             + 'in this runtime. Do you want to overwrite?')
@@ -151,8 +135,8 @@ def overwriteHelperFunction(queue, key:str = ""):
     # return
 
     # If generated histogram is found, ask users if willing to overwrite
-    # Otherwise generate Histogram and save Histogram in analyzer.CohnAlpha dict
-    # if analyzer.CohnAlpha['Histogram'] != []:
+    # Otherwise generate Histogram and save Histogram in caInterface.CohnAlpha dict
+    # if caInterface.CohnAlpha['Histogram'] != []:
     #     # Ask user if willing to overwrite histogram that exists in memory
     #     editor.print('WARNING: There is an already stored histogram '
     #         + 'in this runtime. Do you want to erase it?')
@@ -166,4 +150,4 @@ def overwriteHelperFunction(queue, key:str = ""):
     #         editor.print('Cancelling overwrite...')
     #         editor.print('Displaying Histogram')
     #         overwrite = False
-    # helperAutoFunc(queue=queue, editor=editor, overwrite=overwrite)
+    # helperAutoFunc(queue=queue, editor=editor)
