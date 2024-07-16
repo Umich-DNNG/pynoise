@@ -13,8 +13,8 @@ def writeHDF5Data(npArrays, keys, path: list, settings: dict, fileName:str = "py
     - keys: the keys for each of the data set. Assuming parallel list with npArrays
     - path: list containing the path to where the npArray will be stored. Ex: [RossiAlpha, histogram] or [input file/folder, rossialpha, td method, reset time]
     - settings: dict of runtime settings
-    - fileName: string name of the hdf5 file. Either 'pynoise' or 'processing_data'
-    - settingsNama: string of the path to settings file--not required if fileName is not pynoise
+    - fileName: string name of the hdf5 file. 'pynoise' has a specific starting format before following user format, while all others just follow user format
+    - settingsName: string of the path to settings file--not required if fileName is not pynoise
     '''
 
     # numFolders + reset time + td method
@@ -46,11 +46,11 @@ def readHDF5Data(path: list, settings: dict, fileName:str = 'pynoise', settingsN
     Inputs:
     - path: list containing the path to the data destinataion
     - settings: dictionary containing runtimee settings
-    - fileName: string name of the h5 file to read from
-    - settingsNama: string path to settings file--not required if fileName is not pynoise
+    - fileName: string name of the h5 file to read from. 'pynoise' has a specific format to search, all other files follow user paths
+    - settingsName: string path to settings file--not required if fileName is not pynoise
 
     Outputs:
-    data; a dictionary of the data at the destination
+    data: a dictionary of the data at the destination
     '''
     fileName = fileName + '.h5'
     filePath = os.path.join(settings['Input/Output Settings']['Save directory'], fileName)
@@ -166,7 +166,7 @@ def findMatchingSettings(group, settings):
                 continue
             valueGroup.create_dataset(subkey, data=subvalue)
         
-        return group
+    return group
 
 
 def compareSettings(settings, group):
