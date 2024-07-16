@@ -3,11 +3,9 @@ import numpy as np                     # For processing data
 import matplotlib.pyplot as pyplot     # For plotting data summaries
 from scipy.optimize import curve_fit   # For fitting the curve
 from scipy import signal               # For welch (fourier transform)
-from pathlib import Path               # path manipulation
 import os                              # For saving figures
+import hdf5
 
-
-# original alpha and uncertainty values: alpha = 160.84, uncertainty = 28.29
 
 # ------------ Power Spectral Density Fitting Function ----------------------------------------------
 def CAFit(f, A, alpha, c):
@@ -17,6 +15,7 @@ def CAFit(f, A, alpha, c):
     '''
     return A / (1+(f**2/alpha**2)) + c
 # ---------------------------------------------------------------------------------------------------
+
 
 class CohnAlpha:
     def __init__(self,
@@ -49,8 +48,6 @@ class CohnAlpha:
             self.print("Unable to determine Measure Time Range from settings")
             self.print("Setting Measure Time Range to default values of [1.5e11, 1.0e12] in ns")
             self.meas_time_range = [1.5e11, 1.0e12]
-        # initialize variable to be used later
-        self.fs = 0
 
         # Annotation Parameters
         self.annotate_font_weight = settings['CohnAlpha Settings']['Annotation Font Weight']
@@ -61,7 +58,7 @@ class CohnAlpha:
         self.print("Finished reading input file/folder data")
 
 
-    def plotCountsHistogram(self, settings: dict = {}, showSubPlots: bool = True):
+    def plotCountsHistogram(self, settings: dict = {}, settingsPath:str = './settings/default.json', showSubPlots:bool = True):
 
         '''
         Creating Counts Histogram from data
@@ -77,38 +74,27 @@ class CohnAlpha:
         Output:
             - count_times_hist: the histogram saved in array format
         '''
-        # calculate dwell time
-        # change from Hz --> seconds --> nanoseconds
+
+
+        # calculate dwell time; change from Hz --> seconds --> nanoseconds
+        # Making count of bins over time histogram
         dwell_time = 1 / (2 * settings['CohnAlpha Settings']['Frequency Maximum'])
         dwell_time_ns = dwell_time * 1e9
         
-        # Making count of bins over time histogram
-        count_bins = np.diff(self.meas_time_range) / dwell_time_ns
+        count_bins = np.diff(self.meas_time_range) / dwell_time_ns        
 
-        # read in histogram data
-        # import data from disk
-        # reformat lists to numpy arrays
-        counts_time_hist = []
-        edges_seconds = []
-
-        
-        # TODO: Start using the new .hdf5 import/export functionality
-
-        # importResults = ds.importAnalysis(
-        #     data={
-        #         'Time(s)': edges_seconds,
-        #         'Counts': counts_time_hist
-        #     },
-        #     name=f"ca_hist_{settings['CohnAlpha Settings']['Frequency Minimum']}_{settings['CohnAlpha Settings']['Frequency Maximum']}_s",
-        #     input=settings['Input/Output Settings']['Save directory'])
-        
-        # counts_time_hist = np.array(counts_time_hist, dtype=np.int64)
-        # edges_seconds = np.array(edges_seconds, dtype=np.float64)
-
-        # If unable to read in data or no data exists
-        # generate corresponding histogram
-        importResults = False
-        if not importResults:
+        # import data
+        # generate corresponding histogram if importing fails
+        # path == CohnAlpha//<Histogram/Scatter/Fit>
+        importResults = hdf5.readHDF5Data(path=['CohnAlpha','Histogram'],
+                                          settings=settings,
+                                          settingsName=settingsPath,
+                                          fileName='processing_data')
+    
+        if importResults is not None:
+            counts_time_hist = importResults['counts_time_hist']
+            edges_seconds = importResults['edges_seconds']
+        else:
             counts_time_hist, edges_ns = np.histogram(a=self.list_data_array,
                                                     bins=int(count_bins),
                                                     range=self.meas_time_range)
@@ -119,40 +105,25 @@ class CohnAlpha:
         if settings['General Settings']['Show plots'] and showSubPlots:
             self.plot_ca(x=edges_seconds,y=counts_time_hist, method='hist', settings=settings)
 
-        # Saving counts histogram raw data
-
-        
-        # TODO: Start using the new .hdf5 import/export functionality
-
-        # if settings['Input/Output Settings']['Save raw data']:
-        #     ds.exportAnalysis(
-        #         data={
-        #             'Time(s)': (edges_seconds.tolist(), 0),
-        #             'Counts': (counts_time_hist.tolist(), 0)
-        #         },
-        #         singles=[],
-        #         name= f"ca_hist_{settings['CohnAlpha Settings']['Frequency Minimum']}_{settings['CohnAlpha Settings']['Frequency Maximum']}_s",
-        #         output=settings['Input/Output Settings']['Save directory']
-        #     )
-
-        #     # output save location
-        #     # save histogram path to check for existence later
-        #     outputPath = os.path.abspath(settings['Input/Output Settings']['Save directory'])
-        #     self.histOutputName = outputPath
-        #     self.print('Histogram Data saved at ' + str(outputPath))
+        # Saving raw data
+        if settings['Input/Output Settings']['Save raw data']:
+            hdf5.writeHDF5Data(npArrays=[counts_time_hist, edges_seconds],
+                               keys=['counts_time_hist', 'edges_seconds'],
+                               path=['CohnAlpha', 'Histogram'],
+                               settings=settings,
+                               settingsName=settingsPath,
+                               fileName='processing_data')
 
         # Creating evenly spaced start and stop endpoint for plotting
+        # Calculating power spectral density distribution from counts over time hist (Get frequency of counts samples)
         timeline = np.linspace(start=self.meas_time_range[0], 
                             stop=self.meas_time_range[1],
                             num=int(count_bins))/1e9
-        
-        # Calculating power spectral density distribution from counts over time hist (Get frequency of counts samples)
-        # Save into class, for future functions to use
         self.fs = 1 / (timeline[3]-timeline[2])
 
         return edges_seconds, counts_time_hist
-    
-    def welchApproxFourierTrans(self, settings:dict = {}, showSubPlots:bool = True):
+
+    def welchApproxFourierTrans(self, settings: dict = {}, settingsPath:str = './settings/default.json', showSubPlots:bool = True):
 
         '''
         Creating Cohn Alpha Scatterplot from data
@@ -168,33 +139,20 @@ class CohnAlpha:
         Output:
             - welchResultDict: a dict, contains the frequency and the power spectral density
         '''
-        
-        
-        self.print('\nApplying Welch Approximation...')
+
 
         # Read in existing data if exists
-        # re-format lists to numpy arrays
-        f = []
-        Pxx = []
-
-        # TODO: Start using the new .hdf5 import/export functionality
-
-        # importResults = ds.importAnalysis(
-        #             data={
-        #                 'Frequency(Hz)': f,
-        #                 'Counts^2/Hz': Pxx
-        #             },
-        #             name=f"{settings['CohnAlpha Settings']['Frequency Minimum']}_{settings['CohnAlpha Settings']['Frequency Maximum']}_s",
-        #             input=settings['Input/Output Settings']['Save directory'])
-
-        # f = np.array(f, dtype=np.float64)
-        # Pxx = np.array(Pxx, dtype=np.float64)
-
+        importResults = hdf5.readHDF5Data(path=['CohnAlpha', 'Scatter'],
+                                          settings=settings,
+                                          settingsName=settingsPath,
+                                          fileName='pynoise')
         
         # If existing data does not exist
         # read in histogram information from disk
-        importResults = False
-        if not importResults:
+        if importResults is not None and not showSubPlots:
+            f = importResults['f']
+            Pxx = importResults['Pxx']
+        else:
             dwell_time = 1 / (2 * settings['CohnAlpha Settings']['Frequency Maximum'])
             nperseg = 1 / (dwell_time * settings['CohnAlpha Settings']['Frequency Minimum'])
 
@@ -206,34 +164,26 @@ class CohnAlpha:
             # generate frequency and power spectral densities
             edges_seconds, counts_time_hist = self.plotCountsHistogram(settings=settings, showSubPlots=True)
             f, Pxx = signal.welch(x=counts_time_hist,
-                                fs=self.fs,
-                                nperseg=int(nperseg), 
-                                window='boxcar')
+                                  fs=self.fs,
+                                  nperseg=int(nperseg), 
+                                  window='boxcar')
 
         if settings['General Settings']['Show plots'] and showSubPlots:
             self.plot_ca(x=f, y=Pxx, method='scatter', settings=settings)
-        
-        # Saving scatter plot data (optional)
-        
-        # TODO: Start using the new .hdf5 import/export functionality
 
-        # if settings['Input/Output Settings']['Save raw data']:
-        #     ds.exportAnalysis(
-        #         data={
-        #             'Frequency(Hz)': (f.tolist(), 0),
-        #             'Counts^2/Hz': (Pxx.tolist(), 0)
-        #         },
-        #         singles=[],
-        #         name=f"ca_graph_{settings['CohnAlpha Settings']['Frequency Minimum']}_{settings['CohnAlpha Settings']['Frequency Maximum']}_s",
-        #         output=settings['Input/Output Settings']['Save directory']
-        #     )
-        #     outputPath = os.path.abspath(settings['Input/Output Settings']['Save directory'])
-        #     self.print('Scatterplot Data saved at ' + str(outputPath))
+        # Saving raw data
+        if settings['Input/Output Settings']['Save raw data']:
+            hdf5.writeHDF5Data(npArrays=[f, Pxx],
+                               keys=['f', 'Pxx'],
+                               path=['CohnAlpha', 'Scatter'],
+                               settings=settings,
+                               settingsName=settingsPath,
+                               fileName='pynoise')
 
         return (f, Pxx)
         
 
-    def fitCohnAlpha(self, settings:dict = {}, showSubPlots:bool = True):
+    def fitCohnAlpha(self, settings: dict = {}, settingsPath:str = './settings/default.json', showSubPlots:bool = False):
 
         '''
         Fits Power Spectral Density onto provided scatterplot
@@ -270,51 +220,24 @@ class CohnAlpha:
             - pcov (DESCRIPTION NEEDED)
     
         '''
-
-        self.print('\nFitting Power Spectral Density Curve...')
         
-        # initialize lists
         # read in files
-        f = []
-        Pxx = []
-        residuals = []
-        popt = []
+        importResults = hdf5.readHDF5Data(path=['CohnAlpha', 'Fit'],
+                                        settings=settings,
+                                        settingsName=settingsPath,
+                                        fileName='pynoise')
 
-        # create list to store tuple information
-        singles = []
-        
-        # TODO: Start using the new .hdf5 import/export functionality
+        if importResults is not None and not showSubPlots:
+            f = importResults['f']
+            Pxx = importResults['Pxx']
+            residuals = importResults['residuals']
+            popt = importResults['popt']
+            uncertainty = importResults['uncertainty']
+            alpha = importResults['alpha']
 
-        # importResults = ds.importAnalysis(
-        #     data={
-        #         'Frequency(Hz)': f,
-        #         'Counts^2/Hz': Pxx,
-        #         'Residuals': residuals
-        #     },
-        #     singles=singles,
-        #     name=f"ca_graph_{settings['CohnAlpha Settings']['Frequency Minimum']}_{settings['CohnAlpha Settings']['Frequency Maximum']}_s",
-        #     input=settings['Input/Output Settings']['Save directory'])
-
-        # singles.pop(0)[1] removes the first value of the list, as well as grabs the 2nd tuple value of the element
-        # store in popt
-        
-        importResults = False
-        if importResults:
-            while singles != []:
-                popt.append(np.float64(singles.pop(0)[1]))
-
-            # assign uncertainty and alpha values
-            # grab from end of list, i.e. [x, y, z, alpha, uncertainty] --> [x, y, z, alpha] --> [x, y, z]
-            uncertainty = np.float64(popt.pop(len(popt) - 1))
-            alpha = np.float64(popt.pop(len(popt) - 1))
-
-        # convert lists to proper numpy array
-        f = np.array(f, dtype=np.float64)
-        Pxx = np.array(Pxx, dtype=np.float64)
-        residuals = np.array(residuals, dtype=np.float64)
 
         # Fitting distribution with expected equation
-        if not importResults:
+        else:
             f, Pxx = self.welchApproxFourierTrans(settings=settings, showSubPlots=True)
             # Ignore start & end points that are incorrect due to welch endpoint assumptions
             popt, pcov = curve_fit(CAFit,
@@ -337,28 +260,16 @@ class CohnAlpha:
                       'uncertainty': uncertainty}
             self.plot_ca(x=f, y=Pxx, residuals=residuals, method='fit', settings=settings, **kwDict)
 
-        # if settings['Input/Output Settings']['Save raw data']:
-            # TODO: change output name to save
-            
-            # TODO: Start using the new .hdf5 import/export functionality
-
-            # nameString = f
-            # ds.exportAnalysis(
-            #     data={
-            #         'Frequency(Hz)': (f.tolist(), 0),
-            #         'Counts^2/Hz': (Pxx.tolist(), 0),
-            #         'Residuals': (residuals.tolist(), 0)
-            #     },
-            #     singles=[('optimal a', popt[0]),
-            #              ('optimal alpha', popt[1]),
-            #              ('optimal c', popt[2]),
-            #              ('alpha', alpha),
-            #              ('uncertainty', uncertainty)],
-            #     name=f"ca_graph_{settings['CohnAlpha Settings']['Frequency Minimum']}_{settings['CohnAlpha Settings']['Frequency Maximum']}_s",
-            #     output=settings['Input/Output Settings']['Save directory']
-            # )
-            # outputPath = os.path.abspath(settings['Input/Output Settings']['Save directory'])
-            # self.print('Fitted Curve Data saved at ' + str(outputPath))
+        # Saving raw data
+        if settings['Input/Output Settings']['Save raw data']:
+            uncertainty_array = np.array(uncertainty)
+            alpha_array = np.array(alpha)
+            hdf5.writeHDF5Data(npArrays=[f, Pxx, residuals, popt, uncertainty_array, alpha_array],
+                               keys=['f', 'Pxx', 'residuals', 'popt', 'uncertainty', 'alpha'],
+                               path=['CohnAlpha', 'Fit'],
+                               settings=settings,
+                               settingsName=settingsPath,
+                               fileName='pynoise')
 
         return popt, alpha, uncertainty
 
@@ -399,8 +310,6 @@ class CohnAlpha:
         nRows = 1
         shareX = False
         gridSpecDict = {}
-
-        returnValue = None
 
         # update variables for fitting if fitting is chosen
         if method == 'fit':
@@ -466,12 +375,6 @@ class CohnAlpha:
         pyplot.show()
         pyplot.close()
 
-        # returning popt, alpha, uncertainty doesn't work if method != 'fit'
-        # resolve exception by returning None instead
-        try:
-            return popt, alpha, uncertainty
-        except NameError:
-            return None
 
 
     def fit_ca(self, x, y, residuals, ax, popt = None, alpha = None, uncertainty = None, settings:dict = {}):
@@ -518,7 +421,7 @@ class CohnAlpha:
         ax[1].set_xlabel('Frequency(Hz)')
         ax[1].set_ylabel('Percent difference (%)')
 
-        return (popt, alpha, uncertainty)
+
 
     # TODO: a different method of Cohn-Alpha
     # Need to use sub-functions to also work with this alternate method

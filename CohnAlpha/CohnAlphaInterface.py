@@ -13,16 +13,13 @@ def initCohnAlphaObject(settings: dict = {}):
     global caObj
     
     # if uninitialized then set variable
-    # otherwise return
-    if caObj is not None:
-        return False
+    if caObj is None:
+        caObj = ca.CohnAlpha(settings=settings)
     
-    caObj = ca.CohnAlpha(settings=settings)
-
-    return True
+    
 
 
-def plotCohnAlphaHist(settings:dict = {}):
+def plotCohnAlphaHist(settings:dict = {}, settingsPath:str = './settings/default.json'):
     
     '''
     Creates a Cohn Alpha Counts Histogram
@@ -33,13 +30,12 @@ def plotCohnAlphaHist(settings:dict = {}):
     - overwrite: if overwriting the current information in memory
     '''
 
-    # ensure caObj is initialized
     initCohnAlphaObject(settings)
-    caObj.plotCountsHistogram(settings)
+    caObj.plotCountsHistogram(settings=settings, settingsPath=settingsPath)
     return True
 
 
-def applyWelchApprox(settings:dict = {}):
+def applyWelchApprox(settings:dict = {}, settingsPath:str = './settings/default.json'):
     
     '''
     Applies the Welch Approximation transformation
@@ -50,13 +46,13 @@ def applyWelchApprox(settings:dict = {}):
     - settings: the current user's runtime settings
     - overwrite: if overwriting the current information in memory
     '''
-    # ensure caObj is initialized
+    
     initCohnAlphaObject(settings)
-    caObj.welchApproxFourierTrans(settings)
+    caObj.welchApproxFourierTrans(settings=settings, settingsPath=settingsPath)
     return True
 
 
-def fitCohnAlpha(settings:dict = {}):        
+def fitCohnAlpha(settings:dict = {}, settingsPath:str = './settings/default.json', showSubPlots:bool = False):
     
     '''
     Fits a Power Spectral Density Curve onto a 
@@ -68,7 +64,6 @@ def fitCohnAlpha(settings:dict = {}):
     - settings: the current user's runtime settings
     '''
     
-    # ensure caObj is initialized
     initCohnAlphaObject(settings)
-    caObj.fitCohnAlpha(settings=settings)
+    caObj.fitCohnAlpha(settings=settings, settingsPath=settingsPath, showSubPlots=showSubPlots)
     return True

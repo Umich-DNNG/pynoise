@@ -45,28 +45,28 @@ def main(editorIn: edit.Editor, queue: list[str]):
             # Run entire Cohn-Alpha method
             case 'm':
                 editor.print('\nRunning the entire Cohn Alpha analysis...')
-                caInterface.fitCohnAlpha(editor.parameters.settings)
-                editor.log('Ran the entire Cohn Alpha on file ' 
-                            + editor.parameters.settings['Input/Output Settings']['Input file/folder'] 
-                            + '\n')
+                if caInterface.fitCohnAlpha(settings=editor.parameters.settings, settingsPath=editor.parameters.origin, showSubPlots=True):
+                    editor.log('Ran the entire Cohn Alpha on file ' 
+                                + editor.parameters.settings['Input/Output Settings']['Input file/folder'] 
+                                + '\n')
             # Plot Counts Histogram
             case 'p':
                 editor.print('\nPlotting Counts Histogram...')
-                if caInterface.plotCohnAlphaHist(settings=editor.parameters.settings):
+                if caInterface.plotCohnAlphaHist(settings=editor.parameters.settings, settingsPath=editor.parameters.origin):
                     editor.log('Generated Cohn Alpha Histogram on file '
                             + editor.parameters.settings['Input/Output Settings']['Input file/folder'] 
                             + '.\n')
             # Apply Welch Approximation of Fourier Transformation
             case 'w':
                 editor.print('\nApplying Welch Approximation...')
-                if caInterface.applyWelchApprox(settings=editor.parameters.settings):
+                if caInterface.applyWelchApprox(settings=editor.parameters.settings, settingsPath=editor.parameters.origin):
                     editor.log('Calculated frequency and power spectral density values on '
                             + editor.parameters.settings['Input/Output Settings']['Input file/folder'] 
                             + '.\n')
             # Fit Power Spectral Density Curve
             case 'f':
                 editor.print('\nFitting Power Spectral Density Curve...')
-                if caInterface.fitCohnAlpha(settings=editor.parameters.settings):
+                if caInterface.fitCohnAlpha(settings=editor.parameters.settings, settingsPath=editor.parameters.origin, showSubPlots=True):
                     editor.log('Fitted Power Spectral Density Curve on '
                             + editor.parameters.settings['Input/Output Settings']['Input file/folder'] 
                             + '.\n')

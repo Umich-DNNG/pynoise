@@ -1,5 +1,5 @@
 import math                            # To compare floats and assign correct time units string
-# import h5py                            # For saving data in .hdf5 format
+from pathlib import Path               # Path manipulation
 
 # Helper Functions
 def convertTimeUnitsToStr(units):
@@ -39,3 +39,10 @@ def checkPowerOfTwo(value):
         return True
     if value < 1:
         return False
+    
+
+def constructHDF5Path(settings:dict = {}):
+    h5_path = Path(settings['Input/Output Settings']['Input file/folder']).stem
+    h5_path += '_' + str(settings['CohnAlpha Settings']['Frequency Minimum'])
+    h5_path += '_' + str(settings['CohnAlpha Settings']['Frequency Maximum'])
+    return h5_path
