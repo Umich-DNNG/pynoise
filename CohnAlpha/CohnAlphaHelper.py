@@ -39,10 +39,3 @@ def checkPowerOfTwo(value):
         return True
     if value < 1:
         return False
-    
-
-def constructHDF5Path(settings:dict = {}):
-    h5_path = Path(settings['Input/Output Settings']['Input file/folder']).stem
-    h5_path += '_' + str(settings['CohnAlpha Settings']['Frequency Minimum'])
-    h5_path += '_' + str(settings['CohnAlpha Settings']['Frequency Maximum'])
-    return h5_path

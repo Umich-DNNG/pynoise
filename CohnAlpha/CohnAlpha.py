@@ -85,7 +85,7 @@ class CohnAlpha:
 
         # import data
         # generate corresponding histogram if importing fails
-        # path == CohnAlpha//<Histogram/Scatter/Fit>
+        # file == processing_data.h5, path == CohnAlpha/Histogram
         importResults = hdf5.readHDF5Data(path=['CohnAlpha','Histogram'],
                                           settings=settings,
                                           settingsName=settingsPath,
@@ -142,16 +142,18 @@ class CohnAlpha:
 
 
         # Read in existing data if exists
+        # file == pynoise.h5, path = CohnAlpha/Scatter
         importResults = hdf5.readHDF5Data(path=['CohnAlpha', 'Scatter'],
                                           settings=settings,
                                           settingsName=settingsPath,
                                           fileName='pynoise')
         
-        # If existing data does not exist
-        # read in histogram information from disk
+        # If existing data does not exist and showSubPlots is false
+        # import data from disk
         if importResults is not None and not showSubPlots:
             f = importResults['f']
             Pxx = importResults['Pxx']
+        # otherwise re-calculate data and re-plot histogram
         else:
             dwell_time = 1 / (2 * settings['CohnAlpha Settings']['Frequency Maximum'])
             nperseg = 1 / (dwell_time * settings['CohnAlpha Settings']['Frequency Minimum'])
@@ -168,6 +170,7 @@ class CohnAlpha:
                                   nperseg=int(nperseg), 
                                   window='boxcar')
 
+        # Plotting
         if settings['General Settings']['Show plots'] and showSubPlots:
             self.plot_ca(x=f, y=Pxx, method='scatter', settings=settings)
 
@@ -226,7 +229,9 @@ class CohnAlpha:
                                         settings=settings,
                                         settingsName=settingsPath,
                                         fileName='pynoise')
-
+        
+        # If existing data does not exist and showSubPlots is false
+        # import data from disk
         if importResults is not None and not showSubPlots:
             f = importResults['f']
             Pxx = importResults['Pxx']
@@ -235,7 +240,7 @@ class CohnAlpha:
             uncertainty = importResults['uncertainty']
             alpha = importResults['alpha']
 
-
+        # otherwise re-calculate data and re-plot histogram + scatterplot
         # Fitting distribution with expected equation
         else:
             f, Pxx = self.welchApproxFourierTrans(settings=settings, showSubPlots=True)
