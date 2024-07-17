@@ -12,12 +12,12 @@ data2 = Path('./data/processing_data.h5').resolve()
 # if adding more files, add files here, and declare the files global in the main() function below
 
 
-def compareResults(result):
+def compareResults(result, verbose:bool=False):
 
     '''
     Function used to compare the two files and print differences
     input:
-        results: the object returned from a subprocess.run() call
+        result: the object returned from a subprocess.run() call
     output:
         print messages, determining if the files are different or not
     '''
@@ -29,14 +29,13 @@ def compareResults(result):
     # documentation link: https://manpages.ubuntu.com/manpages/lunar/man1/h5diff.1.html
 
     # h5diff ran successfully and found no differences
-    print('h5diff returned ' + str(result.returncode))
     if result.returncode == 0:
-        print('\nAll tests passed')
+        print('\nALL TESTS PASSED')
         print('No differences found')
         print('Tree structure and data is identical')
 
     # h5diff found differences
-    # if differences is nothing, inform users that tree structure is different
+    # if differences is nothing , inform users that tree structure is different
     # Otherwise, print differences
     elif result.returncode == 1:
         print('\nTESTS FAILED')
@@ -44,14 +43,47 @@ def compareResults(result):
             print('Existing data is the same')
             print('Tree structure is different')
         else:
-            print('Existing data is different\n')
             print('h5diff output:')
             print(result.stdout)
     
+        # ask users if they would like to see the verbose output
+        # only ask users if comparing non-verbose output, if verbose output then do not ask and continue to next test
+        if not verbose:
+            print('Would a more detailed report be desired? All differences between the files, including tree differences, will be displayed')
+            print('WARNING: if there are a large number of differences, there will be a lot of output')
+            input_val = input('If a more detailed report is desired, enter "Y" or "y". Enter anything else to cancel: ')
+            if input_val == 'Y' or input_val == 'y':
+                runh5Diff(verbose=True)
+                    
     # h5diff ran into an error and failed to run
     else:
         print('\nERROR')
         print('h5diff failed to run')
+
+
+def runh5Diff(verbose:bool = False):
+
+    print('\nComparing processing data (e.g. Rossi Alpha time differences, Cohn Alpha counts histogram)\n')
+    if verbose:
+        result = subprocess.run(['h5diff', '-v', data1, data2],
+                               capture_output=True,
+                               text=True)
+    else:
+        result = subprocess.run(['h5diff', data1, data2],
+                                capture_output=True,
+                                text=True)
+    compareResults(result=result,verbose=verbose)
+    print('\nComparing graph data\n')
+    if verbose:
+        result = subprocess.run(['h5diff', '-v', file1, file2],
+                               capture_output=True,
+                               text=True)
+    else:
+        result = subprocess.run(['h5diff', file1, file2],
+                                capture_output=True,
+                                text=True)
+    compareResults(result=result,verbose=verbose)
+
 
 
 def runRossiAlphaUnitTests():
@@ -77,12 +109,7 @@ def runRossiAlphaUnitTests():
         'r', 'm', 'x', 'x', 'q'
     ])
 
-    
-    result = subprocess.run(['h5diff', file1, file2],
-        capture_output=True,
-        text=True)
-
-    compareResults(result=result)
+    runh5Diff(verbose=False)
 
 
 def runCohnAlphaUnitTests():
@@ -111,33 +138,24 @@ def runCohnAlphaUnitTests():
         'c', 'm', 'x', 'x', 'q'
     ])
 
-    print('Comparing histogram data')
-    result = subprocess.run(['h5diff', data1, data2],
-                            capture_output=True,
-                            text=True)
-    compareResults(result=result)
-
-    print('Comparing graph data')
-    result = subprocess.run(['h5diff', file1, file2],
-                            capture_output=True,
-                            text=True)
-    compareResults(result=result)
+    # compare output
+    runh5Diff(verbose=False)
 
 
 
-
-
-def runFeynmanYUnitTests():
+def runFeynmanYUnitTests(verbose:bool=False):
     
     print('FEYNMAN Y UNIT TESTING NOT IMPLEMENTED')
+    return
 
     # TODO: add test cases
 
-    # result = subprocess.run(['h5diff', file1, file2],
-    #     capture_output=True,
-    #     text=True)
-    
-    # compareResults(result=result)
+    subprocess.run([
+        'python', 'main.py', '-c', 'i', 'a',
+        'FEYNMAN Y SETTINGS FILE HERE',
+        'f', 'm', 'x', 'x', 'q'
+    ])
+    runh5Diff(verbose)
 
 
 def main():
