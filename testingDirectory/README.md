@@ -3,11 +3,10 @@ This section of the PyNoise suite is for running unit tests. Unit tests for this
 
 
 ## Requirements
-In addition to the requirements used by the main Pynoise suite, there is an additional command-line tool used by the testing script named 'h5diff'. Please run the command: 
+In addition to the requirements used by the main Pynoise suite, there is an additional command-line tool used by the testing script named 'h5diff'. For Debian/Ubuntu users, please run the command: ```sudo apt install hdf5-tools``` in your command-line to install h5diff and ensure the testing script functions properly.
 
-```sudo apt install hdf5-tools``` 
+For MacOs users, use ```brew install hdf5```.
 
-in your command-line to install h5diff and ensure the testing script functions properly.
 
 
 ## How to use
