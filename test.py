@@ -30,26 +30,26 @@ def compareResults(result, verbose:bool=False):
 
     # h5diff ran successfully and found no differences
     if result.returncode == 0:
-        print('\nALL TESTS PASSED')
+        print('ALL TESTS PASSED')
         print('No differences found')
-        print('Tree structure and data is identical')
+        print('Tree structure and data is identical\n\n')
 
     # h5diff found differences
     # if differences is nothing , inform users that tree structure is different
     # Otherwise, print differences
     elif result.returncode == 1:
-        print('\nTESTS FAILED')
+        print('TESTS FAILED')
         if len(result.stdout) == 0:
             print('Existing data is the same')
             print('Tree structure is different')
         else:
             print('h5diff output:')
-            print(result.stdout)
+            print(result.stdout + '\n\n')
     
         # ask users if they would like to see the verbose output
         # only ask users if comparing non-verbose output, if verbose output then do not ask and continue to next test
         if not verbose:
-            print('Would a more detailed report be desired? All differences between the files, including tree differences, will be displayed')
+            print('\nWould a more detailed report be desired? All differences between the files, including tree differences, will be displayed')
             print('WARNING: if there are a large number of differences, there will be a lot of output')
             input_val = input('If a more detailed report is desired, enter "Y" or "y". Enter anything else to cancel: ')
             if input_val == 'Y' or input_val == 'y':
@@ -57,13 +57,13 @@ def compareResults(result, verbose:bool=False):
                     
     # h5diff ran into an error and failed to run
     else:
-        print('\nERROR')
-        print('h5diff failed to run')
+        print('ERROR')
+        print('h5diff failed to run\n\n')
 
 
 def runh5Diff(verbose:bool = False):
 
-    print('\nComparing processing data (e.g. Rossi Alpha time differences, Cohn Alpha counts histogram)\n')
+    print('\nComparing processing data (e.g. Rossi Alpha time differences, Cohn Alpha counts histogram)')
     if verbose:
         result = subprocess.run(['h5diff', '-v', data1, data2],
                                capture_output=True,
@@ -72,8 +72,11 @@ def runh5Diff(verbose:bool = False):
         result = subprocess.run(['h5diff', data1, data2],
                                 capture_output=True,
                                 text=True)
-    compareResults(result=result,verbose=verbose)
-    print('\nComparing graph data\n')
+
+    # set verbose to true to let users see verbose output only once
+    # when runh5Diff() calls compareResults() the second time
+    compareResults(result=result,verbose=True)
+    print('\nComparing graph data')
     if verbose:
         result = subprocess.run(['h5diff', '-v', file1, file2],
                                capture_output=True,
