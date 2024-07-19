@@ -92,8 +92,10 @@ class CohnAlpha:
                                           fileName='processing_data')
     
         if importResults is not None:
-            counts_time_hist = importResults['counts_time_hist']
-            edges_seconds = importResults['edges_seconds']
+            # 2d numpy array slicing: The matrix[1, :] slice selects all elements in the second row, showing how to slice rows.
+            data = importResults['data']
+            edges_seconds = data[:, 0]
+            counts_time_hist = data[:, 1]
         else:
             counts_time_hist, edges_ns = np.histogram(a=self.list_data_array,
                                                     bins=int(count_bins),
@@ -147,11 +149,15 @@ class CohnAlpha:
                                           settingsName=settingsPath,
                                           fileName='pynoise')
         
-        # If existing data does not exist
-        # read in histogram information from disk
-        if importResults is not None and not showSubPlots:
-            f = importResults['f']
-            Pxx = importResults['Pxx']
+        
+        # If existing data does not exist and showSubPlots is false
+        # import data from disk
+        if importResults is not None:
+            data = importResults['data']
+            f = data[:, 0]
+            Pxx = data[:, 1]
+
+        # otherwise re-calculate data and re-plot histogram
         else:
             dwell_time = 1 / (2 * settings['CohnAlpha Settings']['Frequency Maximum'])
             nperseg = 1 / (dwell_time * settings['CohnAlpha Settings']['Frequency Minimum'])
@@ -173,8 +179,9 @@ class CohnAlpha:
 
         # Saving raw data
         if settings['Input/Output Settings']['Save raw data']:
-            hdf5.writeHDF5Data(npArrays=[f, Pxx],
-                               keys=['f', 'Pxx'],
+            data = np.array([f, Pxx]).T
+            hdf5.writeHDF5Data(npArrays=[data],
+                               keys=['data'],
                                path=['CohnAlpha', 'Scatter'],
                                settings=settings,
                                settingsName=settingsPath,
@@ -226,15 +233,16 @@ class CohnAlpha:
                                         settings=settings,
                                         settingsName=settingsPath,
                                         fileName='pynoise')
-
-        if importResults is not None and not showSubPlots:
+        
+        # If existing data does not exist and showSubPlots is false
+        # import data from disk
+        if importResults is not None:
             f = importResults['f']
             Pxx = importResults['Pxx']
             residuals = importResults['residuals']
             popt = importResults['popt']
             uncertainty = importResults['uncertainty']
             alpha = importResults['alpha']
-
 
         # Fitting distribution with expected equation
         else:
