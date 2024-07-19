@@ -23,7 +23,7 @@ def writeHDF5Data(npArrays, keys, path: list, settings: dict, fileName:str = "py
     with h5py.File(filePath, 'a') as file:
         group = file
         # if is pynoise.h5, find the matching settings, or create a new iteration
-        if fileName == 'pynoise.h5':
+        if fileName == 'pynoise.h5' or fileName == 'processing_data.h5':
             settingsName = settingsName[settingsName.rfind('/')+1:]
             group = findMatchingSettings(file.require_group(settingsName), settings)
         
@@ -59,9 +59,12 @@ def readHDF5Data(path: list, settings: dict, fileName:str = 'pynoise', settingsN
             group = file
             
             # if pynoise, find correct settings
-            if fileName == 'pynoise.h5':
+            if fileName == 'pynoise.h5' or fileName == 'processing_data.h5':
                 settingsName = settingsName[settingsName.rfind('/')+1:]
-                group = findMatchingSettings(file.require_group(settingsName), settings)
+
+                if settingsName not in file:
+                    return None
+                group = findMatchingSettings(file[settingsName], settings)
             
             # travel to destination
             dest = travelDownHDF5Read(group, path)
@@ -75,8 +78,6 @@ def readHDF5Data(path: list, settings: dict, fileName:str = 'pynoise', settingsN
                 data[key] = dest[key][()]
             return data
     except FileNotFoundError:
-        return None
-    except ValueError:
         return None
 
 # -----------------------------helper functions for hdf5---------------------------------------------
