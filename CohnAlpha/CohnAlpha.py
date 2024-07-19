@@ -5,6 +5,7 @@ from scipy.optimize import curve_fit   # For fitting the curve
 from scipy import signal               # For welch (fourier transform)
 import os                              # For saving figures
 import hdf5
+from pathlib import Path
 
 
 # ------------ Power Spectral Density Fitting Function ----------------------------------------------
@@ -58,7 +59,7 @@ class CohnAlpha:
         self.print("Finished reading input file/folder data")
 
 
-    def plotCountsHistogram(self, settings: dict = {}, settingsPath:str = './settings/default.json', showSubPlots:bool = True):
+    def plotCountsHistogram(self, settings: dict = {}, settingsPath:str = './settings/default.json'):
 
         '''
         Creating Counts Histogram from data
@@ -75,7 +76,6 @@ class CohnAlpha:
             - count_times_hist: the histogram saved in array format
         '''
 
-
         # calculate dwell time; change from Hz --> seconds --> nanoseconds
         # Making count of bins over time histogram
         dwell_time = 1 / (2 * settings['CohnAlpha Settings']['Frequency Maximum'])
@@ -85,17 +85,17 @@ class CohnAlpha:
 
         # import data
         # generate corresponding histogram if importing fails
-        # path == CohnAlpha//<Histogram/Scatter/Fit>
-        importResults = hdf5.readHDF5Data(path=['CohnAlpha','Histogram'],
+        # file == processing_data.h5, path == CohnAlpha/Histogram
+        importResults = hdf5.readHDF5Data(path=['CohnAlpha', 'Histogram'],
                                           settings=settings,
                                           settingsName=settingsPath,
                                           fileName='processing_data')
-    
         if importResults is not None:
             # 2d numpy array slicing: The matrix[1, :] slice selects all elements in the second row, showing how to slice rows.
             data = importResults['data']
             edges_seconds = data[:, 0]
             counts_time_hist = data[:, 1]
+            
         else:
             counts_time_hist, edges_ns = np.histogram(a=self.list_data_array,
                                                     bins=int(count_bins),
@@ -104,13 +104,14 @@ class CohnAlpha:
             edges_seconds = edges_seconds[:-1]
 
         # Plotting
-        if settings['General Settings']['Show plots'] and showSubPlots:
+        if settings['General Settings']['Show plots']:
             self.plot_ca(x=edges_seconds,y=counts_time_hist, method='hist', settings=settings)
 
         # Saving raw data
         if settings['Input/Output Settings']['Save raw data']:
-            hdf5.writeHDF5Data(npArrays=[counts_time_hist, edges_seconds],
-                               keys=['counts_time_hist', 'edges_seconds'],
+            data = np.array([edges_seconds, counts_time_hist]).T
+            hdf5.writeHDF5Data(npArrays=[data],
+                               keys=['data'],
                                path=['CohnAlpha', 'Histogram'],
                                settings=settings,
                                settingsName=settingsPath,
@@ -125,7 +126,7 @@ class CohnAlpha:
 
         return edges_seconds, counts_time_hist
 
-    def welchApproxFourierTrans(self, settings: dict = {}, settingsPath:str = './settings/default.json', showSubPlots:bool = True):
+    def welchApproxFourierTrans(self, settings: dict = {}, settingsPath:str = './settings/default.json', showSubPlots:bool=True):
 
         '''
         Creating Cohn Alpha Scatterplot from data
@@ -142,8 +143,8 @@ class CohnAlpha:
             - welchResultDict: a dict, contains the frequency and the power spectral density
         '''
 
-
         # Read in existing data if exists
+        # file == pynoise.h5, path = CohnAlpha/Scatter
         importResults = hdf5.readHDF5Data(path=['CohnAlpha', 'Scatter'],
                                           settings=settings,
                                           settingsName=settingsPath,
@@ -153,12 +154,13 @@ class CohnAlpha:
         # If existing data does not exist and showSubPlots is false
         # import data from disk
         if importResults is not None:
-            data = importResults['data']
+            data = importResults['graphData']
             f = data[:, 0]
             Pxx = data[:, 1]
 
         # otherwise re-calculate data and re-plot histogram
         else:
+            showSubPlots = False
             dwell_time = 1 / (2 * settings['CohnAlpha Settings']['Frequency Maximum'])
             nperseg = 1 / (dwell_time * settings['CohnAlpha Settings']['Frequency Minimum'])
 
@@ -168,20 +170,26 @@ class CohnAlpha:
             
             # initialize counts histogram list
             # generate frequency and power spectral densities
-            edges_seconds, counts_time_hist = self.plotCountsHistogram(settings=settings, showSubPlots=True)
+            edges_seconds, counts_time_hist = self.plotCountsHistogram(settings=settings, settingsPath=settingsPath)
             f, Pxx = signal.welch(x=counts_time_hist,
                                   fs=self.fs,
                                   nperseg=int(nperseg), 
                                   window='boxcar')
+            
+        # Separate if block to prevent creating histogram twice
+        if showSubPlots:
+            self.plotCountsHistogram(settings=settings, settingsPath=settingsPath)
 
-        if settings['General Settings']['Show plots'] and showSubPlots:
+
+        # Plotting
+        if settings['General Settings']['Show plots']:
             self.plot_ca(x=f, y=Pxx, method='scatter', settings=settings)
 
         # Saving raw data
         if settings['Input/Output Settings']['Save raw data']:
             data = np.array([f, Pxx]).T
             hdf5.writeHDF5Data(npArrays=[data],
-                               keys=['data'],
+                               keys=['graphData'],
                                path=['CohnAlpha', 'Scatter'],
                                settings=settings,
                                settingsName=settingsPath,
@@ -237,16 +245,19 @@ class CohnAlpha:
         # If existing data does not exist and showSubPlots is false
         # import data from disk
         if importResults is not None:
-            f = importResults['f']
-            Pxx = importResults['Pxx']
+            data = importResults['graphData']
+            f = data[:, 0]
+            Pxx = data[:, 1]
             residuals = importResults['residuals']
             popt = importResults['popt']
-            uncertainty = importResults['uncertainty']
-            alpha = importResults['alpha']
+            alpha = importResults['alpha_uncertainty'][0]
+            uncertainty = importResults['alpha_uncertainty'][1]
 
+        # otherwise re-calculate data and re-plot histogram + scatterplot
         # Fitting distribution with expected equation
         else:
-            f, Pxx = self.welchApproxFourierTrans(settings=settings, showSubPlots=True)
+            showSubPlots = False
+            f, Pxx = self.welchApproxFourierTrans(settings=settings, settingsPath=settingsPath, showSubPlots=True)
             # Ignore start & end points that are incorrect due to welch endpoint assumptions
             popt, pcov = curve_fit(CAFit,
                                 f[1:-2],
@@ -258,6 +269,10 @@ class CohnAlpha:
             alpha = np.around(popt[1]*2*np.pi, decimals=2)
             uncertainty = np.around(pcov[1,1]*2*np.pi, decimals=2)
             residuals = ((CAFit(f[1:-2], *popt) - Pxx[1:-2]) / Pxx[1:-2]) * 100
+        
+        # separate if block to prevent plotting scatter plot twice
+        if showSubPlots:
+            self.welchApproxFourierTrans(settings=settings, settingsPath=settingsPath, showSubPlots=True)
 
         # plots the graph
         # will call fit() as well to fit the curve
@@ -270,10 +285,10 @@ class CohnAlpha:
 
         # Saving raw data
         if settings['Input/Output Settings']['Save raw data']:
-            uncertainty_array = np.array(uncertainty)
-            alpha_array = np.array(alpha)
-            hdf5.writeHDF5Data(npArrays=[f, Pxx, residuals, popt, uncertainty_array, alpha_array],
-                               keys=['f', 'Pxx', 'residuals', 'popt', 'uncertainty', 'alpha'],
+            data = np.array([f, Pxx]).T
+            alpha_uncertainty = np.array([alpha, uncertainty])
+            hdf5.writeHDF5Data(npArrays=[data, residuals, popt, alpha_uncertainty],
+                               keys=['graphData', 'residuals', 'popt', 'alpha_uncertainty'],
                                path=['CohnAlpha', 'Fit'],
                                settings=settings,
                                settingsName=settingsPath,
@@ -372,8 +387,8 @@ class CohnAlpha:
             # reduce padding in the figure
             fig.tight_layout()
             absPath = os.path.abspath(settings['Input/Output Settings']['Save directory'])
-            frequencyString = f"{settings['CohnAlpha Settings']['Frequency Minimum']}_{settings['CohnAlpha Settings']['Frequency Maximum']}_s"
-            save_img_filename = os.path.join(absPath, 'CA_' + method + '_' + frequencyString + '.png')
+            inputFileName = Path(settings['Input/Output Settings']['Input file/folder']).stem
+            save_img_filename = os.path.join(absPath, 'CA_' + method + '_' + inputFileName + '.png')
             pyplot.savefig(save_img_filename, dpi=300, bbox_inches='tight')
             self.print('Image saved at ' + save_img_filename)
 
