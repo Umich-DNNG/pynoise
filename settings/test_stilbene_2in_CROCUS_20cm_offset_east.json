@@ -1,0 +1,81 @@
+{
+    "Input/Output Settings": {
+        "Input file/folder": "./data/input/stilbene_2in_CROCUS_20cm_offset_east.txt",
+        "Time column": 0,
+        "Channels column": null,
+        "Save directory": "./data",
+        "Output name": "CurrentRun",
+        "Save figures": false,
+        "Save raw data": true,
+        "Save time differences": false,
+        "Overwrite lower reset times": true,
+        "Keep logs": false,
+        "Quiet mode": true
+    },
+    "General Settings": {
+        "Number of folders": null,
+        "Verbose iterations": false,
+        "Sort data": true,
+        "Show plots": false,
+        "Input time units": null,
+        "Output time units": null,
+        "Text editor": "vim"
+    },
+    "RossiAlpha Settings": {
+        "Reset time": 5000,
+        "Time difference method": "cc",
+        "Digital delay": 750,
+        "Combine Calc and Binning": false,
+        "Bin width": null,
+        "Max avg relative bin err": 0.10,
+        "Error Bar/Band": "band",
+        "Fit minimum": 30,
+        "Fit maximum": null
+    },
+    "CohnAlpha Settings": {
+        "Frequency Minimum": 0.1220703125,
+        "Frequency Maximum": 250.0,
+        "Meas time range": [
+            150000000000.0,
+            1000000000000.0
+        ],
+        "Font Size": 12,
+        "Annotation Font Weight": "bold",
+        "Annotation Color": "black",
+        "Annotation Background Color": "white"
+    },
+    "FeynmanY Settings": { 
+        "Tau range": [
+            30,
+            3000
+        ],
+        "Increment amount": 30,
+        "Plot scale": "linear"
+    },
+    "Semilog Plot Settings": {
+        "label": "Frequency Intensity",
+        "markeredgecolor": "#162F65",
+        "markeredgewidth": 0.2,
+        "markerfacecolor": "#B2CBDE"
+    },
+    "Histogram Visual Settings": {
+        "alpha": 1,
+        "fill": true,
+        "color": "#B2CBDE",
+        "edgecolor": "#162F65",
+        "linewidth": 0.4
+    },
+    "Line Fitting Settings": {
+        "color": "#162F65",
+        "linestyle": "-",
+        "linewidth": 1,
+        "label": "Fit"
+    },
+    "Scatter Plot Settings": {
+        "color": "#B2CBDE",
+        "edgecolor": "#162F65",
+        "linewidth": 0.4,
+        "marker": "o",
+        "s": 20
+    }
+}
