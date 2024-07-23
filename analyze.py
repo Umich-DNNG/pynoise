@@ -4,76 +4,11 @@
 
 # Necessary imports.
 import os
-import numpy as np
-import matplotlib.pyplot as pyplot
 import Event as evt
-import time
-import math
-import lmxReader as lmx
-from RossiAlpha import rossiAlpha as ra
-from CohnAlpha import CohnAlpha as ca
 from FeynmanY import feynman as fey
 from tkinter import *
 from tqdm import tqdm
 
-
-def isValid(parameters: dict, object: dict):
-    '''
-    Checks if the current values are valid, ie if the object's 
-    '''
-
-    for setting in parameters:
-        if parameters[setting] != object[setting]:
-            return False
-        return True
-    
-
-class Analyzer:
-
-    '''The class that runs analysis. Can be used 
-    in either terminal or gui implementation.'''
-
-
-    def __init__(self):
-
-        '''The initializer for the Analyzer object.'''
-
-
-        # Initialize the variables used to determine whether 
-        # or not certain elements have to be recreated.
-        self.RATimeDifs = {'Time differences': [],
-                           'Input file/folder': None,
-                           'Number of folders': None,
-                           'Sort data': None,
-                           'Time difference method': [],
-                           'Digital delay': None,
-                           'Reset time': None}
-        self.RAHist = {'Histogram': [],
-                       'Bin width': None}
-        self.RABestFit = {'Best fit': [],
-                          'Fit minimum': [],
-                          'Fit maximum': []}
-        self.CohnAlpha = {'CA_Object': None,
-                          'Histogram': [],
-                          'Welch Result': [],
-                          'PSD Fit Curve': []}
-        self.FeynmanY = {}
-
-
-
-    def isValid(self, method:str, parameters:dict):
-        match method:
-            case 'RABestFit':
-                if (not self.isValid('RAHist',parameters)):
-                    return False
-            case 'RAHist':
-                if (not self.isValid('RATimeDifs',parameters)):
-                    return False
-        for setting in parameters:
-            if parameters[setting] != self.RATimeDifs[setting]:
-                return False
-            return True
-        
 
 def export(data: dict[str:tuple], 
             singles: list[tuple], 
@@ -149,6 +84,7 @@ def export(data: dict[str:tuple],
     file.flush()
     file.close()
 
+
 def calcNumFolders(original):
     '''Computes the number of folders on the given path.
 
@@ -167,7 +103,8 @@ def calcNumFolders(original):
         return False, 0
     return True, numFolders
 
-def replace_zeroes(self, lst: list):
+
+def replace_zeroes(lst: list):
 
     '''Replace all zeroes in a list with 
     the average of the non-zero elements.
@@ -191,6 +128,7 @@ def replace_zeroes(self, lst: list):
     return lst
 
 
+# ---------- unorganized feymanY code -----------
 
 class Analyzer:
 
@@ -201,14 +139,7 @@ class Analyzer:
     def __init__(self):
 
         '''The initializer for the Analyzer object.'''
-
-
-        # Initialize the variables used to determine whether 
-        # or not certain elements have to be recreated.
-        self.RossiAlpha = None
-        self.CohnAlpha = {}
         self.FeynmanY = {}
-
 
     def runFeynmanY(self, 
                     io: dict, 
@@ -298,7 +229,7 @@ class Analyzer:
             # If in verbose mode:
             if verbose:
                 # Save the raw data if desired..
-                if io['Save outputs']:
+                if io['Save raw data']:
                     self.export({'Count': (range(0,len(counts)), 0),
                                  'Frequency': (counts,0)},
                                  [('Tau',tau)],
@@ -361,145 +292,4 @@ class Analyzer:
                          ('Input file', io['Input file/folder'])],
                         filename,
                         io['Save directory'])
-
-    def genCohnAlphaObject(self, settings: dict = {}):
-        '''Creates a Cohn Alpha object
         
-        Inputs:
-        - settings: the current user's runtime settings'''
-
-        # Load the values from the specified file into an NP array.
-        values = np.loadtxt(settings['Input/Output Settings']['Input file/folder'], usecols=0, dtype=float)
-
-        return ca.CohnAlpha(values,
-                            settings['CohnAlpha Settings']['Dwell time'],
-                            settings['CohnAlpha Settings']['Meas time range'],
-                            settings['Input/Output Settings']['Quiet mode'])
-
-
-    def plotCohnAlphaHist(self, settings:dict = {}, overwrite:bool = True):
-        
-        '''
-        Creates a Cohn Alpha Counts Histogram
-        Created Histogram is saved in the Analyzer class
-        
-        Inputs:
-        - settings: the current user's runtime settings
-        - overwrite: if overwriting the current information in memory
-        '''
-
-        if self.CohnAlpha['CA_Object'] is None:
-            self.CohnAlpha['CA_Object'] = self.genCohnAlphaObject(settings)
-
-        if not overwrite:
-            return False
-
-        self.CohnAlpha['CA_Object'].plotCountsHistogram(settings)
-        return True
-
-
-        # OLD CODE
-        # LEAVING HERE FOR NOW
-        # WOULD SAVE DATA IN MEMORY, preferably grab data from disk when needed is better
-
-        # # if overwriting or no histogram in memory, then clear and generate new histogram
-        # # if not overwriting and histogram in memory exists, then do not generate
-        # if not overwrite and self.CohnAlpha['Histogram'] != []:
-        #     return False
-            
-        #     # TODO: currently displaying an image is not working. Shows image inside of a plot. Need to fix
-        #     # If show plots enabled, then show the plot before returning
-        #     # if settings['General Settings']['Show plots']:
-        #         # imgFilePath = os.path.join(settings['Input/Output Settings']['Save directory'], 'CACountsHist' + str(self.CohnAlpha['CA_Object'].dwell_time) + '.png')
-        #         # img = pyplot.imread(imgFilePath)
-        #         # pyplot.imshow(img)
-        #         # pyplot.show()
-        #         # pyplot.close()
-
-
-        # # clear dependent data
-        # self.CohnAlpha['Histogram'].clear()
-        # self.CohnAlpha['Welch Result'].clear()
-        # self.CohnAlpha['PSD Fit Curve'].clear()
-
-        # print('\nPlotting the Cohn Alpha Histogram...')
-        # self.CohnAlpha['Histogram'].append(self.CohnAlpha['CA_Object'].plotCountsHistogram(settings))
-        # return True
-
-
-
-    def applyWelchApprox(self, settings:dict = {}, overwrite:bool = True):
-        
-        '''
-        Applies the Welch Approximation transformation
-        Frequencies as well as Power Spectral Density is saved in Analyzer class
-        Will generate any required missing information
-        
-        Inputs:
-        - settings: the current user's runtime settings
-        - overwrite: if overwriting the current information in memory
-        '''
-
-        # Ensure that histogram exists
-        self.plotCohnAlphaHist(settings=settings, overwrite=overwrite)
-
-        if not overwrite:
-            return False
-        self.CohnAlpha['CA_Object'].welchApproxFourierTrans(settings)
-        return True
-
-        # OLD CODE
-
-
-        # # If overwriting or no data exists, then clear and generate
-        # # If not overwriting and data exists, then don't clear and return early
-        # if not overwrite and self.CohnAlpha['Welch Result'] != []:
-        #     return False
-
-        # self.CohnAlpha['Welch Result'].clear()
-        # self.CohnAlpha['PSD Fit Curve'].clear()
-
-        # # Generate a graph for each histogram
-        # # TODO: double check with Flynn the behavior for folder analysis
-        # for hist in self.CohnAlpha['Histogram']:
-        #     welchResultDict = self.CohnAlpha['CA_Object'].welchApproxFourierTrans(hist, settings)
-        #     self.CohnAlpha['Welch Result'].append(welchResultDict)
-
-
-
-    def fitPSDCurve(self, settings:dict = {}, overwrite:bool = True):        
-        
-        '''
-        Fits a Power Spectral Density Curve onto a 
-        Transformed graph is saved into the Analyzer class
-        
-        Will run entire method if required information is missing
-        
-        Inputs:
-        - settings: the current user's runtime settings
-        '''
-        
-        # ensure necessary data exists
-        self.applyWelchApprox(settings=settings, overwrite=overwrite)
-
-        if not overwrite:
-            return False
-    
-        self.CohnAlpha['CA_Object'].fitPSDCurve(settings=settings)
-        return True
-
-        # OLD CODE
-
-        # # if overwriting or no data exists, then generate best fit
-        # # if not overwriting and data exists, then do not generate
-        # if not overwrite and self.CohnAlpha['PSD Fit Curve'] != []:
-        #     return False
-        
-        # self.CohnAlpha['PSD Fit Curve'].clear()
-        
-        # dict_list = self.CohnAlpha['Welch Result']
-        # for dict in dict_list:
-        #     PSDFitCurveDict = self.CohnAlpha['CA_Object'].fitPSDCurve(settings=settings, welchResultDict=dict)
-        #     self.CohnAlpha['PSD Fit Curve'].append(PSDFitCurveDict)
-        
-        # return True
