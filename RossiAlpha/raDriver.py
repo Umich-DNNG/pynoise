@@ -79,29 +79,8 @@ def main(editor: edit.Editor, queue: list[str] = []):
                     editor.parameters.settings['Input/Output Settings']['Save directory'] = (editor.parameters.settings['Input/Output Settings']['Input file/folder']
                                                                                              [:editor.parameters.settings['Input/Output Settings']['Input file/folder'].rfind('/')])
             
-            # Perform various error checks
-            
-            # Ensure the user is ONLY using 'aa' time difference method for a file if no channel column is specified
-            if (editor.parameters.settings['RossiAlpha Settings']['Time difference method'] != 'aa' 
-                and editor.parameters.settings['RossiAlpha Settings']['Time difference method'] != ['aa']
-                and editor.parameters.settings['Input/Output Settings']['Channels column'] == None
-                and name.count('.') > 0):
-                print('ERROR: When using methods other than any and all for a file analysis, you must specify a channels column.\n')
-                selection = 'blank'
-                continue
-            # if is a folder and the number of folders is specified, it must be more than one folder
-            if (name.count('.') == 0 and editor.parameters.settings["General Settings"]["Number of folders"] != None 
-                and editor.parameters.settings["General Settings"]["Number of folders"] <= 1):
-                print('ERROR: Running RossiAlpha method on a folder of folders requires either more' 
-                    + ' than one folder specified or \"null\" for the setting.\n')
-                selection = 'blank'
-                continue
-            # If input is a file and the bin width is not specified for anything other than computing time differences
-            if (name.count('.') > 0 and editor.parameters.settings['RossiAlpha Settings']['Bin width'] == None
-                and (selection == 'm' or selection == 'f' or selection == 'p')):
-                print('ERROR: Using RossiAlpha on a file to generate plots of the time difference data and/or'
-                    + ' fit the data to an exponetial curve requires the bin width to be specified.\n')
-                selection = 'blank'
+            # Perform various error checks, if failed, go back to the menu
+            if not errorCheck(editor.parameters.settings, name, selection):
                 continue
 
             # For full analysis:
@@ -115,7 +94,7 @@ def main(editor: edit.Editor, queue: list[str] = []):
 
                 editor.print('Running the entire RossiAlpha method...')
                 # Split on the best fit. TODO: create a function to specialize for full analysis
-                successful = ra.driveFit(editor.parameters.settings, (name.count('.') == 0))
+                successful = ra.driveFit(editor.parameters.settings, editor.parameters.origin, (name.count('.') == 0))
                 if successful:
                     if (name.count('.') == 0):
                         editor.log('Ran the entire RossiAlpha method on folder ' 
@@ -129,14 +108,14 @@ def main(editor: edit.Editor, queue: list[str] = []):
             # For time difference calculation:
             elif selection == 't':
                 editor.print('Creating new time differences...')
-                successful = ra.driveTimeDifs(editor.parameters.settings, (name.count('.') == 0))
+                successful = ra.driveTimeDifs(editor.parameters.settings, editor.parameters.origin, (name.count('.') == 0))
                 if successful:
                     editor.log('New time differences created.\n')
 
             # Make a histogram of the time differences.
             elif selection == 'p':
                 editor.print('Creating new histogram...')
-                successful = ra.drivePlots(editor.parameters.settings, (name.count('.') == 0))
+                successful = ra.drivePlots(editor.parameters.settings, editor.parameters.origin, (name.count('.') == 0))
                 if successful: 
                     editor.log('New histogram created.\n')
 
@@ -150,7 +129,7 @@ def main(editor: edit.Editor, queue: list[str] = []):
                     continue
 
                 editor.print('Creating new best fit and residual...')
-                successful = ra.driveFit(editor.parameters.settings, (name.count('.') == 0))
+                successful = ra.driveFit(editor.parameters.settings, editor.parameters.origin, (name.count('.') == 0))
                 if successful:
                     editor.log('New best fit and residual created.\n')
         # View and/or edit program settings.
@@ -165,3 +144,51 @@ def main(editor: edit.Editor, queue: list[str] = []):
             print('ERROR: Unrecognized command ' + selection
                   + '. Please review the list of appriopriate inputs.\n')          
     return editor, queue
+
+
+def errorCheck(settings: dict, name: str, selection: str):
+    '''
+    Helper to perform various error checks before computation to prevent crashing or unintended behavior
+
+    Inputs:
+    - settings: dictionary of runtime settings
+    - name: name of the file/folder
+    - selection: the selection made
+
+    Outputs:
+    a bool, false if it failed an error check and true otherwise 
+    '''
+    # enforce the time difference methods to be one value only
+    if isinstance(settings['RossiAlpha Settings']['Time difference method'], list):
+        if len(settings['RossiAlpha Settings']['Time difference method']) > 1:
+            print('Please run RossiAlpha with only one time difference method\n')
+            return False
+    # Ensure the user is ONLY using 'aa' time difference method for a file if no channel column is specified
+    if (settings['RossiAlpha Settings']['Time difference method'] != 'aa' 
+        and settings['RossiAlpha Settings']['Time difference method'] != ['aa']
+        and settings['Input/Output Settings']['Channels column'] == None
+        and name.count('.') > 0):
+        print('ERROR: When using methods other than any and all for a file analysis, you must specify a channels column.\n')
+        return False
+    # if is a folder and the number of folders is specified, it must be more than one folder
+    if (name.count('.') == 0 and settings["General Settings"]["Number of folders"] != None 
+        and settings["General Settings"]["Number of folders"] <= 1):
+        print('ERROR: Running RossiAlpha method on a folder of folders requires either more' 
+            + ' than one folder specified or \"null\" for the setting.\n')
+        return False
+    # If input is a file and the bin width is not specified for anything other than computing time differences
+    if (name.count('.') > 0 and settings['RossiAlpha Settings']['Bin width'] == None
+        and (selection == 'm' or selection == 'f' or selection == 'p')):
+        print('ERROR: Using RossiAlpha on a file to generate plots of the time difference data and/or'
+            + ' fit the data to an exponetial curve requires the bin width to be specified.\n')
+        return False
+    if selection == 'f' or selection == 'm':
+        if isinstance(settings['RossiAlpha Settings']['Fit minimum'], list):
+            if isinstance(settings['RossiAlpha Settings']['Fit maximum'], list):
+                if (len(settings['RossiAlpha Settings']['Fit minimum']) != len(settings['RossiAlpha Settings']['Fit maximum'])):
+                    print('ERROR: the length of fit minimum and fit maximum must match\n')
+                    return False
+            else:
+                print('ERROR: the length of fit minimum and fit maximum must match\n')
+                return False
+    return True

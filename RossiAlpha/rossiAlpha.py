@@ -7,62 +7,23 @@ Does NOT perform any calculations, just determines the combination of calls and 
 
 
 # Necessary imports.
-import os
-import numpy as np
-import matplotlib.pyplot as pyplot
-import Event as evt
-import time
-import math
-import lmxReader as lmx
 from . import fitting as fit
 from . import plots as plt
 from . import analyze as td
 from tkinter import *
-from tqdm import tqdm
 
-# to allow for importing global files
+# to allow for importing global files of the same name
+import os
 import sys
 ogPath = sys.path.copy()
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), os.pardir)))
-import analyze as globalAnalyze                      # to import functions used across all methods
+import analyze as globalAnalyze
+import hdf5
+
 sys.path = ogPath
 
 
-def getNumSets(settings: dict):
-    '''
-    Returns the number of time diff sets/histograms to make. 
-    This is equivalent to the number of time difference methods listed
-
-    Inputs:
-    - settings: dictionary containing the runtime settings
-
-    Outputs:
-    - number of time difference sets/histograms
-    '''
-    if isinstance(settings['RossiAlpha Settings']['Time difference method'], list):
-        return len(settings['RossiAlpha Settings']['Time difference method'])
-    else:
-        return 1
-
-
-def computeBinEdges(hist: dict):
-    '''
-    Computes the bin edges for anytime outputs are saved
-
-    Inputs:
-    - hist: the dictionary of the histogram used to determine the bin edges
-
-    Outputs:
-    - begin, end: the lists containing the bin beginnings and edges, respectively
-    '''
-    # Initialize variables.
-    begin = []
-    end = []
-    # Construct the beginning and ending bin edges lists.
-    for k in range(len(hist['Histogram'][-1].bin_edges)-1):
-        begin.append(hist['Histogram'][-1].bin_edges[k])
-        end.append(hist['Histogram'][-1].bin_edges[k+1])
-    return begin, end
+# --------- class determining the combination of calls to make for rossi alpha
 
 class RossiAlpha:
     '''
@@ -71,57 +32,163 @@ class RossiAlpha:
     def __init__(self):
         '''
         Initialize the object for the class functions to be utilized in raDriver.py
+        The class holds the dictionaries of computed rossi-alpha data
         '''
         self.timeDifs = {'Time differences': [],
-                        'Time difference method': [],
-                        'Input file/folder': None,
-                        'Number of folders': None,
-                        'Sort data': None,
-                        'Digital delay': None,
-                        'Reset time': None}
+                        'Time difference method': []}
         self.hist = {'Histogram': [],
                      'Uncertainty': [],
-                    'Bin width': None}
+                     'Bin width': None,
+                     'Subplots': []} # holds subfolder histograms, only saved if verbose iterations is on
         self.fit = {'Best fit': [],
                     'Fit minimum': [],
                     'Fit maximum': []}
 
-    def driveTimeDifs(self, settings: dict, isFolder: bool = False):
+    def driveTimeDifs(self, settings: dict, settingsPath: str, isFolder: bool = False):
         
         '''Determine the function combinations needed to compute Rossi Alpha time differences
         for the specific current settings
         
         Inputs:
-        - settings: the Input/Output Settings dictionary.
+        - settings: dictionary of runtime settings
+        - settingsPath: path to the settings file
         - isFolder: whether this is a folder analysis or not
 
         Outputs:
         - a bool indicating whether the computation was successful
         '''
-        # build validity check dictionary
-        check = {'Input file/folder': settings['Input/Output Settings']['Input file/folder'],
-                'Sort data': settings['General Settings']['Sort data'],
-                'Time difference method': (settings['RossiAlpha Settings']['Time difference method'] if isinstance(settings['RossiAlpha Settings']['Time difference method'], list) else [settings['RossiAlpha Settings']['Time difference method']]),
-                'Digital delay': settings['RossiAlpha Settings']['Digital delay'],
-                'Reset time': settings['RossiAlpha Settings']['Reset time'],
-                'Number of folders': 0}
+        # self.findValidInFile(settings, './default.json', 'td')
+        # return True
         if isFolder:
             numFolders = settings['General Settings']['Number of folders']
             # calculate number of folders if was not specified
             if numFolders is None:
                 successful, numFolders = globalAnalyze.calcNumFolders(settings['Input/Output Settings']['Input file/folder'])
                 if not successful: return False
-            check['Number of folders'] = numFolders
-            # if there are no time differences in this runtime or they are invalid
-            if self.timeDifs['Time differences'] == [] or not globalAnalyze.isValid(check, self.timeDifs):
-                return td.folderAnalyzer(self.timeDifs, settings, numFolders)
-            # 
+            success = td.folderAnalyzer(self.timeDifs, settings, settingsPath, numFolders) 
         else:
-            if self.timeDifs['Time differences'] == [] or not globalAnalyze.isValid(check, self.timeDifs):
-                td.createTimeDifs(self.timeDifs, settings)
-        return True
+            success = True
+            td.createTimeDifs(self.timeDifs, settings, settingsPath)
+        return success
 
 
+    def drivePlots(self, settings: dict, settingsPath: str, isFolder: bool = False):
+
+        '''Determine the function combinations needed to compute Rossi Alpha histograms
+        for the specific current settings and situation
+        
+        Inputs:
+        - settings: dictionary containing the current runtime settings.
+        - isFolder: bool indicating whether this is a folder or a file'''
+        
+        # execute for "Combine Calc and Binning". NOTE that these functions are not currently maintained
+        if (settings['RossiAlpha Settings']['Combine Calc and Binning']):
+            if numFolders == 0:
+                self.calculateTimeDifsAndPlot(settings['Input/Output Settings'],
+                                                settings['General Settings'],
+                                                settings['RossiAlpha Settings'],
+                                                settings['Histogram Visual Settings'],
+                                                0)
+            else:
+                for folder in range(1, numFolders + 1):
+                    self.calculateTimeDifsAndPlot(settings['Input/Output Settings'],
+                                                    settings['General Settings'],
+                                                    settings['RossiAlpha Settings'],
+                                                    settings['Histogram Visual Settings'],
+                                                    folder)
+                
+        if isFolder:
+            numFolders = settings['General Settings']['Number of folders']
+            # calculate number of folders if was not specified
+            if numFolders is None:
+                successful, numFolders = globalAnalyze.calcNumFolders(settings['Input/Output Settings']['Input file/folder'])
+                if not successful: return False
+            if settings['RossiAlpha Settings']['Bin width'] is None:
+                successful = td.prepMARBE(self.timeDifs, self.hist, settings, settingsPath, numFolders)
+                if not successful: return False
+            else:
+                successful = td.folderAnalyzer(self.timeDifs, settings, settingsPath, numFolders)
+                if not successful: return False
+            plt.folderHistogram(self.timeDifs, self.hist, numFolders, settings, settingsPath)
+        
+        else:
+            td.createTimeDifs(self.timeDifs, settings, settingsPath)
+            plt.createPlot(self.timeDifs, self.hist, settings, settingsPath)
+        
+        
+    def driveFit(self, settings: dict, settingsPath: str, isFolder: bool = False):
+        '''
+        Determine the function combinations needed to compute Rossi Alpha fit graphs
+        for the specific current settings and situation
+        
+        Inputs:
+        - settings: dictionary containing the current runtime settings.
+        - isFolder: bool indicating whether this is a folder or a file
+        '''
+
+        if isFolder:
+            numFolders = settings['General Settings']['Number of folders']
+            # calculate number of folders if was not specified
+            if numFolders is None:
+                successful, numFolders = globalAnalyze.calcNumFolders(settings['Input/Output Settings']['Input file/folder'])
+                if not successful: return False
+            if settings['RossiAlpha Settings']['Bin width'] is None:
+                successful = td.prepMARBE(self.timeDifs, self.hist, settings, settingsPath, numFolders)
+                if not successful: return False
+            else:
+                successful = td.folderAnalyzer(self.timeDifs, settings, settingsPath, numFolders)
+                if not successful: return False
+            plt.folderHistogram(self.timeDifs, self.hist, numFolders, settings, settingsPath)
+            fit.folderFit(self.fit, self.hist, settings, settingsPath, numFolders)
+        else:
+            td.createTimeDifs(self.timeDifs, settings, settingsPath)
+            plt.createPlot(self.timeDifs, self.hist, settings, settingsPath)
+            fit.createBestFit(self.fit, self.hist, settings, settingsPath)
+        pass
+
+# --------------------------- helper functions for the class -------------------------------
+
+    # TODO: make work
+    def findValidInFile(self, settings: dict, settingsName: str, step: str):
+        data = None
+        if step == 'fit':
+            path = ['RossiAlpha', 'fit']
+            data = hdf5.readHDF5Data(path, settings, 'pynoise', settingsName)
+            if data is not None:
+                # TODO: do something with the data, pending storage format
+                pass
+        
+        if step == 'hist' or (step == 'fit' and data is None):
+            path = ['RossiAlpha', 'hist']
+            data = hdf5.readHDF5Data(path, settings, 'pynoise', settingsName)
+            if data is not None:
+                # TODO: do smth with the data, pending storage format
+                pass
+        # if data is None by now, try and read time difference data
+        if step == 'td' or data is None:
+            name = settings['Input/Output Settings']['Input file/folder']
+            name = name[name.rfind('/')+1:]
+            numSets = getNumSets(settings)
+            for i in range(numSets):
+                if isinstance(settings['RossiAlpha Settings']['Time difference method'], list):
+                    method = settings['RossiAlpha Settings']['Time difference method'][i]
+                else:
+                    method = settings['RossiAlpha Settings']['Time difference method']
+                path = [name, 'RossiAlpha', method, str(settings['RossiAlpha Settings']['Reset time'])]
+                data = hdf5.readHDF5Data(path, settings, 'processing_data')
+            if data is not None:
+                self.timeDifs['Time differences'] = [[[] for _ in range(60)], []]
+                for key, value in data.items():
+                    t = int(key)
+                    self.timeDifs['Time differences'][0][t - 1] = value       
+                self.timeDifs['Time difference method'].append(method)            
+            i = 0
+            for stuff in self.timeDifs['Time differences'][0]:
+                print(f'{i}: {stuff}')
+                i = i + 1
+
+
+    
     # NOTE: this function is not currently maintained
     def calculateTimeDifsAndPlot(self,
                                  io:dict,
@@ -193,75 +260,41 @@ class RossiAlpha:
         self.hist['Bin width'] = ra['Bin width']
 
 
-    def drivePlots(self, settings: dict, isFolder: bool = False):
-
-        '''Determine the function combinations needed to compute Rossi Alpha histograms
-        for the specific current settings and situation
-        
-        Inputs:
-        - settings: dictionary containing the current runtime settings.
-        - isFolder: bool indicating whether this is a folder or a file'''
+# ------------- helper functions used across analyze, plots, and fitting
 
 
-        # TODO: write function; check validity then delegate fxn calls
-        numFolders = 0
-        if isFolder:
-            numFolders = settings['General Settings']['Number of folders']
-            # calculate number of folders if was not specified
-            if numFolders is None:
-                successful, numFolders = globalAnalyze.calcNumFolders(settings['Input/Output Settings']['Input file/folder'])
-                if not successful: return False
-            td.folderAnalyzer(self.timeDifs, settings, numFolders)
-            plt.folderHistogram(self.timeDifs, self.hist, numFolders, settings)
-        
-        # execute for "Combine Calc and Binning". NOTE that these functions are not currently maintained
-        if (settings['RossiAlpha Settings']['Combine Calc and Binning']):
-            if numFolders == 0:
-                self.calculateTimeDifsAndPlot(settings['Input/Output Settings'],
-                                                settings['General Settings'],
-                                                settings['RossiAlpha Settings'],
-                                                settings['Histogram Visual Settings'],
-                                                0)
-            else:
-                for folder in range(1, numFolders + 1):
-                    self.calculateTimeDifsAndPlot(settings['Input/Output Settings'],
-                                                    settings['General Settings'],
-                                                    settings['RossiAlpha Settings'],
-                                                    settings['Histogram Visual Settings'],
-                                                    folder)
-        
-        
-        #TODO: write rest of fxn
-        
-        '''
-        planning:
+def getNumSets(settings: dict):
+    '''
+    Returns the number of time diff sets/histograms to make. 
+    This is equivalent to the number of time difference methods listed
 
-        if file:
-            check validity of hist
-                if valid, plot and ret
-            check validity of td
-                if invalid, create new 
-                plot and ret
-        if folder:
-            compute numfolders
-            check validity of hist
-                if valid, plot
-            check bin width
-                if none, MARBE then plot (marbe not maintained, thus it computes tds no matter what so no need to check) and ret
-            check td
-                if invalid, create new
-                plot and ret
+    Inputs:
+    - settings: dictionary containing the runtime settings
 
-        '''
-
-    def driveFit(self, settings: dict, isFolder: bool = False):
-        # TODO
-
-        '''
-        planning:
-        if file:
-        '''
+    Outputs:
+    - number of time difference sets/histograms
+    '''
+    if isinstance(settings['RossiAlpha Settings']['Time difference method'], list):
+        return len(settings['RossiAlpha Settings']['Time difference method'])
+    else:
+        return 1
 
 
+def computeBinEdges(hist: dict):
+    '''
+    Computes the bin edges for anytime outputs are saved to csv
 
-        pass
+    Inputs:
+    - hist: the dictionary of the histogram used to determine the bin edges
+
+    Outputs:
+    - begin, end: the lists containing the bin beginnings and edges, respectively
+    '''
+    # Initialize variables.
+    begin = []
+    end = []
+    # Construct the beginning and ending bin edges lists.
+    for k in range(len(hist['Histogram'][-1].bin_edges)-1):
+        begin.append(hist['Histogram'][-1].bin_edges[k])
+        end.append(hist['Histogram'][-1].bin_edges[k+1])
+    return begin, end
