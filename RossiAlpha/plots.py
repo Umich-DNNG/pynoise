@@ -83,7 +83,7 @@ def folderHistogram(timeDifs: dict, hist: dict, numFolders: int, settings: dict,
     '''
     # Get the name of the input.
     name = settings['Input/Output Settings']['Input file/folder']
-    name = name[name[:name.rfind('/')].rfind('/')+1:]
+    name = name[name.rfind('/')+1:]
 
     hist['Histogram'].clear()
     hist['Bin width'] = settings['RossiAlpha Settings']['Bin width']
@@ -371,7 +371,7 @@ class RossiHistogram:
             plt.title(self.title + method)
 
             plt.tight_layout()
-            save_filename = os.path.join(self.save_dir, 'histogram_' + input + '_' + str(self.reset_time) + '_' + method + '.png')
+            save_filename = os.path.join(self.save_dir, 'histogram_' + input + '_' + method + '_' + str(self.bin_width) + '_' + str(self.reset_time) + '.png')
             plt.savefig(save_filename, dpi=300, bbox_inches='tight')
         
         # Showing plot (optional)
