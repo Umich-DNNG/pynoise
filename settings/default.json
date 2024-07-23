@@ -4,21 +4,21 @@
         "Time column": 0,
         "Channels column": null,
         "Save directory": "./data",
-        "Save figures": true,
+        "Save figures": false,
         "Save outputs": true,
-        "Save time differences": true,
+        "Save time differences": false,
         "Overwrite lower reset times": true,
-        "Keep logs": false,
+        "Keep logs": true,
         "Quiet mode": false
     },
     "General Settings": {
         "Number of folders": null,
         "Verbose iterations": false,
         "Sort data": true,
-        "Show plots": false,
+        "Show plots": true,
         "Input time units": "nanoseconds",
         "Output time units": "nanoseconds",
-        "Text editor": "nano"
+        "Text editor": "vim"
     },
     "RossiAlpha Settings": {
         "Reset time": 500,
