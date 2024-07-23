@@ -7,9 +7,9 @@ import subprocess
 file1 = Path('./data/pynoise_master.h5').resolve()
 file2 = Path('./data/pynoise.h5').resolve()
 
-data1 = Path('./data/processing_data_master.h5').resolve()
-data2 = Path('./data/processing_data.h5').resolve()
-# if adding more files, add files here, and declare the files global in the main() function below
+# all data1/data2 lines commented out due to no longer keeping processing_data_master.h5 on branch
+# data1 = Path('./data/processing_data_master.h5').resolve()
+# data2 = Path('./data/processing_data.h5').resolve()
 
 
 def compareResults(result, verbose:bool=False):
@@ -63,19 +63,20 @@ def compareResults(result, verbose:bool=False):
 
 def runh5Diff(verbose:bool = False):
 
-    print('\nComparing processing data (e.g. Rossi Alpha time differences, Cohn Alpha counts histogram)')
-    if verbose:
-        result = subprocess.run(['h5diff', '-v', data1, data2],
-                               capture_output=True,
-                               text=True)
-    else:
-        result = subprocess.run(['h5diff', data1, data2],
-                                capture_output=True,
-                                text=True)
+    # print('\nComparing processing data (e.g. Rossi Alpha time differences, Cohn Alpha counts histogram)')
+    # if verbose:
+    #     result = subprocess.run(['h5diff', '-v', data1, data2],
+    #                            capture_output=True,
+    #                            text=True)
+    # else:
+    #     result = subprocess.run(['h5diff', data1, data2],
+    #                             capture_output=True,
+    #                             text=True)
 
-    # set verbose to true to let users see verbose output only once
-    # when runh5Diff() calls compareResults() the second time
-    compareResults(result=result,verbose=True)
+    # # set verbose to true to let users see verbose output only once
+    # # when runh5Diff() calls compareResults() the second time
+    # compareResults(result=result,verbose=True)
+
     print('\nComparing graph data')
     if verbose:
         result = subprocess.run(['h5diff', '-v', file1, file2],
@@ -162,10 +163,12 @@ def runFeynmanYUnitTests(verbose:bool=False):
 
 
 def main():
+
+    # global data1
+    # global data2
+
     global file1
     global file2
-    global data1
-    global data2
     print('Testing Rossi-Alpha Method')
     runRossiAlphaUnitTests()
     print('Testing Cohn-Alpha Method')
