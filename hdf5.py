@@ -129,7 +129,7 @@ def travelDownHDF5Read(group, layers):
         return None
 
 
-def findMatchingSettings(group, settings: dict, read: bool):
+def findMatchingSettings(group, settings: dict, read: bool=False):
     '''
     Helper function to determine which iteration number has settings that match. If none match, create a new iteration and add the settings
 
