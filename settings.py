@@ -320,6 +320,7 @@ class Settings:
         # If the append is from a permanent file, mark that 
         # file as the most recently file appended from.
         if path != os.path.abspath('settings/append.json'):
+            self.origin = path
             self.appended = path
 
 

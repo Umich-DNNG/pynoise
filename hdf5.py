@@ -13,8 +13,8 @@ def writeHDF5Data(npArrays, keys, path: list, settings: dict, fileName:str = "py
     - keys: the keys for each of the data set. Assuming parallel list with npArrays
     - path: list containing the path to where the npArray will be stored. Ex: [RossiAlpha, histogram] or [input file/folder, rossialpha, td method, reset time]
     - settings: dict of runtime settings
-    - fileName: string name of the hdf5 file. Either 'pynoise' or 'processing_data'
-    - settingsNama: string of the path to settings file--not required if fileName is not pynoise
+    - fileName: string name of the hdf5 file. 'pynoise' has a specific starting format before following user format, while all others just follow user format
+    - settingsName: string of the path to settings file--not required if fileName is not pynoise
     '''
 
     # numFolders + reset time + td method
@@ -23,7 +23,7 @@ def writeHDF5Data(npArrays, keys, path: list, settings: dict, fileName:str = "py
     with h5py.File(filePath, 'a') as file:
         group = file
         # if is pynoise.h5, find the matching settings, or create a new iteration
-        if fileName == 'pynoise.h5':
+        if fileName == 'pynoise.h5' or fileName == 'processing_data.h5':
             settingsName = settingsName[settingsName.rfind('/')+1:]
             group = findMatchingSettings(file.require_group(settingsName), settings)
         
@@ -46,35 +46,39 @@ def readHDF5Data(path: list, settings: dict, fileName:str = 'pynoise', settingsN
     Inputs:
     - path: list containing the path to the data destinataion
     - settings: dictionary containing runtimee settings
-    - fileName: string name of the h5 file to read from
-    - settingsNama: string path to settings file--not required if fileName is not pynoise
+    - fileName: string name of the h5 file to read from. 'pynoise' has a specific format to search, all other files follow user paths
+    - settingsName: string path to settings file--not required if fileName is not pynoise
 
     Outputs:
-    data; a dictionary of the data at the destination
+    data: a dictionary of the data at the destination
     '''
     fileName = fileName + '.h5'
     filePath = os.path.join(settings['Input/Output Settings']['Save directory'], fileName)
+    try:
+        with h5py.File(filePath, 'r') as file:
+            group = file
+            
+            # if pynoise, find correct settings
+            if fileName == 'pynoise.h5' or fileName == 'processing_data.h5':
+                settingsName = settingsName[settingsName.rfind('/')+1:]
+
+                if settingsName not in file:
+                    return None
+                group = findMatchingSettings(file[settingsName], settings)
+            
+            # travel to destination
+            dest = travelDownHDF5Read(group, path)
     
-    with h5py.File(filePath, 'r') as file:
-        group = file
-        
-        # if pynoise, find correct settings
-        if fileName == 'pynoise.h5':
-            settingsName = settingsName[settingsName.rfind('/')+1:]
-            group = findMatchingSettings(file.require_group(settingsName), settings)
-        
-        # travel to destination
-        dest = travelDownHDF5Read(group, path)
-
-        # if destination could not be found, the data does not exist. Exit without reading data
-        if dest is None:
-            return None
-        
-        data = {}
-        for key in dest.keys():
-            data[key] = dest[key][()]
-        return data
-
+            # if destination could not be found, the data does not exist. Exit without reading data
+            if dest is None:
+                return None
+            
+            data = {}
+            for key in dest.keys():
+                data[key] = dest[key][()]
+            return data
+    except FileNotFoundError:
+        return None
 
 # -----------------------------helper functions for hdf5---------------------------------------------
 
@@ -166,7 +170,7 @@ def findMatchingSettings(group, settings):
                 continue
             valueGroup.create_dataset(subkey, data=subvalue)
         
-        return group
+    return group
 
 
 def compareSettings(settings, group):
