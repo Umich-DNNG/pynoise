@@ -1,5 +1,4 @@
 import os
-from tqdm import tqdm
 import h5py # 3.11.0
 import numpy as np
 
@@ -13,11 +12,9 @@ def writeHDF5Data(npArrays, keys, path: list, settings: dict, fileName:str = "py
     - keys: the keys for each of the data set. Assuming parallel list with npArrays
     - path: list containing the path to where the npArray will be stored. Ex: [RossiAlpha, histogram] or [input file/folder, rossialpha, td method, reset time]
     - settings: dict of runtime settings
-    - fileName: string name of the hdf5 file. 'pynoise' has a specific starting format before following user format, while all others just follow user format
-    - settingsName: string of the path to settings file--not required if fileName is not pynoise
+    - fileName: string name of the hdf5 file. 'pynoise' and 'processing_data' have a specific starting format before following user format, while all others just follow user format
+    - settingsName: string of the path to settings file--not required if fileName is not pynoise or processing_data
     '''
-
-    # numFolders + reset time + td method
     fileName = fileName + '.h5'
     filePath = os.path.join(settings['Input/Output Settings']['Save directory'], fileName)
     with h5py.File(filePath, 'a') as file:
@@ -35,7 +32,7 @@ def writeHDF5Data(npArrays, keys, path: list, settings: dict, fileName:str = "py
             return
         
         # write data to destination
-        for _, (npList, key) in tqdm(enumerate(zip(npArrays, keys))):
+        for _, (npList, key) in enumerate(zip(npArrays, keys)):
             dest.create_dataset(key, data=npList)
 
 
@@ -46,8 +43,8 @@ def readHDF5Data(path: list, settings: dict, fileName:str = 'pynoise', settingsN
     Inputs:
     - path: list containing the path to the data destinataion
     - settings: dictionary containing runtimee settings
-    - fileName: string name of the h5 file to read from. 'pynoise' has a specific format to search, all other files follow user paths
-    - settingsName: string path to settings file--not required if fileName is not pynoise
+    - fileName: string name of the h5 file to read from. 'pynoise' and 'processing_data' have a specific format to search, all other files follow user paths
+    - settingsName: string path to settings file--not required if fileName is not pynoise or processing_data
 
     Outputs:
     data: a dictionary of the data at the destination
@@ -58,13 +55,16 @@ def readHDF5Data(path: list, settings: dict, fileName:str = 'pynoise', settingsN
         with h5py.File(filePath, 'r') as file:
             group = file
             
-            # if pynoise, find correct settings
+            # if pynoise or processing_data, find correct settings
             if fileName == 'pynoise.h5' or fileName == 'processing_data.h5':
                 settingsName = settingsName[settingsName.rfind('/')+1:]
-
+                # if the settingsName does not exist, data does not exist
                 if settingsName not in file:
                     return None
-                group = findMatchingSettings(file[settingsName], settings)
+                group = findMatchingSettings(file[settingsName], settings, True)
+                # if iteration could not be found, data does not exist
+                if group is None:
+                    return None
             
             # travel to destination
             dest = travelDownHDF5Read(group, path)
@@ -129,13 +129,17 @@ def travelDownHDF5Read(group, layers):
         return None
 
 
-def findMatchingSettings(group, settings):
+def findMatchingSettings(group, settings: dict, read: bool=False):
     '''
     Helper function to determine which iteration number has settings that match. If none match, create a new iteration and add the settings
 
     Inputs:
     - group: the h5 group to analyze
     - settings: dictionary containing runtime settings
+    - read: bool indicating if this is being called for reading only
+
+    Outputs:
+    - the group to write settings to, or None if we are reading and the group wasn't found
     '''
     i = 1
     paramStr = 'iteration' + str(i)
@@ -151,7 +155,12 @@ def findMatchingSettings(group, settings):
         i = i + 1
         paramStr = 'iteration' + str(i)
     
-    # if matching settings were not found, create a new iteration group and write the settings to it
+    # if we reach here, settings were not found.
+    # leave for reading only instances
+    if read:
+        return None
+
+    # create a new iteration group and write the settings to it
     group = group.create_group(paramStr)
     settingsGroup = group.create_group('settings')
     for key, value in settings.items():                    
