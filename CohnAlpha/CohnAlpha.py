@@ -108,7 +108,7 @@ class CohnAlpha:
             self.plot_ca(x=edges_seconds,y=counts_time_hist, method='hist', settings=settings)
 
         # Saving raw data
-        if settings['Input/Output Settings']['Save raw data']:
+        if settings['Input/Output Settings']['Save outputs']:
             data = np.array([edges_seconds, counts_time_hist]).T
             hdf5.writeHDF5Data(npArrays=[data],
                                keys=['data'],
@@ -186,7 +186,7 @@ class CohnAlpha:
             self.plot_ca(x=f, y=Pxx, method='scatter', settings=settings)
 
         # Saving raw data
-        if settings['Input/Output Settings']['Save raw data']:
+        if settings['Input/Output Settings']['Save outputs']:
             data = np.array([f, Pxx]).T
             hdf5.writeHDF5Data(npArrays=[data],
                                keys=['graphData'],
@@ -284,7 +284,7 @@ class CohnAlpha:
             self.plot_ca(x=f, y=Pxx, residuals=residuals, method='fit', settings=settings, **kwDict)
 
         # Saving raw data
-        if settings['Input/Output Settings']['Save raw data']:
+        if settings['Input/Output Settings']['Save outputs']:
             data = np.array([f, Pxx]).T
             alpha_uncertainty = np.array([alpha, uncertainty])
             hdf5.writeHDF5Data(npArrays=[data, residuals, popt, alpha_uncertainty],
