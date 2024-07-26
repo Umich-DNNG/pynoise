@@ -6,7 +6,7 @@
         "Save directory": "./data",
         "Output name": "CurrentRun",
         "Save figures": false,
-        "Save raw data": true,
+        "Save outputs": true,
         "Save time differences": false,
         "Overwrite lower reset times": true,
         "Keep logs": false,
