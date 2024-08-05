@@ -41,9 +41,8 @@ class CohnAlpha:
 
         # Required Parameters
         # Load the values from the specified file into an NP array.
-        self.list_data_array = np.loadtxt(settings['Input/Output Settings']['Input file/folder'], usecols=0, dtype=float)
         self.meas_time_range = settings['CohnAlpha Settings']['Meas time range']
-    
+        self.input_file_ext = Path(settings['Input/Output Settings']['Input file/folder']).suffix
         # set measure time range to default value if incorrect input
         if self.meas_time_range == [] or self.meas_time_range is None:
             self.print("Unable to determine Measure Time Range from settings")
@@ -57,6 +56,17 @@ class CohnAlpha:
         self.annotate_font_size = settings['CohnAlpha Settings']['Font Size']
 
         self.print("Finished reading input file/folder data")
+
+    
+    def readInInputFile(self, settings:dict= {}):
+
+        if self.input_file_ext == '.hist':
+            list_data_array = np.loadtxt(settings['Input/Output Settings']['Input file/folder'],
+                delimiter=',',skiprows=5)
+        else:
+            list_data_array = np.loadtxt(settings['Input/Output Settings']['Input file/folder'], usecols=0, dtype=float)
+
+        return list_data_array
 
 
     def plotCountsHistogram(self, settings: dict = {}, settingsPath:str = './settings/default.json'):
@@ -76,12 +86,17 @@ class CohnAlpha:
             - count_times_hist: the histogram saved in array format
         '''
 
+        # dwell_time value: 0.002
+
+        list_data_array = self.readInInputFile(settings=settings)
+
         # calculate dwell time; change from Hz --> seconds --> nanoseconds
         # Making count of bins over time histogram
         dwell_time = 1 / (2 * settings['CohnAlpha Settings']['Frequency Maximum'])
+        # print(dwell_time)
         dwell_time_ns = dwell_time * 1e9
         
-        count_bins = np.diff(self.meas_time_range) / dwell_time_ns        
+        count_bins = np.diff(self.meas_time_range) / dwell_time_ns
 
         # import data
         # generate corresponding histogram if importing fails
@@ -90,26 +105,35 @@ class CohnAlpha:
                                           settings=settings,
                                           settingsName=settingsPath,
                                           fileName='processing_data')
+        # TODO: REMOVE
+        importResults = None
+
         if importResults is not None:
-            # 2d numpy array slicing: The matrix[1, :] slice selects all elements in the second row, showing how to slice rows.
             data = importResults['data']
             edges_seconds = data[:, 0]
-            counts_time_hist = data[:, 1]
+            hist = data[:, 1]
             
+        elif self.input_file_ext == '.hist':
+            edges_seconds, hist = list_data_array[:,0], list_data_array[:,1]
+
+
         else:
-            counts_time_hist, edges_ns = np.histogram(a=self.list_data_array,
-                                                    bins=int(count_bins),
-                                                    range=self.meas_time_range)
+            hist, edges_ns = np.histogram(a=list_data_array,
+                                            bins=int(count_bins),
+                                            range=self.meas_time_range)
             edges_seconds = edges_ns / 1e9
             edges_seconds = edges_seconds[:-1]
 
+        # No longer need to hold input data in memory, remove reference to invoke garbage collector
+        list_data_array = None
+
         # Plotting
-        if settings['General Settings']['Show plots']:
-            self.plot_ca(x=edges_seconds,y=counts_time_hist, method='hist', settings=settings)
+        if settings['General Settings']['Show plots'] or settings['Input/Output Settings']['Save figures']:
+            self.plot_ca(x=edges_seconds,y=hist, method='hist', settings=settings)
 
         # Saving raw data
         if settings['Input/Output Settings']['Save outputs']:
-            data = np.array([edges_seconds, counts_time_hist]).T
+            data = np.array([edges_seconds, hist]).T
             hdf5.writeHDF5Data(npArrays=[data],
                                keys=['data'],
                                path=['CohnAlpha', 'Histogram'],
@@ -124,7 +148,10 @@ class CohnAlpha:
                             num=int(count_bins))/1e9
         self.fs = 1 / (timeline[3]-timeline[2])
 
-        return edges_seconds, counts_time_hist
+        # TODO: ask Flynn
+        # self.fs = 1/dwell_time
+
+        return edges_seconds, hist
 
     def welchApproxFourierTrans(self, settings: dict = {}, settingsPath:str = './settings/default.json', showSubPlots:bool=True):
 
@@ -150,6 +177,8 @@ class CohnAlpha:
                                           settingsName=settingsPath,
                                           fileName='pynoise')
         
+        # TODO: REMOVE
+        importResults = None
         
         # If existing data does not exist and showSubPlots is false
         # import data from disk
@@ -163,15 +192,14 @@ class CohnAlpha:
             showSubPlots = False
             dwell_time = 1 / (2 * settings['CohnAlpha Settings']['Frequency Maximum'])
             nperseg = 1 / (dwell_time * settings['CohnAlpha Settings']['Frequency Minimum'])
-
             # check to see if nperseg is a power of 2
             if not helper.checkPowerOfTwo(value=int(nperseg)):
                 self.print('WARNING: calculated nperseg is not a power of 2')
             
             # initialize counts histogram list
             # generate frequency and power spectral densities
-            edges_seconds, counts_time_hist = self.plotCountsHistogram(settings=settings, settingsPath=settingsPath)
-            f, Pxx = signal.welch(x=counts_time_hist,
+            edges_seconds, hist = self.plotCountsHistogram(settings=settings, settingsPath=settingsPath)
+            f, Pxx = signal.welch(x=hist,
                                   fs=self.fs,
                                   nperseg=int(nperseg), 
                                   window='boxcar')
@@ -182,7 +210,7 @@ class CohnAlpha:
 
 
         # Plotting
-        if settings['General Settings']['Show plots']:
+        if settings['General Settings']['Show plots'] or settings['Input/Output Settings']['Save figures']:
             self.plot_ca(x=f, y=Pxx, method='scatter', settings=settings)
 
         # Saving raw data
@@ -242,6 +270,9 @@ class CohnAlpha:
                                         settingsName=settingsPath,
                                         fileName='pynoise')
         
+        # TODO: REMOVE
+        importResults = None
+        
         # If existing data does not exist and showSubPlots is false
         # import data from disk
         if importResults is not None:
@@ -277,7 +308,7 @@ class CohnAlpha:
         # plots the graph
         # will call fit() as well to fit the curve
         # plot() will return the dict containing popt, alpha, uncertainty
-        if settings['General Settings']['Show plots']:
+        if settings['General Settings']['Show plots'] or settings['Input/Output Settings']['Save figures']:
             kwDict = {'popt': popt,
                       'alpha': alpha,
                       'uncertainty': uncertainty}
@@ -322,7 +353,7 @@ class CohnAlpha:
         # grab axis titles and graph name from map
         # return tuple order: x-axis label, y-axis label, graph title
         map = {
-            'hist': ('Time(s)', 'Counts', 'Cohn-Alpha Counts Histogram'),
+            'hist': ('Time(s)', 'Signal(V)', 'C4--SC-08072024-54mW-00000--00000'),
             'scatter': ('Frequency(Hz)', 'Counts^2/Hz', 'Cohn-Alpha Scatter Plot'),
             'fit': ('Frequency(Hz)', 'Counts^2/Hz', 'Cohn-Alpha Graph')
         }
@@ -363,7 +394,7 @@ class CohnAlpha:
         # update limit of x-axis
         else:
             ax[0].semilogx(x[1:-2], y[1:-2], '.', **settings['Semilog Plot Settings'])
-            ax[0].set_xlim([1, 200])
+            # ax[0].set_xlim([1, 200])
 
 
             # if fitting, then call fit() and fit curve
@@ -392,10 +423,13 @@ class CohnAlpha:
             pyplot.savefig(save_img_filename, dpi=300, bbox_inches='tight')
             self.print('Image saved at ' + save_img_filename)
 
+
         # plot and show graph
         # close graph after showing graph
-        self.print("Plotting...")
-        pyplot.show()
+        if settings['General Settings']['Show plots']:
+            self.print("Plotting...")
+            pyplot.show()
+        
         pyplot.close()
 
 
