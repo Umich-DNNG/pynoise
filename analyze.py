@@ -229,7 +229,7 @@ class Analyzer:
             # If in verbose mode:
             if verbose:
                 # Save the raw data if desired..
-                if io['Save raw data']:
+                if io['Save outputs']:
                     self.export({'Count': (range(0,len(counts)), 0),
                                  'Frequency': (counts,0)},
                                  [('Tau',tau)],
