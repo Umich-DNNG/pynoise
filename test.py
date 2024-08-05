@@ -174,7 +174,7 @@ def runh5Diff(save:bool = False):
     # compares the files, only prints differences greater than 0.001
     # if verbose prints tree differences as well
     print('\nComparing graph data')
-    result = subprocess.run(['h5diff', '-v', '-d', precision, file1, file2],
+    result = subprocess.run(['h5diff', '-v', '-p', precision, file1, file2],
                             capture_output=True,
                             text=True)
     

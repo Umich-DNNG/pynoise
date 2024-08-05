@@ -1,6 +1,6 @@
 {
     "Input/Output Settings": {
-        "Input file/folder": "./data/input/stilbene_2in_CROCUS_20cm_offset_north.txt",
+        "Input file/folder": "./data/stilbene_2in_CROCUS_20cm_offset_north.txt",
         "Time column": 0,
         "Channels column": null,
         "Save directory": "./data",
