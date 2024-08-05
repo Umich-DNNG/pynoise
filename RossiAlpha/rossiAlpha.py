@@ -56,9 +56,7 @@ class RossiAlpha:
 
         Outputs:
         - a bool indicating whether the computation was successful
-        '''
-        # self.findValidInFile(settings, './default.json', 'td')
-        # return True
+        '''       
         if isFolder:
             numFolders = settings['General Settings']['Number of folders']
             # calculate number of folders if was not specified
@@ -103,16 +101,10 @@ class RossiAlpha:
             if numFolders is None:
                 successful, numFolders = globalAnalyze.calcNumFolders(settings['Input/Output Settings']['Input file/folder'])
                 if not successful: return False
-            if settings['RossiAlpha Settings']['Bin width'] is None:
-                successful = td.prepMARBE(self.timeDifs, self.hist, settings, settingsPath, numFolders)
-                if not successful: return False
-            else:
-                successful = td.folderAnalyzer(self.timeDifs, settings, settingsPath, numFolders)
-                if not successful: return False
-            plt.folderHistogram(self.timeDifs, self.hist, numFolders, settings, settingsPath)
+            successful = plt.folderHistogram(self.timeDifs, self.hist, numFolders, settings, settingsPath)
+            if not successful: return False
         
         else:
-            td.createTimeDifs(self.timeDifs, settings, settingsPath)
             plt.createPlot(self.timeDifs, self.hist, settings, settingsPath)
         
         
@@ -132,62 +124,14 @@ class RossiAlpha:
             if numFolders is None:
                 successful, numFolders = globalAnalyze.calcNumFolders(settings['Input/Output Settings']['Input file/folder'])
                 if not successful: return False
-            if settings['RossiAlpha Settings']['Bin width'] is None:
-                successful = td.prepMARBE(self.timeDifs, self.hist, settings, settingsPath, numFolders)
-                if not successful: return False
-            else:
-                successful = td.folderAnalyzer(self.timeDifs, settings, settingsPath, numFolders)
-                if not successful: return False
             plt.folderHistogram(self.timeDifs, self.hist, numFolders, settings, settingsPath)
             fit.folderFit(self.fit, self.hist, settings, settingsPath, numFolders)
         else:
-            td.createTimeDifs(self.timeDifs, settings, settingsPath)
             plt.createPlot(self.timeDifs, self.hist, settings, settingsPath)
             fit.createBestFit(self.fit, self.hist, settings, settingsPath)
         pass
 
 # --------------------------- helper functions for the class -------------------------------
-
-    # TODO: make work
-    def findValidInFile(self, settings: dict, settingsName: str, step: str):
-        data = None
-        if step == 'fit':
-            path = ['RossiAlpha', 'fit']
-            data = hdf5.readHDF5Data(path, settings, 'pynoise', settingsName)
-            if data is not None:
-                # TODO: do something with the data, pending storage format
-                pass
-        
-        if step == 'hist' or (step == 'fit' and data is None):
-            path = ['RossiAlpha', 'hist']
-            data = hdf5.readHDF5Data(path, settings, 'pynoise', settingsName)
-            if data is not None:
-                # TODO: do smth with the data, pending storage format
-                pass
-        # if data is None by now, try and read time difference data
-        if step == 'td' or data is None:
-            name = settings['Input/Output Settings']['Input file/folder']
-            name = name[name.rfind('/')+1:]
-            numSets = getNumSets(settings)
-            for i in range(numSets):
-                if isinstance(settings['RossiAlpha Settings']['Time difference method'], list):
-                    method = settings['RossiAlpha Settings']['Time difference method'][i]
-                else:
-                    method = settings['RossiAlpha Settings']['Time difference method']
-                path = [name, 'RossiAlpha', method, str(settings['RossiAlpha Settings']['Reset time'])]
-                data = hdf5.readHDF5Data(path, settings, 'processing_data')
-            if data is not None:
-                self.timeDifs['Time differences'] = [[[] for _ in range(60)], []]
-                for key, value in data.items():
-                    t = int(key)
-                    self.timeDifs['Time differences'][0][t - 1] = value       
-                self.timeDifs['Time difference method'].append(method)            
-            i = 0
-            for stuff in self.timeDifs['Time differences'][0]:
-                print(f'{i}: {stuff}')
-                i = i + 1
-
-
     
     # NOTE: this function is not currently maintained
     def calculateTimeDifsAndPlot(self,

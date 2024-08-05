@@ -4,6 +4,7 @@ import os
 
 import tkinter as Tk
 from . import rossiAlpha as ra
+from . import analyze as td
 from tqdm import tqdm
 
 # to allow for importing global files
@@ -35,13 +36,34 @@ def createPlot(timeDifs: dict,
 
     # Clear out the current histogram data.
     hist['Histogram'].clear()
+    name = settings['Input/Output Settings']['Input file/folder']
+    name = name[name.rfind('/')+1:]
+
+    readHistFromHDF5(hist, settings, settingsPath)
+    # if data was found, plot it
+    if hist['Histogram'] != []:
+        if isinstance(settings['RossiAlpha Settings']['Time difference method'], list):
+            method = settings['RossiAlpha Settings']['Time difference method'][0]
+        else:
+            method = settings['RossiAlpha Settings']['Time difference method']
+        hist['Histogram'][0].plotFromHist(name,
+                                            method,
+                                            settings['Histogram Visual Settings'],
+                                            settings['Input/Output Settings']['Save figures'], 
+                                            settings['General Settings']['Show plots'], 
+                                            settings['Input/Output Settings']['Save directory'], 
+                                            False, 
+                                            settings['General Settings']['Verbose iterations'])
+        return
+    # if data was not found, get time differences
+    else:
+        td.createTimeDifs(timeDifs, settings, settingsPath)
+
     # Create a RossiHistogram object for each time difference.
     for time_dif in timeDifs['Time differences']:
         hist['Histogram'].append(RossiHistogram(time_dif, 
                                                 settings['RossiAlpha Settings']['Bin width'], 
                                                 settings['RossiAlpha Settings']['Reset time']))
-    name = settings['Input/Output Settings']['Input file/folder']
-    name = name[name.rfind('/')+1:]
 
     print('Creating histograms...')
     # Plot each histogram.
@@ -86,7 +108,44 @@ def folderHistogram(timeDifs: dict, hist: dict, numFolders: int, settings: dict,
     name = name[name.rfind('/')+1:]
 
     hist['Histogram'].clear()
+    hist['Subplots'].clear()
+    hist['Uncertainty'].clear()
     hist['Bin width'] = settings['RossiAlpha Settings']['Bin width']
+
+    readHistFromHDF5(hist, settings, settingsPath, numFolders)
+    # if data was found, plot it
+    if hist['Histogram'] != []:
+        if isinstance(settings['RossiAlpha Settings']['Time difference method'], list):
+            method = settings['RossiAlpha Settings']['Time difference method'][0]
+        else:
+            method = settings['RossiAlpha Settings']['Time difference method']
+        hist['Histogram'][0].plotFromHist(name,
+                                            method,
+                                            settings['Histogram Visual Settings'],
+                                            settings['Input/Output Settings']['Save figures'], 
+                                            settings['General Settings']['Show plots'], 
+                                            settings['Input/Output Settings']['Save directory'], 
+                                            False, 
+                                            settings['General Settings']['Verbose iterations'])
+        if settings['General Settings']['Verbose iterations']:
+            for folder in range(numFolders):
+                hist['Subplots'][-1].plotFromHist(name + '-' + str(folder + 1),
+                                                    method,
+                                                    settings['Histogram Visual Settings'],
+                                                    settings['Input/Output Settings']['Save figures'], 
+                                                    settings['General Settings']['Show plots'], 
+                                                    settings['Input/Output Settings']['Save directory'], 
+                                                    False, 
+                                                    settings['General Settings']['Verbose iterations'])
+        return
+    # if data was not found, get time differences
+    else:
+        if settings['RossiAlpha Settings']['Bin width'] is None:
+            successful = td.prepMARBE(timeDifs, hist, settings, settingsPath, numFolders)
+            if not successful: return False
+        else:
+            td.folderAnalyzer(timeDifs, settings, settingsPath, numFolders)
+
     # compile subfolder data together, including exporting if in verbose mode
     combined = subfolderPlots(timeDifs, hist, settings, settingsPath, numFolders)
     
@@ -111,20 +170,6 @@ def folderHistogram(timeDifs: dict, hist: dict, numFolders: int, settings: dict,
                                             False, 
                                             settings['General Settings']['Verbose iterations'])
         if settings['Input/Output Settings']['Save outputs']:
-            # ---------- NOTE: code below exports outputs in csv format ------------
-            # ----------------- commented out as we move to hdf5 -------------------
-            # begin, end = ra.computeBinEdges(hist)
-            # fileName = 'rossi_hist_' + name + '_' + method + '_' + str(hist['Histogram'][-1].bin_width) + '_' + str(settings['RossiAlpha Settings']['Reset time'])
-            # globalAnalyze.export({'Bin beginning': (begin,0),
-            #                     'Bin ending': (end,0),
-            #                     'Measured Count': (hist['Histogram'][-1].counts,0)
-            #                     },
-            #                     [('Time difference method',method),
-            #                     ('Number of folders', numFolders),
-            #                     ('Input file', name)],
-            #                     fileName,
-            #                     settings['Input/Output Settings']['Save directory'])
-
             # export to hdf5
             data = []
             data.append(np.array([hist['Histogram'][-1].bin_centers, hist['Histogram'][-1].counts, hist['Uncertainty'][i]]).T)
@@ -139,6 +184,50 @@ def folderHistogram(timeDifs: dict, hist: dict, numFolders: int, settings: dict,
 
 
 # --------------------------------- helper functions for creating histograms -----------------------------------------
+
+
+def readHistFromHDF5(hist:dict, settings:dict, settingsPath:str, numFolders:int=0):
+    '''
+    Helper to reading histogram data from an hdf5 file
+
+    Inputs:
+    - hist: the dictionary from the calling function that will contain the histogram data
+    - settings: dict of runtime settings
+    - settingsPath: string indicating path to settings file used
+    - isFolder: bool indicating if this is for a folder or not
+    '''
+    # prepare values for histogram inits
+    numBins = int(settings['RossiAlpha Settings']['Reset time'] / settings['RossiAlpha Settings']['Bin width'])
+    binEdges = np.linspace(0, settings['RossiAlpha Settings']['Reset time'], numBins + 1)
+    binCenters = np.linspace((settings['RossiAlpha Settings']['Bin width'] / 2),
+                             (settings['RossiAlpha Settings']['Reset time'] - (settings['RossiAlpha Settings']['Bin width'] / 2)),
+                             numBins)
+    
+    # path for a file
+    path = ['RossiAlpha', 'distribution']
+
+    # for folder
+    if numFolders != 0:
+        # find subplots if necessary
+        if settings['General Settings']['Verbose iterations']:
+            path = ['RossiAlpha', 'distribution', 'subfolders']
+            data = hdf5.readHDF5Data(path, settings, 'pynoise', settingsPath)
+            hist['Subplots'] = [[] for _ in range(numFolders)]
+            if data is not None:
+                for key, value in data.items():
+                    folder = int(key)
+                    hist['Subplots'][folder - 1] = (RossiHistogram(bin_width=settings['RossiAlpha Settings']['Bin width'], reset_time=settings['RossiAlpha Settings']['Reset time']))
+                    hist['Subplots'][folder - 1].initFromHist(value[:,1].flatten(), binCenters, binEdges)
+        path = ['RossiAlpha', 'distribution', 'total']
+    data = hdf5.readHDF5Data(path, settings, 'pynoise', settingsPath)
+    if data is not None:
+        for key, value in data.items():
+            hist['Histogram'].append(RossiHistogram(bin_width=settings['RossiAlpha Settings']['Bin width'], reset_time=settings['RossiAlpha Settings']['Reset time']))
+            hist['Histogram'][-1].initFromHist(value[:,1].flatten(), binCenters, binEdges)
+            # for folder analysis, store uncertainty
+            if numFolders != 0:
+                hist['Uncertainty'].append(value[:, 2].flatten())
+        print('Histogram(s) for your settings have already been computed.')
 
 
 def calcUncertainty(hist: dict, total: list, numFolders: int):
@@ -184,6 +273,7 @@ def subfolderPlots(timeDifs: dict, hist: dict, settings: dict, settingsPath:str,
     numHistograms = ra.getNumSets(settings)
 
     totalHist = []
+    hist['Subplots'].clear()
 
     name = settings['Input/Output Settings']['Input file/folder']
     name = name[name[:name.rfind('/')].rfind('/')+1:].replace('/','-')
@@ -207,17 +297,6 @@ def subfolderPlots(timeDifs: dict, hist: dict, settings: dict, settingsPath:str,
                                             settings['Histogram Visual Settings'], 
                                             True, 
                                             settings['General Settings']['Verbose iterations'])
-                # ---------- NOTE: code below exports outputs in csv format ------------
-                # if settings['Input/Output Settings']['Save outputs']:
-                    # begin, end = ra.computeBinEdges(hist) 
-                    # fileName = 'rossi_hist_' + name + '-' + str(folder + 1) + '_' + method + '_' + str(hist['Histogram'][folder].bin_width) + '_' + str(settings['RossiAlpha Settings']['Reset time'])
-                    # globalAnalyze.export({'Bin beginning': (begin,0),
-                    #                     'Bin ending': (end,0),
-                    #                     'Measured Count': (hist['Histogram'][0].counts,0)},
-                    #                     [('Time difference method',method),
-                    #                     ('Input file', (name + '/' + str(folder + 1)))],
-                    #                     fileName,
-                    #                     settings['Input/Output Settings']['Save directory'])
                 hist['Subplots'].append(hist['Histogram'][-1])
             
             # if verbose iterations is not on, then "plot" to be able to retrieve the counts for the uncertainty calculations
@@ -243,7 +322,7 @@ def subfolderPlots(timeDifs: dict, hist: dict, settings: dict, settingsPath:str,
     # save subplots
     if settings['Input/Output Settings']['Save outputs'] and settings['General Settings']['Verbose iterations']:
         data = []
-        for subplot in (hist['Subplots']):
+        for subplot in hist['Subplots']:
             array = np.array([subplot.bin_centers, subplot.counts]).T
             data.append(array)
         data = np.array(data)

@@ -46,6 +46,13 @@ def createTimeDifs(timeDifs:dict, settings:dict, settingsPath: str, curFolder:in
     # Clear out the current time difference data and methods.
     timeDifs['Time differences'].clear()
     timeDifs['Time difference method'].clear()
+
+    # if this is for a file analysis, see if the time difs exist in the hdf5
+    if curFolder == 0:
+        readTimeDifsFromH5(timeDifs, settings, settingsPath)
+        if timeDifs['Time differences'] != []:
+            return
+
     # If methods is a list, create a time difference for each instance.
     if isinstance(settings['RossiAlpha Settings']['Time difference method'], list):
         for method in settings['RossiAlpha Settings']['Time difference method']:
@@ -71,7 +78,7 @@ def createTimeDifs(timeDifs:dict, settings:dict, settingsPath: str, curFolder:in
     for i in range(0,len(timeDifs['Time differences'])):
         timeDifs['Time differences'][i] = timeDifs['Time differences'][i].calculateTimeDifsFromEvents()
     # save single file time differences if specified
-    if settings['Input/Output Settings']['Save time differences'] and curFolder == 0:
+    if settings['Input/Output Settings']['Save processing data'] and curFolder == 0:
         path = ['RossiAlpha', 'time differences']
         key = ['data']
         hdf5.writeHDF5Data(timeDifs['Time differences'], key, path, settings, 'processing_data', settingsPath)
@@ -91,6 +98,12 @@ def folderAnalyzer(timeDifs: dict, settings: dict, settingsPath:str, numFolders:
     Outputs:
     - bool: true if analysis was successful, false otherwise
     '''
+    timeDifs['Time differences'].clear()
+    timeDifs['Time difference method'].clear()
+
+    readTimeDifsFromH5(timeDifs, settings, settingsPath, numFolders)
+    if timeDifs['Time differences'] != []:
+        return True
 
     original = settings['Input/Output Settings']['Input file/folder']
     numSets = ra.getNumSets(settings)
@@ -133,11 +146,48 @@ def folderAnalyzer(timeDifs: dict, settings: dict, settingsPath:str, numFolders:
     settings['Input/Output Settings']['Input file/folder'] = original
     
     # save time difference data for folders
-    if settings['Input/Output Settings']['Save time differences']:
+    if settings['Input/Output Settings']['Save processing data']:
         path = ['RossiAlpha', 'time differences']
         key = [f'{i}' for i in range(1, numFolders + 1)]
         hdf5.writeHDF5Data(timeDifs['Time differences'][0], key, path, settings, 'processing_data', settingsPath)
     return True
+
+
+# ---------------- helper -----------------------
+def readTimeDifsFromH5(timeDifs:dict, settings:dict, settingsPath:str, numFolders:int=0):
+    '''
+    Helper to reading time difference data from an hdf5 file
+    Given the way the timeDifs class is structured, reading from a h5 file 
+    is done in a separate function outside of the class.
+
+    Inputs:
+    - timeDifs: the dictionary from the calling function that will contain the time difference data
+    - settings: dict of runtime settings
+    - settingsPath: string indicating path to settings file used
+    - numFolders: int indicating number of folders; 0 for files
+    '''
+    timeDifs['Time differences'].clear()
+    timeDifs['Time difference method'].clear()
+    if isinstance(settings['RossiAlpha Settings']['Time difference method'], list):
+        method = settings['RossiAlpha Settings']['Time difference method'][0]
+    else:
+        method = settings['RossiAlpha Settings']['Time difference method']
+    path = ['RossiAlpha', 'time differences']
+    data = hdf5.readHDF5Data(path, settings, 'processing_data', settingsPath)
+    if data is not None:
+        # for folder analysis
+        if numFolders != 0:
+            timeDifs['Time differences'] = [[[] for _ in range(numFolders)]]
+            for key, value in data.items():
+                folder = int(key)
+                timeDifs['Time differences'][0][folder - 1] = value
+        # for file analysis
+        else:
+            timeDifs['Time differences'] = [[]]
+            for key, value in data.items():
+                timeDifs['Time differences'][0] = value
+        timeDifs['Time difference method'].append(method)
+        print('Time differences for your settings have already been computed.')
 
 
 # ------------------------ class for time difference calculations ----------------------------
@@ -174,7 +224,7 @@ class timeDifCalcs:
             self.digital_delay = digital_delay
         # Initialize the blank time differences.
         self.timeDifs = None
-        self.export = io['Save time differences']
+        self.export = io['Save processing data']
         self.overwrite = io['Overwrite lower reset times']
         self.outputFolder = io['Save directory']
         name = io['Input file/folder']

@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 import os
+from tqdm import tqdm
 
 from . import rossiAlpha as ra
 import hdf5
@@ -26,33 +27,45 @@ def createBestFit(fit:dict, hist:dict, settings: dict, settingsPath: str):
         else:
             method = settings['RossiAlpha Settings']['Time difference method']
         # create a fit graph for each fit min/max pair
-        for j in range(0, len(fit['Fit minimum'])):
+        for j in tqdm(range(0, len(fit['Fit minimum']))):
             fit['Best fit'].append(RossiHistogramFit(hist['Histogram'][i].counts,
                                                 hist['Histogram'][i].bin_centers,
                                                 method,
                                                 fit['Fit minimum'][j],
                                                 fit['Fit maximum'][j]))
+            successful = fit['Best fit'][-1].readFromHDF5(settings, settingsPath)
             # craft the output name
             output = settings['Input/Output Settings']['Input file/folder']
             output = output[output.rfind('/')+1:]
             output = output + '_' + method + '_' + str(settings['RossiAlpha Settings']['Bin width']) + '_' + str(settings['RossiAlpha Settings']['Reset time'])
             # plot the fit graph using the current settings
-            fit['Best fit'][i].fit_and_residual(settings['Input/Output Settings']['Save figures'],
+            if successful:
+                fit['Best fit'][-1].fitFromHDF5(settings['Input/Output Settings']['Save figures'],
                                                 settings['Input/Output Settings']['Save directory'],
                                                 settings['General Settings']['Show plots'],
                                                 settings['Line Fitting Settings'],
                                                 settings['Scatter Plot Settings'],
                                                 settings['Histogram Visual Settings'],
                                                 output,
-                                                method,
                                                 False,
                                                 settings['General Settings']['Verbose iterations'])
+            else:
+                fit['Best fit'][-1].fit_and_residual(settings['Input/Output Settings']['Save figures'],
+                                                    settings['Input/Output Settings']['Save directory'],
+                                                    settings['General Settings']['Show plots'],
+                                                    settings['Line Fitting Settings'],
+                                                    settings['Scatter Plot Settings'],
+                                                    settings['Histogram Visual Settings'],
+                                                    output,
+                                                    method,
+                                                    False,
+                                                    settings['General Settings']['Verbose iterations'])
             plt.close()
             if settings['Input/Output Settings']['Save outputs']:
                 array = np.array([hist['Histogram'][i].bin_centers, hist['Histogram'][i].counts]).T
-                array = [array, fit['Best fit'][-1].pred, fit['Best fit'][-1].residuals]
+                array = [array, fit['Best fit'][-1].pred, fit['Best fit'][-1].residuals, fit['Best fit'][-1].perr]
                 hdf5.writeHDF5Data(array,
-                                   ['plot values', 'fit count', 'perr'],
+                                   ['plot values', 'fit count', 'residuals', 'perr'],
                                    ['RossiAlpha', 'fit', 'total', f"{fit['Fit minimum'][i]}-{fit['Fit maximum'][i]}", 'plot'],
                                    settings,
                                    'pynoise',
@@ -84,7 +97,7 @@ def folderFit(fit: dict, hist: dict, settings: dict, settingsPath: str, numFolde
     name = settings['Input/Output Settings']['Input file/folder']
     name = name[name.rfind('/')+1:]
 
-    # for each histogram data set to be fitted
+    # for each histogram data set to be fitted (should just be 1)
     for i in range(0, len(hist['Histogram'])):
         # figure out the time difference method used
         if isinstance(settings['RossiAlpha Settings']['Time difference method'], list):
@@ -94,15 +107,18 @@ def folderFit(fit: dict, hist: dict, settings: dict, settingsPath: str, numFolde
 
         # Create a fit object for the total histogram(s) for the ranges.
         total.append(np.vstack((hist['Histogram'][i].counts, hist['Histogram'][i].bin_centers, hist['Uncertainty'][i])))
-        for j in range(len(fit['Fit minimum'])):
+        for j in tqdm(range(len(fit['Fit minimum']))):
             fit['Best fit'].append(Fit_With_Weighting(total[i],
                                                     fit['Fit minimum'][j],
                                                     fit['Fit maximum'][j],
                                                     settings['Input/Output Settings']['Save directory'],
                                                     settings['Line Fitting Settings'], 
                                                     settings['Scatter Plot Settings']))
-            # Fit the total histogram with weighting.
-            fit['Best fit'][-1].fit_RA_hist_weighting()
+            # try to find the data from the hdf5 file
+            successful = fit['Best fit'][-1].readFromHDF5(settings, settingsPath)
+            if not successful:
+                # Fit the total histogram with weighting if data could not be found.
+                fit['Best fit'][-1].fit_RA_hist_weighting()
             # Plot the total histogram fit.
             suffix = name + '_' + method + '_' + str(settings['RossiAlpha Settings']['Bin width']) + '_' + str(settings['RossiAlpha Settings']['Reset time'])
             fit['Best fit'][-1].plot_RA_and_fit(settings['Input/Output Settings']['Save figures'], 
@@ -114,9 +130,9 @@ def folderFit(fit: dict, hist: dict, settings: dict, settingsPath: str, numFolde
             # save data to hdf5 if desired
             if settings['Input/Output Settings']['Save outputs']:
                 array = np.array([hist['Histogram'][i].bin_centers, hist['Histogram'][i].counts, hist['Uncertainty'][i]]).T
-                array = [array, fit['Best fit'][-1].pred, fit['Best fit'][-1].residuals]
+                array = [array, fit['Best fit'][-1].pred, fit['Best fit'][-1].residuals, fit['Best fit'][-1].perr]
                 hdf5.writeHDF5Data(array,
-                                   ['plot values', 'fit count', 'perr'],
+                                   ['plot values', 'fit count', 'residuals', 'perr'],
                                    ['RossiAlpha', 'fit', 'total', f"{fit['Fit minimum'][i]}-{fit['Fit maximum'][i]}", 'plot'],
                                    settings,
                                    'pynoise',
@@ -128,6 +144,7 @@ def folderFit(fit: dict, hist: dict, settings: dict, settingsPath: str, numFolde
                                    settings,
                                    'pynoise',
                                    settingsPath)
+            fit['Best fit'].clear()
 
 
 # ---------- helper functions for the main fit functions -------------------
@@ -142,40 +159,53 @@ def subfolderFit(fit:dict, hist: dict, settings: dict, settingsPath: str, numFol
     - hist: dictionary from the calling class containing histogram data
     - settings: dictionary holding the runtime settings
     - settingsPath: string path to the settings file
-    - numFolder: number of subfolders    
+    - numFolder: number of subfolders
     '''
     if isinstance(settings['RossiAlpha Settings']['Time difference method'], list):
         method = settings['RossiAlpha Settings']['Time difference method'][0]
     else:
         method = settings['RossiAlpha Settings']['Time difference method']
-    for folder in range(numFolders):
+    for folder in tqdm(range(numFolders)):
         for i in range(len(fit['Fit minimum'])):
             subfolder = RossiHistogramFit(hist['Subplots'][folder].counts,
                                           hist['Subplots'][folder].bin_centers,
                                           method,
                                           fit['Fit minimum'][i],
                                           fit['Fit maximum'][i])
+            successful = subfolder.readFromHDF5(settings, settingsPath, folder+1)
             # craft the output name
             output =  settings['Input/Output Settings']['Input file/folder']
             output = output + f'/{folder + 1}'
             output = output[output[:output.rfind('/')].rfind('/')+1:].replace('/','-')
             output = output + '_' + method + '_' + str(settings['RossiAlpha Settings']['Bin width']) + '_' + str(settings['RossiAlpha Settings']['Reset time'])
-            subfolder.fit_and_residual(settings['Input/Output Settings']['Save figures'],
+            if successful:
+                subfolder.fitFromHDF5(settings['Input/Output Settings']['Save figures'],
                                                 settings['Input/Output Settings']['Save directory'],
                                                 settings['General Settings']['Show plots'],
                                                 settings['Line Fitting Settings'],
                                                 settings['Scatter Plot Settings'],
                                                 settings['Histogram Visual Settings'],
                                                 output,
-                                                method,
-                                                True,
+                                                False,
                                                 settings['General Settings']['Verbose iterations'])
+            else:
+            
+                subfolder.fit_and_residual(settings['Input/Output Settings']['Save figures'],
+                                                    settings['Input/Output Settings']['Save directory'],
+                                                    settings['General Settings']['Show plots'],
+                                                    settings['Line Fitting Settings'],
+                                                    settings['Scatter Plot Settings'],
+                                                    settings['Histogram Visual Settings'],
+                                                    output,
+                                                    method,
+                                                    True,
+                                                    settings['General Settings']['Verbose iterations'])
             if settings['Input/Output Settings']['Save outputs']:
                 array = np.array([hist['Subplots'][folder].bin_centers, hist['Subplots'][folder].counts]).T
-                array = [array, subfolder.pred, subfolder.residuals]
+                array = [array, subfolder.pred, subfolder.residuals, subfolder.perr]
                 hdf5.writeHDF5Data(array,
-                                   ['plot values', 'fit count', 'perr'],
-                                   ['RossiAlpha', 'fit', str(folder + 1), f"{fit['Fit minimum'][i]}-{fit['Fit maximum'][i]}", 'plot'],
+                                   ['plot values', 'fit count', 'residuals', 'perr'],
+                                   ['RossiAlpha', 'fit', 'subfolders', str(folder + 1), f"{fit['Fit minimum'][i]}-{fit['Fit maximum'][i]}", 'plot'],
                                    settings,
                                    'pynoise',
                                    settingsPath)
@@ -183,7 +213,7 @@ def subfolderFit(fit:dict, hist: dict, settings: dict, settingsPath: str, numFol
                 array2 = [subfolder.a, subfolder.perr[0], subfolder.alpha, subfolder.perr[1], subfolder.b]
                 hdf5.writeHDF5Data(array2,
                                    ['A', 'A uncertainty', 'alpha', 'alpha uncertainty', 'B'],
-                                   ['RossiAlpha', 'fit', str(folder + 1), f"{fit['Fit minimum'][i]}-{fit['Fit maximum'][i]}", 'function'],
+                                   ['RossiAlpha', 'fit', 'subfolders', str(folder + 1), f"{fit['Fit minimum'][i]}-{fit['Fit maximum'][i]}", 'function'],
                                    settings,
                                    'pynoise',
                                    settingsPath)
@@ -414,6 +444,126 @@ class RossiHistogramFit:
 
 #--------------------------------------------------------------------------------
 
+    def readFromHDF5(self, settings:dict, settingsPath:str, folder:int = 0):
+        '''
+        Reads fit data from a hdf5 file
+
+        Inputs:
+        - hist: the dictionary from the calling function that will contain the histogram data
+        - settings: dict of runtime settings
+        - settingsPath: string indicating path to settings file used
+        - folder: int for current folder. 0 if is a file
+
+        Outputs:
+        - True if data was found, False otherwise
+        '''
+        if folder == 0:
+            pathBase = ['RossiAlpha', 'fit', 'total', f'{self.fit_range[0]}-{self.fit_range[1]}']
+        else:
+            pathBase = ['RossiAlpha', 'fit', 'subfolders', str(folder), f'{self.fit_range[0]}-{self.fit_range[1]}']
+        path = pathBase + ['plot']
+        data = hdf5.readHDF5Data(path, settings, 'pynoise', settingsPath)
+        if data is not None:
+            for key, value in data.items():
+                if key == 'fit count':
+                    self.pred = value
+                elif key == 'residuals':
+                    self.residuals = value
+                elif key == 'perr':
+                    self.perr = value
+        else:
+            return False
+        path = pathBase + ['function']
+        data = hdf5.readHDF5Data(path, settings, 'pynoise', settingsPath)
+        if data is not None:
+            for key, value in data.items():
+                if key == 'A':
+                    self.a = value
+                elif key == 'B':
+                    self.b = value
+                elif key == 'alpha':
+                    self.alpha = value
+            return True
+        else:
+            return False
+
+
+    def fitFromHDF5(self,
+                    save_fig: bool, 
+                    save_dir: str, 
+                    show_plot: bool, 
+                    fitting_opts: dict, 
+                    residual_opts: dict, 
+                    hist_visual_opts: dict, 
+                    outputName: str, 
+                    folder: bool = False, 
+                    verbose: bool = False):
+        self.fitting_options = fitting_opts
+        self.residual_options = residual_opts
+        self.hist_visual_options = hist_visual_opts
+        self.save_dir = save_dir
+        self.save_fig = save_fig
+
+        # Choosing region to fit
+        self.fit_index = np.where((self.bin_centers >= self.fit_range[0]) & 
+                             (self.bin_centers <= self.fit_range[1]))
+
+        xfit = self.bin_centers[self.fit_index]
+
+        # Create figure and axes
+        fig, (ax1, ax2) = plt.subplots(nrows=2, sharex=True, figsize=(8, 6), gridspec_kw={'height_ratios': [2, 1]})
+
+        # Plotting histogram and fitting curve in top subplot
+        ax1.bar(self.bin_centers, self.counts, width=0.8*(self.bin_centers[1]-self.bin_centers[0]), **self.hist_visual_options)
+        ax1.plot(xfit, self.pred, **self.fitting_options)
+        equation = r'$Ae^{\alpha}+B$:'
+        alph_str = (r'$\alpha$ = (' + f'{self.alpha * 1e9:.3g}' + '$\pm$ ' + f'{self.perr[1] * 1e9:.3g}' + ') 1/s')
+        a_str = (r'$A$ = (' + f'{self.a:.3g}' + '$\pm$ ' + f'{self.perr[0]:.3g}' + ') counts')
+        b_str = r'$B$ = ' + f'{self.b:.3g} counts'
+        ymin, ymax = ax1.get_ylim()
+        xmin, xmax = ax1.get_xlim()
+        xloc = (xmin+xmax)/3
+        dy = ymax-ymin
+        ax1.annotate(equation, 
+                    xy=(xloc*3/3.5, ymax-0.2*dy), 
+                    xytext=(xloc*3/3.5, ymax-0.2*dy),
+                    fontsize=16)
+        ax1.annotate(a_str, 
+                    xy=(xloc, ymax-0.3*dy), 
+                    xytext=(xloc, ymax-0.3*dy),
+                    fontsize=16)
+        ax1.annotate(alph_str, 
+                    xy=(xloc, ymax-0.4*dy), 
+                    xytext=(xloc, ymax-0.4*dy),
+                    fontsize=16)
+        ax1.annotate(b_str, 
+                    xy=(xloc, ymax-0.5*dy), 
+                    xytext=(xloc, ymax-0.5*dy),
+                    fontsize=16)
+        ax1.set_ylabel("Coincidence rate (s^-1)")
+
+        index = (self.bin_centers >= xfit[0]) & (self.bin_centers <= xfit[-1])
+        ax2.scatter(self.bin_centers[index], self.residuals, **self.residual_options)
+        ax2.axhline(y=0, color='#162F65', linestyle='--')
+        ax2.set_xlabel("Time Differences(ns)")
+        ax2.set_ylabel('Percent difference (%)')
+
+        # Setting title for entire figure
+        fig.suptitle('Fit Using ' + self.timeDifMethod, fontsize=14)
+
+        # Adjusting layout and saving figure (optional)
+        if self.save_fig and (not folder or verbose):
+            fig.tight_layout()
+            save_filename = 'fit_and_res_' + outputName + '_' + str(self.fit_range[0]) + '-' + str(self.fit_range[1]) + '.png'
+            save_filename = os.path.join(self.save_dir, save_filename)
+            fig.savefig(save_filename, dpi=300, bbox_inches='tight')
+
+        # Showing plot (optional)
+        if show_plot and (not folder or verbose):
+            plt.show()
+        plt.close()
+
+
     def fit_and_residual(self, 
                          save_fig: bool, 
                          save_dir: str, 
@@ -589,6 +739,53 @@ class Fit_With_Weighting:
         # Line fitting variables
         self.xfit = None
 
+
+    def readFromHDF5(self, settings, settingsPath):
+        '''
+        Reads fit data from a hdf5 file
+
+        Inputs:
+        - hist: the dictionary from the calling function that will contain the histogram data
+        - settings: dict of runtime settings
+        - settingsPath: string indicating path to settings file used
+
+        Outputs:
+        - True if data was found, False otherwise
+        '''
+        path = ['RossiAlpha', 'fit', 'total', f'{self.fit_range[0]}-{self.fit_range[1]}', 'plot']
+        data = hdf5.readHDF5Data(path, settings, 'pynoise', settingsPath)
+        if data is not None:
+            for key, value in data.items():
+                if key == 'fit count':
+                    self.pred = value
+                elif key == 'residuals':
+                    self.residuals = value
+                elif key == 'perr':
+                    self.perr = value
+        else:
+            return False
+        path = ['RossiAlpha', 'fit', 'total', f'{self.fit_range[0]}-{self.fit_range[1]}', 'function']
+        data = hdf5.readHDF5Data(path, settings, 'pynoise', settingsPath)
+        if data is not None:
+            for key, value in data.items():
+                if key == 'A':
+                    self.a = value
+                # elif key == 'A uncertainty':
+                elif key == 'B':
+                    self.b = value
+                elif key == 'alpha':
+                    self.alpha = value
+            
+            # create other variables for fitting use
+            self.fit_index = np.where((self.bin_centers >= self.fit_range[0]) &
+                                    (self.bin_centers <= self.fit_range[1]))
+            self.xfit = self.bin_centers[self.fit_index]
+            print(f'A fit graph for range {self.fit_range[0]}-{self.fit_range[1]} has already been computed for your settings.')
+            return True
+        else:
+            return False
+
+
     def fit_RA_hist_weighting(self):
 
         '''
@@ -712,7 +909,8 @@ class Fit_With_Weighting:
 
         # Computing residuals and plot in bottom subplot
         # residuals = self.hist[self.fit_index] - self.pred
-        self.residuals = ((self.pred - self.hist[self.fit_index]) / self.hist[self.fit_index]) * 100
+        if not hasattr(self, 'residuals'):
+            self.residuals = ((self.pred - self.hist[self.fit_index]) / self.hist[self.fit_index]) * 100
         # residuals_norm = residuals / np.max(np.abs(residuals))
 
         ax2.scatter(self.bin_centers[self.fit_index], self.residuals, **self.residual_options)
