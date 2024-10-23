@@ -174,7 +174,7 @@ class CohnAlpha:
             f, Pxx = signal.welch(x=counts_time_hist,
                                   fs=self.fs,
                                   nperseg=int(nperseg), 
-                                  window='boxcar')
+                                  window='Hann')
             
         # Separate if block to prevent creating histogram twice
         if showSubPlots:
@@ -538,22 +538,22 @@ class CohnAlpha:
             counts_time_hist[1,:], 
             fs, 
             nperseg=2**10, 
-            window='boxcar')
+            window='Hann')
         Pxy = np.abs(Pxy)
 
         '''f1, Pxx1 = signal.welch(x=counts_time_hist[0,:], 
                             fs=fs, 
                             nperseg=2**12, 
-                            window='boxcar')
+                            window='Hann')
         
         f2, Pxx2 = signal.welch(x=counts_time_hist[1,:], 
                             fs=fs, 
                             nperseg=2**12, 
-                            window='boxcar')'''
+                            window='Hann')'''
 
         # Apply welch windows and FFT to tapered windows, summation is smoothed FFT
 
-        # f, Pxx = lpsd(counts_time_hist, fs, window='boxcar')
+        # f, Pxx = lpsd(counts_time_hist, fs, window='Hann')
         # # Apply logarithmically spaced power spectral density
 
         popt, pcov = curve_fit(CAFit, f[1:-2], Pxy[1:-2],
