@@ -27,49 +27,62 @@ def main(editorIn: edit.Editor, queue: list[str]):
         editor.print('m - run the entire program through the main driver')
         editor.print('p - plot histogram of provided time data')
         editor.print('w - perform welch approximation of the fourier transform')
-        editor.print('f - fit and plot power spectral density curve')
+        editor.print('a - perform APSD')
+        editor.print('c - perform CPSD')
         editor.print('s - view or edit the program settings')
         editor.print('Leave the command blank or enter x to return to the main menu.')
         selection = helperAutoFunc(queue=queue)
 
-        # if running analysis and not changing settings, then ensure that the input file path is valid
-        # if input file path is not valid then lock user here unless changing settings or going back
-        if (selection != 's' and selection != 'x' and selection != '' 
-            and not os.path.isfile(editor.parameters.settings['Input/Output Settings']['Input file/folder'])
-            and not os.path.isdir(editor.parameters.settings['Input/Output Settings']['Input file/folder'])):
-                    editor.print('ERROR: You currently have no input file/folder defined or the input file/folder cannot be found. '
-                          + 'Please ensure input path is correct before running any analysis.\n')
-                    continue
+        input_list = editor.parameters.settings['Input/Output Settings']['Input file/folder']
+
+        # normalize input; CPSD is list, APSD is not list, turn APSD input into list to check input
+        if not isinstance(input_list, list):
+            input_list = [editor.parameters.settings['Input/Output Settings']['Input file/folder']]
+        for file in input_list:
+            if (selection != 's' and selection != 'x' and selection != '' 
+                and not os.path.isfile(file) and not os.path.isdir(file)):
+                        editor.print('ERROR: You currently have no input file/folder defined or the input file/folder cannot be found. '
+                            + 'Please ensure input path is correct before running any analysis.\n')
+                        exit(1)
+    
 
         match selection:
             # Run entire Cohn-Alpha method
             case 'm':
                 editor.print('\nRunning the entire Cohn Alpha analysis...')
-                if caInterface.fitCohnAlpha(settings=editor.parameters.settings, settingsPath=editor.parameters.origin, showSubPlots=True):
-                    editor.log('Ran the entire Cohn Alpha on file ' 
-                                + editor.parameters.settings['Input/Output Settings']['Input file/folder'] 
-                                + '\n')
+                if caInterface.fitCohnAlpha(settings=editor.parameters.settings, settingsPath=editor.parameters.origin):
+                    editor.log('Ran entire Cohn Alpha method') # on file ' 
+                                # + editor.parameters.settings['Input/Output Settings']['Input file/folder'] 
+                                # + '\n')
             # Plot Counts Histogram
             case 'p':
                 editor.print('\nPlotting Counts Histogram...')
                 if caInterface.plotCohnAlphaHist(settings=editor.parameters.settings, settingsPath=editor.parameters.origin):
-                    editor.log('Generated Cohn Alpha Histogram on file '
-                            + editor.parameters.settings['Input/Output Settings']['Input file/folder'] 
-                            + '.\n')
+                    editor.log('Generated Cohn Alpha Histogram') # on file '
+                            # + editor.parameters.settings['Input/Output Settings']['Input file/folder'] 
+                            # + '.\n')
             # Apply Welch Approximation of Fourier Transformation
             case 'w':
                 editor.print('\nApplying Welch Approximation...')
                 if caInterface.applyWelchApprox(settings=editor.parameters.settings, settingsPath=editor.parameters.origin):
-                    editor.log('Calculated frequency and power spectral density values on '
-                            + editor.parameters.settings['Input/Output Settings']['Input file/folder'] 
-                            + '.\n')
+                    editor.log('Calculated frequency and power spectral density values') # on '
+                            # + editor.parameters.settings['Input/Output Settings']['Input file/folder'] 
+                            # + '.\n')
+            # Fit Power Spectral Density Curve (APSD)
+            case 'a':
+                editor.print('\nPerforming APSD...')
+                if caInterface.fitAPSD(settings=editor.parameters.settings, settingsPath=editor.parameters.origin):
+                    editor.log('Performed APSD')# on '
+                            # + editor.parameters.settings['Input/Output Settings']['Input file/folder'] 
+                            # + '.\n')
+                    
             # Fit Power Spectral Density Curve
-            case 'f':
-                editor.print('\nFitting Power Spectral Density Curve...')
-                if caInterface.fitCohnAlpha(settings=editor.parameters.settings, settingsPath=editor.parameters.origin, showSubPlots=True):
-                    editor.log('Fitted Power Spectral Density Curve on '
-                            + editor.parameters.settings['Input/Output Settings']['Input file/folder'] 
-                            + '.\n')
+            case 'c':
+                editor.print('\nPerforming CPSD...')
+                if caInterface.fitCPSD(settings=editor.parameters.settings, settingsPath=editor.parameters.origin):
+                    editor.log('Performed CPSD') #on '
+                            # + editor.parameters.settings['Input/Output Settings']['Input file/folder'] 
+                            # + '.\n')
                     
             # View and/or edit program settings.
             case 's':
