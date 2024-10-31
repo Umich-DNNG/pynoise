@@ -3,6 +3,7 @@ import h5py # 3.11.0
 import numpy as np
 from itertools import zip_longest
 from collections import defaultdict
+from pathlib import Path
 
 def writeHDF5Data(npArrays, keys, path: list, settings: dict, fileName:str = "pynoise", settingsName: str = './settings/default.json'):
     '''
@@ -357,7 +358,9 @@ def extractAPSD(settings: dict = {}, apsd_keys:list = []):
                 
                 start_index = end_index
 
-                wattage_str = split_file_name[3][start_index + 1 : wattage_index + 1]
+                run_num = Path(file_name).stem
+                run_num = run_num[(len(run_num) - 1)]
+                wattage_str = split_file_name[3][start_index + 1 : wattage_index + 1] + '_' + run_num
 
                 # get alpha + uncertainty
                 try:
@@ -404,7 +407,10 @@ def extractCPSD(settings: dict = {}, cpsd_keys:list = []):
                     if split_file_name[3][end_index] == '-': break
                     end_index = end_index - 1
                 start_index = end_index
-                wattage_str = split_file_name[3][start_index + 1 : wattage_index + 1]
+
+                run_num = Path(file_name).stem
+                run_num = run_num[(len(run_num) - 1)]
+                wattage_str = split_file_name[3][start_index + 1 : wattage_index + 1] + '_' + run_num
 
                 # get alpha + uncertainty
                 alpha_uncertainty = iterations[iteration_num]["CohnAlpha"]["Fit"]["alpha_uncertainty"][()]
