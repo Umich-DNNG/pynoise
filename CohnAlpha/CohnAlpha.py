@@ -82,7 +82,8 @@ class CohnAlpha:
             self.print('Using frequency minimum and maximum values instead')
             self.dwell_time = 1 / (2 * settings['CohnAlpha Settings']['Frequency Maximum'])
             self.nperseg = 1 / (self.dwell_time * settings['CohnAlpha Settings']['Frequency Minimum'])
-                
+
+            self.dwell_time = self.dwell_time * 1e9         
 
         # Annotation Parameters
         self.annotate_font_weight = settings['CohnAlpha Settings']['Annotation Font Weight']
@@ -130,6 +131,7 @@ class CohnAlpha:
     
         importResults = None
         list_data_array = self.readInInputFile(input=input_file)
+        plot_method = None
 
         if importResults is not None:
             data = importResults['data']
@@ -144,15 +146,20 @@ class CohnAlpha:
 
         else:
             count_bins = np.diff(self.meas_time_range) / self.dwell_time
-            hist, edges_output = np.histogram(a=list_data_array,
+            hist, edges_ns = np.histogram(a=list_data_array,
                                             bins=int(count_bins),
                                             range=self.meas_time_range)
-            edges_seconds = edges_output * settings['General Settings']['Output time units']
+            edges_seconds = edges_ns / 1e9
             edges_seconds = edges_seconds[:-1]
+        
+        if self.input_file_ext == '.hist':
+            plot_method = 'current_mode'
+        else:
+            plot_method = 'hist'
 
         # Plotting
         if settings['General Settings']['Show plots'] or settings['Input/Output Settings']['Save figures']:
-            self.plot_ca(x=edges_seconds,y=hist, input_file=input_file, method='hist', settings=settings)
+            self.plot_ca(x=edges_seconds,y=hist, input_file=input_file, method=plot_method, settings=settings)
 
         # Saving raw data
         if settings['Input/Output Settings']['Save outputs']:
@@ -173,7 +180,10 @@ class CohnAlpha:
         #                     num=int(count_bins))/1e9
         # self.fs = 1 / (timeline[3]-timeline[2])
         
-        self.fs = 1/self.dwell_time
+        if self.input_file_ext != '.hist':
+            self.fs = 1 / (self.dwell_time / 1e9)
+        else:
+            self.fs = 1 / self.dwell_time
 
         return edges_seconds, hist
 
@@ -215,6 +225,7 @@ class CohnAlpha:
             # initialize counts histogram list
             # generate frequency and power spectral densities
             edges_seconds, hist = self.plotCountsHistogram(input_file=input_file, settings=settings, settingsPath=settingsPath)
+            #fs_s = self.fs * 1e9
             f, Pxx = signal.welch(x=hist,
                                   fs=self.fs,
                                   nperseg=int(self.nperseg), 
@@ -295,24 +306,26 @@ class CohnAlpha:
         # Fitting distribution with expected equation
         elif importResults is None or settings['General Settings']['Show plots']:
             f, Pxx = self.welchApproxFourierTrans(settings=settings, input_file=input_file, settingsPath=settingsPath)
-            # index == numpy.ndarray
-            # index = ((f < 45) | ((f > 56) & (f < 110)) | ((f > 140) & (f < 148)) | ((f > 152) & (f < 248)) | ((f > 252) & (f < 300)))
-            index = ((f < 45) | ((f > 56) & (f < 148)) | ((f > 152) & (f < 248)) | ((f > 252) & (f < 300)))
-
-            f = f[index]
-            Pxx = Pxx[index]
-
             # Ignore start & end points that are incorrect due to welch endpoint assumptions
-            popt, pcov = curve_fit(CAFit,
+            if self.input_file_ext == '.hist':
+                index = ((f < 45) | ((f > 56) & (f < 148)) | ((f > 152) & (f < 248)) | ((f > 252) & (f < 300)))
+                f = f[index]
+                Pxx = Pxx[index]           
+                popt, pcov = curve_fit(CAFit,
                                 f[2:-1],
                                 Pxx[2:-1],
-                                # f[1:-2],
-                                # Pxx[1:-2],
-                                # p0=[Pxx[2], 25, 0.001],
                                 p0=[Pxx[2], 25, 1e-6],
-                                # bounds=(0, np.inf),
                                 maxfev=1000000)
-                                # maxfev=100000)
+
+            else:
+                popt, pcov = curve_fit(CAFit,
+                                    f[1:-2],
+                                    Pxx[1:-2],
+                                    p0=[Pxx[2], 25, 0.001],
+                                    bounds=(0, np.inf),
+                                    maxfev=100000)
+
+
             
             alpha = np.around(popt[1]*2*np.pi, decimals=2)
             uncertainty = np.around(pcov[1,1]*2*np.pi, decimals=2)
@@ -676,7 +689,8 @@ class CohnAlpha:
         
         self.print("Plotting...")
         map = {
-            'hist': ('Time(s)', 'Signal(V)'),
+            'hist': ('Time(s)', 'Counts'),
+            'current_mode': ('Time(s)', 'Signal(V)'),
             'scatter': ('Frequency(Hz)', 'Counts^2/Hz'),
             'fit': ('Frequency(Hz)', 'Counts^2/Hz')
         }
@@ -707,7 +721,7 @@ class CohnAlpha:
         ax[0].set_title(input_file)
 
         # if histogram, plot histogram values
-        if method == 'hist':
+        if method == 'hist' or method == 'current_mode':
             ax[0].scatter(x=x,
                     y=y,
                     **settings['Scatter Plot Settings'])
