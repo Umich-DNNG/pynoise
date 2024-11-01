@@ -31,7 +31,7 @@ def plotCohnAlphaHist(settings:dict = {}, settingsPath:str = './settings/default
     '''
 
     initCohnAlphaObject(settings)
-    caObj.plotCountsHistogram(settings=settings, settingsPath=settingsPath)
+    caObj.plotCountsHistogram(settings=settings, input_file=settings['Input/Output Settings']['Input file/folder'], settingsPath=settingsPath)
     return True
 
 
@@ -48,11 +48,11 @@ def applyWelchApprox(settings:dict = {}, settingsPath:str = './settings/default.
     '''
     
     initCohnAlphaObject(settings)
-    caObj.welchApproxFourierTrans(settings=settings, settingsPath=settingsPath)
+    caObj.welchApproxFourierTrans(settings=settings, input_file=settings['Input/Output Settings']['Input file/folder'], settingsPath=settingsPath)
     return True
 
 
-def fitCohnAlpha(settings:dict = {}, settingsPath:str = './settings/default.json', showSubPlots:bool = False):
+def fitAPSD(settings:dict = {}, settingsPath:str = './settings/default.json'):
     
     '''
     Fits a Power Spectral Density Curve onto a 
@@ -65,5 +65,22 @@ def fitCohnAlpha(settings:dict = {}, settingsPath:str = './settings/default.json
     '''
     
     initCohnAlphaObject(settings)
-    caObj.fitCohnAlpha(settings=settings, settingsPath=settingsPath, showSubPlots=showSubPlots)
+    caObj.conductAPSD(settings=settings, input_file=settings['Input/Output Settings']['Input file/folder'], settingsPath=settingsPath)
+    return True
+
+
+def fitCPSD(settings:dict = {}, settingsPath:str = './settings/default.json'):
+    
+    '''
+    Fits a Power Spectral Density Curve onto a 
+    Transformed graph is saved into the Analyzer class
+    
+    Will run entire method if required information is missing
+    
+    Inputs:
+    - settings: the current user's runtime settings
+    '''
+    
+    initCohnAlphaObject(settings)
+    caObj.conductCPSD(settings=settings, input_list=settings['Input/Output Settings']['Input file/folder'], settingsPath=settingsPath)
     return True

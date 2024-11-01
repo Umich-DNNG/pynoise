@@ -3,9 +3,8 @@ import numpy as np                     # For processing data
 import matplotlib.pyplot as pyplot     # For plotting data summaries
 from scipy.optimize import curve_fit   # For fitting the curve
 from scipy import signal               # For welch (fourier transform)
-import os                              # For saving figures
 import hdf5
-from pathlib import Path
+from pathlib import Path               # For path manipulation (replaces os)
 
 
 # ------------ Power Spectral Density Fitting Function ----------------------------------------------
@@ -41,14 +40,50 @@ class CohnAlpha:
 
         # Required Parameters
         # Load the values from the specified file into an NP array.
-        self.list_data_array = np.loadtxt(settings['Input/Output Settings']['Input file/folder'], usecols=0, dtype=float)
-        self.meas_time_range = settings['CohnAlpha Settings']['Meas time range']
-    
+        input_list = settings['Input/Output Settings']['Input file/folder']
+        if isinstance(input_list, list):
+            if len(input_list) > 2:
+                print('ERROR: the suite can only read in 1 or 2 files. Please ensure there are at most 2 files in input file/folder')
+                exit(1)
+            if len(input_list) > 1 and Path(input_list[0]).suffix != Path(input_list[1]).suffix:
+                print('ERROR: different file formats provided. Please check input file/folder and ensure they are the same file format')
+                exit(1)
+            for item in input_list:
+                self.input_file_ext = Path(item).suffix
+        
+        else:
+            self.input_file_ext = Path(input_list).suffix
+
+        self.meas_time_range = np.array(settings['CohnAlpha Settings']['Meas time range'])
+
         # set measure time range to default value if incorrect input
         if self.meas_time_range == [] or self.meas_time_range is None:
             self.print("Unable to determine Measure Time Range from settings")
             self.print("Setting Measure Time Range to default values of [1.5e11, 1.0e12] in ns")
-            self.meas_time_range = [1.5e11, 1.0e12]
+            self.meas_time_range = np.array([1.5e11, 1.0e12])
+
+        # TODO: Changing time units not working as expected, need to work on more
+        # normalize measure time range to be in output time units
+        # time_factor = settings['General Settings']['Input time units'] / settings['General Settings']['Output time units']
+        # self.meas_time_range *= time_factor
+
+
+        # calculate and normalize dwell time; change from Hz --> seconds --> output time units
+        # if not provided in setting, use except block to set values
+        try:
+            self.dwell_time = settings['CohnAlpha Settings']['Dwell Time']
+            self.nperseg = settings['CohnAlpha Settings']['nperseg']
+        except KeyError:
+            self.dwell_time = None
+            self.nperseg = None
+
+        if self.dwell_time is None or self.nperseg is None:
+            self.print('Dwell Time and nperseg value not provided')
+            self.print('Using frequency minimum and maximum values instead')
+            self.dwell_time = 1 / (2 * settings['CohnAlpha Settings']['Frequency Maximum'])
+            self.nperseg = 1 / (self.dwell_time * settings['CohnAlpha Settings']['Frequency Minimum'])
+
+            self.dwell_time = self.dwell_time * 1e9         
 
         # Annotation Parameters
         self.annotate_font_weight = settings['CohnAlpha Settings']['Annotation Font Weight']
@@ -56,10 +91,19 @@ class CohnAlpha:
         self.annotate_background_color = settings['CohnAlpha Settings']['Annotation Background Color']
         self.annotate_font_size = settings['CohnAlpha Settings']['Font Size']
 
-        self.print("Finished reading input file/folder data")
+
+    
+    def readInInputFile(self, input):
+
+        if self.input_file_ext == '.hist':
+            list_data_array = np.loadtxt(input, delimiter=',',skiprows=5)
+        else:
+            list_data_array = np.loadtxt(input, usecols=0, dtype=float)
+
+        return list_data_array
 
 
-    def plotCountsHistogram(self, settings: dict = {}, settingsPath:str = './settings/default.json'):
+    def plotCountsHistogram(self, input_file:str = None, settings: dict = {}, settingsPath:str = './settings/default.json'):
 
         '''
         Creating Counts Histogram from data
@@ -69,47 +113,57 @@ class CohnAlpha:
         Inputs:
             - self: all the private variables in PowerSpectralDensity() object
             - settings: the current user runtime settings
-            - showSubPlots: if higher-order function (e.g. fitCohnAlpha) would like to display plots
-                Mainly done for quicker debugging
 
         Output:
             - count_times_hist: the histogram saved in array format
         '''
 
-        # calculate dwell time; change from Hz --> seconds --> nanoseconds
+        # new count_bins value: 4250000
+        # dwell_time value: 0.002
         # Making count of bins over time histogram
-        dwell_time = 1 / (2 * settings['CohnAlpha Settings']['Frequency Maximum'])
-        dwell_time_ns = dwell_time * 1e9
-        
-        count_bins = np.diff(self.meas_time_range) / dwell_time_ns        
 
         # import data
         # generate corresponding histogram if importing fails
-        # file == processing_data.h5, path == CohnAlpha/Histogram
         importResults = hdf5.readHDF5Data(path=['CohnAlpha', 'Histogram'],
                                           settings=settings,
                                           settingsName=settingsPath,
                                           fileName='processing_data')
+    
+        importResults = None
+        list_data_array = self.readInInputFile(input=input_file)
+        plot_method = None
+
         if importResults is not None:
-            # 2d numpy array slicing: The matrix[1, :] slice selects all elements in the second row, showing how to slice rows.
             data = importResults['data']
-            edges_seconds = data[:, 0]
-            counts_time_hist = data[:, 1]
-            
+            edges_seconds, hist = data[:,0], data[:,1]
+
+        elif self.input_file_ext == '.hist':
+            # normalize list_data_array to be in output time units
+            # time_factor = settings['General Settings']['Input time units'] / settings['General Settings']['Output time units']
+            self.print('Current Mode data provided, using dwell time from input file')
+            edges_seconds, hist = list_data_array[:,0], list_data_array[:,1]
+            self.dwell_time = edges_seconds[1] - edges_seconds[0]
+
         else:
-            counts_time_hist, edges_ns = np.histogram(a=self.list_data_array,
-                                                    bins=int(count_bins),
-                                                    range=self.meas_time_range)
+            count_bins = np.diff(self.meas_time_range) / self.dwell_time
+            hist, edges_ns = np.histogram(a=list_data_array,
+                                            bins=int(count_bins),
+                                            range=self.meas_time_range)
             edges_seconds = edges_ns / 1e9
             edges_seconds = edges_seconds[:-1]
+        
+        if self.input_file_ext == '.hist':
+            plot_method = 'current_mode'
+        else:
+            plot_method = 'hist'
 
         # Plotting
-        if settings['General Settings']['Show plots']:
-            self.plot_ca(x=edges_seconds,y=counts_time_hist, method='hist', settings=settings)
+        if settings['General Settings']['Show plots'] or settings['Input/Output Settings']['Save figures']:
+            self.plot_ca(x=edges_seconds,y=hist, input_file=input_file, method=plot_method, settings=settings)
 
         # Saving raw data
         if settings['Input/Output Settings']['Save outputs']:
-            data = np.array([edges_seconds, counts_time_hist]).T
+            data = np.array([edges_seconds, hist]).T
             hdf5.writeHDF5Data(npArrays=[data],
                                keys=['data'],
                                path=['CohnAlpha', 'Histogram'],
@@ -117,16 +171,23 @@ class CohnAlpha:
                                settingsName=settingsPath,
                                fileName='processing_data')
 
+        # TODO: I dont't understand what is going on
+        # TODO: time units not correct, just use 1/self.dwell_time for now
         # Creating evenly spaced start and stop endpoint for plotting
         # Calculating power spectral density distribution from counts over time hist (Get frequency of counts samples)
-        timeline = np.linspace(start=self.meas_time_range[0], 
-                            stop=self.meas_time_range[1],
-                            num=int(count_bins))/1e9
-        self.fs = 1 / (timeline[3]-timeline[2])
+        # timeline = np.linspace(start=self.meas_time_range[0], 
+        #                     stop=self.meas_time_range[1],
+        #                     num=int(count_bins))/1e9
+        # self.fs = 1 / (timeline[3]-timeline[2])
+        
+        if self.input_file_ext != '.hist':
+            self.fs = 1 / (self.dwell_time / 1e9)
+        else:
+            self.fs = 1 / self.dwell_time
 
-        return edges_seconds, counts_time_hist
+        return edges_seconds, hist
 
-    def welchApproxFourierTrans(self, settings: dict = {}, settingsPath:str = './settings/default.json', showSubPlots:bool=True):
+    def welchApproxFourierTrans(self, input_file:str = None, settings: dict = {}, settingsPath:str = './settings/default.json',):
 
         '''
         Creating Cohn Alpha Scatterplot from data
@@ -136,8 +197,6 @@ class CohnAlpha:
         Inputs:
             - self: all the private variables in PowerSpectralDensity() object
             - settings: the current user runtime settings
-            - showSubPlots: if higher-order function (e.g. fitCohnAlpha) would like to display plots
-                Mainly done for quicker debugging
 
         Output:
             - welchResultDict: a dict, contains the frequency and the power spectral density
@@ -145,13 +204,12 @@ class CohnAlpha:
 
         # Read in existing data if exists
         # file == pynoise.h5, path = CohnAlpha/Scatter
-        importResults = hdf5.readHDF5Data(path=['CohnAlpha', 'Scatter'],
+        importResults = hdf5.readHDF5Data(path=['CohnAlpha', 'Fit'],
                                           settings=settings,
                                           settingsName=settingsPath,
                                           fileName='pynoise')
         
-        
-        # If existing data does not exist and showSubPlots is false
+        # If existing data does not exist
         # import data from disk
         if importResults is not None:
             data = importResults['graphData']
@@ -159,31 +217,24 @@ class CohnAlpha:
             Pxx = data[:, 1]
 
         # otherwise re-calculate data and re-plot histogram
-        else:
-            showSubPlots = False
-            dwell_time = 1 / (2 * settings['CohnAlpha Settings']['Frequency Maximum'])
-            nperseg = 1 / (dwell_time * settings['CohnAlpha Settings']['Frequency Minimum'])
-
+        elif importResults is None or settings['General Settings']['Show plots']:
             # check to see if nperseg is a power of 2
-            if not helper.checkPowerOfTwo(value=int(nperseg)):
-                self.print('WARNING: calculated nperseg is not a power of 2')
+            if not helper.checkPowerOfTwo(value=int(self.nperseg)):
+                self.print('WARNING: calculated nperseg: ' + str(int(self.nperseg)) + ' is not a power of 2')
             
             # initialize counts histogram list
             # generate frequency and power spectral densities
-            edges_seconds, counts_time_hist = self.plotCountsHistogram(settings=settings, settingsPath=settingsPath)
-            f, Pxx = signal.welch(x=counts_time_hist,
+            edges_seconds, hist = self.plotCountsHistogram(input_file=input_file, settings=settings, settingsPath=settingsPath)
+            #fs_s = self.fs * 1e9
+            f, Pxx = signal.welch(x=hist,
                                   fs=self.fs,
-                                  nperseg=int(nperseg), 
+                                  nperseg=int(self.nperseg), 
                                   window='boxcar')
-            
-        # Separate if block to prevent creating histogram twice
-        if showSubPlots:
-            self.plotCountsHistogram(settings=settings, settingsPath=settingsPath)
 
 
         # Plotting
-        if settings['General Settings']['Show plots']:
-            self.plot_ca(x=f, y=Pxx, method='scatter', settings=settings)
+        if settings['General Settings']['Show plots'] or settings['Input/Output Settings']['Save figures']:
+            self.plot_ca(x=f, y=Pxx, input_file=input_file, method='scatter', settings=settings)
 
         # Saving raw data
         if settings['Input/Output Settings']['Save outputs']:
@@ -198,7 +249,7 @@ class CohnAlpha:
         return (f, Pxx)
         
 
-    def fitCohnAlpha(self, settings: dict = {}, settingsPath:str = './settings/default.json', showSubPlots:bool = False):
+    def conductAPSD(self, input_file:str = None, settings: dict = {}, settingsPath:str = './settings/default.json'):
 
         '''
         Fits Power Spectral Density onto provided scatterplot
@@ -208,8 +259,6 @@ class CohnAlpha:
         Inputs:
             - self: all the private variables in PowerSpectralDensity() object
             - settings: the current user runtime settings
-            - showSubPlots: if higher-order function (e.g. fitCohnAlpha) would like to display plots
-                Mainly done for quicker debugging
 
             
         Output:
@@ -235,14 +284,14 @@ class CohnAlpha:
             - pcov (DESCRIPTION NEEDED)
     
         '''
-        
+
         # read in files
         importResults = hdf5.readHDF5Data(path=['CohnAlpha', 'Fit'],
                                         settings=settings,
                                         settingsName=settingsPath,
                                         fileName='pynoise')
         
-        # If existing data does not exist and showSubPlots is false
+        # If existing data does not exist
         # import data from disk
         if importResults is not None:
             data = importResults['graphData']
@@ -255,33 +304,41 @@ class CohnAlpha:
 
         # otherwise re-calculate data and re-plot histogram + scatterplot
         # Fitting distribution with expected equation
-        else:
-            showSubPlots = False
-            f, Pxx = self.welchApproxFourierTrans(settings=settings, settingsPath=settingsPath, showSubPlots=True)
+        elif importResults is None or settings['General Settings']['Show plots']:
+            f, Pxx = self.welchApproxFourierTrans(settings=settings, input_file=input_file, settingsPath=settingsPath)
             # Ignore start & end points that are incorrect due to welch endpoint assumptions
-            popt, pcov = curve_fit(CAFit,
-                                f[1:-2],
-                                Pxx[1:-2],
-                                p0=[Pxx[2], 25, 0.001],
-                                bounds=(0, np.inf),
-                                maxfev=100000)
+            if self.input_file_ext == '.hist':
+                index = ((f < 45) | ((f > 56) & (f < 148)) | ((f > 152) & (f < 248)) | ((f > 252) & (f < 300)))
+                f = f[index]
+                Pxx = Pxx[index]           
+                popt, pcov = curve_fit(CAFit,
+                                f[2:-1],
+                                Pxx[2:-1],
+                                p0=[Pxx[2], 25, 1e-6],
+                                maxfev=1000000)
+
+            else:
+                popt, pcov = curve_fit(CAFit,
+                                    f[1:-2],
+                                    Pxx[1:-2],
+                                    p0=[Pxx[2], 25, 0.001],
+                                    bounds=(0, np.inf),
+                                    maxfev=100000)
+
+
             
             alpha = np.around(popt[1]*2*np.pi, decimals=2)
             uncertainty = np.around(pcov[1,1]*2*np.pi, decimals=2)
             residuals = ((CAFit(f[1:-2], *popt) - Pxx[1:-2]) / Pxx[1:-2]) * 100
-        
-        # separate if block to prevent plotting scatter plot twice
-        if showSubPlots:
-            self.welchApproxFourierTrans(settings=settings, settingsPath=settingsPath, showSubPlots=True)
 
         # plots the graph
         # will call fit() as well to fit the curve
         # plot() will return the dict containing popt, alpha, uncertainty
-        if settings['General Settings']['Show plots']:
+        if settings['General Settings']['Show plots'] or settings['Input/Output Settings']['Save figures']:
             kwDict = {'popt': popt,
                       'alpha': alpha,
                       'uncertainty': uncertainty}
-            self.plot_ca(x=f, y=Pxx, residuals=residuals, method='fit', settings=settings, **kwDict)
+            self.plot_ca(x=f, y=Pxx, residuals=residuals, input_file=input_file, method='fit', settings=settings, **kwDict)
 
         # Saving raw data
         if settings['Input/Output Settings']['Save outputs']:
@@ -293,199 +350,65 @@ class CohnAlpha:
                                settings=settings,
                                settingsName=settingsPath,
                                fileName='pynoise')
+            hdf5.exportFissionChamberData(settings=settings)
 
         return popt, alpha, uncertainty
 
-
-    def print(self, message):
-
-        '''
-        Self-defined print function
-        Will print if quiet mode is set to false, otherwise prints nothing
-        '''
-
-        if self.quiet:
-            return
-        print(message)
-
-
-    def plot_ca(self, x, y, residuals = None, method:str = '', settings:dict = {}, **kwargs):
-
-        '''
-        Cohn Alpha Plotting Function
-        x, y should both be numpy arrays to plot the x,y values
-        method should have 3 possible values, either: 'hist', 'scatter', or 'fit'
-        settings are user's current runtime settings
-
-        '''
-
-        # grab axis titles and graph name from map
-        # return tuple order: x-axis label, y-axis label, graph title
-        map = {
-            'hist': ('Time(s)', 'Counts', 'Cohn-Alpha Counts Histogram'),
-            'scatter': ('Frequency(Hz)', 'Counts^2/Hz', 'Cohn-Alpha Scatter Plot'),
-            'fit': ('Frequency(Hz)', 'Counts^2/Hz', 'Cohn-Alpha Graph')
-        }
-        
-        xLabel, yLabel, graphTitle = map[method]
-
-        # initialize variables for hist and scatterplot settings
-        nRows = 1
-        shareX = False
-        gridSpecDict = {}
-
-        # update variables for fitting if fitting is chosen
-        if method == 'fit':
-            nRows = 2
-            shareX = True
-            gridSpecDict['height_ratios']= [2, 1]
-
-        # initialize plot
-        fig, ax = pyplot.subplots(nrows=nRows,sharex=shareX, gridspec_kw=gridSpecDict)
-
-        # small data manipulation, makes code cleaner
-        if method != 'fit':
-            ax = np.array([ax, ax])
-
-        # set axis labels
-        ax[0].set_xlabel(xLabel)
-        ax[0].set_ylabel(yLabel)
-        ax[0].set_title(graphTitle)
-
-        # if histogram, plot histogram values
-        if method == 'hist':
-            ax[0].scatter(x=x,
-                    y=y,
-                    **settings['Scatter Plot Settings'])
-
-        # if scatterplot or fitting, then:
-        # change scaling of x-axis to log scaling + plot points
-        # update limit of x-axis
-        else:
-            ax[0].semilogx(x[1:-2], y[1:-2], '.', **settings['Semilog Plot Settings'])
-            ax[0].set_xlim([1, 200])
-
-
-            # if fitting, then call fit() and fit curve
-            # use kwargs to pass popt, alpha, uncertainty
-            if method == 'fit':
-                self.fit_ca(x=x,
-                            y=y,
-                            residuals=residuals,
-                            ax=ax,
-                            popt=kwargs['popt'],
-                            alpha=kwargs['alpha'],
-                            uncertainty=kwargs['uncertainty'],
-                            settings=settings)
-
-
-        # Saving figure
-        # file name: CA_[method]_[freq min]_[freq_max]_[time units].png
-        # TODO: start to use settings and time units setting, currently hard coding in seconds
-        # NOTE: if saving figure and showing plot: must first save plot, otherwise matplotlib saves a blank plot
-        if settings['Input/Output Settings']['Save figures']:
-            # reduce padding in the figure
-            fig.tight_layout()
-            absPath = os.path.abspath(settings['Input/Output Settings']['Save directory'])
-            inputFileName = Path(settings['Input/Output Settings']['Input file/folder']).stem
-            save_img_filename = os.path.join(absPath, 'CA_' + method + '_' + inputFileName + '.png')
-            pyplot.savefig(save_img_filename, dpi=300, bbox_inches='tight')
-            self.print('Image saved at ' + save_img_filename)
-
-        # plot and show graph
-        # close graph after showing graph
-        self.print("Plotting...")
-        pyplot.show()
-        pyplot.close()
-
-
-
-    def fit_ca(self, x, y, residuals, ax, popt = None, alpha = None, uncertainty = None, settings:dict = {}):
-
-        '''
-        Fitting Function, plots fitted curve
-        assumes plot() has been called with method='fit' 
-        Fits scatterplot with Power Spectral Density Curve
-
-        Inputs:
-            self: (TODO: ADD DESCRIPTION)
-            fig: the figure returned by pyplot.subplots()
-            ax: the axes returned by pyplot.subplots()
-            fitEquation: the equation that will be used by curve_fit() to fit the graph
-            kwargs: (TODO: ADD DESCRIPTION)
-        '''
-
-        # Display Alpha and Uncertainty values, store within Welch Approx
-        self.print('alpha = ' + str(alpha) + ', uncertainty = '+ 
-                    str(uncertainty))
-        
-        
-        ax[0].semilogx(x[1:-2], CAFit(x[1:-2], *popt), **settings['Line Fitting Settings'])                
-        ax[0].legend(loc='upper right')
-        
-        ymin, ymax = ax[0].get_ylim()
-        dy = ymax - ymin
-        alph_str = (r'$\alpha$ = (' +
-                    '{:.2e}'.format(alpha) + '$\pm$ ' +
-                    '{:.2e}'.format(uncertainty) + ') 1/s')
-        
-        ax[0].annotate(alph_str,
-                        xy=(1.5, ymin+0.1*dy),
-                        xytext=(1.5, ymin+0.1*dy),
-                        fontsize=self.annotate_font_size,
-                        fontweight=self.annotate_font_weight,
-                        color=self.annotate_color,
-                        backgroundcolor=self.annotate_background_color)
-
-        # plot residuals
-        # label axis
-        ax[1].scatter(x[1:-2], residuals, **settings['Scatter Plot Settings'])
-        ax[1].axhline(y=0, color='#162F65', linestyle='--')
-        ax[1].set_xlabel('Frequency(Hz)')
-        ax[1].set_ylabel('Percent difference (%)')
-
-
-
+    
     # TODO: a different method of Cohn-Alpha
     # Need to use sub-functions to also work with this alternate method
-    def conduct_CPSD(self,
+    def conductCPSD(self,
+                     input_list:list = [],
+                     settings:dict = {},
                      show_plot: bool = True,
                      save_fig: bool = True,
                      save_dir: str = './',
                      caSet: dict = {},
                      sps: dict = {},
-                    lfs: dict = {},
-                    scatter_opt: dict = {}):
+                     lfs: dict = {},
+                     scatter_opt: dict = {},
+                     settingsPath:str = './settings/default.json'):
+        
         
         # Annotation Parameters
-        self.annotate_font_weight = caSet['Annotation Font Weight']
-        self.annotate_color = caSet['Annotation Color']
-        self.annotate_background_color = caSet['Annotation Background Color']
+        self.annotate_font_weight = settings['CohnAlpha Settings']['Annotation Font Weight']
+        self.annotate_color = settings['CohnAlpha Settings']['Annotation Color']
+        self.annotate_background_color = settings['CohnAlpha Settings']['Annotation Background Color']
+
+
+        edges_seconds, hist1 = self.plotCountsHistogram(settings=settings, input_file=input_list[0])
+        edges_seconds, hist2 = self.plotCountsHistogram(settings=settings, input_file=input_list[1])
+
+
+        self.dwell_time = edges_seconds[1] - edges_seconds[0]
+
+        counts_time_hist = np.array([hist1, hist2]).T
+
 
         # Making count of bins over time histogram
-        count_bins = np.diff(self.meas_time_range) / self.dwell_time
+        # count_bins = np.diff(self.meas_time_range) / self.dwell_time
 
-        counts_time_hist = np.zeros([2,int(count_bins)])
+        # counts_time_hist = np.zeros([2,int(count_bins)])
 
-        index = self.list_data_array[:,0]!=0
+        # index = self.list_data_array[:,0]!=0
 
-        times = self.list_data_array[index, 0]
+        # times = self.list_data_array[index, 0]
 
-        N, _ = np.histogram(
-                    times,
-                    bins=int(count_bins),
-                    range=self.meas_time_range
-                    )
-        counts_time_hist[0,:] = N
+        # N, _ = np.histogram(
+        #             times,
+        #             bins=int(count_bins),
+        #             range=self.meas_time_range
+        #             )
+        # counts_time_hist[0,:] = N
 
-        list_data_array = np.loadtxt(caSet['Second Input file'])
-        index = list_data_array[:,0]!=0
+        # list_data_array = np.loadtxt(caSet['Second Input file'])
+        # index = list_data_array[:,0]!=0
 
-        N, _ = np.histogram(list_data_array,
-                            bins=int(count_bins),
-                            range=self.meas_time_range)
+        # N, _ = np.histogram(list_data_array,
+        #                     bins=int(count_bins),
+        #                     range=self.meas_time_range)
         
-        counts_time_hist[1,:] = N
+        # counts_time_hist[1,:] = N
         
         # counts_time_hist = np.zeros([2,int(count_bins)])
         ''' if np.size(channels) == 2:
@@ -508,9 +431,9 @@ class CohnAlpha:
             print("Must specify two and only two channels to cross-correlate.")
         '''
 
-        timeline = np.linspace(start=self.meas_time_range[0], 
-                            stop=self.meas_time_range[1],
-                            num=int(count_bins))/1e9
+        # timeline = np.linspace(start=self.meas_time_range[0], 
+        #                     stop=self.meas_time_range[1],
+        #                     num=int(count_bins))/1e9
 
         '''fig1, ax1 = pyplot.subplots()
         ax1.plot(timeline, counts_time_hist, '.', label="TBD")
@@ -524,22 +447,40 @@ class CohnAlpha:
         i=0
         for ch in [0,1]:
             fig1, ax1 = pyplot.subplots()
-            ax1.plot(timeline, counts_time_hist[i,:], '.', label="TBD")
+            # ax1.plot(timeline, counts_time_hist[i,:], '.', label="TBD")
+            ax1.plot(edges_seconds, counts_time_hist[:, i], '.', label="TBD")
 
             ax1.set_ylabel('Counts')
             ax1.set_xlabel('Time(s)')
             ax1.legend()
             i+=1
 
-        fs = 1/(timeline[3]-timeline[2]) # Get frequency of counts samples
+        # fs = 1/(timeline[3]-timeline[2]) # Get frequency of counts samples
+        fs = 1/self.dwell_time
 
+        # f, Pxy = signal.csd(
+        #     counts_time_hist[0,:], 
+        #     counts_time_hist[1,:], 
+        #     fs, 
+        #     nperseg=settings['CohnAlpha Settings']['nperseg'], 
+        #     window='boxcar')
+        
         f, Pxy = signal.csd(
-            counts_time_hist[0,:], 
-            counts_time_hist[1,:], 
-            fs, 
-            nperseg=2**10, 
+            counts_time_hist[:, 0], 
+            counts_time_hist[:, 1], 
+            fs,
+            nperseg=settings['CohnAlpha Settings']['nperseg'], 
             window='boxcar')
+        
+        
+        
+        
         Pxy = np.abs(Pxy)
+
+        index = ((f < 45) | ((f > 56) & (f < 148)) | ((f > 152) & (f < 248)) | ((f > 252) & (f < 300)))
+
+        f = f[index]
+        Pxy = Pxy[index]
 
         '''f1, Pxx1 = signal.welch(x=counts_time_hist[0,:], 
                             fs=fs, 
@@ -595,10 +536,15 @@ class CohnAlpha:
                     color='black', backgroundcolor='white')
         # ax2.text(1.5, ymin+0.1*dy, alph_str)
 
-        # ax2.set_title(pyplot_title)
+        graph_title = input('insert graph title: ')
+        ax2.set_title(graph_title)
         ax2.legend(loc='upper right')
 
         ax2.grid()
+
+
+
+        fig2.tight_layout()
 
         '''
         # Plotting the auto-power-spectral-density distribution and fit
@@ -693,7 +639,178 @@ class CohnAlpha:
         if show_plot:
             pyplot.show()
         '''
-        pyplot.show()
+        # pyplot.show()
+
+        # Saving raw data
+        if settings['Input/Output Settings']['Save outputs']:
+            alpha = np.around(popt[1]*2*np.pi, decimals=2)
+            uncertainty = np.around(pcov[1,1]*2*np.pi, decimals=2)
+            data = np.array([f, Pxy]).T
+            alpha_uncertainty = np.array([alpha, uncertainty])
+            # hdf5.writeHDF5Data(npArrays=[data, popt, alpha_uncertainty],
+            #                    keys=['graphData', 'popt', 'alpha_uncertainty'],
+            #                    path=['CohnAlpha', 'Fit'],
+            #                    settings=settings,
+            #                    settingsName=settingsPath,
+            #                    fileName='pynoise')
+            hdf5.exportFissionChamberData(settings=settings)
 
         return f, Pxy, popt, pcov
 # ---------------------------------------------------------------------------------------------------
+
+    def print(self, message):
+
+        '''
+        Self-defined print function
+        Will print if quiet mode is set to false, otherwise prints nothing
+        '''
+        if self.quiet:
+            return
+        print(message)
+
+
+    def plot_ca(self, x, y, residuals = None, input_file:str = "", method:str = '', settings:dict = {}, **kwargs):
+
+        '''
+        Cohn Alpha Plotting Function
+        x, y should both be numpy arrays to plot the x,y values
+        method should have 3 possible values, either: 'hist', 'scatter', or 'fit'
+        settings are user's current runtime settings
+
+        '''
+
+        # grab axis titles and graph name from map
+        # return tuple order: x-axis label, y-axis label, graph title
+        # map = {
+        #     'hist': ('Time(s)', 'Signal(V)', 'Cohn-Alpha Counts Histogram'),
+        #     'scatter': ('Frequency(Hz)', 'Counts^2/Hz', 'Cohn-Alpha Scatter Plot'),
+        #     'fit': ('Frequency(Hz)', 'Counts^2/Hz', 'Cohn-Alpha Graph')
+        # }
+        
+        self.print("Plotting...")
+        map = {
+            'hist': ('Time(s)', 'Counts'),
+            'current_mode': ('Time(s)', 'Signal(V)'),
+            'scatter': ('Frequency(Hz)', 'Counts^2/Hz'),
+            'fit': ('Frequency(Hz)', 'Counts^2/Hz')
+        }
+
+        xLabel, yLabel = map[method]
+
+        # initialize variables for hist and scatterplot settings
+        nRows = 1
+        shareX = False
+        gridSpecDict = {}
+
+        # update variables for fitting if fitting is chosen
+        if method == 'fit':
+            nRows = 2
+            shareX = True
+            gridSpecDict['height_ratios']= [2, 1]
+
+        # initialize plot
+        fig, ax = pyplot.subplots(nrows=nRows,sharex=shareX, gridspec_kw=gridSpecDict)
+
+        # small data manipulation, makes code cleaner
+        if method != 'fit':
+            ax = np.array([ax, ax])
+
+        # set axis labels
+        ax[0].set_xlabel(xLabel)
+        ax[0].set_ylabel(yLabel)
+        ax[0].set_title(input_file)
+
+        # if histogram, plot histogram values
+        if method == 'hist' or method == 'current_mode':
+            ax[0].scatter(x=x,
+                    y=y,
+                    **settings['Scatter Plot Settings'])
+
+        # if scatterplot or fitting, then:
+        # change scaling of x-axis to log scaling + plot points
+        # update limit of x-axis
+        else:
+            ax[0].semilogx(x[1:-2], y[1:-2], '.', **settings['Semilog Plot Settings'])
+            # ax[0].set_xlim([1, 300])
+
+
+            # if fitting, then call fit() and fit curve
+            # use kwargs to pass popt, alpha, uncertainty
+            if method == 'fit':
+                self.fit_ca(x=x,
+                            y=y,
+                            residuals=residuals,
+                            ax=ax,
+                            popt=kwargs['popt'],
+                            alpha=kwargs['alpha'],
+                            uncertainty=kwargs['uncertainty'],
+                            settings=settings)
+
+
+        # Saving figure
+        # file name: CA_[method]_[freq min]_[freq_max]_[time units].png
+        # TODO: start to use settings and time units setting, currently hard coding in seconds
+        # NOTE: if saving figure and showing plot: must first save plot, otherwise matplotlib saves a blank plot
+        if settings['Input/Output Settings']['Save figures']:
+            # reduce padding in the figure
+            fig.tight_layout()
+            absPath = Path(settings['Input/Output Settings']['Save directory']).resolve()
+            save_img_filename = absPath / ('CA_' + method + '_' + Path(input_file).stem + '.png')
+            pyplot.savefig(save_img_filename, dpi=300, bbox_inches='tight')
+            self.print('Image saved at ' + str(save_img_filename))
+
+
+        # plot and show graph
+        # close graph after showing graph
+        if settings['General Settings']['Show plots']:
+            pyplot.show()
+        
+        pyplot.close()
+
+
+
+    def fit_ca(self, x, y, residuals, ax, popt = None, alpha = None, uncertainty = None, settings:dict = {}):
+
+        '''
+        Fitting Function, plots fitted curve
+        assumes plot() has been called with method='fit' 
+        Fits scatterplot with Power Spectral Density Curve
+
+        Inputs:
+            self: (TODO: ADD DESCRIPTION)
+            fig: the figure returned by pyplot.subplots()
+            ax: the axes returned by pyplot.subplots()
+            fitEquation: the equation that will be used by curve_fit() to fit the graph
+            kwargs: (TODO: ADD DESCRIPTION)
+        '''
+
+        # Display Alpha and Uncertainty values, store within Welch Approx
+        self.print('alpha = ' + str(alpha) + ', uncertainty = '+ 
+                    str(uncertainty))
+        
+        
+        ax[0].semilogx(x[1:-2], CAFit(x[1:-2], *popt), **settings['Line Fitting Settings'])                
+        ax[0].legend(loc='upper right')
+        
+        ymin, ymax = ax[0].get_ylim()
+        dy = ymax - ymin
+        alph_str = (r'$\alpha$ = (' +
+                    '{:.2e}'.format(alpha) + '$\pm$ ' +
+                    '{:.2e}'.format(uncertainty) + ') 1/s')
+        
+        ax[0].annotate(alph_str,
+                        xy=(1.5, ymin+0.1*dy),
+                        xytext=(1.5, ymin+0.1*dy),
+                        fontsize=self.annotate_font_size,
+                        fontweight=self.annotate_font_weight,
+                        color=self.annotate_color,
+                        backgroundcolor=self.annotate_background_color)
+
+        # plot residuals
+        # label axis
+        ax[1].scatter(x[1:-2], residuals, **settings['Scatter Plot Settings'])
+        ax[1].axhline(y=0, color='#162F65', linestyle='--')
+        ax[1].set_xlabel('Frequency(Hz)')
+        ax[1].set_ylabel('Percent difference (%)')
+
+

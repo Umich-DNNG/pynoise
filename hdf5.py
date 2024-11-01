@@ -1,7 +1,9 @@
 import os
 import h5py # 3.11.0
 import numpy as np
-
+from itertools import zip_longest
+from collections import defaultdict
+from pathlib import Path
 
 def writeHDF5Data(npArrays, keys, path: list, settings: dict, fileName:str = "pynoise", settingsName: str = './settings/default.json'):
     '''
@@ -242,3 +244,233 @@ def compareSettings(settings, group):
                     return False
     return True
 
+
+
+
+def exportFissionChamberData(settings: dict = {}):
+
+    # remove duplicate iterations (e.g. same input file/nperseg/dwell time, but a true/false setting was changed creating a new iteration)
+    removeDuplicates(settings=settings)
+    filePath = os.path.join(settings['Input/Output Settings']['Save directory'], 'pynoise.h5')
+    apsd_keys = []
+    cpsd_keys = []
+
+    # collect APSD output
+    with h5py.File(filePath, 'r') as file:
+        for key in file.keys():
+            if 'fission_chamber_setting' in key:
+                apsd_keys.append(key)
+    
+    apsd_output = extractAPSD(settings=settings, apsd_keys=apsd_keys)
+
+    
+    # collect CPSD output
+    with h5py.File(filePath, 'r') as file:
+        for key in file.keys():
+            if 'cpsd_' in key:
+                cpsd_keys.append(key)
+    
+    cpsd_output = extractCPSD(settings=settings, cpsd_keys=cpsd_keys)
+
+
+    # write output to file
+    with open('fission_chamber_tabular.csv', 'w+') as file:
+        # write headers
+        file.write('APSD,,,,,,,,,,,,, CPSD\n')
+        file.write('Wattage,C1,, C2,, C3,, C4,, , , , , Wattage, C1/C2,, C1/C3,, C1/C4,, C2/C3,, C2/C4,, C3/C4\n')
+        
+        # parse output
+        # take alpha + uncertainty value from output tuple, connect to wattage
+        # use 2d list since multiple runs per wattage is possible
+        for (apsd_wattage, apsd_vals), (cpsd_wattage, cpsd_vals) in zip(apsd_output.items(), cpsd_output.items()):
+            apsd_output_list = []
+            apsd_write_list = []
+            for i in range(4):
+                apsd_output_list.append([])
+            for val in apsd_vals:
+                # val == ('C#', ',', 'alpha_val', ',', 'uncertainty_val')
+                indice, filler, alpha, filler, uncertainty = val
+                indice = int(val[0][-1:]) - 1     
+                apsd_output_list[indice].append(alpha + ',' + uncertainty + ',')
+            
+            # while data still in apsd_output_list
+            while not apsd_output_list.count([]) == len(apsd_output_list):
+                apsd_file_write_string = ""
+                for chamber in apsd_output_list:
+                    apsd_file_write_string += chamber[0]
+                    chamber.pop(0)
+                apsd_write_list.append(apsd_file_write_string)
+            
+            cpsd_output_list = []
+            cpsd_write_list = []
+            for i in range(6):
+                cpsd_output_list.append([])
+            for val in cpsd_vals:
+                # val == ('C#/C#', ',', 'alpha_val', ',', 'uncertainty_val')
+                chambers, filler, alpha, filler, uncertainty = val
+
+                # create indice by adding the two chamber numbers together
+                # since C1 + C4 and C2 + C3 lead to same value, increase C2 + C3 by 1
+                indice = int(chambers[1]) + int(chambers[4]) - 3
+                if 'C1' not in chambers:
+                    indice += 1
+                cpsd_output_list[indice].append(alpha + ',' + uncertainty + ',')
+
+            # while data still in cpsd_output_list
+            while not cpsd_output_list.count([]) == len(cpsd_output_list):
+                cpsd_file_write_string = ""
+                for chamber in cpsd_output_list:
+                    cpsd_file_write_string += chamber[0]
+                    chamber.pop(0)
+                cpsd_write_list.append(cpsd_file_write_string)
+            
+            # write parsed output to file
+            for apsd_write, cpsd_write in zip_longest(apsd_write_list, cpsd_write_list,fillvalue=',,,,,,,,'):
+                file.write(apsd_wattage + ',' + apsd_write + ',,,,' + cpsd_wattage + ',' + cpsd_write + '\n')
+    
+
+def extractAPSD(settings: dict = {}, apsd_keys:list = []):
+    filePath = os.path.join(settings['Input/Output Settings']['Save directory'], 'pynoise.h5')
+    output = defaultdict(list)
+
+    # open file, go thru each iteration
+    with h5py.File(filePath, 'r') as file:
+        for key in apsd_keys:
+            iterations = file[key]
+            for iteration_num in iterations:
+
+                # get chamber number
+                file_name = iterations[iteration_num]["settings"]["Input-Output Settings"]["Input file-folder"][()]
+                if isinstance(file_name, np.ndarray):
+                    file_name = file_name[0]
+                file_name = file_name.decode('utf-8')
+                split_file_name = file_name.split('/')
+                chamber_num = split_file_name[3][:2]
+
+                # find wattage from input file name
+                wattage_index = split_file_name[3].find('W')
+
+                end_index = wattage_index
+
+                while end_index > 0:
+                    if split_file_name[3][end_index] == '-': break
+                    end_index = end_index - 1
+                
+                start_index = end_index
+
+                run_num = Path(file_name).stem
+                run_num = run_num[(len(run_num) - 1)]
+                wattage_str = split_file_name[3][start_index + 1 : wattage_index + 1] + '_' + run_num
+
+                # get alpha + uncertainty
+                try:
+                    alpha_uncertainty = iterations[iteration_num]["CohnAlpha"]["Fit"]["alpha_uncertainty"][()]
+                except KeyError:
+                    continue
+
+                # store output
+                line = (str(chamber_num),',', str(alpha_uncertainty[0]), ',', str(alpha_uncertainty[1]))
+                output[wattage_str].append(line)
+            
+            # sort output
+            for key in output:
+                output[key].sort()
+    return output
+
+
+def extractCPSD(settings: dict = {}, cpsd_keys:list = []):
+    filePath = os.path.join(settings['Input/Output Settings']['Save directory'], 'pynoise.h5')
+    output = defaultdict(list)
+
+    # open file, go thru iterations
+    with h5py.File(filePath, 'r') as file:
+        for key in cpsd_keys:
+            iterations = file[key]
+            for iteration_num in iterations:
+                # get chamber number
+                chamber_string = ""
+                split_file_name = ""
+                file_name_list = iterations[iteration_num]["settings"]["Input-Output Settings"]["Input file-folder"][()]
+                if not isinstance(file_name_list, np.ndarray):
+                    file_name_list = [file_name_list]
+                for item in file_name_list:
+                    file_name = item.decode('utf-8')
+                    split_file_name = file_name.split('/')
+                    chamber_num = split_file_name[3][:2]
+                    chamber_string += (chamber_num + '/')
+                chamber_string = chamber_string[:-1]
+
+                # find wattage from input file name
+                wattage_index = split_file_name[3].find('W')
+                end_index = wattage_index
+                while end_index > 0:
+                    if split_file_name[3][end_index] == '-': break
+                    end_index = end_index - 1
+                start_index = end_index
+
+                run_num = Path(file_name).stem
+                run_num = run_num[(len(run_num) - 1)]
+                wattage_str = split_file_name[3][start_index + 1 : wattage_index + 1] + '_' + run_num
+
+                # get alpha + uncertainty
+                alpha_uncertainty = iterations[iteration_num]["CohnAlpha"]["Fit"]["alpha_uncertainty"][()]
+                
+                # store output
+                line = (str(chamber_string),',', str(alpha_uncertainty[0]), ',', str(alpha_uncertainty[1]))
+                output[wattage_str].append(line)
+
+        # sort output
+        for key in output:
+            output[key].sort()
+
+    return output
+
+
+def removeDuplicates(settings:dict = {}):
+
+    filePath = os.path.join(settings['Input/Output Settings']['Save directory'], 'pynoise.h5')
+
+    with h5py.File(filePath, 'a') as file:
+        # go through all settings + iterations, ignore default.json
+        for key in file.keys():
+            if 'default.json' not in key:
+                iterations = file[key]
+                to_delete = []
+                dupe_check = {}
+                for iteration_num in iterations:
+
+                    # grab file name from iteration
+                    # if stored within a list, then combine all file names into one string
+                    combined_file_names = ""
+                    file_name_list = iterations[iteration_num]["settings"]["Input-Output Settings"]["Input file-folder"][()]
+
+                    if isinstance(file_name_list, np.ndarray):
+                        for file_name in file_name_list:
+                            combined_file_names += file_name.decode('utf-8')
+                    else:
+                        combined_file_names += file_name_list.decode('utf-8')
+                    
+                    # try to get iteration nperseg; if not provided, set value to 0
+                    try:
+                        iteration_nperseg = iterations[iteration_num]["settings"]["CohnAlpha Settings"]["nperseg"][()]
+                    except KeyError:
+                        iteration_nperseg = 0
+                    # try to get iteration dwell time; if not provided, set value to 0
+                    try:
+                        iteration_dwell_time = iterations[iteration_num]["settings"]["CohnAlpha Settings"]["Dwell Time"][()]
+                    except KeyError:
+                        iteration_dwell_time = 0
+                    
+                    # combine file name(s), dwell time, nperseg into tuple
+                    # use tuple to check if already inserted
+                    # if not inserted, insert into dict. If already inserted, then add to to_delete list
+                    data_tuple = (combined_file_names, iteration_nperseg, iteration_dwell_time)
+                    if data_tuple in dupe_check:
+                        to_delete.append(iteration_num)
+                        continue
+                    dupe_check[data_tuple] = True
+                
+                # delete iterations within to_delete list
+                while len(to_delete) != 0:
+                    del iterations[to_delete[0]]
+                    to_delete.pop(0)
