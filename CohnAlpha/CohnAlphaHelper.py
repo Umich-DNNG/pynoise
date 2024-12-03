@@ -3,24 +3,29 @@ from pathlib import Path               # Path manipulation
 
 # Helper Functions
 def convertTimeUnitsToStr(units):
-    # femtoseconds
-    if (math.isclose(a=units, b=1e-15, abs_tol=1e-15)):
-        return 'fs'
-    # picoseconds
-    if (math.isclose(a=units, b=1e-12, abs_tol=1e-12)):
-        return 'ps'    
-    # nano seconds
-    if (math.isclose(a=units, b=1e-9, abs_tol=1e-9)):
-        return 'ns'
-    # microseconds
-    if (math.isclose(a=units, b=1e-6, abs_tol=1e-6)):
-        return 'us'
-    # milliseconds
-    if (math.isclose(a=units, b=1e-3, abs_tol=1e-3)):
-        return 'ms'
-    # seconds
-    if (math.isclose(a=units, b=1, abs_tol=1)):
-        return 's'
+
+    units_map = {
+        1: '',
+        1e-3: 'm',
+        1e-6: 'u',
+        1e-9: 'n',
+        1e-12: 'p',
+        1e-15: 'f'
+    }
+
+    return units_map[units]
+
+def convertTimeUnitsToStrInverse(units):
+    units_map = {
+        1: '',
+        1e-3: 'k',
+        1e-6: 'M',
+        1e-9: 'G',
+        1e-12: 'T',
+        1e-15: 'P'
+    }
+
+    return units_map[units]
 
 
 
