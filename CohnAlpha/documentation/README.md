@@ -38,7 +38,8 @@ There are 5 options for this method:
 * m - run the entire program through the [main driver](#main)
 * p - plot the [histogram](#histogram) of the provided time data
 * w - perform the Welch Approximation of the Fourier Transformation
-* f - fit and plot Power Spectral Density curve
+* a - perform APSD
+* c - perform CPSD
 * s - view or edit the program [settings](#settings-configurations)
 * Leave the command blank to end the program.
 
