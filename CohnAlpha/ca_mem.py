@@ -61,161 +61,6 @@ class CohnAlpha:
         self.annotate_background_color = settings['CohnAlpha Settings']['Annotation Background Color']
         self.annotate_font_size = settings['CohnAlpha Settings']['Font Size']
 
-
-    def memControl(self, settings: dict = {}, settingsPath:str = './settings/default.json'):
-
-        '''
-        loads a txt file by portions for memory control
-        '''
-
-        dwell_time = 1 / (2 * settings['CohnAlpha Settings']['Frequency Maximum'])
-        dwell_time_ns = dwell_time * 1e9
-        # nperseg = num bins for each segment
-        nperseg = int(1 / (dwell_time * settings['CohnAlpha Settings']['Frequency Minimum']))
-        # amount of s in a segment
-        segmentLength = nperseg * dwell_time
-        # amount of time (in input units) in a segment
-        # segmentLength = segmentLength / settings['General Settings']['Input time units']
-        segmentLength = segmentLength * 1e6
-        numSegments = 0
-        
-        fftSum = []
-
-        self.print("Reading in input file/folder data...")
-
-# hertz for frequency, (1/s). ns for meas time range
-
-        with open(settings['Input/Output Settings']['Input file/folder']) as file:
-            # determine measurement time range, in input units
-            rangeStart = settings['CohnAlpha Settings']['Meas time range'][0] * 1e-9 * 1e6
-            # rangeStart = settings['CohnAlpha Settings']['Meas time range'][0] * 1e-9 / settings['General Settings']['Input time units']
-            # rangeEnd = settings['CohnAlpha Settings']['Meas time range'][1] * 1e-9 / settings['General Settings']['Input time units']
-            rangeEnd = settings['CohnAlpha Settings']['Meas time range'][1] * 1e-9 *1e6
-
-            # find start of time stamps to analyze
-            readIn = float(file.readline())
-            while readIn < rangeStart:
-                readIn = float(file.readline())
-
-            # initialize segment bounds
-            segment = []
-            segmentStart = rangeStart
-            segmentEnd = segmentStart + segmentLength
-            rollover = [readIn]
-            chunk = []
-
-            while True:
-                chunk = rollover
-                rollover = []
-                temp = file.readlines(nperseg)
-                temp = [float(line) for line in temp]
-                # if no more data to read, break the loop
-                if not temp: 
-                    break
-                chunk += temp
-
-
-                # if we have read to or past the segment end, parse out current segment and compute
-                if chunk[-1] >= segmentEnd:
-                    segmentRange = np.array([segmentStart, segmentEnd])
-                    index = bisect.bisect(chunk, segmentEnd)
-                    rollover = chunk[index:]
-                    segment += chunk[:index]
-                    if segment == []:
-                        continue
-                        
-                    numSegments += 1
-                    fft = self.memcontrolCompute(settings, segment, nperseg, segmentRange)
-                    if fftSum == []:
-                        fftSum = fft
-                    else:
-                        fftSum += fft
-
-                    print("fft:")
-                    print(fftSum)
-                    # update segment bounds for next segment
-                    segmentStart = (segmentStart + segmentEnd) / 2 # hardcoded 50% overlap
-                    segmentEnd = segmentStart + segmentLength
-                    # update starting segment from overlap
-                    index = bisect.bisect(segment, segmentStart)
-                    segment = segment[index:]
-                    # if settings['General Settings']['Show plots']:
-                    # self.plot_ca(x=fft, y=edges, method='scatter', settings=settings)
-                
-                # if we have read past the meas time range, parse out portion within the range and exit
-                elif chunk[-1] >= rangeEnd:
-                    segmentRange = np.array([segmentStart, segmentEnd])
-                    index = bisect.bisect(chunk, rangeEnd)
-                    segment += chunk[:index]
-                    if segment == []:
-                        continue
-
-                    numSegments += 1
-                    fft, edges = self.memcontrolCompute(settings, segment, nperseg, segmentRange)
-                    if fftSum == []:
-                        fftSum = fft
-                    else:
-                        fftSum += fft
-                    break
-                # otherwise, continue reading TODO: clean up logic
-                else:
-                    segment += chunk
-                    continue
-
-                '''# Split the chunk into lines
-                lines = chunk.splitlines()
-
-                # convert string lines to floats, then to ns
-                segmentData = np.array([float(line) for line in lines]) * 1e3
-
-                # clear out data after use?
-                segmentData = None
-                if histogram is None:
-                    histogram = counts
-                    edges_seconds = edges_ns / 1e9
-                    edges_seconds = edges_seconds[:-1]
-                else:
-                    histogram += counts'''
-        print(f"fftSum {fftSum}")
-        fftMean = fftSum / numSegments
-        print(fftMean)
-        # # Plotting
-        # if settings['General Settings']['Show plots']:
-        #     self.plot_ca(x=edges_seconds,y=histogram, method='hist', settings=settings)
-
-        '''  # Creating evenly spaced start and stop endpoint for plotting
-        # Calculating power spectral density distribution from counts over time hist (Get frequency of counts samples)
-        timeline = np.linspace(start=self.meas_time_range[0], 
-                            stop=self.meas_time_range[1],
-                            num=int(count_bins))/1e9
-        self.fs = 1 / (timeline[3]-timeline[2])'''
-        
-    
-    def memcontrolCompute(self, settings, segment, nperseg, segmentRange):
-        # convert segment from us into s
-        array = np.array(segment)
-        array = array / 1e6
-        segmentRange = np.array(segmentRange)
-        segmentRange /= 1e6
-
-        # compute hist of segment
-        hist, edges_input = np.histogram(a=array,
-                                        bins=nperseg,
-                                        range=segmentRange)
-        edges_seconds = edges_input #* settings['General Settings']['Input time units']
-        edges_seconds = edges_seconds[:-1]
-
-        # self.plot_ca(x=edges_seconds,y=hist, method='hist', settings=settings)
-        
-        # win = signal.get_window('boxcar', nperseg)
-        # segmentsX = hist * win
-
-        # fft
-        # TODO: inverse seconds
-        fft = np.fft.rfft(np.array(hist), axis=0)
-        squaredModulus = np.abs(fft) ** 2
-        return squaredModulus
-
     def fitCohnAlpha(self, settings: dict = {}, settingsPath:str = './settings/default.json', showSubPlots:bool = False):
 
         '''
@@ -380,11 +225,11 @@ class CohnAlpha:
         # change scaling of x-axis to log scaling + plot points
         # update limit of x-axis
         else:
-            # if is_mem:
-            #     ax[0].semilogx(x[2:-2], y[2:-2], label="APSD (scaled)")
-            # else:
             ax[0].semilogx(x[1:-2], y[1:-2], '.', **settings['Semilog Plot Settings'])
             ax[0].set_xlim([1, 200])
+            # ax[0].set_xlim([50, 2e3])
+            # ax[1].set_yscale('log')
+            # ax[1].set_ylim([5,7])
 
 
             # if fitting, then call fit() and fit curve
@@ -554,7 +399,6 @@ class CohnAlpha:
 
         fs = 1/(timeline[3]-timeline[2]) # Get frequency of counts samples
 
-#TODO: swap
         f, Pxy = testing.CPSD(
         # f, Pxy = signal.csd(
             counts_time_hist[0,:], 
@@ -641,12 +485,13 @@ class CohnAlpha:
         return signal
 
 
-    def process_file_with_windowing(self, settings, window_type='boxcar'):
+    def process_file_with_windowing(self, settings, settingsPath, window_type='boxcar'):
         """
         Processes timestamp data in segments, applies windowing before FFT, and computes APSD for each segment.
 
         Parameters:
-        - settings
+        - settings: user's current runtime settings
+        - settingsPath (str): path to the settings file, used for hdf5 saving
         - window_type (str): Windowing type for FFT (default is 'boxcar').
 
         Returns:
@@ -666,127 +511,105 @@ class CohnAlpha:
         segment_start = start_time*1e6  # Start time of the current segment in microseconds
         segment_end = segment_start + segment_length 
 
-        # apsd_sum = None
         fft_sum = None
         freqs = np.fft.rfftfreq(nperseg, d=1/sampling_rate)
+        
+        scaled_apsd = None
+        residuals = None
+        kwDict = None
+
         num_segments = 0
         
-        self.print("Reading in input file/folder data...")
+        importResults = hdf5.readHDF5Data(path=['CohnAlpha', 'Fit'],
+                                        settings=settings,
+                                        settingsName=settingsPath,
+                                        fileName='pynoise')
+        
+        # import data from disk
+        if importResults is not None:
+            data = importResults['graphData']
+            freqs = data[:, 0]
+            scaled_apsd = data[:, 1]
+            residuals = importResults['residuals']
+            popt = importResults['popt']
+            alpha = importResults['alpha_uncertainty'][0]
+            uncertainty = importResults['alpha_uncertainty'][1]
+            kwDict = {'popt': popt,
+                        'alpha': alpha,
+                        'uncertainty': uncertainty}
+        else:
+            self.print("Reading in input file/folder data...")
 
-        with open(settings['Input/Output Settings']['Input file/folder'], 'r') as file:
-            for line in file:
-                timestamp = float(line.strip())
-                
-                # Collect timestamps for the current segment
-                if segment_start <= timestamp < segment_end:
-                    segment.append(timestamp)
-                elif timestamp >= segment_end:
-                    # Process the current segment if it has data
-                    if segment:
-                        # Convert timestamps to a time-domain signal
-                        time_domain_signal = \
-                            self.create_time_domain_signal(segment, 
-                                                    nperseg,
-                                                    segment_start,
-                                                    sampling_rate)
-                        
-                        # Apply windowing
-                        window = signal.get_window(window_type, 
-                                                        len(time_domain_signal))
-                        windowed_signal = time_domain_signal * window
-                        
-                        # Compute APSD using Welch's method
-                        # f, apsd = signal.welch(windowed_signal, 
-                        #                             fs=sampling_rate, 
-                        #                             nperseg=nperseg)
-                        squared_modulus = np.fft.rfft(time_domain_signal)
-                        squared_modulus = np.abs(squared_modulus) ** 2
-                        
-                        # Accumulate APSD and frequencies
-                        # if apsd_sum is None:
-                        if fft_sum is None:
-                            num_segments += 1
-                            # apsd_sum = apsd
-                            # freqs = f
-                            fft_sum = squared_modulus
-                        else:
-                            num_segments += 1
-                            fft_sum += squared_modulus
-                            # apsd_sum += apsd
+            # TODO: look into scaling issue with the y-axis (issue most obvious in the 54mW case)
+            window = signal.get_window(window_type, nperseg)
+            with open(settings['Input/Output Settings']['Input file/folder'], 'r') as file:
+                for line in file:
+                    timestamp = float(line.strip())
                     
-                    # Reset for the next segment with overlap
-                    overlap = int(segment_length *
-                            overlap_fraction)  # Calculate overlap in microseconds
-                    segment_start = segment_end - overlap
-                    segment_end = segment_start + segment_length
-                    segment = [timestamp for timestamp in segment if timestamp >= segment_start]
-                    segment.append(timestamp)
+                    # Collect timestamps for the current segment
+                    if segment_start <= timestamp < segment_end:
+                        segment.append(timestamp)
+                    elif timestamp >= segment_end:
+                        # Process the current segment if it has data
+                        if segment:
+                            # Convert timestamps to a time-domain signal
+                            time_domain_signal = \
+                                self.create_time_domain_signal(segment, 
+                                                                nperseg,
+                                                                segment_start,
+                                                                sampling_rate)
+                            
+                            # Apply windowing
+                            windowed_signal = time_domain_signal * window
+                            
+                            # Compute APSD using Welch's method
+                            squared_modulus = np.fft.rfft(windowed_signal)
+                            squared_modulus = np.abs(squared_modulus) ** 2
+                            
+                            # Accumulate APSD and frequencies
+                            if fft_sum is None:
+                                num_segments += 1
+                                fft_sum = squared_modulus
+                            else:
+                                num_segments += 1
+                                fft_sum += squared_modulus
+                        
+                        # Reset for the next segment with overlap
+                        overlap = int(segment_length * overlap_fraction)  # Calculate overlap in microseconds
+                        segment_start = segment_end - overlap
+                        segment_end = segment_start + segment_length
+                        segment = [timestamp for timestamp in segment if timestamp >= segment_start]
+                        segment.append(timestamp)
 
-        # apsd_sum = np.abs(apsd_sum)
-        window = signal.get_window(window_type, nperseg)
-        scaled_apsd = (fft_sum / num_segments) / (np.sum(window**2) * sampling_rate)
+            scaled_apsd = (fft_sum / num_segments) / (np.sum(window**2) * sampling_rate)
 
-        self.plot_ca(freqs, scaled_apsd, method='scatter', settings=settings)
-        popt, pcov = curve_fit(CAFit,
-                                freqs[1:-2],
-                                scaled_apsd[1:-2],
-                                p0=[scaled_apsd[2], 25, 0.001],
-                                bounds=(0, np.inf),
-                                maxfev=100000)
-        alpha = np.around(popt[1]*2*np.pi, decimals=2)
-        uncertainty = np.around(pcov[1,1]*2*np.pi, decimals=2)
-        residuals = ((CAFit(freqs[1:-2], *popt) - scaled_apsd[1:-2]) / scaled_apsd[1:-2]) * 100
-        kwDict = {'popt': popt,
-                    'alpha': alpha,
-                    'uncertainty': uncertainty}
-        self.plot_ca(x=freqs, y=scaled_apsd, residuals=residuals, method='fit', settings=settings, **kwDict)
-        
+            # compute fit values
+            popt, pcov = curve_fit(CAFit,
+                                    freqs[1:-2],
+                                    scaled_apsd[1:-2],
+                                    p0=[scaled_apsd[2], 25, 0.001],
+                                    bounds=(0, np.inf),
+                                    maxfev=100000)
+            alpha = np.around(popt[1]*2*np.pi, decimals=2)
+            uncertainty = np.around(pcov[1,1]*2*np.pi, decimals=2)
+            residuals = ((CAFit(freqs[1:-2], *popt) - scaled_apsd[1:-2]) / scaled_apsd[1:-2]) * 100
+            kwDict = {'popt': popt,
+                        'alpha': alpha,
+                        'uncertainty': uncertainty}
 
 
-
-
-
-
-
-
-
-
-
-
-
-    def loadSegments(self, settings):
-        '''
-        loads a txt file by portions for memory control
-        '''
-        
-        histogram = None
-        edgesSeconds = None
-
-        dwell_time = 1 / (2 * settings['CohnAlpha Settings']['Frequency Maximum'])
-        dwell_time_ns = dwell_time * 1e9
-
-        # Annotation Parameters
-        self.annotate_font_weight = settings['CohnAlpha Settings']['Annotation Font Weight']
-        self.annotate_color = settings['CohnAlpha Settings']['Annotation Color']
-        self.annotate_background_color = settings['CohnAlpha Settings']['Annotation Background Color']
-        self.annotate_font_size = settings['CohnAlpha Settings']['Font Size']
-
-        # lines = look at final time stamp + total num of lines -> load % of lines associated with a segment
-        # segment = nperseg * dwell time 
-        count_bins = np.diff(self.meas_time_range) / dwell_time_ns
-        with open(settings['Input/Output Settings']['Input file/folder']) as file:
-            while True:
-                # TODO: change? make a setting?
-                numBytes = 1000
-                lines = file.readline(numBytes)
-                if not lines:
-                    break
-                segmentData = np.array([float(line.strip()) for line in lines if line.strip()])
-                counts, edges_ns = np.histogram(segmentData, bins=int(count_bins), range=[0, self.reset_time])
-                if histogram is None:
-                    histogram = counts
-                    edges_seconds = edges_ns / 1e9
-                    edges_seconds = edges_seconds[:-1]
-                else:
-                    histogram += counts
-        return edges_seconds, histogram
+            if settings['Input/Output Settings']['Save outputs']:
+                data = np.array([freqs, scaled_apsd]).T
+                alpha_uncertainty = np.array([alpha, uncertainty])
+                hdf5.writeHDF5Data(npArrays=[data, residuals, popt, alpha_uncertainty],
+                                keys=['graphData', 'residuals', 'popt', 'alpha_uncertainty'],
+                                path=['CohnAlpha', 'Fit'],
+                                settings=settings,
+                                settingsName=settingsPath,
+                                fileName='pynoise')
+        if settings['General Settings']['Show plots']:
+            # plot the scatter plot
+            self.plot_ca(freqs, scaled_apsd, method='scatter', settings=settings)
+            # plot the fit 
+            self.plot_ca(x=freqs, y=scaled_apsd, residuals=residuals, method='fit', settings=settings, **kwDict)
+                
