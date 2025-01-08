@@ -1,4 +1,6 @@
-'''The file that defines and stores Event objects.'''
+'''The file that defines and stores Event objects.
+Eliminate repetition. It's likely only used for Rossi and Feynman. Cohn Alpha uses np.loadtxt(). All methods should use the same loading schemes.
+'''
 
 
 
