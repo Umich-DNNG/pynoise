@@ -1,5 +1,5 @@
-'''The class for constructing and calculating time 
-difference objects for RossiAlpha analysis. Supports 
+'''The class for constructing and calculating time
+difference objects for RossiAlpha analysis. Supports
 separated and combined histogram/time difference operations.
 
 Also executes MARBE
@@ -34,14 +34,14 @@ sys.path = ogPath
 
 
 def createTimeDifs(timeDifs:dict, settings:dict, settingsPath: str, curFolder:int = 0):
-    
+
     '''Create Rossi Alpha time differences for files or for a subfolder
-    
+
     Inputs:
-    - timeDifs: the calling class's dictionary of time differences 
+    - timeDifs: the calling class's dictionary of time differences
     - settings: the dictionary holding the runtime settings
     - curFolder: the current folder being analyzed'''
-    
+
 
     # Clear out the current time difference data and methods.
     timeDifs['Time differences'].clear()
@@ -51,8 +51,8 @@ def createTimeDifs(timeDifs:dict, settings:dict, settingsPath: str, curFolder:in
         for method in settings['RossiAlpha Settings']['Time difference method']:
             timeDifs['Time differences'].append(timeDifCalcs(
                                                             io=settings['Input/Output Settings'],
-                                                            reset_time=settings['RossiAlpha Settings']['Reset time'], 
-                                                            method=method, 
+                                                            reset_time=settings['RossiAlpha Settings']['Reset time'],
+                                                            method=method,
                                                             digital_delay=settings['RossiAlpha Settings']['Digital delay'],
                                                             folderNum=curFolder,
                                                             sort_data=settings['General Settings']['Sort data']))
@@ -61,8 +61,8 @@ def createTimeDifs(timeDifs:dict, settings:dict, settingsPath: str, curFolder:in
     else:
         timeDifs['Time differences'].append(timeDifCalcs(
                                                         io=settings['Input/Output Settings'],
-                                                        reset_time=settings['RossiAlpha Settings']['Reset time'], 
-                                                        method=settings['RossiAlpha Settings']['Time difference method'], 
+                                                        reset_time=settings['RossiAlpha Settings']['Reset time'],
+                                                        method=settings['RossiAlpha Settings']['Time difference method'],
                                                         digital_delay=settings['RossiAlpha Settings']['Digital delay'],
                                                         folderNum=curFolder,
                                                         sort_data=settings['General Settings']['Sort data']))
@@ -94,10 +94,10 @@ def folderAnalyzer(timeDifs: dict, settings: dict, settingsPath:str, numFolders:
 
     original = settings['Input/Output Settings']['Input file/folder']
     numSets = ra.getNumSets(settings)
-    
+
     # hold a list of all the time difference data across all folders
     combinedTimeDifs = [[] for _ in range(numSets)]
-    
+
     print("Calculating time differences...")
     # iterate through all of the folders (1-based indexing)
     for folder in tqdm(range(1, numFolders + 1)):
@@ -111,12 +111,12 @@ def folderAnalyzer(timeDifs: dict, settings: dict, settingsPath:str, numFolders:
             print('Aborting...\n')
             settings['Input/Output Settings']['Input file/folder'] = original
             return False
-        
+
         # compute the time difs for this subfolder and add to the list
         createTimeDifs(timeDifs, settings, settingsPath, folder)
         for i in range(numSets):
             combinedTimeDifs[i].append(timeDifs['Time differences'][i])
-    
+
     # set the class object to the calculated combined time differences
     timeDifs['Time differences'].clear()
     timeDifs['Time difference method'].clear()
@@ -131,7 +131,7 @@ def folderAnalyzer(timeDifs: dict, settings: dict, settingsPath:str, numFolders:
 
     # reset file name to original path
     settings['Input/Output Settings']['Input file/folder'] = original
-    
+
     # save time difference data for folders
     if settings['Input/Output Settings']['Save time differences']:
         path = ['RossiAlpha', 'time differences']
@@ -143,23 +143,23 @@ def folderAnalyzer(timeDifs: dict, settings: dict, settingsPath:str, numFolders:
 # ------------------------ class for time difference calculations ----------------------------
 
 class timeDifCalcs:
-    
-    '''The time differences object that stores 
+
+    '''The time differences object that stores
     events and calculates time differences.'''
 
     def __init__(self, io: dict, reset_time: float = None, method: str = 'aa', digital_delay: int = None, folderNum = 0, sort_data: bool = False):
-        
+
         '''Initializes a time difference object. Autogenerates variables where necessary.
-    
+
         Inputs:
         - events: the list of measurement times for each data point.
-        - digital_delay: the amount of digital delay, if 
+        - digital_delay: the amount of digital delay, if
         applicable. Only required when using the dd method.
-        - reset_time: the maximum time difference allowed. If 
+        - reset_time: the maximum time difference allowed. If
         not given, will autogenerate the best reset time.
-        - method: the method of calculating time 
+        - method: the method of calculating time
         differences (assumes aa).'''
-        
+
 
         # If a reset time is given, use it.
         if reset_time != None:
@@ -178,7 +178,7 @@ class timeDifCalcs:
         self.overwrite = io['Overwrite lower reset times']
         self.outputFolder = io['Save directory']
         name = io['Input file/folder']
-        # if is a folder analysis, retrieve the name of the folder. 
+        # if is a folder analysis, retrieve the name of the folder.
         # When this function is called on a folder, the input file/folder was changed to the user inputted folder name + "/" + the current folder number
         # TODO: change calling logic to not have to do this?
         if folderNum != 0:
@@ -205,6 +205,8 @@ class timeDifCalcs:
                 self.events = evt.createEventsListFromTxtFile(io['Input file/folder'],
                                                     io['Time column'],
                                                     io['Channels column'],
+                                                    io['Light column'],
+                                                    io['Light range'],
                                                     True,
                                                     io['Quiet mode'],
                                                     self.folderNum != 0)
@@ -224,6 +226,8 @@ class timeDifCalcs:
                             self.events.extend(evt.createEventsListFromTxtFile(io['Input file/folder'] + "/" + filename,
                                                                         io['Time column'],
                                                                         int(channel),
+                                                                        io['Light column'],
+                                                                        io['Light range'],
                                                                         False,
                                                                         io['Quiet mode'],
                                                                         True))
@@ -255,15 +259,15 @@ class timeDifCalcs:
 
     def calculateTimeDifsFromEvents(self):
 
-        '''Returns and stores the array of time differences used 
+        '''Returns and stores the array of time differences used
         for constructing a histogram based on the stored method.
 
         Outputs:
         - the calculated time differences.'''
-        
-        # Construct the empty time differences array, store the total 
+
+        # Construct the empty time differences array, store the total
         # number of data points, and initialize the indexing variable.
-        
+
         if self.pregenerated != '':
             with open(self.pregenerated,'r') as file:
                 self.timeDifs = np.array([item for item in json.load(file)['Time differences'] if item <= self.reset_time])
@@ -279,17 +283,17 @@ class timeDifCalcs:
             # Iterate through the rest of the vector
             # starting 1 after the current data point.
             for j in range(i + 1, n):
-                # If the current time difference exceeds the 
+                # If the current time difference exceeds the
                 # reset time range, break to the next data point.
                 if self.events[j].time - self.events[i].time > self.reset_time:
                     break
-                # If the method is any and all, continue. Otherwise, assure 
+                # If the method is any and all, continue. Otherwise, assure
                 # that the channels are different between the two data points.
                 if((self.method == 'aa') or self.events[j].channel != self.events[i].channel):
-                    # If the method is any and all or cross_correlation, continue. Otherwise, 
+                    # If the method is any and all or cross_correlation, continue. Otherwise,
                     # check that the current data point's channel is not in the bank.
-                    if(self.method == 'aa' or 
-                       self.method == 'cc' or 
+                    if(self.method == 'aa' or
+                       self.method == 'cc' or
                        self.events[j].channel not in ch_bank):
                         # Add the current time difference to the list.
                         time_diffs = np.append(time_diffs,(self.events[j].time - self.events[i].time))
@@ -311,54 +315,54 @@ class timeDifCalcs:
                 prevent = False
         # Store the time differences array.
         self.timeDifs = time_diffs
-        
+
         # NOTE: the code commented out below saves time differences to a folder with text files
         # as we move to exporting to hdf5, this is no longer needed
-        
+
         # if self.export:
         #     self.exportTimeDifs()
 
         # Return the time differences array.
         return self.timeDifs
-    
+
 
     # NOTE: this function is not currently maintained
-    def calculateTimeDifsAndBin(self, 
+    def calculateTimeDifsAndBin(self,
                                 input:str,
-                                bin_width:int = None, 
-                                save_fig:bool = False, 
-                                show_plot:bool = True, 
-                                save_dir:str= './', 
-                                plot_opts:dict = None, 
-                                folder:bool = False, 
+                                bin_width:int = None,
+                                save_fig:bool = False,
+                                show_plot:bool = True,
+                                save_dir:str= './',
+                                plot_opts:dict = None,
+                                folder:bool = False,
                                 verbose:bool = False):
-        
-        '''Simultaneously calculates the time differences for 
+
+        '''Simultaneously calculates the time differences for
         the timeDifs object and adds them to a new histogram.
-        
+
         Inputs:
-        - bin width: the width of each histogram bin. If 
+        - bin width: the width of each histogram bin. If
         not given, will autogenerate a reasonable width.
         TODO: Actually do this.
-        - save_fig: whether or not the figures should be saved 
+        - save_fig: whether or not the figures should be saved
         to the given directory after creation (assumes False).
-        - show_plot: whether or not the figures should be 
+        - show_plot: whether or not the figures should be
         shown to the user upon creation (assumes True).
-        - save_dir: if save_fig is True, what directory the figures 
+        - save_dir: if save_fig is True, what directory the figures
         will be saved in (assumes the current working directory).
         - plot_opts: all the matplotlib plot parameters.
         - folder: whether or not this plot is for folder analysis.
         - verbose: whether or not folder analysis should output file results.
-        
+
         Outputs:
         - RossiHistogram object
         - histogram: the list of counts for each histogram bin.
         - bin_centers: the time at the center of each bin.
         - bin_edges: the time on the edge of each bin.
         '''
-        
-        
-        # Store the number of data points, the number of bins, 
+
+
+        # Store the number of data points, the number of bins,
         # and initialize the data point index and histogram array.
         n = len(self.events)
         i = 0
@@ -372,26 +376,26 @@ class timeDifCalcs:
             # Iterate through the rest of the vector
             # starting 1 after the current data point.
             for j in range(i + 1, n):
-                # If the current time difference exceeds the 
+                # If the current time difference exceeds the
                 # reset time range, break to the next data point.
                 if self.events[j].time - self.events[i].time > self.reset_time:
                     break
-                # If the method is any and all, continue. Otherwise, assure 
+                # If the method is any and all, continue. Otherwise, assure
                 # that the channels are different between the two data points.
                 if((self.method == 'aa') or self.events[j].channel != self.events[i].channel):
-                    # If the method is any and all or cross_correlation, continue. Otherwise, 
+                    # If the method is any and all or cross_correlation, continue. Otherwise,
                     # check that the current data point's channel is not in the bank.
                     if(self.method == 'aa' or self.method == 'cc' or self.events[j].channel not in ch_bank):
                         # Store the current time difference.
                         thisDif = self.events[j].time - self.events[i].time
                         # Calculate the bin index for the current time difference.
                         binIndex = int((thisDif) / bin_width)
-                        # If the calculated index is exactly at the end 
+                        # If the calculated index is exactly at the end
                         # of the time range, put it into the last bin.
                         if(binIndex == num_bins):
                             binIndex -= 1
                         # Increase the histogram count in the appropriate bin.
-                        histogram[binIndex] += 1    
+                        histogram[binIndex] += 1
                     # If digital delay is on:
                     elif(self.method == 'dd'):
                         # Skip to the nearest data point after the
@@ -488,18 +492,18 @@ def computeMARBE(timeDifs: dict, hist: dict, settings: dict, numFolders: int):
                 if settings['RossiAlpha Settings']['Reset time'] / (settings['RossiAlpha Settings']['Bin width'] + 1) < 4:
                     bestBinFound = True
                 else:
-                    settings['RossiAlpha Settings']['Bin width'] += 1 
-        
+                    settings['RossiAlpha Settings']['Bin width'] += 1
+
         # clean up histogram memory
         hist['Histogram'].clear()
 
 
 def prepMARBE(timeDifs: dict, hist: dict, settings: dict, settingsPath: str, numFolders: int, window: Tk = None):
     '''Function to prepare for automatic bin width computation using MARBE when a bin width is not specified for folder analysis
-    
+
     NOTE: Automatic bin width calculation is not properly supported for multiple time difference methods at once; it will
     default to the method listed first in the settings
-    
+
     Inputs:
     - timeDifs
     - hist:
@@ -521,12 +525,12 @@ def prepMARBE(timeDifs: dict, hist: dict, settings: dict, settingsPath: str, num
 
     if isinstance(settings['RossiAlpha Settings']['Time difference method'], list):
         settings['RossiAlpha Settings']['Time difference method'] = settings['RossiAlpha Settings']['Time difference method'][0]
-        print('Automatic bin width calculation is currently only supported for 1 time difference method at a time.', 
-                    'Defaulting to', 
+        print('Automatic bin width calculation is currently only supported for 1 time difference method at a time.',
+                    'Defaulting to',
                     settings['RossiAlpha Settings']['Time difference method'],
                     'method for the bin width calculation portion.')
     print("Testing different bin widths...")
-        
+
     # compute MARBE
     computeMARBE(timeDifs, hist, settings, numFolders)
 
