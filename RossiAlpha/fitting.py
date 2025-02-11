@@ -99,13 +99,13 @@ def folderFit(fit: dict, hist: dict, settings: dict, settingsPath: str, numFolde
                                                     fit['Fit minimum'][j],
                                                     fit['Fit maximum'][j],
                                                     settings['Input/Output Settings']['Save directory'],
-                                                    settings['Line Fitting Settings'], 
+                                                    settings['Line Fitting Settings'],
                                                     settings['Scatter Plot Settings']))
             # Fit the total histogram with weighting.
             fit['Best fit'][-1].fit_RA_hist_weighting()
             # Plot the total histogram fit.
             suffix = name + '_' + method + '_' + str(settings['RossiAlpha Settings']['Bin width']) + '_' + str(settings['RossiAlpha Settings']['Reset time'])
-            fit['Best fit'][-1].plot_RA_and_fit(settings['Input/Output Settings']['Save figures'], 
+            fit['Best fit'][-1].plot_RA_and_fit(settings['Input/Output Settings']['Save figures'],
                                             settings['General Settings']['Show plots'],
                                             settings['RossiAlpha Settings']['Error Bar/Band'],
                                             suffix,
@@ -142,7 +142,7 @@ def subfolderFit(fit:dict, hist: dict, settings: dict, settingsPath: str, numFol
     - hist: dictionary from the calling class containing histogram data
     - settings: dictionary holding the runtime settings
     - settingsPath: string path to the settings file
-    - numFolder: number of subfolders    
+    - numFolder: number of subfolders
     '''
     if isinstance(settings['RossiAlpha Settings']['Time difference method'], list):
         method = settings['RossiAlpha Settings']['Time difference method'][0]
@@ -229,7 +229,7 @@ def exp_decay_3_param(x, a, b, c):
     '''
     Description:
         - Exponential decay function with 3 parameters including offset
- 
+
     Inputs:
         - x (time differences: x-axis)
         - a (coefficient constant)
@@ -254,21 +254,21 @@ def exp_decay_2_param(x, a, b):
         - x (time differences: x-axis)
         - a (coefficient constant)
         - b (alpha value)
-    
+
     Outputs:
         - Exponential decay function
     '''
-    
+
     # exponential decay function with 2 parameters
     return a * np.exp(b * x)
 
 
-#---------------------- class for rossi alpha fit -------------------------------    
+#---------------------- class for rossi alpha fit -------------------------------
 
 
 class RossiHistogramFit:
     def __init__(self, counts, bin_centers,timeDifMethod = 'aa', begin = None, end = None):
-        
+
         '''
         Description:
             - Creating the a Fit() object and its variables.
@@ -278,9 +278,9 @@ class RossiHistogramFit:
             - bin_centers (adjusted bin centers for visual plotting)
             - timeDifMethod: method used to calculate time differences
             - fit_range: range of values to fit the curve to
-            
 
-        Outputs: 
+
+        Outputs:
             - Fit() object
         '''
         # Required parameters
@@ -324,7 +324,7 @@ class RossiHistogramFit:
             - fitting_opts (setting for fitting)
             - hist_visual_opts (setting for styling histogram plot)
 
-        Outputs: 
+        Outputs:
             - popt (Optimal values for the parameters)
         '''
 
@@ -349,29 +349,28 @@ class RossiHistogramFit:
         num_bins = np.size(self.counts)
 
         # Choosing region to fit
-        self.fit_index = np.where((self.bin_centers >= self.fit_range[0]) & 
+        self.fit_index = np.where((self.bin_centers >= self.fit_range[0]) &
                              (self.bin_centers <= self.fit_range[1]))
 
         xfit = self.bin_centers[self.fit_index]
 
         # Fitting distribution
         # Fitting the data using curve_fit
-        # exp_decay_fit_bounds = ([0,-np.inf],[np.inf,0])
-        exp_decay_fit_bounds = ([np.inf,0], [0,-np.inf])
+        exp_decay_fit_bounds = ([0,-np.inf,-np.inf], [np.inf,0,np.inf])
         a0 = np.max(self.counts)
         c0 = np.mean(self.counts[-int(num_bins*0.05):])
         b0 = ((np.log(c0)-np.log(self.counts[0]))/
             (self.bin_centers[-1]-self.bin_centers[0]))
-        
+
         yfit = self.counts[self.fit_index] - c0
-        exp_decay_p0 = [a0, b0]
+        exp_decay_p0 = [a0, b0, c0]
 
         # Fitting line function to truncated data
-        popt, pcov = curve_fit(exp_decay_2_param, xfit, yfit, bounds=exp_decay_fit_bounds, p0=exp_decay_p0, maxfev=1e6)
+        popt, pcov = curve_fit(exp_decay_3_param, xfit, yfit, bounds=exp_decay_fit_bounds, p0=exp_decay_p0, maxfev=1e6)
 
         # Deriving line x and line y
         line_x = xfit
-        self.pred = exp_decay_3_param(xfit, *popt, c0)
+        self.pred = exp_decay_3_param(xfit, *popt)
 
         # Displaying fitting parameters
         popt = np.hstack((popt, c0))
@@ -384,11 +383,11 @@ class RossiHistogramFit:
         fig, ax1 = plt.subplots(nrows=2, sharex=True, figsize=(8, 6), gridspec_kw={'height_ratios': [2, 1]})
 
         # Plotting histogram and fitting curve in top subplot
-        ax1.bar(self.bin_centers, self.counts, width=0.8*(self.bin_centers[1]-self.bin_centers[0]), 
+        ax1.bar(self.bin_centers, self.counts, width=0.8*(self.bin_centers[1]-self.bin_centers[0]),
                 alpha=0.6, color="b", align="center", edgecolor="k", linewidth=0.5, fill=True)
-        
+
         prev_label = self.fitting_options.get('label')
-        self.fitting_options['label'] = ((prev_label if prev_label != None else 'Fitted Curve') 
+        self.fitting_options['label'] = ((prev_label if prev_label != None else 'Fitted Curve')
                                          + f' (A={self.a:.3g}, alpha={self.alpha:.3g}, B={self.b:.3g})')
 
         ax1.plot(line_x, self.pred, 'r--', **self.fitting_options)
@@ -414,16 +413,16 @@ class RossiHistogramFit:
 
 #--------------------------------------------------------------------------------
 
-    def fit_and_residual(self, 
-                         save_fig: bool, 
-                         save_dir: str, 
-                         show_plot: bool, 
-                         fitting_opts: dict, 
-                         residual_opts: dict, 
-                         hist_visual_opts: dict, 
-                         outputName: str, 
-                         method: str = 'aa', 
-                         folder: bool = False, 
+    def fit_and_residual(self,
+                         save_fig: bool,
+                         save_dir: str,
+                         show_plot: bool,
+                         fitting_opts: dict,
+                         residual_opts: dict,
+                         hist_visual_opts: dict,
+                         outputName: str,
+                         method: str = 'aa',
+                         folder: bool = False,
                          verbose: bool = False):
 
         '''
@@ -439,9 +438,9 @@ class RossiHistogramFit:
             - fitting_opts (setting for fitting)
             - residual_opts (setting for residuals)
             - hist_visual_opts (setting for styling histogram plot)
-            - folder_index: 
+            - folder_index:
 
-        Outputs: 
+        Outputs:
             - popt (Optimal values for the parameters)
         '''
 
@@ -455,14 +454,14 @@ class RossiHistogramFit:
         num_bins = np.size(self.counts)
 
         # Choosing region to fit
-        self.fit_index = np.where((self.bin_centers >= self.fit_range[0]) & 
+        self.fit_index = np.where((self.bin_centers >= self.fit_range[0]) &
                              (self.bin_centers <= self.fit_range[1]))
 
         xfit = self.bin_centers[self.fit_index]
 
         # Fitting distribution
         # Fitting the data using curve_fit
-        exp_decay_fit_bounds = ([0,-np.inf],[np.inf,0])
+        exp_decay_fit_bounds = ([0,-np.inf,-np.inf],[np.inf,0,np.inf])
         a0 = np.max(self.counts)
         c0 = np.mean(self.counts[-int(num_bins*0.05):])
         b0 = ((np.log(c0)-np.log(self.counts[0]))/
@@ -472,15 +471,15 @@ class RossiHistogramFit:
         if b0 == np.inf or b0== -np.inf:
             b0 = -1
 
-        yfit = self.counts[self.fit_index] - c0
-        exp_decay_p0 = [a0, b0]
+        yfit = self.counts[self.fit_index]
+        exp_decay_p0 = [a0, b0, c0]
 
         # Fitting line function to truncated data
         popt, pcov = curve_fit(exp_decay_2_param, xfit, yfit, bounds=exp_decay_fit_bounds, p0=exp_decay_p0, maxfev=1e6)
         self.perr = np.sqrt(np.diag(pcov))
         # Deriving line x and line y
         line_x = xfit
-        self.pred = exp_decay_3_param(xfit, *popt, c0)
+        self.pred = exp_decay_3_param(xfit, *popt)
 
         # Displaying fitting parameters
         popt = np.hstack((popt, c0))
@@ -504,20 +503,20 @@ class RossiHistogramFit:
         xmin, xmax = ax1.get_xlim()
         xloc = (xmin+xmax)/3
         dy = ymax-ymin
-        ax1.annotate(equation, 
-                    xy=(xloc*3/3.5, ymax-0.2*dy), 
+        ax1.annotate(equation,
+                    xy=(xloc*3/3.5, ymax-0.2*dy),
                     xytext=(xloc*3/3.5, ymax-0.2*dy),
                     fontsize=16)
-        ax1.annotate(a_str, 
-                    xy=(xloc, ymax-0.3*dy), 
+        ax1.annotate(a_str,
+                    xy=(xloc, ymax-0.3*dy),
                     xytext=(xloc, ymax-0.3*dy),
                     fontsize=16)
-        ax1.annotate(alph_str, 
-                    xy=(xloc, ymax-0.4*dy), 
+        ax1.annotate(alph_str,
+                    xy=(xloc, ymax-0.4*dy),
                     xytext=(xloc, ymax-0.4*dy),
                     fontsize=16)
-        ax1.annotate(b_str, 
-                    xy=(xloc, ymax-0.5*dy), 
+        ax1.annotate(b_str,
+                    xy=(xloc, ymax-0.5*dy),
                     xytext=(xloc, ymax-0.5*dy),
                     fontsize=16)
         ax1.set_ylabel("Coincidence rate (s^-1)")
@@ -566,7 +565,7 @@ class Fit_With_Weighting:
             - fitting_opts (setting for fitting)
             - residual_opts (setting for residuals)
 
-        Outputs: 
+        Outputs:
             - Fit_with_Weighting() object
         '''
 
@@ -599,36 +598,36 @@ class Fit_With_Weighting:
         Inputs:
             - self (encompasses all private variables)
 
-        Outputs: 
+        Outputs:
             - None
         '''
 
         # Choosing region to fit
         self.fit_index = np.where((self.bin_centers >= self.fit_range[0]) &
                                   (self.bin_centers <= self.fit_range[1]))
-    
+
         xfit = self.bin_centers[self.fit_index]
-        
+
         # Fitting distribution
         # Fitting the data using curve_fit
-        exp_decay_fit_bounds = ([0,-np.inf],[np.inf,0])
+        exp_decay_fit_bounds = ([0,-np.inf,-np.inf],[np.inf,0,np.inf])
         a0 = np.max(self.hist)
         c0 = np.mean(self.hist[-int(self.num_bins*0.05):])
         b0 = ((np.log(c0 if c0 != 0 else 1e-10)-np.log(self.hist[0]))/
             (self.bin_centers[-1]-self.bin_centers[0]))
-        yfit = self.hist[self.fit_index] - c0
-        exp_decay_p0 = [a0, b0]
+        yfit = self.hist[self.fit_index]
+        exp_decay_p0 = [a0, b0, c0]
 
         print("xfit:", xfit)
         print("yfit:", yfit)
 
-        popt, pcov = curve_fit(exp_decay_2_param, xfit, yfit, bounds=exp_decay_fit_bounds, 
-                               p0=exp_decay_p0,maxfev=1e6,sigma=self.uncertainties[self.fit_index], 
+        popt, pcov = curve_fit(exp_decay_3_param, xfit, yfit, bounds=exp_decay_fit_bounds,
+                               p0=exp_decay_p0,maxfev=1e6,sigma=self.uncertainties[self.fit_index],
                                absolute_sigma=True)
-        
+
         print("Optimal parameters:", popt)
         print("Covariance matrix:", pcov)
-        
+
 
         # Printing out optimization parameters
         self.a = popt[0]
@@ -637,11 +636,11 @@ class Fit_With_Weighting:
         #print('Fit parameters: A =', popt[0], ', alpha =', popt[1], ', B =', c0)
 
         self.pred = exp_decay_3_param(xfit, *popt, c0)
-        
+
         #cerr = np.std(self.hist[-int(self.num_bins*0.05):], axis=0, ddof=1)
-        
+
         self.perr = np.sqrt(np.diag(pcov))
-        
+
         self.xfit = xfit
 
 
@@ -660,15 +659,15 @@ class Fit_With_Weighting:
             - pngSuffix: str suffix for the png file name
             - method: time difference method used for the analysis
 
-        Outputs: 
+        Outputs:
             - None
         '''
-        
+
         fig, (ax1, ax2) = plt.subplots(nrows=2, sharex=True, figsize=(8, 6), gridspec_kw={'height_ratios': [2, 1]})
-        
+
         # Creating a scatter plot with the data
         ax1.scatter(self.bin_centers, self.hist, **self.residual_options)
-        
+
         if errorBars == "bar":
             ax1.errorbar(self.bin_centers, self.hist, yerr=self.uncertainties, fmt='o', ecolor='black',capsize=5)
         #ax.fill_between(time_diff_centers, self.hist[:-1] - self.uncertainties[:-1], self.hist[:-1] + self.uncertainties[:-1], alpha=0.3, color='gray')
@@ -688,20 +687,20 @@ class Fit_With_Weighting:
         xmin, xmax = ax1.get_xlim()
         xloc = (xmin+xmax)/3
         dy = ymax-ymin
-        ax1.annotate(equation, 
-                    xy=(xloc*3/3.5, ymax-0.2*dy), 
+        ax1.annotate(equation,
+                    xy=(xloc*3/3.5, ymax-0.2*dy),
                     xytext=(xloc*3/3.5, ymax-0.2*dy),
                     fontsize=16)
-        ax1.annotate(a_str, 
-                    xy=(xloc, ymax-0.3*dy), 
+        ax1.annotate(a_str,
+                    xy=(xloc, ymax-0.3*dy),
                     xytext=(xloc, ymax-0.3*dy),
                     fontsize=16)
-        ax1.annotate(alph_str, 
-                    xy=(xloc, ymax-0.4*dy), 
+        ax1.annotate(alph_str,
+                    xy=(xloc, ymax-0.4*dy),
                     xytext=(xloc, ymax-0.4*dy),
                     fontsize=16)
-        ax1.annotate(b_str, 
-                    xy=(xloc, ymax-0.5*dy), 
+        ax1.annotate(b_str,
+                    xy=(xloc, ymax-0.5*dy),
                     xytext=(xloc, ymax-0.5*dy),
                     fontsize=16)
 
@@ -723,9 +722,9 @@ class Fit_With_Weighting:
         # Adjusting layout and saving figure (optional)
         if save_fig:
             fig.tight_layout()
-            save_filename = os.path.join(self.save_dir, 'weighted_fit_and_res_' + pngSuffix + '_' + str(self.fit_range[0]) + '-' + str(self.fit_range[1]) + '.png') 
+            save_filename = os.path.join(self.save_dir, 'weighted_fit_and_res_' + pngSuffix + '_' + str(self.fit_range[0]) + '-' + str(self.fit_range[1]) + '.png')
             fig.savefig(save_filename, dpi=300, bbox_inches='tight')
-        
+
         # Displaying the plot (optional)
         if show_plot:
             plt.show()
