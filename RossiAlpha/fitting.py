@@ -635,7 +635,7 @@ class Fit_With_Weighting:
         self.b = c0
         #print('Fit parameters: A =', popt[0], ', alpha =', popt[1], ', B =', c0)
 
-        self.pred = exp_decay_3_param(xfit, *popt, c0)
+        self.pred = exp_decay_3_param(xfit, *popt)
 
         #cerr = np.std(self.hist[-int(self.num_bins*0.05):], axis=0, ddof=1)
 

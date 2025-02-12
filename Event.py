@@ -26,7 +26,6 @@ class Event:
         # Store the time and channel data accordingly.
         self.time = time
         self.channel = channel
-        self.light = light
 
 
 
@@ -82,7 +81,7 @@ def createEventsListFromTxtFile(path:str,
             columns = line.strip().split()
 
             if light_bool:
-                light_val = columns[light]
+                light_val = float(columns[light])
                 if (light_val > light_range[0]) & (light_val < light_range[1]):
                     accept_bool = 1
                 else:
