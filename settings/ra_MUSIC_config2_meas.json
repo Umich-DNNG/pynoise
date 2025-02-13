@@ -1,0 +1,27 @@
+{
+  "Input/Output Settings": {
+    "Input file/folder": "/Users/fdarby/University of Michigan Dropbox/ENGIN-Well-counter/DAF/MUSIC/Data/OSCAR/20210222_Wk2/20210224_02_RF3-30_CF_OS",
+    "Save directory": "/Users/fdarby/University of Michigan Dropbox/ENGIN-Well-counter/DAF/MUSIC/Data/OSCAR/20210222_Wk2/20210224_02_RF3-30_CF_OS/Current Graphs/",
+    "Save figures": false,
+    "Save time differences": true,
+    "Channels column": "",
+    "Light column": 1,
+    "Light range": [
+      0.335,
+      6.695
+    ]
+  },
+  "General Settings": {
+    "Input time units": 1,
+    "Output time units": 1,
+    "Number of folders": "",
+    "Verbose iterations": 1
+  },
+  "RossiAlpha Settings": {
+    "Reset time": 80,
+    "Time difference method": "cc",
+    "Bin width": 5,
+    "Fit minimum": 17.5,
+    "Fit maximum": ""
+  }
+}
