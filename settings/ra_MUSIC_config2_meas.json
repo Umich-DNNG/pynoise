@@ -15,7 +15,8 @@
     "Input time units": 1,
     "Output time units": 1,
     "Number of folders": "",
-    "Verbose iterations": 1
+    "Verbose iterations": 1,
+    "Show plots": false
   },
   "RossiAlpha Settings": {
     "Reset time": 80,
