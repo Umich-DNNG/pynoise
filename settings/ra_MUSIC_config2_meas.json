@@ -21,7 +21,7 @@
   "RossiAlpha Settings": {
     "Reset time": 80,
     "Time difference method": "cc",
-    "Bin width": 5,
+    "Bin width": 1,
     "Fit minimum": 10,
     "Fit maximum": ""
   }
