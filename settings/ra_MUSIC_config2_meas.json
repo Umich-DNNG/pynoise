@@ -22,7 +22,7 @@
     "Reset time": 80,
     "Time difference method": "cc",
     "Bin width": 5,
-    "Fit minimum": 17.5,
+    "Fit minimum": 10,
     "Fit maximum": ""
   }
 }
