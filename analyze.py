@@ -170,12 +170,23 @@ class Analyzer:
         - window: the window object, if being run in GUI mode.'''
         
 
+        # Fill the tau list with the desired tau values.
+        tValues = []
+        tValues.extend(range(fy['Tau range'][0], fy['Tau range'][1]+1, fy['Increment amount']))
+        
         # Initialize variables.
         yValues = []
         y2Values = []
-        tValues = []
-        # Fill the tau list with the desired tau values.
-        tValues.extend(range(fy['Tau range'][0], fy['Tau range'][1]+1, fy['Increment amount']))
+        y3Values = []
+        rValues = []
+        r2Values = []
+        r3Values = []
+        uncr2Values = []
+        uncr3Values = []
+        # doubleprob = []
+        # tripleprob = []
+        moments = np.zeros([len(tValues),4])
+        
         # Create a FeynmanY object.
         FeynmanYObject = fey.FeynmanY(fy['Tau range'], fy['Increment amount'], fy['Plot scale'])
         # Load in the data and sort it.
@@ -217,15 +228,26 @@ class Analyzer:
         if not quiet:
             print('Running each tau value...')
         # For each tau value:
+        i = 0;
         for tau in tqdm(tValues):
             # Convert the data into bin frequency counts.
             counts = FeynmanYObject.randomCounts(data, tau, meas_time)
             # Compute the variance to mean for this 
             # tau value and add it to the list.
-            FeynmanYObject.computeMoments(counts, tau)
-            y, y2 = FeynmanYObject.computeYY2(tau)
+            momentarray = FeynmanYObject.computeMoments(counts, tau)
+            FeynmanYObject.computeOmegas(fy['Lambda'], tau)
+            y, y2, y3 = FeynmanYObject.computeYY2Y3(tau)
+            r, r2, r3 = FeynmanYObject.computeRR2R3(y, y2, y3,tau)
+            uncr2, uncr3 = FeynmanYObject.computeUncR(y2, y3, meas_time, tau)
             yValues.append(y)
             y2Values.append(y2)
+            y3Values.append(y3)
+            rValues.append(r)
+            r2Values.append(r2)
+            r3Values.append(r3)
+            uncr2Values.append(uncr2)
+            uncr3Values.append(uncr3)
+            moments[i] = momentarray
             # If in verbose mode:
             if verbose:
                 # Save the raw data if desired..
@@ -252,9 +274,18 @@ class Analyzer:
                 window.after(1, wait.set, True)
                 # Wait for the dummy variable to be set, then continue.
                 window.wait_variable(wait)
+                
+            i+=1;
         # Plot and fit both Y and Y2 values against tau.
-        FeynmanYObject.plot(tValues, yValues, save, show, io['Save directory'])
-        FeynmanYObject.plot(tValues, y2Values, save, show, io['Save directory'])
+       
+        FeynmanYObject.plot(tValues, yValues, "Y", [], save, show, io['Save directory'])
+        FeynmanYObject.plot(tValues, y2Values, "Y2", [], save, show, io['Save directory'])
+        FeynmanYObject.plot(tValues, y3Values, "Y3",[], save, show, io['Save directory'])
+        FeynmanYObject.plot(tValues, rValues, "R", [], save, show, io['Save directory'])
+        FeynmanYObject.plot(tValues, r2Values, "R2 (cps)", [uncr2Values], save, show, io['Save directory'])
+        FeynmanYObject.plot(tValues, uncr2Values, "R2 uncy (cps)", [uncr2Values], save, show, io['Save directory'])
+        FeynmanYObject.plot(tValues, r3Values, "R3 (cps)", [uncr3Values], save, show, io['Save directory'])
+        FeynmanYObject.plot_moments(tValues, moments, "Moments", [], save, show, io['Save directory'])
         FeynmanYObject.fitting(tValues, 
                                yValues, 
                                gamma_guess=yValues[-1], 

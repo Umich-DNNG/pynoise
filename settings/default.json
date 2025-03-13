@@ -1,11 +1,11 @@
 {
     "Input/Output Settings": {
-        "Input file/folder": "",
+        "Input file/folder": "/Users/oscarstennes/Documents/Git/flynn-darby-simulation-inputs/OSCAR/OSCAR_Cf252/Weak Cm outputs/Cm_PoliMi_OSCAR_run2_feynman_time_chain.txt",
         "Time column": 0,
         "Channels column": null,
-        "Save directory": "./data",
+        "Save directory": "/Users/oscarstennes/Documents/Plots&Data/Rossi-A",
         "Output name": "CurrentRun",
-        "Save figures": false,
+        "Save figures": true,
         "Save raw data": false,
         "Save time differences": false,
         "Overwrite lower reset times": true,
@@ -17,20 +17,20 @@
         "Verbose iterations": false,
         "Sort data": true,
         "Show plots": true,
-        "Input time units": null,
-        "Output time units": null,
+        "Input time units": 1,
+        "Output time units": 1,
         "Text editor": "vim"
     },
     "RossiAlpha Settings": {
-        "Reset time": 5000,
-        "Time difference method": "cc",
+        "Reset time": 300,
+        "Time difference method": "aa",
         "Digital delay": 750,
         "Combine Calc and Binning": false,
-        "Bin width": null,
-        "Max avg relative bin err": 0.10,
+        "Bin width": 1,
+        "Max avg relative bin err": 0.1,
         "Error Bar/Band": "band",
-        "Fit minimum": 30,
-        "Fit maximum": null
+        "Fit minimum": 0,
+        "Fit maximum": 300
     },
     "CohnAlpha Settings": {
         "Dwell time": 2000000.0,
@@ -45,12 +45,13 @@
         "Annotation Background Color": "white",
         "nperseg": 4096
     },
-    "FeynmanY Settings": { 
+    "FeynmanY Settings": {
         "Tau range": [
-            30,
-            3000
+            20,
+            15000
         ],
         "Increment amount": 30,
+        "Lambda": 10,
         "Plot scale": "linear"
     },
     "Semilog Plot Settings": {

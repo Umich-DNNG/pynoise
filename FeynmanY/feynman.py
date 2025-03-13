@@ -3,6 +3,13 @@ import Event as evt
 from scipy.optimize import curve_fit
 import matplotlib.pyplot as plt
 import os
+from matplotlib import rcParams
+rcParams.update({'figure.autolayout': True})
+
+import seaborn as sns
+sns.set(rc={"figure.dpi": 350, 'savefig.dpi': 350})
+sns.set_style("ticks")
+sns.set_context("talk", font_scale=0.8)
 
 
 # ------------ FeynmanY Fitting Function ----------------------------------------------
@@ -39,6 +46,13 @@ class FeynmanY:
         self.pred = None
         self.m1 = {}
         self.m2 = {}
+        self.m3 = {}
+        self.m4 = {}
+        self.m5 = {}
+        self.m6 = {}
+        self.omega1 = {}
+        self.omega2 = {}
+        self.omega3 = {}
 
 
 
@@ -129,29 +143,96 @@ class FeynmanY:
         - probabilities (numpy array): index representing the bin count, and value representing frequency
         '''
 
-        moment1, moment2 = 0, 0
+        moment1, moment2, moment3, moment4, moment5, moment6 = 0, 0, 0, 0, 0, 0
         for i in range(len(probabilities)):
             moment1 += (i)*probabilities[i]
             moment2 += (i)*(i-1)*probabilities[i]
+            moment3 += (i)*(i-1)*(i-2)*probabilities[i]
+            moment4 += (i)*(i-1)*(i-2)*(i-3)*probabilities[i]
+            moment5 += (i)*(i-1)*(i-2)*(i-3)*(i-4)*probabilities[i]
+            moment6 += (i)*(i-1)*(i-2)*(i-3)*(i-4)*(i-5)*probabilities[i]
         moment2 /= 2
+        moment3 /= 6
+        moment4 /= 24
+        moment5 /= 120
+        moment6 /= 720
         self.m1[tau] = moment1
         self.m2[tau] = moment2
+        self.m3[tau] = moment3
+        self.m4[tau] = moment4
+        self.m5[tau] = moment5
+        self.m6[tau] = moment6
+        
+        return [moment1,moment2,moment3,moment4]
+        
+    def computeOmegas(self, lam, tau: int):
+        self.omega1[tau] = 1
+        self.omega2[tau] = 1 - 1/(lam*tau) * (1-np.exp(-lam*tau))
+        self.omega3[tau] = 1 - 1/(2*lam*tau) * (3 - 4*np.exp(-lam*tau) + np.exp(-2*lam*tau))
     
-    def computeYY2(self, tau: int):
+    def computeYY2Y3(self, tau: int):
         # If moments 1 or 2 are not defined for this tau, throw an error.
         if self.m1.get(tau) is None or self.m2.get(tau) is None:
             raise ValueError()
         # Otherwise, return Y and Y2.
-        return (2*self.m2[tau] + self.m1[tau] - self.m1[tau]*self.m1[tau])/self.m1[tau] - 1, (self.m2[tau] - self.m1[tau]*self.m1[tau]/2)/(tau*1e-9)
-
-
-    def plot(self, taus, ys, save_fig: bool = False, show_plot: bool = False, save_dir: str = './'):
-        
+        return ((2*self.m2[tau] + self.m1[tau] - self.m1[tau]*self.m1[tau])/self.m1[tau] - 1, 
+                (self.m2[tau] - self.m1[tau]*self.m1[tau]/2)/(tau*1e-9), 
+                (self.m3[tau] - self.m2[tau]*self.m1[tau] + self.m1[tau]*self.m1[tau]*self.m1[tau]/3)/(tau*1e-9)) 
+    
+    def computeRR2R3(self,Y,Y2,Y3,tau):
+        return (Y/self.omega1[tau],
+                Y2/self.omega2[tau],
+                Y3/self.omega3[tau])
+    
+    def computeUncR(self,Y2,Y3,meas_time,tau):
+        N = int(meas_time/tau)
+        # uncY2 = 0
+        uncY2 = np.sqrt(6*self.m4[tau] + 6*self.m3[tau] + self.m2[tau] - self.m2[tau]**2 + 4*(self.m2[tau]*self.m1[tau])**2 + self.m1[tau]**3 - self.m1[tau]**4 - 
+                6*self.m3[tau]*self.m1[tau] - 4*self.m2[tau]*self.m1[tau]) / (np.sqrt(N-1)*tau)
+        uncY3 = np.sqrt( 20*self.m6[tau] + 30*self.m5[tau] + 12*self.m4[tau] + self.m3[tau] - self.m3[tau]**2 + 2*self.m2[tau]**3 + self.m1[tau]**5 - 
+                self.m1[tau]**6 - 20*self.m5[tau]*self.m1[tau] - 8*self.m4[tau]*self.m2[tau] - 24*self.m4[tau]*self.m1[tau] + 14*(self.m4[tau]*self.m1[tau])**2 - 
+                6*self.m3[tau]*self.m2[tau] - 6*self.m3[tau]*self.m1[tau] + 12*(self.m3[tau]*self.m1[tau])**2 - 8*(self.m3[tau]*self.m1[tau])**3 + 
+                5*(self.m2[tau])**2*self.m1[tau] + self.m2[tau]*self.m1[tau]**2 - 6*(self.m2[tau]*self.m1[tau])**3 + 6*(self.m2[tau]*self.m1[tau])**4 -
+                8*(self.m2[tau]**2)*(self.m1[tau]**2)+10*self.m3[tau]*self.m2[tau]*self.m1[tau]) / ( np.sqrt(N-1)*tau ) 
+        return (10**9*uncY2/self.omega2[tau], 10**9*uncY3/self.omega3[tau])
+    
+    def plot(self, taus, ys, Ylabel, error, save_fig: bool = False, show_plot: bool = False, save_dir: str = './'):
+    
         plt.plot(taus,ys)
+        #if len(error) != 0:
+            #plt.fill_between(taus,ys-error,ys+error)
+        plt.xlabel("Gate Width (ns)")
+        plt.ylabel(str(Ylabel))
+        plt.ylim(0,None)
+        
 
         # Saving the figure (optional)
         if save_fig:
-            save_filename = os.path.join(save_dir, 'FeynmanY.png') 
+            save_filename = os.path.join(save_dir, Ylabel + '_FeynmanY.png') 
+            plt.savefig(save_filename, dpi=300, bbox_inches='tight')
+            save_filename = os.path.join(save_dir, Ylabel + '_FeynmanY.txt')
+            savedata = np.vstack((taus,ys))
+            np.savetxt(save_filename,savedata)
+            
+        # Displaying the plot (optional)
+        if show_plot:
+            plt.show()
+            
+    def plot_moments(self, taus, moments, Ylabel, error, save_fig: bool = False, show_plot: bool = False, save_dir: str = './'):
+    
+        plt.plot(taus,moments[:,0],label = 'm1')
+        plt.plot(taus,moments[:,1],label = 'm2')
+       
+        plt.xlabel("Gate Width (ns)")
+        plt.yscale("log")
+        plt.legend(['m1','m2'])
+        plt.ylabel(str(Ylabel))
+        plt.ylim(0,None)
+        
+
+        # Saving the figure (optional)
+        if save_fig:
+            save_filename = os.path.join(save_dir, Ylabel + '_FeynmanY.png') 
             plt.savefig(save_filename, dpi=300, bbox_inches='tight')
             
         # Displaying the plot (optional)
