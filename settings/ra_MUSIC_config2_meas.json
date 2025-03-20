@@ -9,7 +9,7 @@
       6.695
     ],
     "Save directory": "./data",
-    "Save figures": true,
+    "Save figures": false,
     "Save outputs": true,
     "Save time differences": true,
     "Overwrite lower reset times": true,
@@ -26,7 +26,7 @@
     "Text editor": "vim"
   },
   "RossiAlpha Settings": {
-    "Reset time": 1000,
+    "Reset time": 5000,
     "Time difference method": "cc",
     "Digital delay": 750,
     "Combine Calc and Binning": false,
