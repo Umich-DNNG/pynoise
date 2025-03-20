@@ -1,80 +1,82 @@
 {
-    "Input/Output Settings": {
-        "Input file/folder": "/Users/fdarby/University of Michigan Dropbox/ENGIN-Well-counter/DAF/MUSIC/Data/OSCAR/20210222_Wk2/20210224_02_RF3-30_CF_OS",
-        "Time column": 0,
-        "Channels column": null,
-        "Save directory": "./data",
-        "Save figures": true,
-        "Save outputs": true,
-        "Save time differences": true,
-        "Overwrite lower reset times": true,
-        "Keep logs": true,
-        "Quiet mode": false
-    },
-    "General Settings": {
-        "Number of folders": null,
-        "Verbose iterations": true,
-        "Sort data": true,
-        "Show plots": true,
-        "Input time units": "nanoseconds",
-        "Output time units": "nanoseconds",
-        "Text editor": "vim"
-    },
-    "RossiAlpha Settings": {
-        "Reset time": 1000,
-        "Time difference method": "cc",
-        "Digital delay": 750,
-        "Combine Calc and Binning": false,
-        "Bin width": 5,
-        "Max avg relative bin err": 0.10,
-        "Error Bar/Band": "band",
-        "Fit minimum": 100,
-        "Fit maximum": null
-    },
-    "CohnAlpha Settings": {
-        "Frequency Minimum": 0.1220703125,
-        "Frequency Maximum": 250.0,
-        "Meas time range": [
-            150000000000.0,
-            1000000000000.0
-        ],
-        "Font Size": 12,
-        "Annotation Font Weight": "bold",
-        "Annotation Color": "black",
-        "Annotation Background Color": "white"
-    },
-    "FeynmanY Settings": { 
-        "Tau range": [
-            30,
-            3000
-        ],
-        "Increment amount": 30,
-        "Plot scale": "linear"
-    },
-    "Semilog Plot Settings": {
-        "label": "Frequency Intensity",
-        "markeredgecolor": "#162F65",
-        "markeredgewidth": 0.2,
-        "markerfacecolor": "#B2CBDE"
-    },
-    "Histogram Visual Settings": {
-        "alpha": 1,
-        "fill": true,
-        "color": "#B2CBDE",
-        "edgecolor": "#162F65",
-        "linewidth": 0.4
-    },
-    "Line Fitting Settings": {
-        "color": "#162F65",
-        "linestyle": "-",
-        "linewidth": 1,
-        "label": "Fit"
-    },
-    "Scatter Plot Settings": {
-        "color": "#B2CBDE",
-        "edgecolor": "#162F65",
-        "linewidth": 0.4,
-        "marker": "o",
-        "s": 20
-    }
+  "Input/Output Settings": {
+    "Input file/folder": "/Users/fdarby/University of Michigan Dropbox/ENGIN-Well-counter/DAF/MUSIC/Data/OSCAR/20210222_Wk2/20210224_02_RF3-30_CF_OS",
+    "Time column": 0,
+    "Channels column": null,
+    "Light column": 1,
+    "Light range": [0.335, 6.695]
+    "Save directory": "./data",
+    "Save figures": true,
+    "Save outputs": true,
+    "Save time differences": true,
+    "Overwrite lower reset times": true,
+    "Keep logs": true,
+    "Quiet mode": false
+  },
+  "General Settings": {
+    "Number of folders": null,
+    "Verbose iterations": true,
+    "Sort data": true,
+    "Show plots": true,
+    "Input time units": "nanoseconds",
+    "Output time units": "nanoseconds",
+    "Text editor": "vim"
+  },
+  "RossiAlpha Settings": {
+    "Reset time": 1000,
+    "Time difference method": "cc",
+    "Digital delay": 750,
+    "Combine Calc and Binning": false,
+    "Bin width": 5,
+    "Max avg relative bin err": 0.10,
+    "Error Bar/Band": "band",
+    "Fit minimum": 100,
+    "Fit maximum": null
+  },
+  "CohnAlpha Settings": {
+    "Frequency Minimum": 0.1220703125,
+    "Frequency Maximum": 250.0,
+    "Meas time range": [
+      150000000000.0,
+      1000000000000.0
+    ],
+    "Font Size": 12,
+    "Annotation Font Weight": "bold",
+    "Annotation Color": "black",
+    "Annotation Background Color": "white"
+  },
+  "FeynmanY Settings": {
+    "Tau range": [
+      30,
+      3000
+    ],
+    "Increment amount": 30,
+    "Plot scale": "linear"
+  },
+  "Semilog Plot Settings": {
+    "label": "Frequency Intensity",
+    "markeredgecolor": "#162F65",
+    "markeredgewidth": 0.2,
+    "markerfacecolor": "#B2CBDE"
+  },
+  "Histogram Visual Settings": {
+    "alpha": 1,
+    "fill": true,
+    "color": "#B2CBDE",
+    "edgecolor": "#162F65",
+    "linewidth": 0.4
+  },
+  "Line Fitting Settings": {
+    "color": "#162F65",
+    "linestyle": "-",
+    "linewidth": 1,
+    "label": "Fit"
+  },
+  "Scatter Plot Settings": {
+    "color": "#B2CBDE",
+    "edgecolor": "#162F65",
+    "linewidth": 0.4,
+    "marker": "o",
+    "s": 20
+  }
 }
