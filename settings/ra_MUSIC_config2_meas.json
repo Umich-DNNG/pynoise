@@ -4,7 +4,7 @@
     "Time column": 0,
     "Channels column": null,
     "Light column": 1,
-    "Light range": [0.335, 6.695]
+    "Light range": [0.335, 6.695],
     "Save directory": "./data",
     "Save figures": true,
     "Save outputs": true,
