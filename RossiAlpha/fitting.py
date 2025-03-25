@@ -475,7 +475,7 @@ class RossiHistogramFit:
         exp_decay_p0 = [a0, b0, c0]
 
         # Fitting line function to truncated data
-        popt, pcov = curve_fit(exp_decay_2_param, xfit, yfit, bounds=exp_decay_fit_bounds, p0=exp_decay_p0, maxfev=1e6)
+        popt, pcov = curve_fit(exp_decay_3_param, xfit, yfit, bounds=exp_decay_fit_bounds, p0=exp_decay_p0, maxfev=1e6)
         self.perr = np.sqrt(np.diag(pcov))
         # Deriving line x and line y
         line_x = xfit
