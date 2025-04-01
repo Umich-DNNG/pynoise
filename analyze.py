@@ -10,24 +10,24 @@ from tkinter import *
 from tqdm import tqdm
 
 
-def export(data: dict[str:tuple], 
-            singles: list[tuple], 
-            name: str, 
+def export(data: dict[str:tuple],
+            singles: list[tuple],
+            name: str,
             output: str = './data'):
 
-    '''Export data from analysis to a csv file. The file 
-    will be stored in the data folder and will be named 
+    '''Export data from analysis to a csv file. The file
+    will be stored in the data folder and will be named
     based on the give analysis method and current time.
-    
+
     Inputs:
-    - dict: a dictionary that contains all the 
-    list data to be outputted to the csv file. 
-    Each key will be the name of the column, and 
-    the value stored will be a tuple. The first 
-    value is the list of data, and the second is 
+    - dict: a dictionary that contains all the
+    list data to be outputted to the csv file.
+    Each key will be the name of the column, and
+    the value stored will be a tuple. The first
+    value is the list of data, and the second is
     the row to start displaying the list at.
-    - single: a list of single values to display on the top row. 
-    Each list value will contain a tuple, whose first entry is 
+    - single: a list of single values to display on the top row.
+    Each list value will contain a tuple, whose first entry is
     the name of the value and whose second entry is the value.
     - method: the name of the method of analysis.
     - output: the output directory. If not given, defaults to ./data.'''
@@ -48,7 +48,7 @@ def export(data: dict[str:tuple],
             max = len(data[key][0]) + data[key][1]
         # Add the dataset name to the labels string.
         labels += key + ','
-        # If the dataset is starting at first 
+        # If the dataset is starting at first
         # row, add the first value to the row.
         if data[key][1] == 0:
             line += str(data[key][0][0]) + ','
@@ -61,7 +61,7 @@ def export(data: dict[str:tuple],
         labels += str(item[0]) + ','
         # Add the data value to the first row.
         line += str(item[1]) + ','
-    # Write the columns row and first data row 
+    # Write the columns row and first data row
     # to the file (excluding tailing commas).
     file.write(labels[:-1] + '\n' + line[:-1] + '\n')
     # For each possible dataset index:
@@ -70,8 +70,8 @@ def export(data: dict[str:tuple],
         line = ''
         # For each dataset:
         for key in data:
-            # If the desired beginning row for the dataset has 
-            # been reached and there's still data left to print, 
+            # If the desired beginning row for the dataset has
+            # been reached and there's still data left to print,
             # add the proper data value to the current row.
             if i >= data[key][1] and i-data[key][1] < len(data[key][0]):
                 line += str(data[key][0][i-data[key][1]]) + ','
@@ -85,7 +85,7 @@ def export(data: dict[str:tuple],
     file.close()
 
 
-def calcNumFolders(original):
+def calcNumFolders(original,prefix='',suffix=''):
     '''Computes the number of folders on the given path.
 
     Inputs:
@@ -95,8 +95,11 @@ def calcNumFolders(original):
     - bool: true if number of folders is valid, false otherwise.
     - numFolders: int, the number of folders computed
     '''
-    numFolders = 0
-    while (os.path.exists(original + '/' + str(numFolders + 1))):
+    if prefix == '':
+        numFolders = 0
+    else:
+        numFolders = -1
+    while (os.path.exists(original + '/' + prefix + str(numFolders + 1))):
         numFolders += 1
     if (numFolders <= 1):
         print('ERROR: Running RossiAlpha method on a folder with \"null\" number of folders requires more than 1 folder in the path.\n')
@@ -106,15 +109,15 @@ def calcNumFolders(original):
 
 def replace_zeroes(lst: list):
 
-    '''Replace all zeroes in a list with 
+    '''Replace all zeroes in a list with
     the average of the non-zero elements.
-    
+
     Inputs:
     - lst: the list to be edited.
-    
+
     Outputs:
     - the edited list.'''
-    
+
 
     # Create a list of all the non-zero elements and compute their average.
     non_zero_elements = [x for x in lst if x != 0]
@@ -132,7 +135,7 @@ def replace_zeroes(lst: list):
 
 class Analyzer:
 
-    '''The class that runs analysis. Can be used 
+    '''The class that runs analysis. Can be used
     in either terminal or gui implementation.'''
 
 
@@ -141,34 +144,34 @@ class Analyzer:
         '''The initializer for the Analyzer object.'''
         self.FeynmanY = {}
 
-    def runFeynmanY(self, 
-                    io: dict, 
-                    fy: dict, 
-                    show: bool, 
-                    save: bool, 
-                    quiet: bool, 
-                    verbose: bool = False, 
-                    hvs: dict = {}, 
+    def runFeynmanY(self,
+                    io: dict,
+                    fy: dict,
+                    show: bool,
+                    save: bool,
+                    quiet: bool,
+                    verbose: bool = False,
+                    hvs: dict = {},
                     lfs: dict = {},
-                    sps: dict = {}, 
+                    sps: dict = {},
                     window: Tk = None):
-        
+
         '''Run FeynmanY analysis for varying tau values.
         Plots each tau value and estimates alpha.
-        
+
         Inputs:
         - io: the Input/Output Settings dictionary.
         - fy: the FeynmanY Settings dictionary.
         - show: whether or not to show plots.
         - save: whether or not to save plots.
         - quiet: whether or not to silence print statements.
-        - verbose: whether or not the analysis should 
+        - verbose: whether or not the analysis should
         consider each tau value for exporting.
         - hvs: the Histogram Visual Settings.
         - lfs: the Line Fitting Settings.
         - sps: the Scatter Plot Settings.
         - window: the window object, if being run in GUI mode.'''
-        
+
 
         # Initialize variables.
         yValues = []
@@ -195,7 +198,7 @@ class Analyzer:
         for entry in data:
             # If we have reached a jump:
             if entry.time - end > 1e13:
-                # Add the previous measurement 
+                # Add the previous measurement
                 # time range to the total.
                 meas_time += end - begin
                 # Reset the beginning time
@@ -220,7 +223,7 @@ class Analyzer:
         for tau in tqdm(tValues):
             # Convert the data into bin frequency counts.
             counts = FeynmanYObject.randomCounts(data, tau, meas_time)
-            # Compute the variance to mean for this 
+            # Compute the variance to mean for this
             # tau value and add it to the list.
             FeynmanYObject.computeMoments(counts, tau)
             y, y2 = FeynmanYObject.computeYY2(tau)
@@ -255,22 +258,22 @@ class Analyzer:
         # Plot and fit both Y and Y2 values against tau.
         FeynmanYObject.plot(tValues, yValues, save, show, io['Save directory'])
         FeynmanYObject.plot(tValues, y2Values, save, show, io['Save directory'])
-        FeynmanYObject.fitting(tValues, 
-                               yValues, 
-                               gamma_guess=yValues[-1], 
-                               alpha_guess=-0.01, 
-                               save_fig=save, 
-                               show_plot=show, 
+        FeynmanYObject.fitting(tValues,
+                               yValues,
+                               gamma_guess=yValues[-1],
+                               alpha_guess=-0.01,
+                               save_fig=save,
+                               show_plot=show,
                                save_dir=io['Save directory'],
                                fit_opt=lfs,
                                scatter_opt=sps,
                                type='Y')
-        FeynmanYObject.fitting(tValues, 
-                               y2Values, 
-                               gamma_guess=yValues[-1], 
-                               alpha_guess=-0.01, 
-                               save_fig=save, 
-                               show_plot=show, 
+        FeynmanYObject.fitting(tValues,
+                               y2Values,
+                               gamma_guess=yValues[-1],
+                               alpha_guess=-0.01,
+                               save_fig=save,
+                               show_plot=show,
                                save_dir=io['Save directory'],
                                fit_opt=lfs,
                                scatter_opt=sps,
@@ -292,4 +295,4 @@ class Analyzer:
                          ('Input file', io['Input file/folder'])],
                         filename,
                         io['Save directory'])
-        
+

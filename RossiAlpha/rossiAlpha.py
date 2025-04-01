@@ -45,10 +45,10 @@ class RossiAlpha:
                     'Fit maximum': []}
 
     def driveTimeDifs(self, settings: dict, settingsPath: str, isFolder: bool = False):
-        
+
         '''Determine the function combinations needed to compute Rossi Alpha time differences
         for the specific current settings
-        
+
         Inputs:
         - settings: dictionary of runtime settings
         - settingsPath: path to the settings file
@@ -63,9 +63,13 @@ class RossiAlpha:
             numFolders = settings['General Settings']['Number of folders']
             # calculate number of folders if was not specified
             if numFolders is None:
-                successful, numFolders = globalAnalyze.calcNumFolders(settings['Input/Output Settings']['Input file/folder'])
+                successful, numFolders = globalAnalyze.calcNumFolders(
+                     settings['Input/Output Settings']['Input file/folder'],
+                     settings['Input/Output Settings']['prefix'],
+                     settings['Input/Output Settings']['suffix']
+                 )
                 if not successful: return False
-            success = td.folderAnalyzer(self.timeDifs, settings, settingsPath, numFolders) 
+            success = td.folderAnalyzer(self.timeDifs, settings, settingsPath, numFolders)
         else:
             success = True
             td.createTimeDifs(self.timeDifs, settings, settingsPath)
@@ -76,11 +80,11 @@ class RossiAlpha:
 
         '''Determine the function combinations needed to compute Rossi Alpha histograms
         for the specific current settings and situation
-        
+
         Inputs:
         - settings: dictionary containing the current runtime settings.
         - isFolder: bool indicating whether this is a folder or a file'''
-        
+
         # execute for "Combine Calc and Binning". NOTE that these functions are not currently maintained
         if (settings['RossiAlpha Settings']['Combine Calc and Binning']):
             if numFolders == 0:
@@ -96,12 +100,16 @@ class RossiAlpha:
                                                     settings['RossiAlpha Settings'],
                                                     settings['Histogram Visual Settings'],
                                                     folder)
-                
+
         if isFolder:
             numFolders = settings['General Settings']['Number of folders']
             # calculate number of folders if was not specified
             if numFolders is None:
-                successful, numFolders = globalAnalyze.calcNumFolders(settings['Input/Output Settings']['Input file/folder'])
+                successful, numFolders = globalAnalyze.calcNumFolders(
+                     settings['Input/Output Settings']['Input file/folder'],
+                     settings['Input/Output Settings']['prefix'],
+                     settings['Input/Output Settings']['suffix']
+                 )
                 if not successful: return False
             if settings['RossiAlpha Settings']['Bin width'] is None:
                 successful = td.prepMARBE(self.timeDifs, self.hist, settings, settingsPath, numFolders)
@@ -110,17 +118,17 @@ class RossiAlpha:
                 successful = td.folderAnalyzer(self.timeDifs, settings, settingsPath, numFolders)
                 if not successful: return False
             plt.folderHistogram(self.timeDifs, self.hist, numFolders, settings, settingsPath)
-        
+
         else:
             td.createTimeDifs(self.timeDifs, settings, settingsPath)
             plt.createPlot(self.timeDifs, self.hist, settings, settingsPath)
-        
-        
+
+
     def driveFit(self, settings: dict, settingsPath: str, isFolder: bool = False):
         '''
         Determine the function combinations needed to compute Rossi Alpha fit graphs
         for the specific current settings and situation
-        
+
         Inputs:
         - settings: dictionary containing the current runtime settings.
         - isFolder: bool indicating whether this is a folder or a file
@@ -130,7 +138,11 @@ class RossiAlpha:
             numFolders = settings['General Settings']['Number of folders']
             # calculate number of folders if was not specified
             if numFolders is None:
-                successful, numFolders = globalAnalyze.calcNumFolders(settings['Input/Output Settings']['Input file/folder'])
+                successful, numFolders = globalAnalyze.calcNumFolders(
+                    settings['Input/Output Settings']['Input file/folder'],
+                    settings['Input/Output Settings']['prefix'],
+                    settings['Input/Output Settings']['suffix']
+                )
                 if not successful: return False
             if settings['RossiAlpha Settings']['Bin width'] is None:
                 successful = td.prepMARBE(self.timeDifs, self.hist, settings, settingsPath, numFolders)
@@ -157,7 +169,7 @@ class RossiAlpha:
             if data is not None:
                 # TODO: do something with the data, pending storage format
                 pass
-        
+
         if step == 'hist' or (step == 'fit' and data is None):
             path = ['RossiAlpha', 'hist']
             data = hdf5.readHDF5Data(path, settings, 'pynoise', settingsName)
@@ -180,15 +192,15 @@ class RossiAlpha:
                 self.timeDifs['Time differences'] = [[[] for _ in range(60)], []]
                 for key, value in data.items():
                     t = int(key)
-                    self.timeDifs['Time differences'][0][t - 1] = value       
-                self.timeDifs['Time difference method'].append(method)            
+                    self.timeDifs['Time differences'][0][t - 1] = value
+                self.timeDifs['Time difference method'].append(method)
             i = 0
             for stuff in self.timeDifs['Time differences'][0]:
                 print(f'{i}: {stuff}')
                 i = i + 1
 
 
-    
+
     # NOTE: this function is not currently maintained
     def calculateTimeDifsAndPlot(self,
                                  io:dict,
@@ -197,10 +209,10 @@ class RossiAlpha:
                                  hist:dict,
                                  folder:int = 0):
 
-        '''Simultaneously calculate the time 
+        '''Simultaneously calculate the time
         differences and construct a Rossi Histogram.
 
-        
+
         Inputs:
         - io: the Input/Output Settings dictionary.
         - gen: the General Settings dictionary.
@@ -219,8 +231,8 @@ class RossiAlpha:
             for type in ra['Time difference method']:
                 self.timeDifs['Time differences'].append(td.timeDifCalcs(
                     io=io,
-                    reset_time=ra['Reset time'], 
-                    method=type, 
+                    reset_time=ra['Reset time'],
+                    method=type,
                     digital_delay=ra['Digital delay'],
                     folderNum=folder,
                     sort_data=gen['Sort data']))
@@ -229,8 +241,8 @@ class RossiAlpha:
         else:
             self.timeDifs['Time differences'].append(td.timeDifCalcs(
                 io=io,
-                reset_time=ra['Reset time'], 
-                method=type, 
+                reset_time=ra['Reset time'],
+                method=type,
                 digital_delay=ra['Digital delay'],
                 folderNum=folder,
                 sort_data=gen['Sort data']))
@@ -265,7 +277,7 @@ class RossiAlpha:
 
 def getNumSets(settings: dict):
     '''
-    Returns the number of time diff sets/histograms to make. 
+    Returns the number of time diff sets/histograms to make.
     This is equivalent to the number of time difference methods listed
 
     Inputs:
