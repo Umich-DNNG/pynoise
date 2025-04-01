@@ -22,23 +22,23 @@ def createPlot(timeDifs: dict,
                 hist: dict,
                 settings: dict,
                 settingsPath: str):
-    
-    '''Create a Rossi Alpha histogram. Assumes 
+
+    '''Create a Rossi Alpha histogram. Assumes
     that time differences are already calculated.
-    
+
     Inputs:
     - timeDifs: the dictionary containing time difference data; from the calling class
     - hist: the dictionary containing histogram data; from the calling class
     - settings: dictionary holding the runtime settings
     - settingsPath: string path to the settings file'''
-    
+
 
     # Clear out the current histogram data.
     hist['Histogram'].clear()
     # Create a RossiHistogram object for each time difference.
     for time_dif in timeDifs['Time differences']:
-        hist['Histogram'].append(RossiHistogram(time_dif, 
-                                                settings['RossiAlpha Settings']['Bin width'], 
+        hist['Histogram'].append(RossiHistogram(time_dif,
+                                                settings['RossiAlpha Settings']['Bin width'],
                                                 settings['RossiAlpha Settings']['Reset time']))
     name = settings['Input/Output Settings']['Input file/folder']
     name = name[name.rfind('/')+1:]
@@ -46,11 +46,11 @@ def createPlot(timeDifs: dict,
     print('Creating histograms...')
     # Plot each histogram.
     for i in range(0, len(hist['Histogram'])):
-        hist['Histogram'][i].plot(name, 
-                                    timeDifs['Time difference method'][i], 
-                                    settings['Input/Output Settings']['Save figures'], 
-                                    settings['General Settings']['Show plots'], 
-                                    settings['Input/Output Settings']['Save directory'], 
+        hist['Histogram'][i].plot(name,
+                                    timeDifs['Time difference method'][i],
+                                    settings['Input/Output Settings']['Save figures'],
+                                    settings['General Settings']['Show plots'],
+                                    settings['Input/Output Settings']['Save directory'],
                                     settings['Histogram Visual Settings'],
                                     False,
                                     settings['General Settings']['Verbose iterations'])
@@ -72,7 +72,7 @@ def createPlot(timeDifs: dict,
 def folderHistogram(timeDifs: dict, hist: dict, numFolders: int, settings: dict, settingsPath:str, window: Tk = None):
     '''Create a histogram for a folder input.
 
-    Inputs: 
+    Inputs:
     - numFolders: int, number of folders to be analyzed.
     - settings: the dictionary containing all the runtime settings
     - settingsPath: string path to the settings file
@@ -89,7 +89,7 @@ def folderHistogram(timeDifs: dict, hist: dict, numFolders: int, settings: dict,
     hist['Bin width'] = settings['RossiAlpha Settings']['Bin width']
     # compile subfolder data together, including exporting if in verbose mode
     combined = subfolderPlots(timeDifs, hist, settings, settingsPath, numFolders)
-    
+
     # create histogram(s) of entire folder
     print('Creating histograms of the entire folder...')
     hist['Histogram'].clear()
@@ -105,10 +105,10 @@ def folderHistogram(timeDifs: dict, hist: dict, numFolders: int, settings: dict,
         hist['Histogram'][-1].plotFromHist(name,
                                             method,
                                             settings['Histogram Visual Settings'],
-                                            settings['Input/Output Settings']['Save figures'], 
-                                            settings['General Settings']['Show plots'], 
-                                            settings['Input/Output Settings']['Save directory'], 
-                                            False, 
+                                            settings['Input/Output Settings']['Save figures'],
+                                            settings['General Settings']['Show plots'],
+                                            settings['Input/Output Settings']['Save directory'],
+                                            False,
                                             settings['General Settings']['Verbose iterations'])
         if settings['Input/Output Settings']['Save outputs']:
             # ---------- NOTE: code below exports outputs in csv format ------------
@@ -129,11 +129,11 @@ def folderHistogram(timeDifs: dict, hist: dict, numFolders: int, settings: dict,
             data = []
             data.append(np.array([hist['Histogram'][-1].bin_centers, hist['Histogram'][-1].counts, hist['Uncertainty'][i]]).T)
             data = np.array(data)
-            hdf5.writeHDF5Data(data, 
-                               ['values'], 
-                               ['RossiAlpha', 'distribution', 'total'], 
-                               settings, 
-                               'pynoise', 
+            hdf5.writeHDF5Data(data,
+                               ['values'],
+                               ['RossiAlpha', 'distribution', 'total'],
+                               settings,
+                               'pynoise',
                                settingsPath)
         plt.close()
 
@@ -152,7 +152,7 @@ def calcUncertainty(hist: dict, total: list, numFolders: int):
     - numFolders: int indicating the number of folders
 
     Outputs:
-    - combinedData, the list holding the histogram data of all the subfolders combined 
+    - combinedData, the list holding the histogram data of all the subfolders combined
     '''
     stdDev = []
     combinedData = []
@@ -196,20 +196,20 @@ def subfolderPlots(timeDifs: dict, hist: dict, settings: dict, settingsPath:str,
             hist['Histogram'].append(RossiHistogram(timeDifs['Time differences'][i][folder],
                                                     settings['RossiAlpha Settings']['Bin width'],
                                                     settings['RossiAlpha Settings']['Reset time']))
-            
+
             # plot with the actual settings, which can show/save the subplot
             if settings['General Settings']['Verbose iterations']:
                 hist['Histogram'][-1].plot((name + "-" + str(folder + 1)),
                                             method,
-                                            settings['Input/Output Settings']['Save figures'], 
-                                            settings['General Settings']['Show plots'], 
-                                            settings['Input/Output Settings']['Save directory'], 
-                                            settings['Histogram Visual Settings'], 
-                                            True, 
+                                            settings['Input/Output Settings']['Save figures'],
+                                            settings['General Settings']['Show plots'],
+                                            settings['Input/Output Settings']['Save directory'],
+                                            settings['Histogram Visual Settings'],
+                                            True,
                                             settings['General Settings']['Verbose iterations'])
                 # ---------- NOTE: code below exports outputs in csv format ------------
                 # if settings['Input/Output Settings']['Save outputs']:
-                    # begin, end = ra.computeBinEdges(hist) 
+                    # begin, end = ra.computeBinEdges(hist)
                     # fileName = 'rossi_hist_' + name + '-' + str(folder + 1) + '_' + method + '_' + str(hist['Histogram'][folder].bin_width) + '_' + str(settings['RossiAlpha Settings']['Reset time'])
                     # globalAnalyze.export({'Bin beginning': (begin,0),
                     #                     'Bin ending': (end,0),
@@ -219,20 +219,20 @@ def subfolderPlots(timeDifs: dict, hist: dict, settings: dict, settingsPath:str,
                     #                     fileName,
                     #                     settings['Input/Output Settings']['Save directory'])
                 hist['Subplots'].append(hist['Histogram'][-1])
-            
+
             # if verbose iterations is not on, then "plot" to be able to retrieve the counts for the uncertainty calculations
             # however, nothing will be saved or shown
             else:
                 hist['Histogram'][-1].plot('Does not matter',
                                             method,
-                                            False, 
-                                            False, 
-                                            settings['Input/Output Settings']['Save directory'], 
-                                            settings['Histogram Visual Settings'], 
-                                            True, 
+                                            False,
+                                            False,
+                                            settings['Input/Output Settings']['Save directory'],
+                                            settings['Histogram Visual Settings'],
+                                            True,
                                             False)
             plt.close()
-        
+
         if folder == 0:
             for histogram in hist['Histogram']:
                 totalHist.append(histogram.counts)
@@ -243,12 +243,16 @@ def subfolderPlots(timeDifs: dict, hist: dict, settings: dict, settingsPath:str,
     # save subplots
     if settings['Input/Output Settings']['Save outputs'] and settings['General Settings']['Verbose iterations']:
         data = []
+        if settings['Input/Output Settings']['prefix'] == "":
+            start_num = 1
+        else:
+            start_num = 0
         for subplot in (hist['Subplots']):
             array = np.array([subplot.bin_centers, subplot.counts]).T
             data.append(array)
         data = np.array(data)
-        hdf5.writeHDF5Data(data, 
-                           [f'{i}' for i in range(1, numFolders + 1)],
+        hdf5.writeHDF5Data(data,
+                           [f'{i}' for i in range(start_num, numFolders + start_num)],
                            ['RossiAlpha', 'distribution', 'subfolders'],
                            settings,
                            'pynoise',
@@ -262,15 +266,15 @@ def marbePlot(timeDifs: list,
               hist: dict,
               width:int,
               reset:float,):
-        
+
         '''Create a Rossi Alpha histogram for MARBE analysis
-        
+
         Inputs:
         - timeDifs: list of time difs used
         - hist: dictionary holding histogram data
         - width: bin width to be tested
         - reset: reset time used'''
-        
+
 
         # Clear out the current histogram data.
         hist['Histogram'].clear()
@@ -297,7 +301,7 @@ class RossiHistogram:
             - bin_width: If time_diffs still need to be binned, this arg should be provided
             - reset_time: If time_diffs still need to be binned, this arg should be provided
 
-        Outputs: 
+        Outputs:
             - Plot() object
         '''
         #Data Variables
@@ -307,19 +311,19 @@ class RossiHistogram:
         # Plotting options
         self.options = None
         self.save_dir = None
-        
+
         # Required parameters
         self.reset_time = reset_time
         self.bin_width = bin_width
         self.x_axis = "Time Differences"
         self.y_axis = "Count"
         self.title = "Histogram Using "
-        
+
         # Parameters set once plot(time_diffs) is called
         self.counts, self.bin_edges, self.bin_centers = None, None, None
 
     def plot(self, input: str, method: str = 'aa', save_fig: bool = False, show_plot: bool = True, save_dir:str= './',plot_opts: dict = None, folder: bool = False, verbose: bool = False, **kwargs ):
-        
+
 
         '''
         Creating histogram from an array of time differences and plotting it.
@@ -330,10 +334,10 @@ class RossiHistogram:
             - save_fig : True/False to save figure
             - show_plot : True/False to show plot in plot editor
             - save_dir : If save_fig = True, the save_dir must be provided. Default saves in current working directory
-            - plot_opts: dictionary of histogram visual settings. 
-            -**kwargs: If plot_opts is not inputed, you can input individual plot settings that you want to be applied to the plot 
+            - plot_opts: dictionary of histogram visual settings.
+            -**kwargs: If plot_opts is not inputed, you can input individual plot settings that you want to be applied to the plot
 
-        Outputs: 
+        Outputs:
             - counts (The set of values of the histogram as a list)
             - bin_centers (adjusted bin centers for visual plotting)
             - bin_edges (The edges of the bins are mentioned as a parameter)
@@ -373,7 +377,7 @@ class RossiHistogram:
             plt.tight_layout()
             save_filename = os.path.join(self.save_dir, 'histogram_' + input + '_' + method + '_' + str(self.bin_width) + '_' + str(self.reset_time) + '.png')
             plt.savefig(save_filename, dpi=300, bbox_inches='tight')
-        
+
         # Showing plot (optional)
         if show_plot and (not folder or verbose):
 
@@ -385,7 +389,7 @@ class RossiHistogram:
             plt.xlabel(self.x_axis)
             plt.ylabel(self.y_axis)
             plt.title(self.title + method)
-            
+
             plt.show()
 
         #Set the counts, bin_centers, and bin_edges of the object
@@ -394,16 +398,16 @@ class RossiHistogram:
         self.bin_edges = bin_edges
 
         return counts, bin_centers, bin_edges
-    
+
     #This function is to initialize the RossiHistogram if we used the combined time_diffs and hist function
     def initFromHist(self, counts, bin_centers, bin_edges):
         '''Description: Used to initialize the plot object if the data has already been processed/binned.
-        
-        Inputs: 
+
+        Inputs:
             - counts: array of histogram counts
             - bin_centers: bin centers of histogram
             - bin_edges: bin_edges of histogram
-            
+
         Outputs:
         Nothing, but plotFromHist can now be called.'''
 
@@ -414,22 +418,22 @@ class RossiHistogram:
 
     # NOTE: this function is not currently maintained
     def plotFromHist(self, input: str, method: str = 'aa', plot_opts: dict = None, save_fig: bool = False, show_plot: bool = True, save_dir:str= None, folder: bool = False, verbose: bool = False):
-        '''Description: Used to plot the histogram when the time differences were calculated simulatenously while being binned. 
-        
-        Inputs: 
+        '''Description: Used to plot the histogram when the time differences were calculated simulatenously while being binned.
+
+        Inputs:
             - plot_opts: dictionary of visual settings to be applied
             - save_fig: True/False to save the figure
             - show_plot: True/False to show figure in plot editor
             - save_dir: Must be provided if save_fig is on.
-            
+
         Outputs:
         Shows a plot/saves a figure if turned on.'''
-        
+
         self.options = plot_opts
         self.save_dir = save_dir
         self.show_plot = show_plot
 
-        
+
         if save_fig and (not folder or verbose):
 
             # Plotting
@@ -443,7 +447,7 @@ class RossiHistogram:
             plt.tight_layout()
             save_filename = os.path.join(self.save_dir, 'histogram_' + input + '_' + str(self.reset_time) + '_' + method + '.png')
             plt.savefig(save_filename, dpi=300, bbox_inches='tight')
-        
+
         # Showing plot (optional)
         if show_plot and (not folder or verbose):
 
@@ -455,8 +459,8 @@ class RossiHistogram:
             plt.xlabel(self.x_axis)
             plt.ylabel(self.y_axis)
             plt.title(self.title + method)
-            
+
             plt.show()
 
-        
+
 #--------------------------------------
