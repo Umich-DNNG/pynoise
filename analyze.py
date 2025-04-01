@@ -99,7 +99,7 @@ def calcNumFolders(original,prefix='',suffix=''):
         numFolders = 0
     else:
         numFolders = -1
-    while (os.path.exists(original + '/' + prefix + str(numFolders + 1))):
+    while (os.path.exists(original + '/' + prefix + str(numFolders + 1) + suffix)):
         numFolders += 1
     if (numFolders <= 1):
         print('ERROR: Running RossiAlpha method on a folder with \"null\" number of folders requires more than 1 folder in the path.\n')
