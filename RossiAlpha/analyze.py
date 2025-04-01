@@ -99,11 +99,18 @@ def folderAnalyzer(timeDifs: dict, settings: dict, settingsPath:str, numFolders:
     combinedTimeDifs = [[] for _ in range(numSets)]
 
     print("Calculating time differences...")
+    if settings['Input/Output Settings']['prefix'] == "":
+        start_num = 1
+    else:
+        start_num = 0
     # iterate through all of the folders (1-based indexing)
-    for folder in tqdm(range(1, numFolders + 1)):
+    for folder in tqdm(range(start_num, numFolders + start_num)):
 
         # Add the folder number to the input.
-        settings['Input/Output Settings']['Input file/folder'] = original + '/' + str(folder)
+        if start_num == 1:
+            settings['Input/Output Settings']['Input file/folder'] = original + '/' + str(folder)
+        else:
+            settings['Input/Output Settings']['Input file/folder'] = original + '/' + settings['Input/Output Settings']['prefix'] + str(folder) + suffix
 
         # check if the folder exists. if not, abort
         if not os.path.isdir(settings['Input/Output Settings']['Input file/folder']):
@@ -181,7 +188,7 @@ class timeDifCalcs:
         # if is a folder analysis, retrieve the name of the folder.
         # When this function is called on a folder, the input file/folder was changed to the user inputted folder name + "/" + the current folder number
         # TODO: change calling logic to not have to do this?
-        if folderNum != 0:
+        if (folderNum != 0) & (io['prefix'] != ""):
             temp = name[:name.rfind('/')]
             name = temp[temp.rfind('/')+1:]
         # if is a file, retrieve the name of just the file
