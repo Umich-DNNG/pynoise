@@ -149,7 +149,7 @@ def folderAnalyzer(timeDifs: dict, settings: dict, settingsPath:str, numFolders:
     # save time difference data for folders
     if settings['Input/Output Settings']['Save time differences']:
         path = ['RossiAlpha', 'time differences']
-        key = [f'{i}' for i in range(1, numFolders + 1)]
+        key = [f'{i}' for i in range(start_num, numFolders + 1)]
         hdf5.writeHDF5Data(timeDifs['Time differences'][0], key, path, settings, 'processing_data', settingsPath)
     return True
 
