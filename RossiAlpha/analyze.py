@@ -110,14 +110,21 @@ def folderAnalyzer(timeDifs: dict, settings: dict, settingsPath:str, numFolders:
         if start_num == 1:
             settings['Input/Output Settings']['Input file/folder'] = original + '/' + str(folder)
         else:
-            settings['Input/Output Settings']['Input file/folder'] = original + '/' + settings['Input/Output Settings']['prefix'] + str(folder) + suffix
+            settings['Input/Output Settings']['Input file/folder'] = original + settings['Input/Output Settings']['prefix'] + str(folder) + settings['Input/Output Settings']['suffix']
 
-        # check if the folder exists. if not, abort
-        if not os.path.isdir(settings['Input/Output Settings']['Input file/folder']):
-            print('ERROR: Folder ', settings['Input/Output Settings']['Input file/folder'], ' does not exist on this path. Please review the RossiAlpha documentation.')
-            print('Aborting...\n')
-            settings['Input/Output Settings']['Input file/folder'] = original
-            return False
+        # check if the folder or file exists. if not, abort
+        if start_num == 1:
+            if not os.path.isdir(settings['Input/Output Settings']['Input file/folder']):
+                print('ERROR: Folder ', settings['Input/Output Settings']['Input file/folder'], ' does not exist on this path. Please review the RossiAlpha documentation.')
+                print('Aborting...\n')
+                settings['Input/Output Settings']['Input file/folder'] = original
+                return False
+        else:
+            if not os.path.isfile(settings['Input/Output Settings']['Input file/folder']):
+                 print('ERROR: Folder ', settings['Input/Output Settings']['Input file/folder'], ' does not exist on this path. Please  review the RossiAlpha documentation.')
+                 print('Aborting...\n')
+                 settings['Input/Output Settings']['Input file/folder'] = original
+                 return False
 
         # compute the time difs for this subfolder and add to the list
         createTimeDifs(timeDifs, settings, settingsPath, folder)
