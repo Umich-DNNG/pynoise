@@ -252,7 +252,7 @@ def subfolderPlots(timeDifs: dict, hist: dict, settings: dict, settingsPath:str,
             data.append(array)
         data = np.array(data)
         hdf5.writeHDF5Data(data,
-                           [f'{i}' for i in range(start_num, numFolders + start_num)],
+                           [f'{i}' for i in range(start_num, numFolders + 1)],
                            ['RossiAlpha', 'distribution', 'subfolders'],
                            settings,
                            'pynoise',
