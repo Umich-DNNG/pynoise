@@ -189,7 +189,11 @@ def subfolderPlots(timeDifs: dict, hist: dict, settings: dict, settingsPath:str,
     name = name[name[:name.rfind('/')].rfind('/')+1:].replace('/','-')
 
     print('Compiling subfolder data...')
-    for folder in tqdm(range(numFolders)):
+    if settings['Input/Output Settings']['prefix'] == "":
+        start_num = 1
+    else:
+        start_num = 0
+    for folder in tqdm(range(start_num,numFolders+1)):
         hist['Histogram'].clear()
         for i in range(numHistograms):
             method = timeDifs['Time difference method'][i]
@@ -199,7 +203,7 @@ def subfolderPlots(timeDifs: dict, hist: dict, settings: dict, settingsPath:str,
 
             # plot with the actual settings, which can show/save the subplot
             if settings['General Settings']['Verbose iterations']:
-                hist['Histogram'][-1].plot((name + "-" + str(folder + 1)),
+                hist['Histogram'][-1].plot((name + "-" + str(folder)),
                                             method,
                                             settings['Input/Output Settings']['Save figures'],
                                             settings['General Settings']['Show plots'],
@@ -241,16 +245,19 @@ def subfolderPlots(timeDifs: dict, hist: dict, settings: dict, settingsPath:str,
                 totalHist[j] = np.vstack((totalHist[j], hist['Histogram'][j].counts))
 
     # save subplots
+    print("Saving subplots.")
     if settings['Input/Output Settings']['Save outputs'] and settings['General Settings']['Verbose iterations']:
         data = []
         if settings['Input/Output Settings']['prefix'] == "":
             start_num = 1
         else:
             start_num = 0
+        print("In folder/file " + str(start_num) + " to " + str(numFolders) + ".")
         for subplot in (hist['Subplots']):
             array = np.array([subplot.bin_centers, subplot.counts]).T
             data.append(array)
         data = np.array(data)
+        print(np.size(data,0))
         hdf5.writeHDF5Data(data,
                            [f'{i}' for i in range(start_num, numFolders + 1)],
                            ['RossiAlpha', 'distribution', 'subfolders'],

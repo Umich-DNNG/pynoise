@@ -104,6 +104,7 @@ def folderAnalyzer(timeDifs: dict, settings: dict, settingsPath:str, numFolders:
     else:
         start_num = 0
     # iterate through all of the folders (1-based indexing)
+    print("Analyzing from folder/file " + str(start_num) + " to " + str(numFolders) + ".")
     for folder in tqdm(range(start_num, numFolders + 1)):
 
         # Add the folder number to the input.

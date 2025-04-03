@@ -104,6 +104,12 @@ def calcNumFolders(original,prefix='',suffix=''):
     if (numFolders <= 1):
         print('ERROR: Running RossiAlpha method on a folder with \"null\" number of folders requires more than 1 folder in the path.\n')
         return False, 0
+    else:
+        if prefix == '':
+            print("Number of folders/files detected: " + str(numFolders) + ".")
+        else:
+            print("Number of folders/files detected: " + str(numFolders+1) + ".")
+
     return True, numFolders
 
 
