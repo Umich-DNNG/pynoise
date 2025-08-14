@@ -1,11 +1,11 @@
 {
   "Input/Output Settings": {
-    "Input file/folder": "/Users/fdarby/University of Michigan Dropbox/ENGIN-Well-counter/DAF/MUSIC/MCNP/MCNPX-Polimi/config4/w_concrete/CrossTalkIncluded/",
-    "prefix": "config4_dets_on_ifplate",
+    "Input file/folder": "/Users/fdarby/Library/CloudStorage/Dropbox-UniversityofMichigan/ENGIN-Well-counter/DAF/MUSIC/MCNP/OSCAR/MCNP6/ptrac/c4d/",
+    "prefix": "c4d",
     "suffix": "_times_0.1_to_2.0_MeVee.txt",
     "Time column": 1,
     "Channels column": 0,
-    "Save directory": "/Users/fdarby/University of Michigan Dropbox/ENGIN-Well-counter/DAF/MUSIC/MCNP/MCNPX-Polimi/config4/w_concrete/CrossTalkIncluded/",
+    "Save directory": "/Users/fdarby/Library/CloudStorage/Dropbox-UniversityofMichigan/ENGIN-Well-counter/DAF/MUSIC/MCNP/OSCAR/MCNP6/ptrac/c4d/",
     "Save figures": false,
     "Save outputs": true,
     "Save time differences": true,
