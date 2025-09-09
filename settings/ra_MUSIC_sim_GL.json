@@ -1,0 +1,82 @@
+{
+  "Input/Output Settings": {
+    "Input file/folder": "/Users/fdarby/Library/CloudStorage/Dropbox-UniversityofMichigan/ENGIN-Well-counter/DAF/MUSIC/MCNP/OSCAR/MCNP6/ptrac/c4d/",
+    "prefix": "c4d",
+    "suffix": "_times_0.1_to_2.0_MeVee.txt",
+    "Time column": 1,
+    "Channels column": 0,
+    "Save directory": "/Users/fdarby/Library/CloudStorage/Dropbox-UniversityofMichigan/ENGIN-Well-counter/DAF/MUSIC/MCNP/OSCAR/MCNP6/ptrac/c4d/",
+    "Save figures": false,
+    "Save outputs": true,
+    "Save time differences": true,
+    "Overwrite lower reset times": true,
+    "Keep logs": true,
+    "Quiet mode": false
+  },
+  "General Settings": {
+    "Number of folders": null,
+    "Verbose iterations": true,
+    "Sort data": true,
+    "Show plots": false,
+    "Input time units": "nanoseconds",
+    "Output time units": "nanoseconds",
+    "Text editor": "vim"
+  },
+  "RossiAlpha Settings": {
+    "Reset time": 5000,
+    "Time difference method": "cc",
+    "Digital delay": 750,
+    "Combine Calc and Binning": false,
+    "Bin width": 1,
+    "Max avg relative bin err": 0.10,
+    "Error Bar/Band": "band",
+    "Fit minimum": 100,
+    "Fit maximum": null
+  },
+  "CohnAlpha Settings": {
+    "Frequency Minimum": 0.1220703125,
+    "Frequency Maximum": 250.0,
+    "Meas time range": [
+      150000000000.0,
+      1000000000000.0
+    ],
+    "Font Size": 12,
+    "Annotation Font Weight": "bold",
+    "Annotation Color": "black",
+    "Annotation Background Color": "white"
+  },
+  "FeynmanY Settings": {
+    "Tau range": [
+      30,
+      3000
+    ],
+    "Increment amount": 30,
+    "Plot scale": "linear"
+  },
+  "Semilog Plot Settings": {
+    "label": "Frequency Intensity",
+    "markeredgecolor": "#162F65",
+    "markeredgewidth": 0.2,
+    "markerfacecolor": "#B2CBDE"
+  },
+  "Histogram Visual Settings": {
+    "alpha": 1,
+    "fill": true,
+    "color": "#B2CBDE",
+    "edgecolor": "#162F65",
+    "linewidth": 0.4
+  },
+  "Line Fitting Settings": {
+    "color": "#162F65",
+    "linestyle": "-",
+    "linewidth": 1,
+    "label": "Fit"
+  },
+  "Scatter Plot Settings": {
+    "color": "#B2CBDE",
+    "edgecolor": "#162F65",
+    "linewidth": 0.4,
+    "marker": "o",
+    "s": 20
+  }
+}
