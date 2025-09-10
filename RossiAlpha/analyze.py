@@ -107,11 +107,11 @@ def folderAnalyzer(timeDifs: dict, settings: dict, settingsPath:str, numFolders:
     print("Analyzing from folder/file " + str(start_num) + " to " + str(numFolders) + ".")
     for folder in tqdm(file_list):
 
-        # Add the folder number to the input.
+        # Add the folder to the input.
         if start_num == 1:
-            settings['Input/Output Settings']['Input file/folder'] = original + '/' + str(folder)
+            settings['Input/Output Settings']['Input file/folder'] = folder
         else:
-            settings['Input/Output Settings']['Input file/folder'] = original + settings['Input/Output Settings']['prefix'] + str(folder) + settings['Input/Output Settings']['suffix']
+            settings['Input/Output Settings']['Input file/folder'] = folder
 
         # check if the folder or file exists. if not, abort
         if start_num == 1:
