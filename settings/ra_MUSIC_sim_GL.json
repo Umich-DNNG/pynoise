@@ -1,11 +1,11 @@
 {
   "Input/Output Settings": {
-    "Input file/folder": "/Users/fdarby/Library/CloudStorage/Dropbox-UniversityofMichigan/ENGIN-Well-counter/DAF/MUSIC/MCNP/OSCAR/MCNP6/ptrac/c4d/",
+    "Input file/folder": "/nfs/turbo/coe-pozzisa1/Projects/Well_Counter/fdarby/MUSIC/inputs/concrete_git/c4d/",
     "prefix": "c4d",
     "suffix": "_times_0.1_to_2.0_MeVee.txt",
     "Time column": 1,
     "Channels column": 0,
-    "Save directory": "/Users/fdarby/Library/CloudStorage/Dropbox-UniversityofMichigan/ENGIN-Well-counter/DAF/MUSIC/MCNP/OSCAR/MCNP6/ptrac/c4d/",
+    "Save directory": "/nfs/turbo/coe-pozzisa1/Projects/Well_Counter/fdarby/MUSIC/inputs/concrete_git/c4d/",
     "Save figures": false,
     "Save outputs": true,
     "Save time differences": true,
@@ -28,17 +28,17 @@
     "Digital delay": 750,
     "Combine Calc and Binning": false,
     "Bin width": 1,
-    "Max avg relative bin err": 0.10,
+    "Max avg relative bin err": 0.1,
     "Error Bar/Band": "band",
     "Fit minimum": 100,
     "Fit maximum": null
   },
   "CohnAlpha Settings": {
     "Frequency Minimum": 0.1220703125,
-    "Frequency Maximum": 250.0,
+    "Frequency Maximum": 250,
     "Meas time range": [
-      150000000000.0,
-      1000000000000.0
+      150000000000,
+      1000000000000
     ],
     "Font Size": 12,
     "Annotation Font Weight": "bold",
