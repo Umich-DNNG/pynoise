@@ -77,7 +77,7 @@ def createTimeDifs(timeDifs:dict, settings:dict, settingsPath: str, curFolder:in
         hdf5.writeHDF5Data(timeDifs['Time differences'], key, path, settings, 'processing_data', settingsPath)
 
 
-def folderAnalyzer(timeDifs: dict, settings: dict, settingsPath:str, numFolders: int) -> bool:
+def folderAnalyzer(timeDifs: dict, settings: dict, settingsPath:str, numFolders: int, file_list: []) -> bool:
     '''Create Rossi Alpha time differences for folders
 
     The indicies will hold each subfolder's data within the index for a given time difference method
@@ -105,7 +105,7 @@ def folderAnalyzer(timeDifs: dict, settings: dict, settingsPath:str, numFolders:
         start_num = 0
     # iterate through all of the folders (1-based indexing)
     print("Analyzing from folder/file " + str(start_num) + " to " + str(numFolders) + ".")
-    for folder in tqdm(range(start_num, numFolders + 1)):
+    for folder in tqdm(file_list):
 
         # Add the folder number to the input.
         if start_num == 1:

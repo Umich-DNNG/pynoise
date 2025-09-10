@@ -4,6 +4,7 @@
 
 # Necessary imports.
 import os
+import glob
 import Event as evt
 from FeynmanY import feynman as fey
 from tkinter import *
@@ -99,7 +100,11 @@ def calcNumFolders(original,prefix='',suffix=''):
         numFolders = 0
     else:
         numFolders = -1
-    while (os.path.exists(original + '/' + prefix + str(numFolders + 1) + suffix)):
+
+    file_list = glob.glob(original + '/' + prefix + '*' + suffix)
+
+    for file in file_list:
+        print(file)
         numFolders += 1
     if (numFolders <= 1):
         print('ERROR: Running RossiAlpha method on a folder with \"null\" number of folders requires more than 1 folder in the path.\n')
@@ -110,7 +115,7 @@ def calcNumFolders(original,prefix='',suffix=''):
         else:
             print("Number of folders/files detected: " + str(numFolders+1) + ".")
 
-    return True, numFolders
+    return True, numFolders, file_list
 
 
 def replace_zeroes(lst: list):

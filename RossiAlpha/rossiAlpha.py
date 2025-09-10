@@ -63,13 +63,13 @@ class RossiAlpha:
             numFolders = settings['General Settings']['Number of folders']
             # calculate number of folders if was not specified
             if numFolders is None:
-                successful, numFolders = globalAnalyze.calcNumFolders(
+                successful, numFolders, file_list = globalAnalyze.calcNumFolders(
                      settings['Input/Output Settings']['Input file/folder'],
                      settings['Input/Output Settings']['prefix'],
                      settings['Input/Output Settings']['suffix']
                  )
                 if not successful: return False
-            success = td.folderAnalyzer(self.timeDifs, settings, settingsPath, numFolders)
+            success = td.folderAnalyzer(self.timeDifs, settings, settingsPath, numFolders, file_list)
         else:
             success = True
             td.createTimeDifs(self.timeDifs, settings, settingsPath)
@@ -105,7 +105,7 @@ class RossiAlpha:
             numFolders = settings['General Settings']['Number of folders']
             # calculate number of folders if was not specified
             if numFolders is None:
-                successful, numFolders = globalAnalyze.calcNumFolders(
+                successful, numFolders, file_list = globalAnalyze.calcNumFolders(
                      settings['Input/Output Settings']['Input file/folder'],
                      settings['Input/Output Settings']['prefix'],
                      settings['Input/Output Settings']['suffix']
@@ -115,7 +115,7 @@ class RossiAlpha:
                 successful = td.prepMARBE(self.timeDifs, self.hist, settings, settingsPath, numFolders)
                 if not successful: return False
             else:
-                successful = td.folderAnalyzer(self.timeDifs, settings, settingsPath, numFolders)
+                successful = td.folderAnalyzer(self.timeDifs, settings, settingsPath, numFolders, file_list)
                 if not successful: return False
             plt.folderHistogram(self.timeDifs, self.hist, numFolders, settings, settingsPath)
 
@@ -138,7 +138,7 @@ class RossiAlpha:
             numFolders = settings['General Settings']['Number of folders']
             # calculate number of folders if was not specified
             if numFolders is None:
-                successful, numFolders = globalAnalyze.calcNumFolders(
+                successful, numFolders, file_list = globalAnalyze.calcNumFolders(
                     settings['Input/Output Settings']['Input file/folder'],
                     settings['Input/Output Settings']['prefix'],
                     settings['Input/Output Settings']['suffix']
@@ -148,7 +148,7 @@ class RossiAlpha:
                 successful = td.prepMARBE(self.timeDifs, self.hist, settings, settingsPath, numFolders)
                 if not successful: return False
             else:
-                successful = td.folderAnalyzer(self.timeDifs, settings, settingsPath, numFolders)
+                successful = td.folderAnalyzer(self.timeDifs, settings, settingsPath, numFolders, file_list)
                 if not successful: return False
             plt.folderHistogram(self.timeDifs, self.hist, numFolders, settings, settingsPath)
             fit.folderFit(self.fit, self.hist, settings, settingsPath, numFolders)
