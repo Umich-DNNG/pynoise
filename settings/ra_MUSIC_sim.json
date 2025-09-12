@@ -1,11 +1,9 @@
 {
   "Input/Output Settings": {
-    "Input file/folder": "/Users/fdarby/Library/CloudStorage/Dropbox-UniversityofMichigan/ENGIN-Well-counter/DAF/MUSIC/MCNP/OSCAR/MCNP6/ptrac/c4d/",
-    "prefix": "c4d",
-    "suffix": "_times_0.1_to_2.0_MeVee.txt",
+    "Input file/folder": "/Users/fdarby/Library/CloudStorage/Dropbox-UniversityofMichigan/ENGIN-Well-counter/DAF/MUSIC/MCNP/OSCAR/MCNP6/ptrac/concatenated_data_times_0.1_to_2.0_MeVee.txt.o",
     "Time column": 1,
     "Channels column": 0,
-    "Save directory": "/Users/fdarby/Library/CloudStorage/Dropbox-UniversityofMichigan/ENGIN-Well-counter/DAF/MUSIC/MCNP/OSCAR/MCNP6/ptrac/c4d/",
+    "Save directory": "/Users/fdarby/Library/CloudStorage/Dropbox-UniversityofMichigan/ENGIN-Well-counter/DAF/MUSIC/MCNP/OSCAR/MCNP6/ptrac/",
     "Save figures": false,
     "Save outputs": true,
     "Save time differences": true,
