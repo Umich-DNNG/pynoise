@@ -1,9 +1,9 @@
 {
   "Input/Output Settings": {
-    "Input file/folder": "/Users/fdarby/Library/CloudStorage/Dropbox-UniversityofMichigan/ENGIN-Well-counter/DAF/MUSIC/MCNP/OSCAR/MCNP6/ptrac/concatenated_data_times_0.1_to_2.0_MeVee.txt.o",
+    "Input file/folder": "/Users/fdarby/Documents/Git/git.lanl.gov/MUSIC/PhD_python_scripts/ptr_tal_test/polimi_collision_data_times_0.5_to_4.0_MeVee.times",
     "Time column": 1,
     "Channels column": 0,
-    "Save directory": "/Users/fdarby/Library/CloudStorage/Dropbox-UniversityofMichigan/ENGIN-Well-counter/DAF/MUSIC/MCNP/OSCAR/MCNP6/ptrac/",
+    "Save directory": "/Users/fdarby/Documents/Git/git.lanl.gov/MUSIC/PhD_python_scripts/ptr_tal_test/",
     "Save figures": false,
     "Save outputs": true,
     "Save time differences": true,
@@ -15,7 +15,7 @@
     "Number of folders": null,
     "Verbose iterations": true,
     "Sort data": true,
-    "Show plots": false,
+    "Show plots": true,
     "Input time units": "nanoseconds",
     "Output time units": "nanoseconds",
     "Text editor": "vim"

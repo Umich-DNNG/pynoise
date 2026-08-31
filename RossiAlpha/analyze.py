@@ -216,7 +216,7 @@ class timeDifCalcs:
             # Create empty data and time difference lists.
             self.events = []
             # Load the data according to its file type.
-            if io['Input file/folder'].endswith(".txt"):
+            if (io['Input file/folder'].endswith(".txt") | io['Input file/folder'].endswith(".times")):
                 self.events = evt.createEventsListFromTxtFile(io['Input file/folder'],
                                                     io['Time column'],
                                                     io['Channels column'],
